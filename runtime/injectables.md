@@ -57,7 +57,7 @@ In HGL, `inject out, logger, clock, scheduler` asks for the output, the
 logger, the clock and the scheduler; `state` and `cache` declarations ask for
 recordable state and state.
 
-The agreed [language capability contract](../language/docs/design/native-interfaces.md#implementation-parts-and-injectables)
+The agreed [language capability contract](https://github.com/hhenson/hgraph_spec/blob/main/language/docs/design/native-interfaces.md#implementation-parts-and-injectables)
 also permits context services in value functions. Its requirements are visible
 to the checker, without adding caller-supplied arguments. Selected native implementation parts declare their own requests; only those
 services need provisioning. Helpers borrow access for the call and acquire no node of their

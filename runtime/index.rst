@@ -26,17 +26,17 @@ It is incomplete and does not certify an implementation.
    cases_nested
    cases_fixed
    cases_wiring
-   validation
-   validation/README
-   validation/fixed/README
-   validation/parity/README
-   validation/wiring/README
+   validation <https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation.md>
+   validation/README <https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/README.md>
+   validation/fixed/README <https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/fixed/README.md>
+   validation/parity/README <https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/parity/README.md>
+   validation/wiring/README <https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/wiring/README.md>
    representations
    layout_example
    boundaries
-   evidence
+   evidence <https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/evidence.md>
    extraction
 
-The :doc:`../specification/index` retains the earlier Python-era documents for
+The `Python-era specification <https://github.com/hhenson/hgraph_spec_audit/tree/main/historical/python>`_ retains the earlier Python-era documents for
 historical context and domains outside these runtime chapters. HGL source
 syntax remains in the repository's ``language/docs/`` documentation.
