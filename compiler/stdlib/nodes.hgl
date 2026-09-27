@@ -1,0 +1,8 @@
+module conformance.stdlib
+
+use hgraph.operators as operators
+use hgraph.std as std
+
+export fn bit_and_i64(lhs: i64, rhs: i64) -> i64 => operators::bit_and(lhs, rhs)
+export fn sample_i64(signal: i64, ts: i64) -> i64 => std::sample(signal, ts)
+export fn dedup_i64(ts: i64) -> i64 => std::dedup(ts)
