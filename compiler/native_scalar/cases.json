@@ -1,0 +1,8 @@
+[
+  {"name":"integer_add", "operator":"add_", "lhs":[null,2,null,-5], "rhs":[3,null,4,null], "expected":[null,5,6,-1], "reason":"Wait for both values, then read the latest pair on either tick."},
+  {"name":"mixed_add", "operator":"add_", "lhs":[2,-5], "rhs":[0.5,null], "expected":[2.5,-4.5], "reason":"Mixed integer and float addition produces float."},
+  {"name":"text_add", "operator":"add_", "lhs":["a",""], "rhs":["b",null], "expected":["ab","b"], "reason":"Concatenate strings, including an empty operand."},
+  {"name":"integer_div", "operator":"div_", "lhs":[-7], "rhs":[2], "expected":[-3.5], "reason":"Integer true division produces float."},
+  {"name":"integer_floor", "operator":"floordiv_", "lhs":[-7], "rhs":[2], "expected":[-4], "reason":"Floor division rounds toward negative infinity."},
+  {"name":"integer_mod", "operator":"mod_", "lhs":[-7], "rhs":[2], "expected":[1], "reason":"Remainder satisfies lhs = floor(lhs/rhs)*rhs + remainder."}
+]
