@@ -43,10 +43,9 @@ The entries below identify the implementation tests for each example.
   node scheduler and the evaluation clock: a scheduler-driven source with no
   temporal input (`start { scheduler.schedule(0s) }`, `when scheduled()`),
   `passivate(input)` after a count, and `clock.evaluation_time()` (ADR 0010).
-- [`const-debug.hgl`](const-debug.hgl) declares a native scalar helper separately
-  from its implementation. hgraph selects a C++ implementation part and binds
-  its provider; hgl supplies the Rust implementation. Native implementations
-  remain in their respective compiler/runtime repositories.
+- [`native-provider.hgl`](native-provider.hgl) separates native scalar declarations
+  from their providers and exercises injectable propagation through helpers.
+  Implementations and provider binding tests live with each compiler/runtime.
 - [`operators-and-generics.hgl`](operators-and-generics.hgl) demonstrates a
   nominal bodyless `operator`, a generic `impl fn` implementation, const-generic
   rolling-window sizes, an exported exact function, the default minimum window
