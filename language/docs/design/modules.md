@@ -357,11 +357,7 @@ Neither format is fixed by the initial scaffold.
 
 ## Development hosting
 
-While hosted in this repository, `language/` is an independent CMake project.
-The root build includes it only with `HGRAPH_BUILD_LANGUAGE=ON`. A standalone
-configure finds an installed `hgraph` package in the same manner as a native
-extension consumer.
-
-The language directory is excluded from the core source distribution. When it
-is packaged, it will own its distribution metadata, version, changelog, tests,
-and release artifacts.
+The C++ compiler is built in hgraph; the Rust compiler is built in hgl.
+This repository contains their shared contracts and examples, not a build
+project. See [hgraph build setup](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/shared-sources.md)
+for the pinned source dependencies and compiler build context.

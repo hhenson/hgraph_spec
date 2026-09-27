@@ -1,16 +1,11 @@
 # Language examples
 
-These files illustrate the first language slice and are executable
-documentation (developer guide, "Documentation examples"). Every example is a
-CTest case that must pass `hgl check`, and every example that declares a
-`test` block also runs under `hgl test`: `../tests/CMakeLists.txt` discovers
-them with a configure-time glob and content check rather than a hand-written
-list. Composition-only examples run on every platform; an example containing
-a runtime function or an `impl fn` takes the Unix-only scripted native path.
-The generated fixtures compile every example through `hgl_add_module()` under
-the repository warning policy, and the `../tests/codegen/generated_*_tests.cpp`
-cases drive the generated graphs with hgraph's own harness. Where an example
-has no `test` block, the note below says which unit tests carry its behaviour.
+These HGL files describe language behaviour. Compiler validation runs in
+[hgraph's language tests](https://github.com/hhenson/hgraph/blob/main/language/tests/CMakeLists.txt)
+after shared-source setup. That suite discovers examples, checks them, runs
+supported `test` blocks and compiles generated fixtures. Native test support
+varies by platform; this source-only repository has no CMake/CTest project.
+The entries below identify the implementation tests for each example.
 
 - [`test-contexts.hgl`](test-contexts.hgl) keeps a runtime helper in a
   module-wide test scope shared by two contexts. Its two cases run through

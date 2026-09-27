@@ -63,7 +63,9 @@ is selected. Physical examples remain proposals; old check counts are historical
 
 ## Ownership
 
-hgraph `docs/source/runtime_spec/` owns the model; hgl keeps a synchronized
-working copy. Propose behaviour changes upstream and update both together.
-The Python-era specification remains historical reference. HGL syntax stays
-in `language/docs/`. The unrelated CI PR and value-rendering RFC are unchanged.
+`hgraph_spec` owns the language and runtime contracts. Propose rule, scenario
+and expected-trace changes here. `hgraph_spec_audit` owns executable experiments,
+observations and variation reports; `hgraph_std` owns portable library HGL.
+Implementations pin these repositories and materialize working inputs; those
+copies are not independent specifications. Python-era guides remain historical
+evidence in the audit repository.
