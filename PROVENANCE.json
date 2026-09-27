@@ -1,0 +1,1678 @@
+{
+  "files": [
+    {
+      "path": "runtime/boundaries.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/boundaries.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/cases_atomic.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/cases_atomic.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/cases_collections.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/cases_collections.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/cases_fixed.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/cases_fixed.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/cases_lifecycle.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/cases_lifecycle.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/cases_nested.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/cases_nested.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/cases_references.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/cases_references.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/cases_wiring.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/cases_wiring.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/conformance.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/conformance.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/execution_engine.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/execution_engine.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/extraction.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/extraction.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/graph.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/graph.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/index.rst",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/index.rst",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/injectables.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/injectables.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/layout_example.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/layout_example.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/node.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/node.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/operators.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/operators.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/overview.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/overview.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/representations.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/representations.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/scalar_types.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/scalar_types.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/time_series.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/time_series.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/assertions.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/assertions.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/decisions.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/decisions.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/decisions.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/decisions.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/reasoned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/reasoned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/reasoning_corrections.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/reasoning_corrections.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_assembled.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_assembled.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_dictionary_assembled.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_dictionary_assembled.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_dictionary_owned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_dictionary_owned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_heterogeneous_assembled.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_heterogeneous_assembled.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_heterogeneous_owned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_heterogeneous_owned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_latest_invalid.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_latest_invalid.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_owned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_owned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_passive.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_passive.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_ref_items.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_ref_items.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_ref_whole.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_ref_whole.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsb_assembled.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_tsb_assembled.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsb_assembled_invalidate.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_tsb_assembled_invalidate.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsb_owned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_tsb_owned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsb_owned_invalidate.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_tsb_owned_invalidate.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_assembled.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_tsl_assembled.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_assembled_invalidate.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_tsl_assembled_invalidate.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_graph_assembled.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_tsl_graph_assembled.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_graph_owned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_tsl_graph_owned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_mixed.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_tsl_mixed.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_owned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_tsl_owned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_owned_invalidate.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_tsl_owned_invalidate.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_ref.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_tsl_ref.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsd_tsb_tsl.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsd_tsb_tsl.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsd_tsl_tsb.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsd_tsl_tsb.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_assembled.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_assembled.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_dictionary_assembled.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_dictionary_assembled.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_dictionary_owned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_dictionary_owned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_latest_invalid.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_latest_invalid.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_owned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_owned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_passive.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_passive.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_ref_items.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_ref_items.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_ref_whole.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_ref_whole.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_assembled.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_tsb_assembled.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_assembled_invalidate.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_tsb_assembled_invalidate.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_graph_assembled.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_tsb_graph_assembled.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_graph_owned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_tsb_graph_owned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_mixed.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_tsb_mixed.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_owned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_tsb_owned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_owned_invalidate.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_tsb_owned_invalidate.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_ref.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_tsb_ref.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsl_assembled.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_tsl_assembled.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsl_assembled_invalidate.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_tsl_assembled_invalidate.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsl_owned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_tsl_owned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsl_owned_invalidate.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsl_tsl_owned_invalidate.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/parity/decisions.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/parity/decisions.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/parity/reasoned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/parity/reasoned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/reasoned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/reasoned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/cancel_timer.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/cancel_timer.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/child_failure.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/child_failure.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/child_start_failure.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/child_start_failure.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/dictionary_ref.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/dictionary_ref.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/expired_ref.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/expired_ref.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/mapped_ref.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/mapped_ref.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/membership.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/membership.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/nested_mapped_ref.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/nested_mapped_ref.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/nested_timer.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/nested_timer.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/parallel_children.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/parallel_children.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/quote.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/quote.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/restore.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/restore.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/scalar_ref.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/scalar_ref.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/recipes/timer.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/recipes/timer.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/wiring/contract_extra_argument.hgl",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/wiring/contract_extra_argument.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/wiring/contract_required_extra.hgl",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/wiring/contract_required_extra.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/wiring/contract_superset.hgl",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/wiring/contract_superset.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/wiring/contract_widening.hgl",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/wiring/contract_widening.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/wiring/decisions.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/wiring/decisions.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/wiring/front_end.hgl",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/wiring/front_end.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/wiring/reasoned.json",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/validation/wiring/reasoned.json",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/wiring.md",
+      "source_project": "hgraph",
+      "source_path": "docs/source/runtime_spec/wiring.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/validation/descriptions/corrections.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/descriptions/corrections.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/descriptions/reasoned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/descriptions/reasoned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/descriptions/recipes/assembled.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/descriptions/recipes/assembled.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/descriptions/recipes/mixed.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/descriptions/recipes/mixed.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/descriptions/recipes/mixed_capture.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/descriptions/recipes/mixed_capture.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/descriptions/recipes/owned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/descriptions/recipes/owned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/descriptions/recipes/owned_capture.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/descriptions/recipes/owned_capture.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/descriptions/rulings.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/descriptions/rulings.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "language/docs/design/const-debug-bootstrap.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/const-debug-bootstrap.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/control-flow.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/control-flow.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/decisions/0005-inline-cpp-native-functions.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/decisions/0005-inline-cpp-native-functions.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/decisions/0006-multi-file-module-parts.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/decisions/0006-multi-file-module-parts.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/decisions/0007-parameter-packs.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/decisions/0007-parameter-packs.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/decisions/0008-temporal-contracts-and-target-mappings.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/decisions/0008-temporal-contracts-and-target-mappings.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/decisions/0009-native-errors-and-the-node-error-model.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/decisions/0009-native-errors-and-the-node-error-model.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/decisions/0010-lifecycle-capabilities.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/decisions/0010-lifecycle-capabilities.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/decisions/0011-cache-declarations.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/decisions/0011-cache-declarations.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/decisions/0012-recursive-struct-fields.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/decisions/0012-recursive-struct-fields.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/decisions/0013-struct-imports.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/decisions/0013-struct-imports.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/decisions/0014-native-implementation-interfaces.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/decisions/0014-native-implementation-interfaces.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/decisions/README.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/decisions/README.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/iteration.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/iteration.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/language-model.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/language-model.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/migration-requirements.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/migration-requirements.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/modules.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/modules.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/native-implementation-parts.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/native-implementation-parts.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/native-interface.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/native-interface.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/native-surface-proposal.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/native-surface-proposal.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/operators.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/operators.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/switch.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/switch.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/design/type-extensions.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/design/type-extensions.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/developer-guide/syntax-and-semantics.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/developer-guide/syntax-and-semantics.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/user-guide/README.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/user-guide/README.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/user-guide/functions.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/user-guide/functions.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/user-guide/language-tour.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/user-guide/language-tour.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/user-guide/modules-and-tools.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/user-guide/modules-and-tools.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/user-guide/testing-and-running.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/user-guide/testing-and-running.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/user-guide/types-and-expressions.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/user-guide/types-and-expressions.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/docs/user-guide/value-functions.md",
+      "source_project": "hgraph",
+      "source_path": "language/docs/user-guide/value-functions.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/README.md",
+      "source_project": "hgraph",
+      "source_path": "language/examples/README.md",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/collection-views.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/collection-views.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/conditional-early-return.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/conditional-early-return.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/conditional-forwarding.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/conditional-forwarding.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/conditional-mixed-results.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/conditional-mixed-results.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/conditional-omitted-else.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/conditional-omitted-else.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/conditional-result.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/conditional-result.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/conditional-results.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/conditional-results.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/conditional-sinks.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/conditional-sinks.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/const-debug.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/const-debug.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/dynamic-collection-iteration.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/dynamic-collection-iteration.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/fixed-list-iteration.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/fixed-list-iteration.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/lifecycle-capabilities.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/lifecycle-capabilities.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/midpoint.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/midpoint.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/operator-properties.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/operator-properties.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/operators-and-generics.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/operators-and-generics.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/parameter-packs.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/parameter-packs.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/recursive-fields.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/recursive-fields.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/reference-routing.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/reference-routing.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/runtime-choice.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/runtime-choice.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/stateful-node.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/stateful-node.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/struct-imports/instrument-book.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/struct-imports/instrument-book.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/struct-imports/market-data.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/struct-imports/market-data.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/structural-types.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/structural-types.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/test-contexts.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/test-contexts.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/examples/when-defaults.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/examples/when-defaults.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/elements-iteration.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/elements-iteration.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/enum-enumeration-order.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/enum-enumeration-order.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/enum-number-range.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/enum-number-range.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/enum-switch.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/enum-switch.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/enum-values.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/enum-values.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/conditional-unassigned-result.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/conditional-unassigned-result.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/enum-conversion-unknown-name.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/enum-conversion-unknown-name.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/enum-conversion-unknown-number.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/enum-conversion-unknown-number.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/enum-duplicate-number.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/enum-duplicate-number.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/enum-implicit-duplicate-number.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/enum-implicit-duplicate-number.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/enum-number-above-range.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/enum-number-above-range.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/enum-number-below-range.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/enum-number-below-range.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/enum-number-overflow.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/enum-number-overflow.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/enum-switch-duplicate-case.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/enum-switch-duplicate-case.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/enum-switch-integer-case.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/enum-switch-integer-case.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/enum-switch-other-enum-case.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/enum-switch-other-enum-case.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/enum-switch-unassigned-result.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/enum-switch-unassigned-result.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/invalid/switch-temporal-case.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/invalid/switch-temporal-case.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/string-conversion.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/string-conversion.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "language/stdlib/examples/switch-scenarios.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/stdlib/examples/switch-scenarios.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "compiler/bootstrap/cases.json",
+      "source_project": "hgl",
+      "source_path": "docs/compiler/bootstrap/cases.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "compiler/stdlib/cases.hgl",
+      "source_project": "hgl",
+      "source_path": "docs/compiler/stdlib/cases.hgl",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "compiler/stdlib/cases.json",
+      "source_project": "hgl",
+      "source_path": "docs/compiler/stdlib/cases.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "language/docs/design/node-authoring.md",
+      "source_project": "hgl",
+      "source_path": "docs/compiler/node-authoring.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "language/docs/design/native-interfaces.md",
+      "source_project": "hgl",
+      "source_path": "docs/compiler/native-interfaces.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "language/examples/native-provider.hgl",
+      "source_project": "hgraph",
+      "source_path": "language/tests/codegen/native-provider.hgl",
+      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
+    },
+    {
+      "path": "runtime/boundaries.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/boundaries.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/cases_atomic.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/cases_atomic.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/cases_collections.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/cases_collections.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/cases_fixed.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/cases_fixed.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/cases_lifecycle.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/cases_lifecycle.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/cases_nested.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/cases_nested.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/cases_references.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/cases_references.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/cases_wiring.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/cases_wiring.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/conformance.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/conformance.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/execution_engine.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/execution_engine.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/extraction.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/extraction.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/graph.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/graph.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/injectables.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/injectables.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/layout_example.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/layout_example.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/node.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/node.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/overview.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/overview.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/representations.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/representations.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/scalar_types.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/scalar_types.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/time_series.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/time_series.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/assertions.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/assertions.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/decisions.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/decisions.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/decisions.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/decisions.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/reasoned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/reasoned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/reasoning_corrections.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/reasoning_corrections.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_assembled.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_assembled.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_dictionary_assembled.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_dictionary_assembled.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_dictionary_owned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_dictionary_owned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_heterogeneous_assembled.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_heterogeneous_assembled.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_heterogeneous_owned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_heterogeneous_owned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_latest_invalid.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_latest_invalid.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_owned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_owned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_passive.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_passive.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_ref_items.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_ref_items.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_ref_whole.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_ref_whole.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsb_assembled.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_tsb_assembled.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsb_assembled_invalidate.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_tsb_assembled_invalidate.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsb_owned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_tsb_owned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsb_owned_invalidate.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_tsb_owned_invalidate.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_assembled.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_tsl_assembled.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_assembled_invalidate.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_tsl_assembled_invalidate.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_graph_assembled.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_tsl_graph_assembled.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_graph_owned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_tsl_graph_owned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_mixed.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_tsl_mixed.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_owned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_tsl_owned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_owned_invalidate.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_tsl_owned_invalidate.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsb_tsl_ref.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsb_tsl_ref.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsd_tsb_tsl.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsd_tsb_tsl.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsd_tsl_tsb.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsd_tsl_tsb.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_assembled.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_assembled.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_dictionary_assembled.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_dictionary_assembled.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_dictionary_owned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_dictionary_owned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_latest_invalid.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_latest_invalid.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_owned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_owned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_passive.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_passive.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_ref_items.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_ref_items.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_ref_whole.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_ref_whole.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_assembled.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_tsb_assembled.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_assembled_invalidate.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_tsb_assembled_invalidate.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_graph_assembled.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_tsb_graph_assembled.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_graph_owned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_tsb_graph_owned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_mixed.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_tsb_mixed.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_owned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_tsb_owned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_owned_invalidate.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_tsb_owned_invalidate.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsb_ref.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_tsb_ref.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsl_assembled.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_tsl_assembled.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsl_assembled_invalidate.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_tsl_assembled_invalidate.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsl_owned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_tsl_owned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/fixed/recipes/tsl_tsl_owned_invalidate.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/fixed/recipes/tsl_tsl_owned_invalidate.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/reasoned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/reasoned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/cancel_timer.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/cancel_timer.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/child_failure.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/child_failure.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/child_start_failure.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/child_start_failure.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/dictionary_ref.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/dictionary_ref.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/expired_ref.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/expired_ref.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/mapped_ref.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/mapped_ref.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/membership.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/membership.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/nested_mapped_ref.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/nested_mapped_ref.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/nested_timer.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/nested_timer.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/parallel_children.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/parallel_children.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/quote.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/quote.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/restore.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/restore.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/scalar_ref.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/scalar_ref.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/recipes/timer.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/recipes/timer.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/wiring/contract_extra_argument.hgl",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/wiring/contract_extra_argument.hgl",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/wiring/contract_required_extra.hgl",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/wiring/contract_required_extra.hgl",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/wiring/contract_superset.hgl",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/wiring/contract_superset.hgl",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/wiring/contract_widening.hgl",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/wiring/contract_widening.hgl",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/wiring/decisions.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/wiring/decisions.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/wiring/front_end.hgl",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/wiring/front_end.hgl",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/validation/wiring/reasoned.json",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/validation/wiring/reasoned.json",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "runtime/wiring.md",
+      "source_project": "hgl",
+      "source_path": "docs/runtime_spec/wiring.md",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "language/examples/const-debug.hgl",
+      "source_project": "hgl",
+      "source_path": "examples/const-debug/main.hgl",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "language/examples/native-provider.hgl",
+      "source_project": "hgl",
+      "source_path": "crates/hgl-native/interfaces/capabilities.hgl",
+      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    }
+  ]
+}
