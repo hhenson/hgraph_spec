@@ -201,3 +201,24 @@ replacements for the native system identities.
 The existing `getitem_`/`getattr_` projections are not redeclared as scalar binary
 arithmetic. Broader temporal, collection, and downstream scalar domains remain
 in the native registry until their HGL materializations are covered.
+
+## Native scalar requirements
+
+A value dependency names its native scalar function, not a temporal operator
+being replaced. `requires native::add(L, R) -> O` requires exactly one matching
+`native const fn` overload with value parameters. Types match exactly; no
+numeric widening, input views or temporal candidates satisfy it. A unique
+result can bind `O`; missing and ambiguous overloads reject the candidate.
+
+The generic body calls `native::add(lhs, rhs)`. Its requirement justifies that
+call while types are symbolic; specialization selects the concrete native
+entry before execution. It does not justify `lhs + rhs`, establish an algebraic
+law, or recursively ask the temporal `add_` implementation to validate itself.
+Native phase restrictions and capability propagation still apply. A requirement
+alone executes nothing and adds no graph node.
+
+Validation cases: integer addition returns `i64`; mixed integer/float addition
+returns `f64`; string concatenation returns `str`. Wrong result types, absent
+overloads, temporal functions and ambiguous signatures are rejected. Renaming
+the native helper does not affect eligibility. Imported descriptors preserve
+this value dependency and require its native interface to be available.

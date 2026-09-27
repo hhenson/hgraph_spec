@@ -1673,6 +1673,10 @@
       "source_project": "hgl",
       "source_path": "crates/hgl-native/interfaces/capabilities.hgl",
       "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
+    },
+    {
+      "path": "compiler/stdlib/nodes.hgl",
+      "note": "Current conformance wrappers import the canonical standard library; no copied node implementations."
     }
   ]
 }

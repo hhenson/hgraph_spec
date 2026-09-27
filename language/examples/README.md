@@ -43,14 +43,9 @@ The entries below identify the implementation tests for each example.
   node scheduler and the evaluation clock: a scheduler-driven source with no
   temporal input (`start { scheduler.schedule(0s) }`, `when scheduled()`),
   `passivate(input)` after a count, and `clock.evaluation_time()` (ADR 0010).
-- [`native-functions.hgl`](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/examples/native-functions.hgl) defines real top-level C++
-  scalar and collection-view helpers with `native fn`, declares their public
-  hgraph view headers with `cpp include`, overloads `len` across list, set, and
-  map HGL types, and calls the selected plain C++ function from runtime nodes.
-  Its `throws` native shows a C++ body that raises: the exception ends the
-  evaluation under hgraph's node error model (ADR 0009).
-  Tests: generated C++ formatting and descriptor import plus scalar/list/set/map
-  ticks in `generated_inline_native_tests.cpp`.
+- [`native-provider.hgl`](native-provider.hgl) separates native scalar declarations
+  from their providers and exercises injectable propagation through helpers.
+  Implementations and provider binding tests live with each compiler/runtime.
 - [`operators-and-generics.hgl`](operators-and-generics.hgl) demonstrates a
   nominal bodyless `operator`, a generic `impl fn` implementation, const-generic
   rolling-window sizes, an exported exact function, the default minimum window
