@@ -91,11 +91,14 @@ for the full distinction and compatibility boundary with existing `native fn`.
 
 ```hgl
 operator mul_<T>(lhs: T, rhs: T) -> T
-properties<i64> { commutative, identity = 1 }
+    properties<i64> { commutative, identity = 1 }
 
 operator add_<T>(lhs: T, rhs: T) -> T
-properties<str> { associative, identity = "" }
+    properties<str> { associative, identity = "" }
 ```
+
+`properties<...>` belongs to the preceding operator. Indent its clauses and
+leave a blank line before the next definition; see [Formatting](formatting.md).
 
 `properties<...>` follows the signature and optional `requires` clause. Entries
 are comma-separated; a trailing comma and multiline layout are allowed.
@@ -108,7 +111,7 @@ The selector binds declaration type parameters **in declaration order**:
 
 ```hgl
 operator mul_<L, R, O>(lhs: L, rhs: R) -> O
-properties<i64, i64, i64> { commutative, identity = 1 }
+    properties<i64, i64, i64> { commutative, identity = 1 }
 ```
 
 This selects `(i64, i64) -> i64`, not every candidate containing an `i64`.
