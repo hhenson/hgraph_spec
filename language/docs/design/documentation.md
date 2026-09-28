@@ -116,7 +116,8 @@ impl fn add_<L, R, O>(lhs: L, rhs: R) -> O
   cannot document a later declaration.
 - Remove delimiters, outer blank lines and common indentation. Preserve internal
   blank lines, Unicode, backslashes and relative indentation. Normalize line endings
-  to LF. A same-line summary does not set the indentation of subsequent lines.
+  to LF. Indentation uses spaces or tabs; other Unicode whitespace is text.
+  A same-line summary does not set the indentation of subsequent lines.
 - Public behavior belongs on the interface declaration. An implementation or
   module part has its own documentation; selecting it never overwrites the interface.
 - Preserve declaration identity, source association, signature, part and text through
