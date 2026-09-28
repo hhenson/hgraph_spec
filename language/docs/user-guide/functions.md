@@ -878,7 +878,9 @@ inject out, logger, clock, scheduler
 
 All four are implemented: `out` and `logger` since the first runtime slice,
 `clock` and `scheduler` under
-[ADR 0010](../design/decisions/0010-lifecycle-capabilities.md).
+[ADR 0010](../design/decisions/0010-lifecycle-capabilities.md). A fifth,
+`alarm`, is agreed and not yet implemented
+([ADR 0015](../design/decisions/0015-pull-sources.md)); see the next section.
 
 The comma-separated form may span lines and may have a trailing comma:
 
@@ -968,6 +970,61 @@ fn first_ticks(value: i64, const count: i64) -> i64 {
 ```
 
 See [`lifecycle-capabilities.hgl`](../../examples/lifecycle-capabilities.hgl).
+
+### `alarm` or `scheduler`
+
+`inject alarm` is agreed in
+[ADR 0015](../design/decisions/0015-pull-sources.md) and not yet
+implemented. It is the stateless scheduler: `alarm.schedule(delay)` and
+`alarm.schedule_at(time)` mark the node to evaluate, the earliest request
+wins, and nothing is stored on the node or recovered after a restore. It is
+admitted only in a source, a runtime function with no temporal parameters,
+where every evaluation is the alarm firing and `scheduled()` is simply true.
+
+| | `alarm` | `scheduler` |
+| --- | --- | --- |
+| Node state | none | pending events and their tags |
+| After a restore | `start` runs again and re-arms | pending alarms are restored |
+| Requests | `schedule(delay)`, `schedule_at(time)` | the same, plus tags, `un_schedule`, `is_scheduled`, `next_scheduled_time` |
+| Wall clock | no | yes, under a real-time executor |
+| Admitted in | sources only | any runtime function |
+
+Reach for `alarm` first. Use `scheduler` when the wake-up must survive a
+restart, be cancelled or replaced, coexist with input ticks, or follow the
+wall clock. A constant is the `alarm` case:
+
+```hgl
+fn constant(const value: i64, const delay: duration = 0s) -> i64 {
+    inject alarm
+    start { alarm.schedule(delay) }
+    when scheduled() { return value }
+}
+```
+
+### Generator sources
+
+The same source can be written with `yield`, also agreed in ADR 0015 and
+not yet implemented. `yield t: v` publishes `v` at `t`: a `duration` counts
+from the time the body is running, a `datetime` is absolute. The body
+suspends until then and resumes after the `yield`; when the body ends the
+source is finished. A generator has no temporal parameters and owns its
+output and scheduling, so it declares no `state`, injects no `out`,
+`scheduler` or `alarm`, and has no `when`, `start` or `stop` block. `while`
+gives it a loop; an omitted condition is unbounded.
+
+```hgl
+fn constant(const value: i64, const delay: duration = 0s) -> i64 {
+    yield delay: value
+}
+
+fn heartbeat(const period: duration, const beats: i64) -> bool {
+    var count: i64 = 0
+    while count < beats {
+        yield period: true
+        count += 1
+    }
+}
+```
 
 ## Lifecycle
 

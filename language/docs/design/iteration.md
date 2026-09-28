@@ -107,7 +107,10 @@ this expansion for the older `values` spelling in
 ## Node-time traversal
 
 Inside a node's evaluation, including a `when` handler, a loop traverses the
-current child views or scalar elements. Ordinary readable child expressions
+current child views or scalar elements. A conditional loop, `while
+condition { ... }` with an omitted condition meaning unbounded, is a runtime
+statement only and is agreed in
+[ADR 0015](decisions/0015-pull-sources.md); a composition body rejects it. Ordinary readable child expressions
 observe their payloads; `valid`, `modified`, and `last_modified` retain their
 endpoint-metadata meaning. The loop does not wire new nodes.
 

@@ -54,6 +54,9 @@ blocker LIB-002). Both are the scheduler case.
    for evaluation in the starting cycle, which is how a static node's
    `schedule_on_start` is spelled. The implicit `valid()` of such a
    function is vacuously true and its implicit `modified()` never holds.
+   [ADR 0015](0015-pull-sources.md) extends this decision: a source may
+   instead inject the stateless `alarm`, or be a generator written with
+   `yield`.
 
 5. **`passivate(input)` and `activate(input)`** are runtime statements
    whose argument is a direct temporal parameter of the function. They are
