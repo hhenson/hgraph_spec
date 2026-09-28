@@ -973,9 +973,8 @@ See [`lifecycle-capabilities.hgl`](../../examples/lifecycle-capabilities.hgl).
 
 ### `alarm` or `scheduler`
 
-`inject alarm` is agreed in
-[ADR 0015](../design/decisions/0015-pull-sources.md) and not yet
-implemented. It is the stateless scheduler: `alarm.schedule(delay)` and
+`inject alarm` follows
+[ADR 0015](../design/decisions/0015-pull-sources.md). It is the stateless scheduler: `alarm.schedule(delay)` and
 `alarm.schedule_at(time)` mark the node to evaluate, the earliest request
 wins, and nothing is stored on the node or recovered after a restore. It is
 admitted only in a source, a runtime function with no temporal parameters,
@@ -988,6 +987,9 @@ where every evaluation is the alarm firing and `scheduled()` is simply true.
 | Requests | `schedule(delay)`, `schedule_at(time)` | the same, plus tags, `un_schedule`, `is_scheduled`, `next_scheduled_time` |
 | Wall clock | no | yes, under a real-time executor |
 | Admitted in | sources only | any runtime function |
+
+A source injects one of the two, never both: `scheduled()` answers for the
+mechanism the source uses.
 
 Reach for `alarm` first. Use `scheduler` when the wake-up must survive a
 restart, be cancelled or replaced, coexist with input ticks, or follow the

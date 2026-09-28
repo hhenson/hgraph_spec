@@ -60,6 +60,10 @@ generator (decision 3).
 | Wall clock | no | `schedule(delay, true)` under a real-time executor |
 | Admitted in | sources only | any runtime function |
 
+A source injects one of the two, never both: `scheduled()` answers for the
+mechanism the source uses, and the alarm's contract is that every
+evaluation is its wake-up.
+
 Reach for `alarm` first. Move to `scheduler` the moment the wake-up must
 survive a restart, be cancelled or replaced, coexist with input ticks, or
 follow the wall clock. The standard library's `schedule` operator stays on
