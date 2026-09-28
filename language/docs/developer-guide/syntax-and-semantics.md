@@ -1237,15 +1237,18 @@ An inject declaration may span lines after `inject`; newlines around commas do
 not terminate it. Duplicate injectable names are rejected after name
 resolution.
 
-`while_statement` and `yield_statement` are agreed but not yet implemented
-([ADR 0015](../design/decisions/0015-pull-sources.md)). `while` repeats its
+`while_statement` and `yield_statement` follow
+[ADR 0015](../design/decisions/0015-pull-sources.md). `while` repeats its
 block while the condition holds; an omitted condition is an unbounded loop.
 It is a runtime statement and is rejected in a composition body. `yield`
 makes the function a generator source: `yield t: v` publishes `v` at `t`,
 where a `duration` is measured from the time the body is running and a
 `datetime` is absolute; the body suspends until then and resumes after the
 `yield`. A generator has no temporal parameters, no `state`, `cache`, `out`
-or scheduler injection, and no `when`, `start` or `stop` block.
+or scheduler injection, and no `when`, `start` or `stop` block; its `return`
+carries no value and finishes the source, `for` is not admitted, and a
+`yield` sits at statement level (the body, a `while` block, an `if`
+statement), never inside a value.
 
 Mutation statements are restricted to declared `state` variables, injected
 `out`, declared `var` bindings, and their writable projections. Parameters,

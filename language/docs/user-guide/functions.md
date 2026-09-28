@@ -878,9 +878,9 @@ inject out, logger, clock, scheduler
 
 All four are implemented: `out` and `logger` since the first runtime slice,
 `clock` and `scheduler` under
-[ADR 0010](../design/decisions/0010-lifecycle-capabilities.md). A fifth,
-`alarm`, is agreed and not yet implemented
-([ADR 0015](../design/decisions/0015-pull-sources.md)); see the next section.
+[ADR 0010](../design/decisions/0010-lifecycle-capabilities.md), and a
+fifth, `alarm`, under [ADR 0015](../design/decisions/0015-pull-sources.md);
+see the next section.
 
 The comma-separated form may span lines and may have a trailing comma:
 
@@ -1003,14 +1003,20 @@ fn constant(const value: i64, const delay: duration = 0s) -> i64 {
 
 ### Generator sources
 
-The same source can be written with `yield`, also agreed in ADR 0015 and
-not yet implemented. `yield t: v` publishes `v` at `t`: a `duration` counts
-from the time the body is running, a `datetime` is absolute. The body
-suspends until then and resumes after the `yield`; when the body ends the
+The same source can be written with `yield`, also agreed in ADR 0015.
+`yield t: v` publishes `v` at `t`: a `duration` counts from the time the
+body is running, a `datetime` is absolute. A time already past is skipped;
+a time equal to now publishes at once and the body carries on; a second
+value at one time is an error. Otherwise the body suspends until `t` and
+resumes after the `yield`; when the body ends, or a bare `return` runs, the
 source is finished. A generator has no temporal parameters and owns its
 output and scheduling, so it declares no `state`, injects no `out`,
-`scheduler` or `alarm`, and has no `when`, `start` or `stop` block. `while`
-gives it a loop; an omitted condition is unbounded.
+`scheduler` or `alarm`, has no `when`, `start` or `stop` block, and never
+returns a value. `while` gives it a loop; an omitted condition is unbounded.
+`for` is not admitted inside a generator. A `yield` is a statement of the
+body, of a `while` block or of an `if` statement, never part of a value.
+Locals live across the suspensions in node-local storage; after a restore
+the body starts again from its first statement.
 
 ```hgl
 fn constant(const value: i64, const delay: duration = 0s) -> i64 {

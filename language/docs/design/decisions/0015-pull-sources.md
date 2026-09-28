@@ -91,10 +91,16 @@ compares it with read alike. A runtime function containing `yield` is a
 generator source:
 
 - It has no temporal parameters and declares a result type. It may use
-  `const` parameters, `clock`, `logger`, `let` and `var` locals, `if`,
-  `for` and `while`. It may not declare `state` or `cache`, inject `out`,
-  `scheduler` or `alarm`, or contain `when`, `start` or `stop`: `yield`
-  owns the output and the scheduling.
+  `const` parameters, `clock`, `logger`, `let` and `var` locals, `if` and
+  `while`. It may not declare `state` or `cache`, inject `out`, `scheduler`
+  or `alarm`, or contain `when`, `start` or `stop`: `yield` owns the output
+  and the scheduling. A `return` carries no value: `yield` publishes, and a
+  bare `return` finishes the source. `for` is not admitted (see the open
+  questions): its iteration owns the body, so a suspension inside it could
+  not resume.
+- A `yield` is a statement of the body, of a `while` block or of an `if`
+  statement. It cannot sit inside a value (an `if` used as an expression,
+  a lambda), where a backend has no resume point to jump to.
 - The body starts running in the node's first evaluation, which the runtime
   requests at start. `yield t: v` with a `duration` `t` means `t` after the
   time at which the body is running; with a `datetime` it is absolute. This
@@ -114,12 +120,6 @@ generator source:
 ```hgl
 impl fn const_<T>(const value: T, const delay: duration = 0s) -> T {
     yield delay: value
-}
-
-impl fn replay_const<T>(const values: list<tuple<datetime, T>>) -> T {
-    for item in values {
-        yield item[0]: item[1]
-    }
 }
 
 fn heartbeat(const period: duration, const beats: i64) -> bool {
@@ -194,33 +194,37 @@ argument provider for `SingleShotScheduler` in `eval`, the
    value typed as the result, and none of `state`, `cache`, `out`,
    `scheduler`, `alarm`, `when`, `start` or `stop`. `while` is admitted in
    runtime bodies only.
-3. **Lowering.** A pass between typed HIR and hgraph IR rewrites the
-   generator into ordinary runtime-node IR. The body is split into blocks
-   at every `yield`, and the yield points are numbered, with 0 the entry and
-   one more value meaning finished. Every local live across a suspension is
-   hoisted into the cache struct together with the resume index, the parked
-   value and, for a `for` over a `const` collection, the loop index. The
-   node is marked `schedule_on_start`, so its first evaluation needs no
-   `start` hook. The generated `eval` publishes a parked value first (after
-   the duplicate-time check against the output's last modified time),
-   dispatches on the resume index, and runs to the next yield: an earlier
-   absolute time is skipped, a time equal to now publishes and continues, a
-   later time parks the value, requests `alarm.schedule_at(instant)`, stores
-   the resume index and returns. Falling off the end marks the node finished.
-4. **Emission.** The C++ emitter gains the `alarm` parameter
-   (`hgraph::SingleShotScheduler`), a plain `while`, and the dispatch: a
-   `switch` on the resume index that jumps to a label at each yield point.
-   Jumping into nested blocks is legal because hoisting leaves no local with
-   an initializer in the `eval` body, the same technique as C# iterators and
-   stackless coroutine libraries. The Rust compiler consumes the same
-   lowered IR and, having no `goto`, emits a loop over a `match` on the
-   resume index.
+3. **IR.** hgraph IR keeps `yield` and `while` as statements and marks the
+   callable a generator. It has no labels or jumps, so the state machine is
+   not an IR rewrite: each backend lowers the generator in its own emitter,
+   where the target language's control flow is available.
+4. **C++ emission.** The emitter numbers the yield points in body order,
+   with `-1` meaning finished. One cache struct (the ADR 0011 slot) holds
+   the resume index, a parked flag, the parked value and every local of the
+   body, hoisted so that no C++ local with an initializer sits in the
+   `eval` body: a `let` or `var` becomes an assignment to its field and
+   every read goes through the slot. The node carries `schedule_on_start`,
+   `start` rebuilds the struct, and `eval` takes the slot, the
+   `SingleShotScheduler` and the output. `eval` first publishes a parked
+   value, then dispatches: a `switch` on the resume index jumps to the label
+   after the last yield. At a yield the instant is `alarm.now()` plus the
+   duration, or the datetime itself; earlier than now is skipped; equal to
+   now publishes, after a duplicate-time check against the output's
+   modified flag, and the body continues; later parks the value, stores the
+   resume index, schedules the alarm at the instant and returns. Falling
+   off the end, or a bare `return`, stores `-1`. Jumping into a `while` or
+   `if` block is legal C++ because hoisting leaves no initialization to
+   bypass, the technique of C# iterators and stackless coroutine libraries.
+   The Rust emitter, having no `goto`, lowers the same IR to a loop over a
+   `match` on the resume index.
 5. **Order.** Keywords, parser and HIR with parser tests; `alarm` end to
    end, which already lets `const_` and `nothing` drop the state slot;
-   `while` in runtime bodies; the generator classification, lowering and
-   dispatch with tests for a constant, a heartbeat, a replay over a `const`
-   list, a skipped past time, a same-time publication and the duplicate-time
-   error; then the standard-library re-expression and the editor keywords.
+   `while` in runtime bodies; the generator classification and the C++
+   state machine with tests for a constant, a counting loop, a single parked
+   value, an absolute time, a skipped past time, a same-time publication,
+   a bare return and a yield inside `if`, and the duplicate-time error;
+   then the standard-library re-expression and the editor keywords. The
+   C++ compiler implements all of this except the last two.
 
 Why not C++20 coroutines: the frame is heap-allocated at start, suspension
 and exceptions are their own model, there is no Rust mirror, and hgraph
@@ -238,4 +242,10 @@ that contract admits reconstructible storage on sources.
   exists; the block would run at teardown with the `const` parameters only.
 - Whether an absolute `yield` time in the past should be a diagnostic
   rather than skipped. hgraph skips silently; this record follows it.
+- `for` inside a generator, which hgraph's replay generators use over a
+  constant collection. It needs the loop index hoisted beside the locals
+  and an index-based loop in each backend; until then the checker rejects
+  it and points to `while`.
+- A scripted test cannot yet expect an error, so the duplicate-time rule is
+  covered by the runtime error message alone.
 - `break` and `continue` for `while`.
