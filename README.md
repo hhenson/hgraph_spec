@@ -4,6 +4,7 @@ The public HGL language and runtime specification: rules, HGL examples,
 reasoned traces and accepted decisions. No Python, C++ or Rust code lives here.
 
 - [Language model](language/docs/design/language-model.md)
+- [Source documentation](language/docs/design/documentation.md)
 - [Language guide](language/docs/user-guide/language-tour.md)
 - [Runtime model](runtime/overview.md) and [wiring](runtime/wiring.md)
 - [Conformance method](runtime/conformance.md)

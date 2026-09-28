@@ -42,7 +42,7 @@ implies that every operator family using it has migrated.
 | MIG-010 implementation arity | partial | B6 | Pack cardinality (#891–#892), ranking in ADR 0007 | Fixed candidates refining a pack contract; implementation-specific scalar parameters. |
 | MIG-011 higher-order forms | partial | B6 | [Switch](switch.md), [Iteration](iteration.md), temporal `if` lowering | Explicit `switch` implementation; general map/reduce/mesh callable contracts. |
 | MIG-012 effects and capabilities | partial | B1, B2, B5 | Descriptor phase/effect/ownership metadata ([native interface](native-interface.md#descriptor-is-the-contract)); throwing evaluation calls ([ADR 0009](decisions/0009-native-errors-and-the-node-error-model.md)); clock and scheduler ([ADR 0010](decisions/0010-lifecycle-capabilities.md)) | Resources, additional approved effects, a closed vocabulary shared with descriptors. |
-| MIG-013 library metadata | open | — | — | Structured documentation, defaults, stability and compatibility metadata on HGL declarations. |
+| MIG-013 library metadata | partial | — | [Source documentation](documentation.md): Google-style sections, reST content and compiler preservation | Defaults, stability and compatibility metadata on HGL declarations. |
 | MIG-014 empty input policies | partial | B2 (LIB-002) | [ADR 0010](decisions/0010-lifecycle-capabilities.md) admits scheduled handlers with an empty activation set | A source form for an explicitly empty validity set. |
 | MIG-015 generic publication | partial | B3 | `instantiate` with retained `_` slots; typed native views read live metadata | Who materializes open downstream types and how a body reads a resolver-selected generic. |
 
@@ -134,10 +134,10 @@ specification.
 
 ### MIG-013: library documentation and compatibility metadata
 
-Operator documentation, parameter meanings, complexity notes, defaults and
-Python examples currently live in the native headers. A migrated declaration
-needs structured documentation and stability metadata from which the C++,
-Python and HGL surfaces are generated, without making comments executable.
+Structured [source documentation](documentation.md) is agreed: declaration-attached
+Google-style sections with reST content survive checking, lowering and emission.
+Comments remain non-executable. Defaults, stability and compatibility metadata
+remain open.
 
 ### MIG-015: open generic implementation publication
 
