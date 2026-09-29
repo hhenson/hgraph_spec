@@ -110,7 +110,13 @@ civil_datetime zoned_datetime zoned_time timezone
 `_` on its own is the placeholder token, not an identifier. Every word in
 that list is reserved everywhere, including the ones such as
 `state`, `start`, `stop`, and `when` that are only meaningful at a particular
-position in a runtime function body. `while` and `yield` are reserved by
+position in a runtime function body. One exception: `const` is admitted as
+the name of an operator, a function, an instantiation and an imported name,
+so the library spells hgraph's `const` by its own name
+([MIG-009](../design/migration-requirements.md#mig-009-source-names-versus-native-identities));
+it stays refused as a parameter, variable, field or generic name, and a call
+`const(f)` whose one argument names a function is the value-role selector of
+[ADR 0008](../design/decisions/0008-temporal-contracts-and-target-mappings.md). `while` and `yield` are reserved by
 [ADR 0015](../design/decisions/0015-pull-sources.md) ahead of their
 implementation. Variables are introduced by `let`, `var`,
 and `state`, and each block keyword carries its own placement rule, so there is
