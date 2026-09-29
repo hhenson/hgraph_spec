@@ -111,8 +111,9 @@ civil_datetime zoned_datetime zoned_time timezone
 that list is reserved everywhere, including the ones such as
 `state`, `start`, `stop`, and `when` that are only meaningful at a particular
 position in a runtime function body. One exception: `const` is admitted as
-the name of an operator, a function, an instantiation and an imported name,
-so the library spells hgraph's `const` by its own name
+the name of an operator, a function, an instantiation and an imported name
+(hgraph PR [#1671](https://github.com/hhenson/hgraph/pull/1671)), so the
+library spells hgraph's `const` by its own name
 ([MIG-009](../design/migration-requirements.md#mig-009-source-names-versus-native-identities));
 it stays refused as a parameter, variable, field or generic name, and a call
 `const(f)` whose one argument names a function is the value-role selector of

@@ -178,11 +178,12 @@ injectable name and, like `out`, `clock` and `scheduler`, stays contextual.
   identity keeps its name), and its contract keeps
   [MIG-009](../migration-requirements.md#mig-009-source-names-versus-native-identities):
   an independent scalar `T` and output shape `S`, with `delay` after them.
-  Today the parser admits `const` only in the value-role selector
-  `const(function)` (ADR 0008), so the library `const` waits on that
-  mapping: admit `const` as an operator and implementation name, and
-  route a `const` call whose argument is not a function name to the
-  operator. Until then the native `const` stays, and no `const_` is added.
+  hgraph PR [#1671](https://github.com/hhenson/hgraph/pull/1671) supplies
+  the mapping: `const` is admitted as an operator, function, instantiation
+  and imported name, a `const(f)` call whose one argument names a function
+  stays the value-role selector of ADR 0008, and any other `const(...)`
+  call goes to the operator in scope. hgraph_std PR #5 then declares
+  `const` on the alarm; no `const_` is added.
 - The evaluation harness needs an end for a source: today `eval` requires a
   time-series input to bound the run, and that stays the rule. A generator
   that reaches the end of its body finishes, but decision 4 admits
