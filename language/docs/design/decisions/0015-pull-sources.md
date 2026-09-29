@@ -1,8 +1,10 @@
 # ADR 0015: pull sources: the `alarm` injectable, `yield`, and `while`
 
 Status: proposed. The spelling was agreed with the project owner on
-2026-09-28; nothing below is implemented in a compiler yet. Implementation
-status will be recorded here as it lands.
+2026-09-28. The C++ compiler implements decisions 1 to 5 in hgraph PR
+[#1670](https://github.com/hhenson/hgraph/pull/1670) (open); the Rust
+compiler has not started. The standard-library re-expression and the
+`const` spelling (consequences) are follow-ups.
 
 ## Context
 
@@ -46,17 +48,19 @@ Nothing about `alarm` is recorded. After a restore the node's `start` runs
 again and re-arms whatever it arms; this is the reconstructible policy of
 `cache` (ADR 0011), not the recovered policy of `scheduler`.
 
-ADR 0010 decision 4 becomes: a runtime function may have no temporal
-parameters when it injects `scheduler` or `alarm`, or when it is a
-generator (decision 3).
+ADR 0010 decision 3 becomes: `scheduled()` is valid in a function-level
+`when` condition of a function that injects `scheduler` or `alarm`; with
+`alarm` it is true on every evaluation. ADR 0010 decision 4 becomes: a
+runtime function may have no temporal parameters when it injects
+`scheduler` or `alarm`, or when it is a generator (decision 3).
 
 ### 2. When to use which
 
 | | `alarm` | `scheduler` |
 | --- | --- | --- |
-| Node state | none | pending events and their tags |
+| Node state | none | pending events (tagged inside hgraph; tags are not exposed, ADR 0010) |
 | After a restore | `start` re-arms; nothing is restored | pending alarms are restored |
-| Requests | `schedule(delay)`, `schedule_at(time)`; earliest wins | the same, plus tags, `un_schedule`, `is_scheduled`, `next_scheduled_time` |
+| Requests | `schedule(delay)`, `schedule_at(time)`; earliest wins | the same, plus `is_scheduled()` and `next_scheduled_time()` |
 | Wall clock | no | `schedule(delay, true)` under a real-time executor |
 | Admitted in | sources only | any runtime function |
 
@@ -65,13 +69,14 @@ mechanism the source uses, and the alarm's contract is that every
 evaluation is its wake-up.
 
 Reach for `alarm` first. Move to `scheduler` the moment the wake-up must
-survive a restart, be cancelled or replaced, coexist with input ticks, or
-follow the wall clock. The standard library's `schedule` operator stays on
-`scheduler` because it promises recovery and wall-clock alarms; `const_`
-and `nothing` move to `alarm` or to a generator.
+survive a restart, be queried, coexist with input ticks, or follow the wall
+clock. The standard library's `schedule` operator stays on `scheduler`
+because it promises recovery and wall-clock alarms; `nothing` moves to
+`alarm`, and a constant source reduces to the alarm shape below (the
+library's `const` itself is a consequence, not this decision).
 
 ```hgl
-impl fn const_<T>(const value: T, const delay: duration = 0s) -> T {
+fn constant(const value: i64, const delay: duration = 0s) -> i64 {
     inject alarm
     start { alarm.schedule(delay) }
     when scheduled() { return value }
@@ -122,7 +127,7 @@ generator source:
   which is what hgraph's generator does.
 
 ```hgl
-impl fn const_<T>(const value: T, const delay: duration = 0s) -> T {
+fn constant(const value: i64, const delay: duration = 0s) -> i64 {
     yield delay: value
 }
 
@@ -164,15 +169,27 @@ injectable name and, like `out`, `clock` and `scheduler`, stays contextual.
 
 ## Consequences
 
-- `const_` and `nothing` in the standard library are re-expressed as above
-  once a compiler implements this record; the catalogue entries for `const`
-  and `nothing` then move from native-provider to implemented, and
-  `replay_const` becomes authorable.
+- `nothing` in the standard library is re-expressed on `alarm` (hgraph_std
+  PR [#5](https://github.com/hhenson/hgraph_std/pull/5)), and its catalogue
+  entry moves from native-provider to implemented.
+- hgraph's `const` reduces to the alarm shape above, but its library
+  spelling is `const`, never `const_` (project owner, 2026-09-29: a
+  function is not the `const` modifier, and the replacement of a native
+  identity keeps its name), and its contract keeps
+  [MIG-009](../migration-requirements.md#mig-009-source-names-versus-native-identities):
+  an independent scalar `T` and output shape `S`, with `delay` after them.
+  Today the parser admits `const` only in the value-role selector
+  `const(function)` (ADR 0008), so the library `const` waits on that
+  mapping: admit `const` as an operator and implementation name, and
+  route a `const` call whose argument is not a function name to the
+  operator. Until then the native `const` stays, and no `const_` is added.
 - The evaluation harness needs an end for a source: today `eval` requires a
-  time-series input to bound the run. A generator ends by itself, so `eval`
-  may run a source until it finishes; a source on `alarm` still needs an
-  explicit end. The harness spelling for that end remains open in
-  "Tests and the evaluation harness".
+  time-series input to bound the run, and that stays the rule. A generator
+  that reaches the end of its body finishes, but decision 4 admits
+  `while { yield ... }`, which never does, so `eval` cannot run a source to
+  completion as its bound. A harness spelling for an explicit end remains
+  open in "Tests and the evaluation harness"; the example pairs each source
+  with a sink on a ticking input.
 - Compiler work: the `alarm` injectable (hgraph already has an argument
   provider for `SingleShotScheduler`), the `while` statement in runtime
   bodies, the generator classification and lowering, and the two keywords.
@@ -222,7 +239,7 @@ argument provider for `SingleShotScheduler` in `eval`, the
    The Rust emitter, having no `goto`, lowers the same IR to a loop over a
    `match` on the resume index.
 5. **Order.** Keywords, parser and HIR with parser tests; `alarm` end to
-   end, which already lets `const_` and `nothing` drop the state slot;
+   end, which lets `nothing` and a constant source drop the state slot;
    `while` in runtime bodies; the generator classification and the C++
    state machine with tests for a constant, a counting loop, a single parked
    value, an absolute time, a skipped past time, a same-time publication,

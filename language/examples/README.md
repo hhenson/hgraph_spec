@@ -24,7 +24,8 @@ The entries below identify the implementation tests for each example.
   input: `inject alarm` for a one-shot wake-up, and `yield` generator sources
   with `while` loops, a bare `return`, an absolute time and a skipped past
   time ([ADR 0015](../docs/design/decisions/0015-pull-sources.md)). Tests:
-  2 `test` blocks under `hgl test` (`hgraph_language_test_pull-sources`).
+  2 `test` blocks under `hgl test` (`hgraph_language_test_pull-sources`),
+  discovered once hgraph's pin of this repository follows hgraph PR #1670.
 - [`stateful-node.hgl`](stateful-node.hgl) demonstrates aggregate state,
   grouped injectables, lifecycle blocks, ordered handlers, previous output,
   and incremental collection output. Tests: none in the file; native behaviour

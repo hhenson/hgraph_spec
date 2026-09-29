@@ -1858,16 +1858,20 @@ injects an admitted service; required capabilities also propagate through calls:
 
 
 1. A body containing no node-only construct becomes `CompositionFn`.
-2. The presence of `state`, `inject`, `start`, `when`, or `stop` anywhere in
-   the body, including inside a `for` body or an `if` branch, makes the
-   complete function a `RuntimeFn`, even when nested syntax is later rejected
-   by phase checking.
-3. `for`, `keys`, `values`, `elements`, and `items` are phase-neutral: iteration follows
-   the phase of its containing function and never selects it. A body whose
-   only special statement is `for` is therefore a composition function, as in
+2. The presence of `state`, `inject`, `start`, `when`, `stop`, or `yield`
+   anywhere in the body, including inside a `for` or `while` body or an `if`
+   branch, makes the complete function a `RuntimeFn`, even when nested syntax
+   is later rejected by phase checking. A `RuntimeFn` containing `yield` is a
+   generator source ([ADR 0015](../design/decisions/0015-pull-sources.md)).
+3. `for`, `while`, `keys`, `values`, `elements`, and `items` are
+   phase-neutral: iteration follows the phase of its containing function and
+   never selects it. A body whose only special statement is `for` is
+   therefore a composition function, as in
    `examples/fixed-list-iteration.hgl` and
-   `examples/dynamic-collection-iteration.hgl`. See
-   [Iteration](../design/iteration.md).
+   `examples/dynamic-collection-iteration.hgl`. `while` is admitted in
+   runtime bodies only, so a body whose only special statement is `while`
+   classifies as a composition and is then rejected by phase checking with a
+   diagnostic that names `while`. See [Iteration](../design/iteration.md).
 4. A body that mixes wiring-only and runtime-only constructs is rejected.
 
 A consequence of rule 3 is that a runtime function whose only phase-sensitive

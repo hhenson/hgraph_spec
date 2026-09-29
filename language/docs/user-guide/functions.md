@@ -921,8 +921,9 @@ is the node's own alarm firing. A handler whose condition names `scheduled()`
 at top level gets no implicit `modified()`, and it adds no input to the node's
 activation. When no handler names an input, the node's activation set is
 explicitly empty and the node evaluates only when scheduled. A runtime
-function with no temporal parameters at all is a source and must inject
-`scheduler`:
+function with no temporal parameters at all is a source: it injects
+`scheduler` (below) or `alarm`, or it is a generator written with `yield`
+(both under "`alarm` or `scheduler`" and "Generator sources"):
 
 ```hgl
 fn ticker(const delay: duration, const max_ticks: i64) -> i64 {
@@ -982,9 +983,9 @@ where every evaluation is the alarm firing and `scheduled()` is simply true.
 
 | | `alarm` | `scheduler` |
 | --- | --- | --- |
-| Node state | none | pending events and their tags |
+| Node state | none | pending events (tags are not exposed) |
 | After a restore | `start` runs again and re-arms | pending alarms are restored |
-| Requests | `schedule(delay)`, `schedule_at(time)` | the same, plus tags, `un_schedule`, `is_scheduled`, `next_scheduled_time` |
+| Requests | `schedule(delay)`, `schedule_at(time)` | the same, plus `is_scheduled()` and `next_scheduled_time()` |
 | Wall clock | no | yes, under a real-time executor |
 | Admitted in | sources only | any runtime function |
 
@@ -992,8 +993,8 @@ A source injects one of the two, never both: `scheduled()` answers for the
 mechanism the source uses.
 
 Reach for `alarm` first. Use `scheduler` when the wake-up must survive a
-restart, be cancelled or replaced, coexist with input ticks, or follow the
-wall clock. A constant is the `alarm` case:
+restart, be queried, coexist with input ticks, or follow the wall clock. A
+constant is the `alarm` case:
 
 ```hgl
 fn constant(const value: i64, const delay: duration = 0s) -> i64 {
