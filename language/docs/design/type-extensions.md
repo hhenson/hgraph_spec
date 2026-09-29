@@ -391,6 +391,22 @@ to observe and copy each selected value tick that it forwards. REF expresses
 that this component is responsible for selecting the connection, without
 processing the values subsequently carried by it.
 
+### Obtaining a reference to an input
+
+A node that both watches an input and forwards it (`default` exposes `ts`
+once it is valid and `default_value` until then) needs the input's
+reference. Today it is obtained the way hgraph's own `default` does it: the
+composition binds the same time series twice, once to a `ref<T>` parameter
+that is forwarded and once to a `T` parameter that is watched for validity
+and then made passive, and the node returns `ref<T>`. Two decisions remain
+open (project owner, 2026-09-29):
+
+- an intrinsic that extracts the reference of an input inside the node,
+  sketched as `reference(ts)`, which would remove the double binding;
+- when the input is itself bound through a reference, the upstream
+  reference should be forwarded rather than a reference to this node's own
+  input; how that is spelled is undecided.
+
 ## Wiring-time access
 
 During wiring, code may access elements beneath a reference layer. Such access

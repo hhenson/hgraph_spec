@@ -979,7 +979,9 @@ See [`lifecycle-capabilities.hgl`](../../examples/lifecycle-capabilities.hgl).
 `alarm.schedule_at(time)` mark the node to evaluate, the earliest request
 wins, and nothing is stored on the node or recovered after a restore. It is
 admitted only in a source, a runtime function with no temporal parameters,
-where every evaluation is the alarm firing and `scheduled()` is simply true.
+where every evaluation is the alarm firing: the source publishes from a
+plain `when`, whose empty selector runs on every evaluation. `scheduled()`
+belongs to `scheduler`.
 
 | | `alarm` | `scheduler` |
 | --- | --- | --- |
@@ -989,8 +991,8 @@ where every evaluation is the alarm firing and `scheduled()` is simply true.
 | Wall clock | no | yes, under a real-time executor |
 | Admitted in | sources only | any runtime function |
 
-A source injects one of the two, never both: `scheduled()` answers for the
-mechanism the source uses.
+A source injects one of the two, never both: it has one wake-up mechanism,
+and `scheduled()` is the `scheduler` handler's selector.
 
 Reach for `alarm` first. Use `scheduler` when the wake-up must survive a
 restart, be queried, coexist with input ticks, or follow the wall clock. A
@@ -1000,7 +1002,7 @@ constant is the `alarm` case:
 fn constant(const value: i64, const delay: duration = 0s) -> i64 {
     inject alarm
     start { alarm.schedule(delay) }
-    when scheduled() { return value }
+    when { return value }
 }
 ```
 

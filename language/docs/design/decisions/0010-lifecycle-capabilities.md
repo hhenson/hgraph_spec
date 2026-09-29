@@ -42,9 +42,9 @@ blocker LIB-002). Both are the scheduler case.
 3. **`scheduled()` is a handler selector.** It is valid only in a
    function-level `when` condition of a function that injects `scheduler`,
    and is true when the current evaluation is the node's alarm firing
-   (`is_scheduled_now`). [ADR 0015](0015-pull-sources.md) extends this
-   decision: a function that injects the stateless `alarm` may name
-   `scheduled()` too, and there it is true on every evaluation. A handler with `scheduled()` at top level receives
+   (`is_scheduled_now`). A source on the stateless `alarm` of
+   [ADR 0015](0015-pull-sources.md) does not use it: it publishes from a
+   plain `when`, since every evaluation is its wake-up. A handler with `scheduled()` at top level receives
    no implicit `modified()`; its implicit `valid()` is unchanged. Such a
    handler adds no input to the node's activation set. When no handler names
    an input, the set is explicitly empty: every input is passive and the

@@ -8,12 +8,12 @@ operator sink(ts: signal)
 impl fn sink(ts: signal) { when { } }
 
 # `inject alarm` binds the stateless one-shot scheduler: one wake-up,
-# nothing recorded. `scheduled()` is true on every evaluation of a source
-# that only the alarm wakes.
+# nothing recorded. The source has no temporal input, so its plain `when`
+# runs on every evaluation, which is the alarm firing.
 export fn constant_after(const value: i64, const delay: duration = 0s) -> i64 {
     inject alarm
     start { alarm.schedule(delay) }
-    when scheduled() { return value }
+    when { return value }
 }
 
 # `yield time: value` makes a runtime function a generator source. A

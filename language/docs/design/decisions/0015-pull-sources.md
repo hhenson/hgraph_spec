@@ -39,20 +39,22 @@ no wall-clock argument; using any of them names `scheduler` in the
 diagnostic.
 
 `alarm` is admitted only in a function with no temporal parameters. In such
-a function every evaluation is the alarm firing, so `scheduled()` is true on
-every evaluation and needs no stored answer. A function with temporal
-parameters that also needs an alarm uses `scheduler`, whose state is what
-tells an alarm evaluation from an input tick.
+a function every evaluation is the alarm firing, so the source publishes
+from a plain `when`: with no temporal inputs the handler's implicit selector
+is empty, and it runs on every evaluation. `scheduled()` belongs to
+`scheduler` and is not admitted with `alarm`; the diagnostic says to write
+the plain `when`. A function with temporal parameters that also needs an
+alarm uses `scheduler`, whose state is what tells an alarm evaluation from
+an input tick.
 
 Nothing about `alarm` is recorded. After a restore the node's `start` runs
 again and re-arms whatever it arms; this is the reconstructible policy of
 `cache` (ADR 0011), not the recovered policy of `scheduler`.
 
-ADR 0010 decision 3 becomes: `scheduled()` is valid in a function-level
-`when` condition of a function that injects `scheduler` or `alarm`; with
-`alarm` it is true on every evaluation. ADR 0010 decision 4 becomes: a
-runtime function may have no temporal parameters when it injects
-`scheduler` or `alarm`, or when it is a generator (decision 3).
+ADR 0010 decision 3 is unchanged: `scheduled()` is the `scheduler`
+selector. ADR 0010 decision 4 becomes: a runtime function may have no
+temporal parameters when it injects `scheduler` or `alarm`, or when it is a
+generator (decision 3).
 
 ### 2. When to use which
 
@@ -64,9 +66,9 @@ runtime function may have no temporal parameters when it injects
 | Wall clock | no | `schedule(delay, true)` under a real-time executor |
 | Admitted in | sources only | any runtime function |
 
-A source injects one of the two, never both: `scheduled()` answers for the
-mechanism the source uses, and the alarm's contract is that every
-evaluation is its wake-up.
+A source injects one of the two, never both: it has one wake-up mechanism.
+`scheduled()` is the `scheduler` handler's selector; an alarm source's
+plain `when` is its handler, because every evaluation is its wake-up.
 
 Reach for `alarm` first. Move to `scheduler` the moment the wake-up must
 survive a restart, be queried, coexist with input ticks, or follow the wall
@@ -79,12 +81,12 @@ library's `const` itself is a consequence, not this decision).
 fn constant(const value: i64, const delay: duration = 0s) -> i64 {
     inject alarm
     start { alarm.schedule(delay) }
-    when scheduled() { return value }
+    when { return value }
 }
 
 impl fn nothing<T>() -> T {
     inject alarm
-    when scheduled() { }
+    when { }
 }
 ```
 
