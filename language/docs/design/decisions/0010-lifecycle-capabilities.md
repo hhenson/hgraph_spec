@@ -42,7 +42,9 @@ blocker LIB-002). Both are the scheduler case.
 3. **`scheduled()` is a handler selector.** It is valid only in a
    function-level `when` condition of a function that injects `scheduler`,
    and is true when the current evaluation is the node's alarm firing
-   (`is_scheduled_now`). A handler with `scheduled()` at top level receives
+   (`is_scheduled_now`). [ADR 0015](0015-pull-sources.md) extends this
+   decision: a function that injects the stateless `alarm` may name
+   `scheduled()` too, and there it is true on every evaluation. A handler with `scheduled()` at top level receives
    no implicit `modified()`; its implicit `valid()` is unchanged. Such a
    handler adds no input to the node's activation set. When no handler names
    an input, the set is explicitly empty: every input is passive and the
@@ -54,6 +56,9 @@ blocker LIB-002). Both are the scheduler case.
    for evaluation in the starting cycle, which is how a static node's
    `schedule_on_start` is spelled. The implicit `valid()` of such a
    function is vacuously true and its implicit `modified()` never holds.
+   [ADR 0015](0015-pull-sources.md) extends this decision: a source may
+   instead inject the stateless `alarm`, or be a generator written with
+   `yield`.
 
 5. **`passivate(input)` and `activate(input)`** are runtime statements
    whose argument is a direct temporal parameter of the function. They are

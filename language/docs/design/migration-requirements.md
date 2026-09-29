@@ -111,6 +111,18 @@ identities (`__lag_proxy`, `__print_sink`, `__log_sink`, `__assert_fmt`,
 `__json_array`) are compiler-selected kernels; they are never public HGL names,
 whatever their catalogue disposition.
 
+Decision (project owner, 2026-09-29, on
+[ADR 0015](decisions/0015-pull-sources.md)): the library spelling of the
+constant source is `const`, never `const_`. A function is not the `const`
+modifier, and replacing a native identity keeps its name. The mapping this
+needs: the parser admits `const` as an operator, implementation and
+instantiation name (it already parses it; the projection rejects it), and a
+call `const(...)` whose single argument is not a function name resolves to
+the operator in scope rather than to the `const(function)` selector of
+[ADR 0008](decisions/0008-temporal-contracts-and-target-mappings.md). The
+`const_` of the [bootstrap](const-debug-bootstrap.md) is a private example
+function, not the library name.
+
 ### MIG-010: fixed candidates beside pack contracts
 
 Native candidates may refine a variadic contract with a fixed arity or add

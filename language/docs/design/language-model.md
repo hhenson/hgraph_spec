@@ -699,9 +699,10 @@ wins over its initializer, a cache field is rebuilt by every start.
 capabilities. It does not add caller-visible parameters. `out` is a special
 injectable whose type comes from the function result and permits the runtime
 body to inspect or incrementally update its output. Other injectables, such as
-`logger`, `clock`, and `scheduler`, map to their hgraph selector contracts
-(`LoggerView`, `EvaluationClockView`, `NodeScheduler`; ADR 0010 fixes the
-clock and scheduler method surfaces).
+`logger`, `clock`, `scheduler` and `alarm`, map to their hgraph selector
+contracts (`LoggerView`, `EvaluationClockView`, `NodeScheduler`,
+`SingleShotScheduler`; ADR 0010 fixes the clock and scheduler method
+surfaces, [ADR 0015](decisions/0015-pull-sources.md) the alarm's).
 
 `start` and `stop` execute once at node startup and teardown. State storage and
 injected capabilities are runtime-owned; `stop` expresses semantic
@@ -745,7 +746,9 @@ evaluation is the node's alarm. A handler naming it at top level receives no
 implicit `modified()` and contributes no input to the activation set; its
 implicit `valid()` is unchanged. When no handler names an input the activation
 set is explicitly empty, which is the agreed spelling of that set. A runtime
-function with no temporal parameters is a source and must inject `scheduler`;
+function with no temporal parameters is a source and must inject `scheduler`
+or `alarm`, or be a generator written with `yield`
+([ADR 0015](decisions/0015-pull-sources.md));
 its implicit `valid()` is vacuous and its implicit `modified()` never holds.
 The other half of the open question, a handler that intentionally admits
 invalid inputs with an explicitly empty validity set, remains open.

@@ -101,7 +101,7 @@ The hard reserved words are those in the keyword table of
 
 ```text
 module part use as export abstract impl instantiate operator fn cpp struct const requires is let var state cache inject return if else
-start when stop for test assert eval
+start when stop for while yield test assert eval
 true false null
 bool i64 f64 str date time datetime duration
 civil_datetime zoned_datetime zoned_time timezone
@@ -110,7 +110,16 @@ civil_datetime zoned_datetime zoned_time timezone
 `_` on its own is the placeholder token, not an identifier. Every word in
 that list is reserved everywhere, including the ones such as
 `state`, `start`, `stop`, and `when` that are only meaningful at a particular
-position in a runtime function body. Variables are introduced by `let`, `var`,
+position in a runtime function body. One exception: `const` is admitted as
+the name of an operator, a function, an instantiation and an imported name
+(hgraph PR [#1671](https://github.com/hhenson/hgraph/pull/1671)), so the
+library spells hgraph's `const` by its own name
+([MIG-009](../design/migration-requirements.md#mig-009-source-names-versus-native-identities));
+it stays refused as a parameter, variable, field or generic name, and a call
+`const(f)` whose one argument names a function is the value-role selector of
+[ADR 0008](../design/decisions/0008-temporal-contracts-and-target-mappings.md). `while` and `yield` are reserved by
+[ADR 0015](../design/decisions/0015-pull-sources.md) ahead of their
+implementation. Variables are introduced by `let`, `var`,
 and `state`, and each block keyword carries its own placement rule, so there is
 no ambiguity to resolve by making them contextual; they are withheld from
 parameter and variable names deliberately to keep a runtime body readable.
@@ -1198,6 +1207,8 @@ when_statement = "when", [ expression ], block;
 for_statement  = "for", iteration_pattern, "in", expression, block;
 iteration_pattern
                = identifier | identifier, ",", identifier;
+while_statement = "while", [ expression ], block;
+yield_statement = "yield", expression, ":", expression;
 mutation_statement
                = place, assignment_operator, expression;
 place          = identifier,
@@ -1232,6 +1243,19 @@ omitted condition, and the generated runtime backend expands the defaults.
 An inject declaration may span lines after `inject`; newlines around commas do
 not terminate it. Duplicate injectable names are rejected after name
 resolution.
+
+`while_statement` and `yield_statement` follow
+[ADR 0015](../design/decisions/0015-pull-sources.md). `while` repeats its
+block while the condition holds; an omitted condition is an unbounded loop.
+It is a runtime statement and is rejected in a composition body. `yield`
+makes the function a generator source: `yield t: v` publishes `v` at `t`,
+where a `duration` is measured from the time the body is running and a
+`datetime` is absolute; the body suspends until then and resumes after the
+`yield`. A generator has no temporal parameters, no `state`, `cache`, `out`
+or scheduler injection, and no `when`, `start` or `stop` block; its `return`
+carries no value and finishes the source, `for` is not admitted, and a
+`yield` sits at statement level (the body, a `while` block, an `if`
+statement), never inside a value.
 
 Mutation statements are restricted to declared `state` variables, injected
 `out`, declared `var` bindings, and their writable projections. Parameters,
@@ -1282,7 +1306,8 @@ The statement and expression productions are:
 ```ebnf
 block          = "{", [ NL ], { statement, NL }, [ statement ], "}";
 statement      = local_decl | state_decl | inject_decl | lifecycle_block
-               | when_statement | for_statement | mutation_statement
+               | when_statement | for_statement | while_statement
+               | yield_statement | mutation_statement
                | return_statement | assert_statement | expression;
 return_statement
                = "return", [ expression ];
@@ -1840,16 +1865,20 @@ injects an admitted service; required capabilities also propagate through calls:
 
 
 1. A body containing no node-only construct becomes `CompositionFn`.
-2. The presence of `state`, `inject`, `start`, `when`, or `stop` anywhere in
-   the body, including inside a `for` body or an `if` branch, makes the
-   complete function a `RuntimeFn`, even when nested syntax is later rejected
-   by phase checking.
-3. `for`, `keys`, `values`, `elements`, and `items` are phase-neutral: iteration follows
-   the phase of its containing function and never selects it. A body whose
-   only special statement is `for` is therefore a composition function, as in
+2. The presence of `state`, `inject`, `start`, `when`, `stop`, or `yield`
+   anywhere in the body, including inside a `for` or `while` body or an `if`
+   branch, makes the complete function a `RuntimeFn`, even when nested syntax
+   is later rejected by phase checking. A `RuntimeFn` containing `yield` is a
+   generator source ([ADR 0015](../design/decisions/0015-pull-sources.md)).
+3. `for`, `while`, `keys`, `values`, `elements`, and `items` are
+   phase-neutral: iteration follows the phase of its containing function and
+   never selects it. A body whose only special statement is `for` is
+   therefore a composition function, as in
    `examples/fixed-list-iteration.hgl` and
-   `examples/dynamic-collection-iteration.hgl`. See
-   [Iteration](../design/iteration.md).
+   `examples/dynamic-collection-iteration.hgl`. `while` is admitted in
+   runtime bodies only, so a body whose only special statement is `while`
+   classifies as a composition and is then rejected by phase checking with a
+   diagnostic that names `while`. See [Iteration](../design/iteration.md).
 4. A body that mixes wiring-only and runtime-only constructs is rejected.
 
 A consequence of rule 3 is that a runtime function whose only phase-sensitive
@@ -1917,16 +1946,21 @@ that are not time series, such as cached adaptor handles, are not `state` or
 designed.
 
 An `inject` declaration requests compiler-approved runtime selectors without
-adding parameters to the callable contract: `out`, `logger`, `clock` and
-`scheduler`. Each generated hook requests only the selectors it uses. Unknown
-capabilities and use from an unsupported phase are diagnostics. `out` is a
+adding parameters to the callable contract: `out`, `logger`, `clock`,
+`scheduler` and, once ADR 0015 is implemented, `alarm`. Each generated hook
+requests only the selectors it uses. Unknown capabilities and use from an
+unsupported phase are diagnostics. `out` is a
 special injectable inferred from the result type; it is invalid on an
 outputless function and is initially available only during evaluation, not in
 `start` or `stop`. The clock and scheduler methods, the `scheduled()` handler
 selector, and the `passivate`/`activate` statements are fixed by
 [ADR 0010](../design/decisions/0010-lifecycle-capabilities.md); `scheduled`,
 `passivate` and `activate` are intrinsic names. A runtime function without
-temporal parameters must inject `scheduler`.
+temporal parameters must inject `scheduler` or `alarm`, or be a generator
+(`yield`). `alarm` is the stateless one-shot scheduler
+([ADR 0015](../design/decisions/0015-pull-sources.md)): `alarm.schedule(delay)`
+and `alarm.schedule_at(time)`, earliest request wins, nothing recorded or
+recovered, admitted in sources only.
 
 `start` runs once after replay-aware state initialization. `stop` runs once at
 teardown. State storage and injected capabilities are runtime-owned and are
