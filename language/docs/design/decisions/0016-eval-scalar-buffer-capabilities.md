@@ -55,7 +55,7 @@ or process-global lookup operation.
 - A node cannot request both capabilities. They are not admitted in value
   functions, native value-helper signatures or composition bodies, and their
   requirements do not propagate transitively through value helpers in this
-  slice. Approved capability functions are the only storage-access primitives.
+  slice. Approved indexing and capability functions are the only storage-access primitives.
 - A borrowed capability cannot be assigned, returned, passed as an ordinary value,
   put in a closure, or kept in state/cache. No capability reference may be
   retained outside its call. Its owned scalar results
@@ -97,8 +97,7 @@ and named argument binding applies.
 | Signature | Allowed phase | Result or effect |
 |---|---|---|
 | `len(replay_input) -> i64` | start, evaluation | Number of slots, including absent slots. |
-| `has_tick(replay_input, index: i64) -> bool` | start, evaluation | Presence at an in-bounds position, independent of payload truthiness or equality. |
-| `delta_at(replay_input, index: i64) -> T` | evaluation | Owned scalar delta at an in-bounds present position. |
+| `replay_input[index]`, with i64 index | evaluation | Owned scalar delta when present; `null` for an absent in-bounds slot. |
 | `begin(capture)` | start | Mark the configured empty recording begun. No output, scheduling or publication. |
 | `append(capture, time: datetime, delta: T)` | evaluation | Append one time and independent owned scalar delta to a begun recording. |
 
@@ -107,7 +106,7 @@ endpoint, deduplicates values, applies a delta to an output, advances a
 cursor, inserts no-tick cells, or performs dense-result padding. HGL determines
 when to call these storage operations.
 
-`delta_at` returns an owned scalar result, including for str (ADR 0009).
+A present indexed read returns an owned scalar result, including for str (ADR 0009).
 `append` copies the scalar and time before returning. Later output changes,
 input destruction, another run and graph teardown cannot change an earlier
 successful capture (VAL-17). This is independence, not mandated allocation.
@@ -118,41 +117,24 @@ hook view escapes in either case.
 
 ## Indexed replay reads
 
-`replay_input` gives a replay source access to its configured input sequence.
-`delta_at(replay_input, index)` reads the delta supplied at one position in that sequence.
-The index is zero-based and counts every slot, including `_` slots; it is
-not a timestamp, an offset from the current evaluation, or an output index.
-A delta here means the update to publish to the time series, not an
-arithmetic difference between successive scalar values. For this scalar
-profile, the update is the scalar itself, so the result type is T.
+`replay_input[index]` reads one configured slot. The zero-based i64 index
+counts every position, including `_` slots. For `[10, _, 12]`,
+`len(replay_input)` is 3 and reads yield present 10, `null`, and present 12.
+An in-range absent read succeeds; it does not return a held or default value.
 
-For the input sequence `[10, _, 12]`, `len(replay_input)` is 3:
+The result is contextually nullable. Bind it with `let item = replay_input[index]`
+and establish `item != null` before using its scalar payload. The
+[nullable indexing contract](../nullable-replay-indexing.md) defines branch
+facts, short-circuit propagation, alias rules and rejected unproven uses.
+It introduces no ordinary nullable source type and does not redefine null
+field clearing or general runtime returns.
 
-| Index | Supplied slot | `has_tick(replay_input, index)` | `delta_at(replay_input, index)` |
-|---|---|---|---|
-| 0 | `10` | `true` | Returns an owned `10`. |
-| 1 | `_` | `false` | Raises `replay_input: slot has no tick`. |
-| 2 | `12` | `true` | Returns an owned `12`, not `2`. |
-
-An absent slot has no delta to read. Reading it does not return the previous
-held value or a default value. The presence check and read have separate
-roles: `has_tick(replay_input, index)` tests whether a delta was supplied, and `delta_at(replay_input, index)`
-retrieves that delta when present.
-
-The read does not consume the slot, advance the index, schedule the source,
-or publish to its output. The replay body owns its cursor and timing;
-`return delta_at(replay_input, current)` reads the configured delta and then
-publishes it through the normal runtime return operation. Repeated valid
-reads of one slot retrieve the same supplied delta with independent ownership.
-The index need not equal a current-cycle counter: this function is indexed
-buffer access, and the replay body establishes the sequence-to-cycle mapping.
-
-`delta_at(replay_input, index)` is a buffer function, not a time-series accessor.
-`delta_value(v)` reads the delta that a live temporal endpoint v published in
-the current cycle. The two operations read different sources: a configured
-input-sequence slot versus a live endpoint's current publication. Neither
-name is an alias for the other. Eval callers provide the sequence; they do
-not call `delta_at` themselves.
+The read is evaluation-only and does not publish, schedule, consume or move
+a cursor. Repeated reads preserve slot contents with independent ownership.
+The index need not be the current cycle number; the replay body determines
+how positions map to evaluation times. `delta_value(endpoint)` instead reads
+a live temporal endpoint's current publication. The old separate replay
+presence/read functions are not admitted or retained as aliases.
 
 ## Failure and validation
 
@@ -172,24 +154,21 @@ try/catch or error-valued return.
 
 Validate the following preconditions before changing a buffer:
 
-1. `has_tick` and `delta_at` require `0 <= index < length`. Otherwise raise
+1. Indexing requires `0 <= index < len(replay_input)`. Otherwise raise
    with message beginning `replay_input: index out of range` and leave input
-   and capture unchanged. An in-bounds absent slot makes has_tick false.
-2. After its bounds check, `delta_at` requires a present slot. Otherwise
-   raise with message beginning `replay_input: slot has no tick`. Never
-   substitute zero, false, empty text or a default temporal scalar.
-3. `begin` requires an unbegun recording. A repeated call raises with
+   and capture unchanged. An in-bounds absent slot returns `null` successfully.
+2. `begin` requires an unbegun recording. A repeated call raises with
    message beginning `capture: already begun`, preserving its state. A
    successful call makes an empty recording present even if append is never
    called. It never clears an existing recording.
-4. `append` first requires begin to have succeeded; otherwise raise with
+3. `append` first requires begin to have succeeded; otherwise raise with
    message beginning `capture: not begun`. Then require time to equal the
    owning record node's current evaluation time, otherwise raise with
    message beginning `capture: timestamp is not evaluation time`. Finally,
    if there is a preceding capture, time must be strictly greater than its
    time; otherwise raise with message beginning
    `capture: timestamp did not advance`. These checks occur in that order.
-5. Failed validation or failure to copy/allocate the new capture appends
+4. Failed validation or failure to copy/allocate the new capture appends
    nothing and preserves all earlier captures. Successful earlier calls and
    node state/output effects remain, as ADR 0009 requires. The atomicity of
    one buffer append does not roll back an entire node evaluation. Allocation
@@ -227,8 +206,9 @@ requires T in {bool, i64, f64, str, date, time, datetime, duration}
         if index < len(replay_input) {
             schedule_at(alarm, next_cycle_evaluation_time(clock))
         }
-        if has_tick(replay_input, current) {
-            return delta_at(replay_input, current)
+        let item = replay_input[current]
+        if item != null {
+            return item
         }
     }
 }
@@ -268,7 +248,8 @@ slots. Presence depends only on the slot, not on its payload.
 | Two fresh runs using the same operator definitions | Each observes only its own configured data and captures. | Per-node/run binding and fresh ownership. |
 | Capture a then publish b; dispose graph | Earlier capture remains a and is readable in the owned result. | VAL-17, EVAL-3. |
 | Missing/wrong-type/wrong-run provider; two capture writers | Graph construction fails before any start effect. | The new binding contract. |
-| Index -1 or length; absent delta_at slot | Specified translated error and no buffer mutation. | Bounds/presence rules. |
+| Index -1 or length | Specified translated error and no buffer mutation. | Bounds rule. |
+| In-bounds absent slot | Read returns `null`; guarded replay produces no publication. | Nullable indexed read and ordinary no-output path. |
 | Repeated begin; append before begin | Specified failure; earlier state preserved. | The new lifecycle preconditions. |
 | Wrong time, repeated current time, or decreasing time | Validation order above selects the error; no extra capture. | The new timestamp contract. |
 | Unsupported type/phase or escaped capability | Checking fails; no graph runs. | The new admission/borrowing rules. |

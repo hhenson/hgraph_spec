@@ -1512,8 +1512,10 @@ and missing required arguments are source diagnostics.
 A call whose callee resolves to a struct type is a complete-value constructor
 and accepts named arguments only. Required fields must be supplied, ordinary
 defaults fill omitted fields, and a field declared with `= null` may remain
-unset. The literal `null` is accepted only when the expected field is optional;
-it is not an untyped runtime object.
+unset. In struct construction, `null` is accepted only when the expected field is
+optional. The separate [replay indexing contract](../design/nullable-replay-indexing.md)
+also uses `null` for an absent slot and permits presence comparisons on its
+contextual nullable local. Neither form makes null an untyped runtime object.
 
 A call whose callee resolves to an enum type is a checked conversion from one
 integer or string operand, such as `Mode(10)` or `Mode("first")`. Resolve the
@@ -1932,6 +1934,14 @@ such as `evaluation_time(clock)`, `schedule(alarm, delay)` and
 `info(logger, value)`. HGL has no method-call alias for these operations.
 The capability is a direct approved borrowing operand, not a first-class
 argument that can be passed to an arbitrary function.
+
+`replay_input[index]` uses ordinary indexing syntax with an i64 index. An
+in-bounds absent slot returns `null`; an out-of-bounds index raises the
+specified error. Its contextual nullable result requires an immutable-local
+presence guard before scalar/delta use, including return or capture append;
+see [nullable replay indexing](../design/nullable-replay-indexing.md). This
+introduces no general nullable type, implicit unwrapping or null-return
+suppression rule.
 
 The proposed [scalar replay/capture extension](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
 adds node-scoped `replay_input` and `capture` capabilities only for its eight

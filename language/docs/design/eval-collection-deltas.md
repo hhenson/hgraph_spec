@@ -53,23 +53,22 @@ not callable HGL syntax or an ordinary source type annotation.
 | Capability operation | Contextual result or argument |
 |---|---|
 | `len(replay_input) -> i64` | Unchanged: number of present and absent slots. |
-| `has_tick(replay_input, index: i64) -> bool` | Unchanged: the slot's presence flag. |
-| `delta_at(replay_input, index: i64)` | Owned contextual result `delta_of(T)`, where T is the source output shape. |
+| `replay_input[index]`, with i64 index | Owned contextual `delta_of(T)` when present, where T is the source output shape; `null` for an absent in-bounds slot. |
 | `begin(capture)` | Unchanged: create the present empty recording. |
 | `append(capture, time: datetime, delta: delta_of(T))` | Contextual delta argument for the sink's exact input shape T; independent owned capture. |
 
 The index still identifies a zero-based position in the configured replay
-sequence, as explained in [the meaning of `delta_at`](decisions/0016-eval-scalar-buffer-capabilities.md#indexed-replay-reads).
+sequence, as explained in [indexed replay reads](decisions/0016-eval-scalar-buffer-capabilities.md#indexed-replay-reads).
 This extension changes the delta payload's shape, not the meaning of the
 index or the source of the data. For example, a slot containing
 `delta<map<i64, i64>>(upsert: [1: 11])` supplies that sparse update when read.
 It does not supply a complete map or fill in other keys from earlier slots.
 `delta_value(v)` instead reads the current publication from a live endpoint.
 
-`delta_at` is admitted only in evaluation, with an in-bounds present slot.
-Its contextual result can be returned directly by replay. `append` remains
+Indexing is admitted only in evaluation. The [nullable indexing rules](nullable-replay-indexing.md)
+require a proven-present result before replay returns its contextual delta. `append` remains
 evaluation-only, and `begin` remains start-only. No replay/capture operation is admitted in
-stop. Existing bounds, absence, beginning, timestamp and allocation-failure
+stop. Existing bounds, beginning, timestamp and allocation-failure
 rules, validation order and diagnostic prefixes remain unchanged.
 
 The source and sink capabilities still borrow only their configured
@@ -78,7 +77,7 @@ bindings and multiple capture writers fail graph construction before start.
 No capability value escapes, enters state/cache, or falls back to ambient
 storage. Shape admission adds no resource API or storage intrinsic.
 
-A successful `delta_at` result owns all nested scalar and sparse-entry data
+A successful present indexed result owns all nested scalar and sparse-entry data
 needed by the delta. `append` completes a recursive owned capture before
 returning. Later source changes, member removal, another eval and graph
 teardown cannot change an earlier capture. No borrowed child view, member

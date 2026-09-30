@@ -20,7 +20,7 @@ unchanged. Native implementation interfaces do not prescribe HGL spelling.
 | `scheduler` | `schedule(scheduler, delay)`, `schedule(scheduler, delay, on_wall_clock)`, `schedule_at(scheduler, time)`, `schedule_at(scheduler, time, on_wall_clock)`, `is_scheduled(scheduler)`, `next_scheduled_time(scheduler)` |
 | `alarm` | `schedule(alarm, delay)`, `schedule_at(alarm, time)` |
 | `logger` | `info(logger, value)` for the existing informational logging operation |
-| `replay_input` | `len(replay_input)`, `has_tick(replay_input, index)`, `delta_at(replay_input, index)` |
+| `replay_input` | `len(replay_input)`; slot access uses `replay_input[index]` |
 | `capture` | `begin(capture)`, `append(capture, time, delta)` |
 
 These operation names are prelude names, not new reserved words. The direct
@@ -32,7 +32,9 @@ operand occupies the first positional argument.
 
 `len` retains the language's length-operation spelling; admitting the
 `replay_input` capability adds neither a `length` alias nor a new keyword.
-The replay/capture signatures and errors are in
+[Indexed replay reads](nullable-replay-indexing.md) return a contextual nullable
+payload and require a presence guard before payload use. The replay/capture
+signatures and errors are in
 [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md).
 Clock/scheduler semantics remain in
 [ADR 0010](decisions/0010-lifecycle-capabilities.md), and the source-only

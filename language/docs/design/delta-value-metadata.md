@@ -109,7 +109,8 @@ node with identity wiring. No explicit generic-call syntax is introduced.
 For the same reason the ADR 0016 record body calls
 `append(capture, last_modified(ts), delta_value(ts))`. Its scalar delta is an
 ordinary T, so the capability signature is unchanged. Replay already obtains
-explicit deltas through `delta_at(replay_input, index)`.
+explicit deltas through `replay_input[index]`, testing the nullable result
+against `null` before publication.
 
 ## Consequences
 
