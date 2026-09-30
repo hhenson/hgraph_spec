@@ -1032,7 +1032,6 @@ valid()
 all_valid(book)
 last_modified(value)
 delta_value(value)
-delta(value)       # compatibility spelling
 ```
 
 Source does not expose `value.modified`, `value.valid`, or `value.value`.
@@ -1064,11 +1063,9 @@ windows, `all_valid` checks the minimum window requirement.
 
 In a `when` condition, these predicates also control when a function may run.
 The canonical [delta_value(value)](../design/delta-value-metadata.md) call
-reads the current scalar delta when that specific input is valid and modified;
-`delta(value)` is retained as its compatibility spelling. The scalar contract
-is specified separately from the still-open structural contextual delta
-transport and output-application contract. This clarification does not claim
-new implementation coverage.
+reads the current scalar delta when that specific input is valid and modified.
+The scalar contract is specified separately from structural contextual delta
+transport and output-application contract.
 
 In a runtime function, `last_modified(value)` returns the hgraph engine time at
 which the endpoint last changed. Its type is `datetime`.

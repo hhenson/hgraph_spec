@@ -1,24 +1,23 @@
 # Explicit delta-value metadata
 
-Status: scalar contract clarification, 2026-09-30. The canonical name
-`delta_value` is already accepted by
-[Native surface completion](native-surface-proposal.md#values-are-values).
-This record reconciles older `delta(x)` metadata spelling, specifies the
-scalar result and its admission, and uses explicit delta forwarding in the
-eval fixture. It does not claim new compiler support or settle structural
-delta transport and application.
+Status: scalar contract clarification, 2026-09-30. This specifies the
+canonical delta accessor, its scalar type and admission, and the generic
+pass-through function. Structural delta transport and application require
+separate contracts.
 
 ## Canonical spelling and typing
 
-`delta_value(endpoint)` is the canonical temporal delta accessor. It takes
-exactly one endpoint argument. The legacy call `delta(endpoint)` is retained
-as a compatibility synonym with identical type, phase, admission and
-observation for the domain specified here; it is not deprecated by this
-record. `delta<S>(...)` remains the separate contextual struct constructor.
-These are prelude intrinsic calls, not new reserved words.
+`delta_value(endpoint)` is the temporal delta accessor. It takes exactly one
+endpoint argument. There is no `delta(endpoint)` accessor intrinsic.
+`delta<S>(...)` is the distinct contextual struct delta constructor and is
+retained. `delta_value` is a prelude intrinsic, not a new reserved word.
+The identifier `delta` outside its constructor form follows ordinary name
+resolution; a call to an undeclared `delta` is a name error, not a metadata
+accessor. An unrelated user-declared callable named delta follows the ordinary
+call rules.
 
 The result is derived from the endpoint's **temporal shape**, not from the
-implementation's storage representation. In generic checking, retain that
+stored representation. In generic checking, retain that
 derived relationship symbolically. Writing `DeltaOf(T)` in this specification
 names that relationship only: it is not a source type, an annotation, or a
 new first-class storable delta value. A runtime return/output context must
@@ -104,17 +103,9 @@ For the same reason the ADR 0016 record body calls
 ordinary T, so the capability signature is unchanged. Replay already obtains
 explicit deltas through `replay_input.delta_at(index)`.
 
-## Reasoning and evidence
+## Consequences
 
-The expected scalar traces are unchanged: an admitted publication is copied
+For a scalar pass-through, an admitted publication is copied
 once; a repeated equal scalar is still a tick; silence has no delta; dense
 horizon materialization retains silent cells. This follows TS-2, the scalar
 row of the runtime delta table, the runtime return contract and EVAL-3/5.
-
-The existing [reference audit](https://github.com/hhenson/hgraph_spec_audit/blob/codex/delta-eval-foundation/runtime/validation/delta_eval/README.md)
-uses a compute returning `ts.delta_value`, and its native scalar supplement
-applies `ts.delta_value()` to its own output. Its frozen scalar traces already
-exercise explicit delta forwarding. No new reference observation is needed
-to rename the HGL call; the alias, checking and generic-instantiation rules
-still require compiler acceptance tests. Collection/REF observations do not
-establish their missing HGL contextual delta types or output application.

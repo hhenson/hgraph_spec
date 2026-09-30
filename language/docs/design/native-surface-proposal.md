@@ -15,9 +15,9 @@ delta shape. Missing transport, borrowing, and operator implementations are
 compiler/library work behind the same language surface.
 
 The [scalar delta-value contract](delta-value-metadata.md) specifies runtime
-admission and scalar typing for `delta_value`, retains `delta(x)` as a
-compatibility spelling, and gives the generic explicit-delta pass-through
-fixture. Structural contextual delta transport/application remain separate.
+admission and scalar typing for the sole accessor `delta_value` and gives
+the generic explicit-delta pass-through fixture. The constructor remains
+`delta<S>(...)`. Structural contextual delta transport/application remain separate.
 
 
 ## Membership and access

@@ -135,8 +135,8 @@ clause, and an ordinary identifier elsewhere. `out` and the names of other
 injectables are contextual names resolved only by an `inject` declaration.
 `struct` is both a declaration keyword and the corresponding constraint
 category. `delta` is contextual: followed by `<` it introduces a structured
-delta constructor, while `delta(value)` is the compatibility spelling of
-canonical `delta_value(value)` metadata.
+delta constructor; `delta_value(value)` is the temporal metadata accessor.
+There is no `delta(value)` metadata intrinsic.
 It is not a general type constructor. `fields`, `has_fields`, `field_type`,
 and the pack-reflection functions `len`, `keys`, `types`, and `type_at` are
 compile-time intrinsics inside a `requires` clause.
@@ -1126,7 +1126,7 @@ An unqualified name resolves, innermost first, to:
    (a `test` is not a value and is a `name` diagnostic in an expression);
 4. a selectively imported operator;
 5. a prelude intrinsic: `valid`, `modified`, `all_valid`, `last_modified`,
-   `delta_value`, `delta`, `key_set`, `keys`, `values`, `elements`, `items`, `added`,
+   `delta_value`, `key_set`, `keys`, `values`, `elements`, `items`, `added`,
    `removed`, `insert`, `update`, `upsert`, `remove`, `discard`, `invalidate`,
    `clear`, `push`, `pop`.
 
@@ -1659,7 +1659,6 @@ valid()
 all_valid(book)
 last_modified(value)
 delta_value(value)
-delta(value)       # compatibility spelling
 ```
 
 The parser treats these as ordinary calls resolved through the prelude or
@@ -1713,9 +1712,9 @@ The canonical [delta_value(endpoint)](../design/delta-value-metadata.md)
 metadata call has the ordinary scalar result type for the admitted eight
 scalar endpoints in a valid and modified runtime context. The particular
 endpoint must be proven valid and modified; an any-input-modified condition
-alone does not establish this for every input. `delta(endpoint)` is retained
-as a compatibility synonym for that domain. Structural contextual delta
-results/application remain open; `delta<S>(...)` is a distinct constructor.
+alone does not establish this for every input. Structural contextual delta
+results/application remain open; `delta<S>(...)` is a distinct constructor,
+not an alternative accessor.
 
 `last_modified(value)` is a runtime metadata operation returning `datetime`.
 It lowers to the endpoint's public `last_modified_time` view and does not
