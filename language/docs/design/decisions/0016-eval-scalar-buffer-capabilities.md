@@ -101,9 +101,8 @@ and named argument binding applies.
 
 No capability method is admitted in stop. No method schedules, publishes an
 endpoint, deduplicates values, applies a delta to an output, advances a
-cursor, inserts no-tick cells, or performs dense-result padding. HGL determines when to call these storage operations. `delta_at` uses that name because it returns the input slot's
-delta; in this admitted profile the return type is the ordinary scalar T.
-It does not settle a future collection delta type.
+cursor, inserts no-tick cells, or performs dense-result padding. HGL determines
+when to call these storage operations.
 
 `delta_at` returns an owned scalar result, including for str (ADR 0009).
 `append` copies the scalar and time before returning. Later output changes,
@@ -113,6 +112,44 @@ The run owner keeps configured storage alive through graph stop and result
 extraction. The returned eval sequence is owned independently of disposed
 graph storage. Extraction may copy or transfer owned storage; no borrowed
 hook view escapes in either case.
+
+## Meaning of `delta_at(index)`
+
+`replay_input` gives a replay source access to its configured input sequence.
+`delta_at(index)` reads the delta supplied at one position in that sequence.
+The index is zero-based and counts every slot, including `_` slots; it is
+not a timestamp, an offset from the current evaluation, or an output index.
+A delta here means the update to publish to the time series, not an
+arithmetic difference between successive scalar values. For this scalar
+profile, the update is the scalar itself, so the result type is T.
+
+For the input sequence `[10, _, 12]`, `replay_input.length()` is 3:
+
+| Index | Supplied slot | `has_tick(index)` | `delta_at(index)` |
+|---|---|---|---|
+| 0 | `10` | `true` | Returns an owned `10`. |
+| 1 | `_` | `false` | Raises `replay_input: slot has no tick`. |
+| 2 | `12` | `true` | Returns an owned `12`, not `2`. |
+
+An absent slot has no delta to read. Reading it does not return the previous
+held value or a default value. The presence check and read have separate
+roles: `has_tick(index)` tests whether a delta was supplied, and `delta_at(index)`
+retrieves that delta when present.
+
+The read does not consume the slot, advance the index, schedule the source,
+or publish to its output. The replay body owns its cursor and timing;
+`return replay_input.delta_at(current)` reads the configured delta and then
+publishes it through the normal runtime return operation. Repeated valid
+reads of one slot retrieve the same supplied delta with independent ownership.
+The index need not equal a current-cycle counter: this method is indexed
+buffer access, and the replay body establishes the sequence-to-cycle mapping.
+
+`delta_at(index)` is a method of `replay_input`, not a time-series accessor.
+`delta_value(v)` reads the delta that a live temporal endpoint v published in
+the current cycle. The two operations read different sources: a configured
+input-sequence slot versus a live endpoint's current publication. Neither
+name is an alias for the other. Eval callers provide the sequence; they do
+not call `delta_at` themselves.
 
 ## Failure and validation
 
