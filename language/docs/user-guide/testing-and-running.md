@@ -95,9 +95,17 @@ hgl test api.hgl --part helpers.hgl --part cases.hgl
 ## Assertions and evaluation
 
 `assert` takes any wiring-time `bool` expression. `eval` drives a function
-through hgraph's replay and record harness: its first argument is a module
-`fn`, the rest bind to that function's parameters exactly as a call would,
+by wiring replay source operators, the function, and a record sink operator.
+Its first argument is a module `fn`; the rest bind to that function's
+parameters exactly as a call would,
 positionally or by name. To evaluate an operator, wrap it in a `fn`.
+
+Eval configures these operators and owns the run's typed input and capture
+buffers; the test does not call or configure replay and record separately.
+They remain normal operators that may also have independent library APIs.
+The recorder retains copies of output deltas, so later ticks cannot change
+an earlier result. The [operator-composition contract](../design/eval-operator-composition.md)
+describes this boundary.
 
 A local `const fn` can also be evaluated through its default lifted node.
 `eval(const(scale), value: [1.0, 2.0], factor: 3.0)` explicitly selects the
@@ -124,6 +132,15 @@ scalar for `f64`, a tuple for `atomic<tuple<f64, f64>>`. Because the tuple
 is `atomic`, it arrives whole and `_` stands for the whole element. The
 observed sequence runs through the later of the last input cycle and the
 last output tick, and `==` requires the same length and equal elements.
+
+The [proposed foundation clarification](../design/eval-operator-composition.md)
+makes explicit that silent cells count toward the input horizon even when
+no output is produced.
+For a scalar runtime pass-through, all-silent input `[_, _, _]` therefore
+compares with `[_, _, _]`, and empty input `[]` compares with `[]`. These
+runs require an empty recording, as OP-11 already specifies. A reference harness's raw no-output
+sentinel is explicitly normalized to this HGL sequence during comparison;
+errors and missing observations are not empty successful results.
 
 A `const` parameter receives a constant, not a sequence:
 

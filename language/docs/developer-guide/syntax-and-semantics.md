@@ -2057,14 +2057,34 @@ with `==` against a sequence literal of the same shape. An outputless callee
 may still be evaluated as a statement, which runs it to completion; its
 result cannot be compared.
 
+Eval configures and wires replay source operators for its temporal inputs,
+calls the target, and connects its output to a record sink operator. Eval
+owns typed input and capture buffers for the run; the test author supplies
+only the eval arguments. Replay and record are normal operators and may also
+have independent standard-library APIs. Retained output deltas are owned
+copies, not borrowed views that can change on a later tick. See
+[Eval operator composition](../design/eval-operator-composition.md) for the
+foundation rules and the distinction between a compute pass-through and a
+composition identity.
+
 Elements of a dense sequence are consecutive engine cycles: element `i` is
 the cycle at the run's start plus `i` engine steps, hgraph's `eval_node`
-alignment, so a test written this way means the same as the equivalent
-Python or C++ harness test. The observed output sequence has one element per
+alignment. Reference comparison preserves the raw result as well as any
+no-output normalization described below. The observed output sequence has
+one element per
 cycle from the first cycle through the later of the last input cycle and the
 last output tick, with `_` where the output did not tick, and `==` requires
 equal length and element-wise equality under hgraph's canonical delta
 equality (`Value::equals`; scalars compare exactly).
+
+The input horizon includes silent cells and is the longest supplied temporal
+sequence length. With no output ticks, a successful run produces that many
+`_` cells; an empty supplied input with no output ticks produces `[]`.
+The recorder still exists and holds an empty recording. A raw reference
+no-output sentinel from a successful run must be preserved in the audit and
+explicitly normalized to this dense HGL result. This introduces neither an
+output tick nor source-only evaluation nor an explicit source end bound.
+A failed run or unavailable observation is not an empty successful result.
 
 A *timed* sequence places each element at an explicit time: a `duration`
 key is an offset from the run's start and a `datetime` key is an absolute

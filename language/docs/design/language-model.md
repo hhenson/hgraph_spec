@@ -892,7 +892,10 @@ Status: proposed (2026-09-03); the record is
 A module carries its own tests. A `test` declaration is a named block in
 module scope that sees every declaration of the module, exported or not; its
 body is composition-phase code plus `assert`. The `eval` form drives a
-function through hgraph's replay and record harness:
+function through replay source operators and a record sink operator, wired
+and configured by eval. Eval owns the typed input and capture buffers; the
+operators remain ordinary library operators with their own contracts. See
+[Eval operator composition](eval-operator-composition.md). For example:
 
 ```hgl
 test midpoint_waits_for_both_sides {
@@ -903,10 +906,13 @@ test midpoint_waits_for_both_sides {
 
 A dense sequence is one element per engine cycle, `_` meaning "no tick" on
 the input side and "did not tick" on the output side; a timed sequence keys
-each element by an offset or absolute time. Both map exactly onto hgraph's
-own `eval_node` alignment and its sparse absolute-time recording, so a test
-in the language and a test of the same operator in C++ or Python observe the
-same ticks. Tests never lower into a build artifact; `hgl test` runs them.
+each element by an offset or absolute time. Their timing follows hgraph's
+`eval_node` alignment and sparse absolute-time recording. A dense HGL result retains the supplied input horizon even if
+there are no output ticks: all-silent input yields all-silent output, and an
+empty supplied input with no output ticks yields `[]`. A raw reference
+no-output sentinel is preserved and explicitly normalized when comparing
+that result; raw return-object identity is not promised. Tests never lower
+into a build artifact; `hgl test` runs them.
 
 There is no `main` and no in-language run call. A module describes graphs;
 running binds an exported function without temporal parameters to a mode, a
