@@ -18,8 +18,13 @@ typed input buffers → replay operator(s) → target → record operator → ca
 ```
 
 The test author calls `eval(target, ...)`; eval constructs and configures the
-operators and owns the buffers for that run. Replay and record remain normal
-operators with their own callable contracts. They may be
+operators and owns the ordinary input data and recording for that run.
+Replay receives its input sequence as an ordinary const argument. Record
+receives a const string key and uses the run-wide `global_state` store;
+eval retrieves the recording after graph stop. These source contracts have
+the value-container dependencies listed in
+[ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md#unresolved-source-contracts).
+Replay and record remain normal operators with their own callable contracts. They may be
 declared in the standard library and used independently. This arrangement
 places no visibility restriction on them and does not require the eval
 caller to select recording keys, seed storage, or configure a recorder.
@@ -70,8 +75,8 @@ Eval owns the configured input data and recorded result for the duration
 needed by that run and its result. Separate eval invocations do not share or
 accumulate recordings.
 
-A node reads a borrowed view that is stable for the current cycle. The replay
-operator publishes into its own output; a compute target publishes into its
+Borrowed endpoint/store access cannot escape its supplying hook. Ordinary
+input data follows its value ownership contract. The replay operator publishes into its own output; a compute target publishes into its
 own output; the record operator retains an **owned copy** of each captured
 output delta. A retained capture cannot be a borrowed view whose contents
 change when a later cycle updates or invalidates the source. “Copy” is the
@@ -149,7 +154,9 @@ child-validity and membership information beyond published-value deltas when
 reconstructing full collection state. These require separate specification
 extensions.
 
-The proposed [scalar buffer capability extension](decisions/0016-eval-scalar-buffer-capabilities.md)
-addresses the narrow fresh dense scalar profile with typed node-scoped
-`replay_input` and `capture` injectables. The broader delta and resource
-questions above remain separate.
+The proposed [run-wide keyed-state foundation](decisions/0016-eval-scalar-buffer-capabilities.md)
+configures replay with ordinary const data and record with a const key for
+reusable shared storage. It does not complete the ordinary sequence,
+contextual-delta storage or recording-construction language. The eval
+behavior above does not imply executable HGL operator bodies before those
+source contracts are settled.

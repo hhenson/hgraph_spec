@@ -1,43 +1,29 @@
 # Eval with contextual collection publication deltas
 
-Status: draft source extension, 2026-09-30. This extends the fresh dense eval
-profile of [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) using
-[contextual collection publication deltas](contextual-collection-deltas.md).
+Status: proposed publication profile, 2026-09-30. This extends the fresh dense
+eval profile using [contextual collection publication deltas](contextual-collection-deltas.md).
 It does not decide empty-event application or introduce full-state replay.
+The ordinary source value contracts needed to implement replay and record
+remain open in [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md#unresolved-source-contracts).
 
-## Admission and ordinary operator contracts
+## Publication shape admission
 
 Admit the recursive scalar, set, fixed-list, positional/named-bundle and
 integer-key-map shapes defined by the contextual collection contract.
 Exact concrete input/output shapes must be known before graph construction.
 Nominal identity, child types, tuple positions and fixed sizes are part of
-the buffer type; matching a scalar leaf representation is insufficient.
-
-The ordinary operator signatures remain:
-
-```hgl
-operator replay<T>() -> T
-operator record<T>(ts: T)
-```
-
-For this extended profile, the finite scalar `requires` list in ADR 0016 is
-replaced by the shape-admission rule above. This is a contextual checking
-rule on the replay/capture capabilities, not a new source constraint predicate
-or a promise that every T is supported. Unsupported instantiations are
-checking errors. These are the same operator contracts with a wider domain;
-do not register a competing universal overload beside the scalar contract.
-Their generic HGL bodies retain ADR 0016's alarm, clock, cache, lifecycle and
-`when` behavior, with the finite scalar `requires` clauses removed. Generic
-checking retains the capability's shape obligation while T is unresolved.
-After ordinary candidate selection, a concrete specialization must satisfy the
-recursive shape grammar before graph construction; failure is a diagnostic,
-not a false `requires` premise or fallback to another candidate. This rule
-adds no type-reflection function and changes no candidate-ranking rule.
+the profile; matching a scalar leaf representation is insufficient.
+Unsupported concrete eval shapes are checking errors. This is an eval
+profile boundary, not a new source constraint predicate or a capability that
+infers a generic implementation's storage type. Generic replay/record source
+checking must await the ordinary value relationships identified in ADR 0016.
 
 The eval caller supplies only the target and typed delta sequences. Eval
-constructs and binds the replay sources, target compute and record sink.
-It does not replace a compute with graph identity wiring. The generic target
-continues to apply its input delta to its own output:
+constructs replay sources configured with ordinary const data, the target
+compute and a record sink configured with a const string key. Record stores
+an ordinary typed recording through run-wide `global_state`. No storage
+injectable knows which temporal shape a node consumes or produces. The
+generic target applies its input delta to its own output:
 
 ```hgl
 fn pass_through<T>(value: T) -> T {
@@ -45,51 +31,25 @@ fn pass_through<T>(value: T) -> T {
 }
 ```
 
-## Typed buffers and exact operation relationships
+## Publication data and owned recording
 
-The following table uses `delta_of(T)` solely as specification notation,
-not callable HGL syntax or an ordinary source type annotation.
+A present input slot supplies a contextual `delta_of(T)` for its exact
+parameter shape. For example,
+`delta<map<i64, i64>>(upsert: [1: 11])` supplies that sparse update, not a
+complete map or other keys from earlier slots. `delta_value(v)` reads the
+current publication from a live endpoint. The [nullable indexing rules](nullable-replay-indexing.md)
+require presence before a nullable element's payload can be used; they do
+not define an ordinary container type for structural deltas.
 
-| Capability operation | Contextual result or argument |
-|---|---|
-| `len(replay_input) -> i64` | Unchanged: number of present and absent slots. |
-| `replay_input[index]`, with i64 index | Owned contextual `delta_of(T)` when present, where T is the source output shape; `null` for an absent in-bounds slot. |
-| `begin(capture)` | Unchanged: create the present empty recording. |
-| `append(capture, time: datetime, delta: delta_of(T))` | Contextual delta argument for the sink's exact input shape T; independent owned capture. |
-
-The index still identifies a zero-based position in the configured replay
-sequence, as explained in [indexed replay reads](decisions/0016-eval-scalar-buffer-capabilities.md#indexed-replay-reads).
-This extension changes the delta payload's shape, not the meaning of the
-index or the source of the data. For example, a slot containing
-`delta<map<i64, i64>>(upsert: [1: 11])` supplies that sparse update when read.
-It does not supply a complete map or fill in other keys from earlier slots.
-`delta_value(v)` instead reads the current publication from a live endpoint.
-
-Indexing is admitted only in evaluation. The [nullable indexing rules](nullable-replay-indexing.md)
-require a proven-present result before replay returns its contextual delta. `append` remains
-evaluation-only, and `begin` remains start-only. No replay/capture operation is admitted in
-stop. Existing bounds, beginning, timestamp and allocation-failure
-rules, validation order and diagnostic prefixes remain unchanged.
-
-The source and sink capabilities still borrow only their configured
-run-owned, node-scoped buffers. Missing/wrong-role/wrong-run/wrong-shape
-bindings and multiple capture writers fail graph construction before start.
-No capability value escapes, enters state/cache, or falls back to ambient
-storage. Shape admission adds no resource API or storage intrinsic.
-
-A successful present indexed result owns all nested scalar and sparse-entry data
-needed by the delta. `append` completes a recursive owned capture before
-returning. Later source changes, member removal, another eval and graph
+A recorder retains an independent owned copy of each output delta and its
+evaluation time. Later source changes, member removal, another eval and graph
 teardown cannot change an earlier capture. No borrowed child view, member
 range or endpoint reference escapes. Immutable physical sharing is allowed
-only when these independence guarantees hold.
-
-These operations do not schedule, publish, apply, deduplicate, advance a cursor,
-or insert silent cells. The HGL record evaluation remains:
-
-```hgl
-when { append(capture, last_modified(ts), delta_value(ts)) }
-```
+only when these independence guarantees hold. Neither generic store access
+nor ordinary input access schedules, publishes, applies a delta, deduplicates
+or inserts silent cells. Full source bodies await ordinary sequence,
+recording-construction and ownership operations; no role-specific capability
+stands in for those contracts.
 
 ## Dense literals, validation and comparison
 
@@ -142,7 +102,7 @@ The exact wrapper fixes the shape even when no slot supplies a payload.
 Repeated scalar child publications are retained. A map/set becoming empty
 through a nonempty removal is admitted. Empty and all-silent input still
 start/stop the graph and create an empty recording; dense materialization
-uses the supplied horizon as in ADR 0016.
+uses the supplied horizon as in [eval composition](eval-operator-composition.md).
 
 ## Boundaries
 

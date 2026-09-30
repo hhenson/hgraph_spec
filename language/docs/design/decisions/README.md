@@ -16,4 +16,4 @@ progress belong to the implementation or audit repository.
 - [0014: Native implementation interfaces](0014-native-implementation-interfaces.md)
 - [0015: Pull sources: the `alarm` injectable, `yield`, and `while`](0015-pull-sources.md)
 
-- [0016: Typed scalar buffer capabilities for replay and record](0016-eval-scalar-buffer-capabilities.md) (proposed)
+- [0016: Run-wide keyed state and eval configuration](0016-eval-scalar-buffer-capabilities.md) (proposed)

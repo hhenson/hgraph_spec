@@ -1,65 +1,67 @@
-# Nullable indexed replay slots
+# Nullable sequence indexing and presence refinement
 
-Status: replay-access contract correction, 2026-09-30.
+Status: contextual presence contract, 2026-09-30.
 
-A replay source reads its configured sequence with ordinary indexing:
-`replay_input[index]`. The index is an i64, is zero-based, and counts every
-slot, including absent slots. `len(replay_input)` counts those same slots.
-Neither operation uses a timestamp or advances a cursor.
+For an ordinary sequence whose element contract admits present and absent
+slots, use `result[index]`. The index is an i64, is zero-based, and counts
+every slot. `len(result)` counts the same slots. These are value operations,
+not injectable operations. Neither advances a cursor or uses a timestamp.
+
+The rules below preserve the presence behavior needed by eval. They do not
+supply a general source sequence type, its construction, a nullable type
+annotation, or a first-class structural delta container. Those dependencies
+remain open in [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md#unresolved-source-contracts).
+In the examples, `result` denotes an already admitted ordinary sequence;
+the bracket notation in the table describes its slots using harness notation.
+It is not a new ordinary value constructor.
 
 ## Presence, bounds and ownership
 
-An in-range read returns the supplied owned delta when the slot is present,
-and the existing language absence literal `null` when it is absent. It never
-returns a previous held value or a default scalar. In the scalar profile the
-present payload is T; in the collection profile it is contextual
-`delta_of(T)`. The latter remains specification notation, not a source type.
+An in-range read yields its present payload or the existing absence literal
+`null`. It never returns a held value or default scalar. A scalar payload has
+its ordinary scalar type; a structural publication payload retains the
+contextual `delta_of(T)` relationship where separately admitted.
 
-| Input sequence | Expression | Result |
+| Sequence slots | Expression | Result |
 |---|---|---|
-| `[10, _, 12]` | `len(replay_input)` | `3` |
-| `[10, _, 12]` | `replay_input[0]` | Present `10`. |
-| `[10, _, 12]` | `replay_input[1]` | `null`. |
-| `[10, _, 12]` | `replay_input[2]` | Present `12`, not the arithmetic difference `2`. |
+| `[10, _, 12]` | `len(result)` | `3` |
+| `[10, _, 12]` | `result[0]` | Present `10`. |
+| `[10, _, 12]` | `result[1]` | `null`. |
+| `[10, _, 12]` | `result[2]` | Present `12`, not the arithmetic difference `2`. |
 | Any sequence of length n | Index less than 0 or at least n | Bounds failure. |
 
-Indexing is evaluation-only; `len(replay_input)` is admitted in start and
-evaluation. Neither is admitted in stop. Validate `0 <= index < len(replay_input)`
-before accessing a slot. A bounds failure uses the existing translated node
-error contract and message prefix `replay_input: index out of range`, leaving
-input and capture unchanged. An absent in-range slot is a successful read,
-not a bounds or missing-publication error.
+Require `0 <= index < len(result)` before accessing a slot. Out-of-bounds
+access fails under the applicable value-operation error contract; inside a
+node hook it follows the translated node error contract. An absent in-range
+slot is a successful read. A missing global-state key is a separate error,
+not an absent sequence element.
 
-A successful present read owns its payload recursively. Repeated reads of
-one immutable slot return the same presence and payload without sharing
-mutable borrowed views. Reading never publishes, schedules, consumes a slot,
-changes a cursor, or materializes a dense result. `delta_value(endpoint)`
-continues to read a live endpoint's current publication; it is distinct from
-configured replay-slot access.
-
-There are no `delta_at` or `has_tick` replay operations or compatibility
-aliases. Presence is tested on the indexed result. The capability itself
-retains its existing node/run binding and non-escape rules.
+Indexing follows the sequence value's lifetime and ownership contract, not a
+replay-specific phase restriction. A retained capture must own its data
+independently; indexing alone does not authorize a borrowed aggregate view
+to escape. Reading does not publish, schedule, consume a slot, or materialize
+a dense result. `delta_value(endpoint)` instead reads a live endpoint's
+current publication.
 
 ## Contextual nullable result and flow refinement
 
 The index result has a contextual nullable payload: either absence or the
-exact admitted delta. This extension introduces no source `Option`, nullable
+exact admitted element payload. This extension introduces no source `Option`, nullable
 type constructor, annotation or general union type. The result may initialize
-an inferred immutable `let` local within the current evaluation. It may be
+an inferred immutable `let` local within the current hook. It may be
 compared with `null` using `==` or `!=`. Such a comparison is a presence test,
 not scalar equality, structural delta equality or a temporal operator call.
 
 Before presence is established, no payload use is admitted: no arithmetic,
 ordering, field/index projection, runtime output assignment, value return,
-constructor argument, capture append, or ordinary helper/operator argument.
+constructor argument, collection insertion, or ordinary helper/operator argument.
 There is no implicit unwrapping or substitution. A nullable bool is not a
 condition and has no truthiness conversion. False, zero and empty text are
 present scalar payloads; a present structural payload is not absent merely
 because its delta contains no entries. Whether applying an empty structural
 publication is admitted remains its separate contract.
 
-For an immutable local `item` initialized by a replay read, direct comparisons
+For an immutable local `item` initialized by an indexed read, direct comparisons
 establish these facts:
 
 | Condition | True branch | False branch |
@@ -77,7 +79,7 @@ at a merge, retain only facts true on every reachable incoming path. A
 terminating branch contributes no continuing path. Thus this is admitted:
 
 ```hgl
-let item = replay_input[current]
+let item = result[index]
 if item == null { return }
 return item
 ```
@@ -99,39 +101,24 @@ Refinement does not relax structural-delta escape restrictions.
 These are checking rules. A rejected nullable use cannot be lowered to an
 absent publication, a default scalar or an unchecked payload read.
 
-## Replay and capture
+## Publication and other uses of null
 
-The source preserves its existing cursor and scheduling policy. The relevant
-evaluation body is:
+Given an admitted sequence and a matching output context, this fragment
+illustrates guarded use; it is not a complete replay implementation:
 
 ```hgl
-when {
-    let current = index
-    index += 1
-    if index < len(replay_input) {
-        schedule_at(alarm, clock.next_cycle_evaluation_time)
-    }
-    let item = replay_input[current]
-    if item != null {
-        return item
-    }
+let item = result[index]
+if item != null {
+    return item
 }
 ```
 
 An absent read follows the path without return/output mutation and therefore
 publishes nothing. This does not define `return null` as a general no-output
 operation. `null` used to clear an optional struct field retains that field's
-separate meaning; it is not replay silence. Harness `_` remains the external
-no-publication slot spelling, and this correction does not add `null` as a
-harness-slot alias.
+separate meaning. Harness `_` remains the external no-publication slot
+spelling; this contract does not add `null` as a harness-slot alias.
 
-`begin(capture)` and `append(capture, time, delta)` keep their existing phases,
-ownership, timestamp checks and errors. Append requires a non-null delta;
-it never accepts absence as a request to skip, pad or erase a recording.
-The normal record body still calls
-`append(capture, last_modified(ts), delta_value(ts))`.
-
-See [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) for the full
-scalar source body and [collection eval](eval-collection-deltas.md) for
-recursive shape admission. Capability calls use
-[receiver-first syntax](capability-function-syntax.md).
+Presence refinement makes a payload usable only in a context already
+admitting its type and ownership. It does not make a structural delta an
+ordinary storable value or complete the source parameter type for replay.

@@ -491,9 +491,10 @@ Things hgraph's graphs carry that no concept above needs yet.
 - **A readable dump** of a graph: its nodes, their labels and schedule
   entries.
 
-- **Initial shared state** and **traits**: keyed values seeded at wiring and
-  copied onto each instance; traits are looked up through the chain of owning
-  graphs. They go with run-wide shared state (see Execution engine).
+- **Graph traits**: keyed metadata looked up through the chain of owning
+  graphs. These are distinct from the required run-wide `global_state`
+  store, shared rather than copied or shadowed by nested graphs (see
+  Execution engine and Injectables).
 - **Checkpoint identity** of a node. Goes with checkpointing.
 - **Whether any node needs the host's phase hook.** Goes with the phase hook.
 

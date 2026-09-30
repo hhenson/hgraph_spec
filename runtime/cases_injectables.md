@@ -1,7 +1,7 @@
 # Injectable cases
 
-Status: proposed 2026-09-30, reasoned from INJ-1 to INJ-12 and the Node
-rules they point at; not yet run.
+Status: proposed 2026-09-30. These cases follow INJ-1 to INJ-14 and the Node
+rules they reference.
 
 ## INJECT-SIGNATURE — INJ-1, INJ-2, INJ-4
 
@@ -51,3 +51,19 @@ time and end time as configured.
 
 See SOURCE-ALARM. A node that injects the alarm and the scheduler is
 refused; a node that injects the alarm has no scheduler to query.
+
+## INJECT-GLOBAL-STATE — INJ-3, INJ-5, INJ-13, INJ-14
+
+The owner seeds an i64 entry before graph start. A node reads it in start,
+updates it during evaluation and updates it again in stop. The owner reads
+the final i64 after all stop hooks. A nested graph's node sees prior writes
+to the same key, while a separate run using the same graph description and
+key sees only its own seed and writes. These store writes alone schedule no
+node and publish no endpoint.
+
+Reading stored false, zero or empty text with the corresponding expected
+scalar type succeeds and preserves that value. Reading a missing key fails;
+reading an i64 entry as bool fails. Neither failure yields null. A source
+read lacking a concrete expected ordinary type is rejected during checking.
+An owned scalar already read remains unchanged when the entry is replaced.
+These cases do not specify aggregate aliases or borrowing.

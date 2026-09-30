@@ -21,7 +21,7 @@ or stop is called.
 Injectables are of two sorts, reached in the same way:
 
 - **System facilities**, which belong to the run and are the same for every
-  node in it: the clock, the logger, engine control.
+  node in it: the clock, the logger, engine control and run-wide keyed state.
 - **What the node instance itself holds**: its scheduler, its output, its
   state and its recordable state. These are not services of the runtime —
   state and recordable state are *values*, held on the node instance for as
@@ -47,6 +47,7 @@ Three things follow from making these requests explicit.
 |---|---|---|
 | **clock** | the run | A struct of four read-only properties: evaluation time, *now*, lag, next cycle evaluation time |
 | **logger** | the run | Somewhere to write messages, identified as coming from this node |
+| **global_state** | the run | String-keyed ordinary values shared by all graphs in the run |
 | **engine control** | the run | The run's mode, start time and end time; whether a stop has been requested; and the means to request one |
 | **scheduler** | the node instance | The node's own scheduler: request, cancel, query (see Node) |
 | **alarm** | nothing: it holds no state | The one-shot scheduler: mark the node to evaluate now, after a delay or at an instant (see Node, "The schedulers"). A node injects the scheduler or the alarm, never both |
@@ -56,7 +57,8 @@ Three things follow from making these requests explicit.
 
 In HGL, `inject out, logger, clock, scheduler` asks for the output, the
 logger, the clock and the scheduler, and `inject alarm` for the alarm (ADR
-0015); `state` and `cache` declarations ask for recordable state and state.
+0015); `inject global_state` asks for run-wide keyed state.
+`state` and `cache` declarations ask for recordable state and state.
 
 The agreed [language capability contract](https://github.com/hhenson/hgraph_spec/blob/main/language/docs/design/native-interfaces.md#implementation-parts-and-injectables)
 also permits context services in value functions. Its requirements are visible
@@ -102,8 +104,8 @@ classDiagram
   per run, shared by every node of every graph in it; or by the node.
 - A **node type** lists the injectables its implementation requests. The list
   is part of the graph description (see Graph).
-- A nested graph's nodes get the *same* clock, logger and engine control as
-  the root graph's. There is one of each per run.
+- A nested graph's nodes get the *same* clock, logger, engine control and
+  global state as the root graph's. There is one of each per run.
 
 
 State
@@ -117,6 +119,7 @@ elsewhere:
 | clock | The clock's four properties | Execution engine | Read |
 | engine control | Run configuration; *stop requested* | Execution engine | Read; set *stop requested* |
 | logger | — | below | Write messages |
+| global_state | Run-wide keyed ordinary values | below | Get and set entries |
 | scheduler | The node's pending requests | Node | Read and change |
 | output | The node's output time-series | Time-series types | Read and write |
 | state | The node's state | Node | Read and write |
@@ -144,6 +147,7 @@ for one does not have one.
 | state, recordable state | yes | yes | yes |
 | logger | yes | yes | yes |
 | engine control | yes | yes | yes |
+| global_state | yes | yes | yes |
 
 ### What each does
 
@@ -213,6 +217,20 @@ Messages are attributed to the node that wrote them. Which level is enabled,
 how a message is laid out and where it goes are the run's configuration.
 Logging has no effect on the graph.
 
+**Global state.** A run-wide string-keyed store of ordinary typed values.
+The owner may seed it before graph start and read it after graph stop. Nested
+graphs share the same store; separate runs have separate stores. Nodes ask
+for `global_state` and use `get(global_state, key)` or
+`set(global_state, key, value)` in start, eval or stop. Get requires an
+expected ordinary value type and fails on a missing key or type mismatch.
+No key or temporal node shape determines that expected type. Entries are not
+endpoints or capabilities. The store assigns no recording-specific roles,
+writer restrictions or timestamp rules. Scalar get/set uses ordinary value
+copy rules; aggregate source access requires a separately admitted ownership
+contract. Retained recordings must independently own their captured deltas.
+The [language contract](../language/docs/design/decisions/0016-eval-scalar-buffer-capabilities.md)
+specifies source admission, lifetime and the remaining aggregate boundaries.
+
 **Engine control.** Reports the run's mode, start time and end time, and
 whether a stop has been requested. **Request stop** asks the engine to end
 the run: the current cycle completes, no other begins, and the graph is
@@ -232,8 +250,9 @@ Rules
   disposal, and keep their contents from one call to the next.
 - **INJ-4** A node has a scheduler only if its type requests one, and an
   alarm only if it requests that; it requests at most one of the two.
-- **INJ-5** There is one clock, one logger and one engine control per run,
-  and every node of every graph in the run is given the same ones.
+- **INJ-5** There is one clock, one logger, one engine control and one global
+  state store per run. Every node of every graph requesting one is given
+  access to that same run-owned facility.
 - **INJ-6** Nothing a node can be injected with lets it change the clock.
 - **INJ-7** Evaluation time and next cycle evaluation time read the same for
   every node in a cycle.
@@ -247,13 +266,21 @@ Rules
   critical, in that order of severity, and can be asked whether a level is
   enabled. A message below the enabled level is dropped without its text
   being built.
+- **INJ-13** Global-state access is borrowed for start, eval or stop. The
+  store belongs to the run, is shared by nested graphs and remains available
+  to its owner through result extraction after stop. Separate runs do not
+  implicitly share entries.
+- **INJ-14** Global-state get/set operates on ordinary string-keyed values.
+  Get requires the expected type and fails on missing or wrong-type entries;
+  it does not produce absence or infer a type from node role. Values follow
+  their ordinary ownership contract; storing a value does not by itself
+  snapshot arbitrary aggregate data.
 
 
 Deferred
 --------
 
-- **Run-wide shared state** and **traits**: keyed stores a node may read
-  and, for shared state, write (see Execution engine, Graph).
+- **Traits**: keyed metadata looked up through graph ownership (see Graph).
 - **The node itself**: its label, its position, its path from the root graph.
   Used for diagnostics.
 - **One-shot cycle callbacks** and **observers**, reached through engine

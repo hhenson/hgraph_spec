@@ -31,8 +31,7 @@ distinct from the `delta_value(endpoint)` accessor and `delta<S>(...)`
 constructor. A runtime return/output context must
 check the derived delta against the same temporal output shape.
 
-For the scalar profile of
-[ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md), T is one of
+For this scalar publication profile, T is one of
 `bool`, `i64`, `f64`, `str`, `date`, `time`, `datetime`, or `duration`.
 `delta_of(T)` is the ordinary scalar T because a TS's delta is the scalar
 published in this cycle. The call reads that delta explicitly; it does not
@@ -106,11 +105,12 @@ test explicit_scalar_deltas {
 The wrapper composes the generic compute node; it does not replace that
 node with identity wiring. No explicit generic-call syntax is introduced.
 
-For the same reason the ADR 0016 record body calls
-`append(capture, last_modified(ts), delta_value(ts))`. Its scalar delta is an
-ordinary T, so the capability signature is unchanged. Replay already obtains
-explicit deltas through `replay_input[index]`, testing the nullable result
-against `null` before publication.
+For the same reason a record implementation must obtain the publication
+with `delta_value(ts)` and retain an owned delta with its timestamp. Its scalar
+delta is an ordinary T. The reusable store in
+[ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) does not supply
+recording construction or make structural deltas ordinary storable values;
+those source contracts remain open.
 
 ## Consequences
 

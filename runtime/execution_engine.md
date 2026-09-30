@@ -24,6 +24,17 @@ owned by a node presents the same four things to its owner, which is what
 lets a graph be driven by an engine or by a parent node without knowing
 which.
 
+### Run-wide keyed state
+
+Each run owns one string-keyed store of ordinary typed values, exposed to
+requesting nodes as `global_state` (see Injectables). The run owner may seed
+it before graph start and read its final contents after graph stop. All
+nested graphs share it. Separate runs have separate stores, even when they
+instantiate the same graph description. This store does not define
+persistence or recovery and does not schedule work merely because an entry
+changes. Aggregate source access and ownership depend on their admitted
+ordinary value contracts.
+
 ### Time
 
 Time is an instant on the UTC timeline at **microsecond** resolution. A
@@ -297,8 +308,9 @@ Rules
   evaluation time plus the lag, and so is never earlier than evaluation time.
 - **ENG-14** The lag is real elapsed time in both modes, measured from the
   start of the current cycle.
-- **ENG-15** Simulation is deterministic: the same graph, inputs, start time
-  and end time produce the same sequence of cycles and the same ticks,
+- **ENG-15** Simulation is deterministic: the same graph, inputs, initial
+  global-state values, start time and end time produce the same sequence of
+  cycles and the same ticks,
   provided no node's behaviour depends on *now* or the lag.
 - **ENG-16** *never* is before *earliest start*, which is before *latest
   end*, which is before *forever*. *Earliest start* is *never* plus one
@@ -325,8 +337,6 @@ them it includes, and none of them changes a required observation.
   with an *after* for evaluation and stop even on failure, but not for start.
 - **One-shot cycle callbacks.** Work registered to run once, just before or
   just after the current cycle; drained until none remain.
-- **Run-wide shared state.** A keyed store seeded before the run, shared by
-  every graph in it, and readable afterwards.
 - **Run logger.** Which logger a run uses, and that nested graphs share it.
 - **Phase hook.** A host may wrap each whole phase — start, each cycle,
   stop — so that, for instance, a language bridge holds its lock for exactly
