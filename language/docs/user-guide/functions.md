@@ -891,17 +891,21 @@ lifecycle output access remains an open question.
 
 ## Scheduling, the clock, and input activity
 
-`inject clock` gives the evaluation clock: `clock.evaluation_time()` is the
-engine time of the current cycle, `clock.now()` the wall clock, and
-`clock.next_cycle_evaluation_time()` the earliest time of the next cycle. All
-three return a `datetime`.
+`inject clock` gives three read-only `datetime` properties:
+`clock.evaluation_time` is the current cycle's logical time,
+`clock.next_cycle_evaluation_time` is that time plus the engine's smallest
+step, and `clock.now` is the engine's wall-time estimate. Evaluation and
+next-cycle time remain constant within a cycle. Now may change between
+reads: it is UTC computer time in real time, and evaluation time plus the
+current cycle's elapsed lag in simulation. These are property reads, with
+no method-call or free-function aliases; see [clock properties](../design/clock-properties.md).
 
-`inject scheduler` gives the node scheduler. `scheduler.schedule(delay)`
+`inject scheduler` gives the node scheduler. `schedule(scheduler, delay)`
 requests an evaluation `delay` after the current evaluation time;
-`scheduler.schedule_at(time)` requests one at a `datetime`. A second `bool`
+`schedule_at(scheduler, time)` requests one at a `datetime`. An optional final `bool`
 argument selects the wall clock, which only a real-time executor accepts.
-`scheduler.is_scheduled()` and `scheduler.next_scheduled_time()` inspect the
-pending alarm. In `start`, `scheduler.schedule(0s)` asks for evaluation in the
+`is_scheduled(scheduler)` and `next_scheduled_time(scheduler)` inspect the
+pending alarm. In `start`, `schedule(scheduler, 0s)` asks for evaluation in the
 starting cycle; that is how a node schedules itself on start.
 
 `scheduled()` is a handler selector: it is true when the current evaluation
@@ -920,14 +924,14 @@ fn ticker(const delay: duration, const max_ticks: i64) -> i64 {
 
     start {
         if ticks < max_ticks {
-            scheduler.schedule(0s)
+            schedule(scheduler, 0s)
         }
     }
 
     when scheduled() {
         ticks += 1
         if ticks < max_ticks {
-            scheduler.schedule(delay)
+            schedule(scheduler, delay)
         }
         return ticks
     }
@@ -963,8 +967,8 @@ See [`lifecycle-capabilities.hgl`](../../examples/lifecycle-capabilities.hgl).
 ### `alarm` or `scheduler`
 
 `inject alarm` follows
-[ADR 0015](../design/decisions/0015-pull-sources.md). It is the stateless scheduler: `alarm.schedule(delay)` and
-`alarm.schedule_at(time)` mark the node to evaluate, the earliest request
+[ADR 0015](../design/decisions/0015-pull-sources.md). It is the stateless scheduler: `schedule(alarm, delay)` and
+`schedule_at(alarm, time)` mark the node to evaluate, the earliest request
 wins, and nothing is stored on the node or recovered after a restore. It is
 admitted only in a source, a runtime function with no temporal parameters,
 where every evaluation is the alarm firing: the source publishes from a
@@ -989,7 +993,7 @@ constant is the `alarm` case:
 ```hgl
 fn constant(const value: i64, const delay: duration = 0s) -> i64 {
     inject alarm
-    start { alarm.schedule(delay) }
+    start { schedule(alarm, delay) }
     when { return value }
 }
 ```
@@ -1035,7 +1039,7 @@ fn monitored_total(value: f64) -> f64 {
     inject out, logger
 
     start {
-        logger.info("starting")
+        info(logger, "starting")
     }
 
     when modified(value) && valid(value) {
@@ -1044,7 +1048,7 @@ fn monitored_total(value: f64) -> f64 {
     }
 
     stop {
-        logger.info("stopping")
+        info(logger, "stopping")
     }
 }
 ```

@@ -163,8 +163,8 @@ with the clock.
 One consequence: a description shows that a node uses the clock, but not
 *which* reading. Whether a graph's behaviour depends on *now* — and so
 whether a simulation of it is deterministic — cannot be told from the
-description. A compiler can tell, because it sees which operation the node
-calls.
+description. A compiler can tell, because it sees which clock property the
+node reads.
 
 **Scheduler.** The whole of the node's scheduler as specified in Node:
 request a time or a delay, optionally tagged and optionally on the wall
@@ -284,10 +284,10 @@ Points to settle
 
    Left out for now, since nothing needs it; the rule to change is INJ-8.
 2. **`lag` is on the runtime's clock and not yet on HGL's.** HGL's `clock`
-   (ADR 0010) has `evaluation_time()`, `now()` and
-   `next_cycle_evaluation_time()`. The ADR drew that list from "what the
-   native stream nodes actually use" and does not mention lag either way.
-   Until it is added, an HGL node can recover it as `now - evaluation time`
+   (ADR 0010) exposes `clock.evaluation_time`, `clock.now` and
+   `clock.next_cycle_evaluation_time` as read-only properties. It does not
+   expose a `clock.lag` property.
+   Until it is added, an HGL node can recover it as `clock.now - clock.evaluation_time`
    in simulation, where that is exactly the lag; in real time the same
    difference also includes however late the cycle started, and the two
    cannot be told apart. Adding `lag` to HGL's `clock` is a language

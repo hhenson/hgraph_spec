@@ -135,7 +135,8 @@ clause, and an ordinary identifier elsewhere. `out` and the names of other
 injectables are contextual names resolved only by an `inject` declaration.
 `struct` is both a declaration keyword and the corresponding constraint
 category. `delta` is contextual: followed by `<` it introduces a structured
-delta constructor, while `delta(value)` remains the temporal metadata function.
+delta constructor; `delta_value(value)` is the temporal metadata accessor.
+There is no `delta(value)` metadata intrinsic.
 It is not a general type constructor. `fields`, `has_fields`, `field_type`,
 and the pack-reflection functions `len`, `keys`, `types`, and `type_at` are
 compile-time intrinsics inside a `requires` clause.
@@ -1125,7 +1126,7 @@ An unqualified name resolves, innermost first, to:
    (a `test` is not a value and is a `name` diagnostic in an expression);
 4. a selectively imported operator;
 5. a prelude intrinsic: `valid`, `modified`, `all_valid`, `last_modified`,
-   `delta`, `key_set`, `keys`, `values`, `elements`, `items`, `added`,
+   `delta_value`, `key_set`, `keys`, `values`, `elements`, `items`, `added`,
    `removed`, `insert`, `update`, `upsert`, `remove`, `discard`, `invalidate`,
    `clear`, `push`, `pop`.
 
@@ -1312,7 +1313,11 @@ generic_constructor
                  "(", [ struct_arguments ], ")";
 delta_expression
                = "delta", "<", type, ">", "(",
-                 [ struct_arguments ], ")";
+                 [ delta_arguments ], ")";
+delta_arguments = delta_argument, { ",", delta_argument }, [ "," ];
+delta_argument  = identifier, ":", ( expression | sparse_entries );
+sparse_entries  = "[", [ sparse_entry, { ",", sparse_entry }, [ "," ] ], "]";
+sparse_entry    = const_expression, ":", expression;
 struct_arguments
                = named_argument, { ",", named_argument }, [ "," ];
 named_argument = identifier, ":", expression;
@@ -1507,8 +1512,10 @@ and missing required arguments are source diagnostics.
 A call whose callee resolves to a struct type is a complete-value constructor
 and accepts named arguments only. Required fields must be supplied, ordinary
 defaults fill omitted fields, and a field declared with `= null` may remain
-unset. The literal `null` is accepted only when the expected field is optional;
-it is not an untyped runtime object.
+unset. In struct construction, `null` is accepted only when the expected field is
+optional. The separate [replay indexing contract](../design/nullable-replay-indexing.md)
+also uses `null` for an absent slot and permits presence comparisons on its
+contextual nullable local. Neither form makes null an untyped runtime object.
 
 A call whose callee resolves to an enum type is a checked conversion from one
 integer or string operand, such as `Mode(10)` or `Mode("first")`. Resolve the
@@ -1543,9 +1550,12 @@ then evaluates the struct's `requires` clause. Every parameter must resolve;
 `Maybe()` without either a type-bearing field or an expected `Maybe<T>` type is
 an inference error.
 
-`delta<S>(...)` requires a fully applied nominal struct `S`, accepts named
-fields only, and
-produces a contextual update value rather than an ordinary source type. Every
+For a fully applied nominal struct `S`, `delta<S>(...)` accepts named
+fields only and produces a contextual update value rather than an ordinary
+source type. The proposed [collection delta extension](../design/contextual-collection-deltas.md)
+also admits shape-specific set, fixed-list, tuple and map constructors. Its
+sparse entry lists are contextual constructor arguments only; they do not
+extend ordinary sequence literals. Every
 field may be omitted independently of the complete constructor's requirements
 or defaults. Omission means no change and does not apply a default. Explicit
 `null` means clear an optional field and is distinct from omission; it is an
@@ -1657,7 +1667,7 @@ modified()
 valid()
 all_valid(book)
 last_modified(value)
-delta(value)
+delta_value(value)
 ```
 
 The parser treats these as ordinary calls resolved through the prelude or
@@ -1705,7 +1715,18 @@ the top-level endpoint even when the endpoint is structural or a collection;
 TSB or TSL for `valid`, not for its own `all_valid`. Removed dictionary keys
 do not participate. The check never recurses into grandchildren. TSW is an
 intentional exception: its `all_valid` checks minimum-window readiness, while
-`valid` becomes true on the first value. The result shape of `delta` remains open.
+`valid` becomes true on the first value.
+
+The canonical [delta_value(endpoint)](../design/delta-value-metadata.md)
+metadata call has the ordinary scalar result type for the admitted eight
+scalar endpoints in a valid and modified runtime context. The particular
+endpoint must be proven valid and modified; an any-input-modified condition
+alone does not establish this for every input. The proposed
+[collection delta extension](../design/contextual-collection-deltas.md)
+specifies contextual results and own-output application for its ordinary
+nonempty publication profile. Empty-event application and full-state changes
+remain separate boundaries. `delta<S>(...)` is a distinct constructor, not
+an alternative accessor.
 
 `last_modified(value)` is a runtime metadata operation returning `datetime`.
 It lowers to the endpoint's public `last_modified_time` view and does not
@@ -1842,7 +1863,7 @@ After classification, phase and effect checking gives identifiers different
 meanings in the two phases. A temporal parameter is a port in a composition
 body. In a runtime expression it denotes the current admitted payload, while
 `modified(parameter)`, `valid(parameter)`, `last_modified(parameter)`, and
-`delta(parameter)` retain access to its endpoint metadata.
+`delta_value(parameter)` retain access to its endpoint metadata.
 
 Runtime validity checking is flow-sensitive and follows Boolean short-circuit
 order. A payload read is valid when the node's ordinary no-`when` policy admits
@@ -1898,15 +1919,40 @@ requests only the selectors it uses. Unknown capabilities and use from an
 unsupported phase are diagnostics. `out` is a
 special injectable inferred from the result type; it is invalid on an
 outputless function and is initially available only during evaluation, not in
-`start` or `stop`. The clock and scheduler methods, the `scheduled()` handler
+`start` or `stop`. The clock properties and scheduler functions, the `scheduled()` handler
 selector, and the `passivate`/`activate` statements are fixed by
 [ADR 0010](../design/decisions/0010-lifecycle-capabilities.md); `scheduled`,
 `passivate` and `activate` are intrinsic names. A runtime function without
 temporal parameters must inject `scheduler` or `alarm`, or be a generator
 (`yield`). `alarm` is the stateless one-shot scheduler
-([ADR 0015](../design/decisions/0015-pull-sources.md)): `alarm.schedule(delay)`
-and `alarm.schedule_at(time)`, earliest request wins, nothing recorded or
+([ADR 0015](../design/decisions/0015-pull-sources.md)): `schedule(alarm, delay)`
+and `schedule_at(alarm, time)`, earliest request wins, nothing recorded or
 recovered, admitted in sources only.
+
+Capability access uses [read-only clock properties](../design/clock-properties.md),
+such as `clock.evaluation_time`, and [receiver-first functions](../design/capability-function-syntax.md),
+such as `schedule(alarm, delay)` and `info(logger, value)`. HGL has no
+method-call aliases; the clock properties have no free-function aliases.
+The direct capability access or approved first argument does not make the
+capability a first-class value that can be passed to an arbitrary function.
+
+`replay_input[index]` uses ordinary indexing syntax with an i64 index. An
+in-bounds absent slot returns `null`; an out-of-bounds index raises the
+specified error. Its contextual nullable result requires an immutable-local
+presence guard before scalar/delta use, including return or capture append;
+see [nullable replay indexing](../design/nullable-replay-indexing.md). This
+introduces no general nullable type, implicit unwrapping or null-return
+suppression rule.
+
+The proposed [scalar replay/capture extension](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
+adds node-scoped `replay_input` and `capture` capabilities only for its eight
+scalar types and fresh dense eval profile. They borrow per-node buffers bound
+at graph construction; they are not general resource values or supported
+state/cache types. Its operation and phase table, construction failures and
+runtime errors are specified in that record. The proposed
+[collection eval extension](../design/eval-collection-deltas.md) widens the
+same capability contracts to its recursive ordinary-publication profile,
+using contextual deltas rather than complete held snapshots.
 
 `start` runs once after replay-aware state initialization. `stop` runs once at
 teardown. State storage and injected capabilities are runtime-owned and are
@@ -2057,14 +2103,30 @@ with `==` against a sequence literal of the same shape. An outputless callee
 may still be evaluated as a statement, which runs it to completion; its
 result cannot be compared.
 
+Eval configures and wires replay source operators for its temporal inputs,
+calls the target, and connects its output to a record sink operator. Eval
+owns typed input and capture buffers for the run; the test author supplies
+only the eval arguments. Replay and record are normal operators and may also
+have independent standard-library APIs. Retained output deltas are owned
+copies, not borrowed views that can change on a later tick. See
+[Eval operator composition](../design/eval-operator-composition.md) for the
+foundation rules and the distinction between a compute pass-through and a
+composition identity.
+
 Elements of a dense sequence are consecutive engine cycles: element `i` is
-the cycle at the run's start plus `i` engine steps, hgraph's `eval_node`
-alignment, so a test written this way means the same as the equivalent
-Python or C++ harness test. The observed output sequence has one element per
-cycle from the first cycle through the later of the last input cycle and the
-last output tick, with `_` where the output did not tick, and `==` requires
-equal length and element-wise equality under hgraph's canonical delta
-equality (`Value::equals`; scalars compare exactly).
+the cycle at the run's start plus `i` smallest engine steps. The observed
+output sequence has one element per cycle from the first cycle through the
+later of the last input cycle and the last output tick, with `_` where the
+output did not tick. `==` requires equal length and element-wise equality
+under the delta type's equality rule; scalars compare exactly.
+
+The input horizon includes silent cells and is the longest supplied temporal
+sequence length. With no output ticks, a successful run produces that many
+`_` cells; an empty supplied input with no output ticks produces `[]`.
+The recorder still exists and holds an empty recording. Missing recording
+state or a failed run is not an empty successful result. This introduces
+neither an output tick nor source-only evaluation nor an explicit source
+end bound.
 
 A *timed* sequence places each element at an explicit time: a `duration`
 key is an offset from the run's start and a `datetime` key is an absolute

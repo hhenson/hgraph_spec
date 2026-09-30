@@ -152,6 +152,21 @@ A recording exists from the moment its recording node starts. A recorded
 time-series that never ticks leaves an empty recording, which is distinct
 from no recording at all; replaying it publishes nothing.
 
+The language's [eval form](../language/docs/design/eval-operator-composition.md)
+wires replay source operators and a record sink operator, owns their typed
+buffers and run-specific configuration, and captures owned copies of output
+deltas. Eval callers do not configure these operators separately; this does
+not restrict their independent library APIs. Materializing a dense eval
+result from an empty recording preserves its input horizon with no-tick
+cells; it does not publish those cells as ticks.
+
+The proposed [scalar replay/record contracts](../language/docs/design/decisions/0016-eval-scalar-buffer-capabilities.md)
+fix `replay<T>() -> T` and `record<T>(ts: T)` for eight scalar types, with
+per-node typed buffer bindings and HGL control flow. Their capabilities are
+not general storage handles, and their admission does not imply collection
+or persistent recording support.
+
+
 
 Rules
 -----

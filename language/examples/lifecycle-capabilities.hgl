@@ -14,14 +14,14 @@ export fn ticker(const delay: duration, const max_ticks: i64) -> i64 {
 
     start {
         if ticks < max_ticks {
-            scheduler.schedule(0s)
+            schedule(scheduler, 0s)
         }
     }
 
     when scheduled() {
         ticks += 1
         if ticks < max_ticks {
-            scheduler.schedule(delay)
+            schedule(scheduler, delay)
         }
         return ticks
     }
@@ -51,7 +51,7 @@ export fn stamped(value: i64) -> datetime {
     inject clock
 
     when modified(value) && valid(value) {
-        return clock.evaluation_time()
+        return clock.evaluation_time
     }
 }
 
@@ -59,16 +59,16 @@ export fn stamped(value: i64) -> datetime {
 # never fires, even when start requests an evaluation.
 export fn dormant() -> bool {
     inject scheduler
-    start { scheduler.schedule(0s) }
+    start { schedule(scheduler, 0s) }
     when { return true }
 }
 
 # Only the alarm activates this node; sample remains passive between alarms.
 export fn scheduled_sample(sample: i64, const delay: duration) -> i64 {
     inject clock, scheduler
-    start { scheduler.schedule(delay) }
+    start { schedule(scheduler, delay) }
     when scheduled() {
-        if scheduler.is_scheduled() {
+        if is_scheduled(scheduler) {
             return sample
         }
     }
@@ -90,8 +90,8 @@ export fn controlled(value: i64, enabled: bool) -> i64 {
 # accepted by hgl check.
 export fn at_time(const alarm: datetime) -> datetime {
     inject clock, scheduler
-    start { scheduler.schedule_at(alarm, false) }
-    when scheduled() { return clock.evaluation_time() }
+    start { schedule_at(scheduler, alarm, false) }
+    when scheduled() { return clock.evaluation_time }
 }
 
 # A `cache` is node-local data outside record/replay: it is re-initialized on

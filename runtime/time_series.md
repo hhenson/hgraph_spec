@@ -559,8 +559,11 @@ Points to settle
    owner gave on 2026-09-26 (WIR-15).
 6. **Structural inputs.** Settled 2026-09-30: a third input activity,
    defined in Node (NOD-28).
-7. **The delta of a whole value.** HGL leaves the result shape of `delta(x)`
-   open. The table under State is hgraph's.
+7. **The delta of a whole value.** HGL's canonical
+   [delta_value(x)](../language/docs/design/delta-value-metadata.md) has a
+   specified scalar result in the admitted valid-and-modified runtime domain;
+   structural contextual delta result types and application remain open. The table under State gives
+   the runtime observations they must preserve.
 8. **Before the first tick.** HGL leaves `valid` and `last_modified` before a
    first tick open. TS-1 and TS-2 answer it: not valid, *never*, nil.
 

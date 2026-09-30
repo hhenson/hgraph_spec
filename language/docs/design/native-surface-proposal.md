@@ -14,6 +14,12 @@ This decision does not claim that the compiler already lowers every value and
 delta shape. Missing transport, borrowing, and operator implementations are
 compiler/library work behind the same language surface.
 
+The [scalar delta-value contract](delta-value-metadata.md) specifies runtime
+admission and scalar typing for the sole accessor `delta_value` and gives
+the generic explicit-delta pass-through fixture. The constructor remains
+`delta<S>(...)`. Structural contextual delta transport/application remain separate.
+
+
 ## Membership and access
 
 | Function | Contract |
@@ -68,8 +74,10 @@ the compiler can retain membership history across rebinds. A composition-level
 Open detail for `get`: whether a present but invalid child returns the fallback
 or remains distinct from an absent key/index. The proposed rule is absent-only,
 preserving removal versus invalidation; this detail still needs agreement.
-The nullable-expression and result contract also remains to be specified. Neither
-an invented zero value nor an implicit no-output tick implements nullable lookup.
+The general nullable-expression and `get` result contract also remains to be
+specified. The scoped [replay-slot contract](nullable-replay-indexing.md)
+does not settle general child lookup. Neither an invented zero value nor an
+implicit no-output tick implements nullable lookup.
 
 ## Windows
 

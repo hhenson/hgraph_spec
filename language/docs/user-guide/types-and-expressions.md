@@ -682,8 +682,11 @@ unset:
 | `currency: str = "USD"` | Omission supplies `"USD"` |
 | `venue: str = null` | Omission leaves `venue` unset |
 
-`null` is a polymorphic absence literal accepted only where the expected field
-is optional. Passing `null` to a required field is a type error. Defaults and
+In struct construction, the polymorphic absence literal `null` requires an
+optional expected field. Passing `null` to a required field is a type error.
+The separate [replay indexing contract](../design/nullable-replay-indexing.md)
+uses the same literal for an absent configured slot and permits local
+presence comparisons before payload use. Defaults and
 optionality are authoring metadata; the underlying Bundle validity bitmap
 represents whether a field is set. Defaults apply when constructing a struct;
 they do not replace an invalid field on an existing temporal input.
@@ -1031,7 +1034,7 @@ modified()
 valid()
 all_valid(book)
 last_modified(value)
-delta(value)
+delta_value(value)
 ```
 
 Source does not expose `value.modified`, `value.valid`, or `value.value`.
@@ -1062,8 +1065,12 @@ temporal children, so their `all_valid` is the same as `valid`. For rolling
 windows, `all_valid` checks the minimum window requirement.
 
 In a `when` condition, these predicates also control when a function may run.
-The result shape of the proposed `delta(value)` operation remains open; use
-the supported `delta_value` operations described below.
+The canonical [delta_value(value)](../design/delta-value-metadata.md) call
+reads the current scalar delta when that specific input is valid and modified.
+The proposed [collection publication contract](../design/contextual-collection-deltas.md)
+adds shape-derived contextual deltas and own-output application for a bounded
+nonempty structural profile. Empty-event application and full-state changes
+remain outside that extension.
 
 In a runtime function, `last_modified(value)` returns the hgraph engine time at
 which the endpoint last changed. Its type is `datetime`.

@@ -19,7 +19,7 @@ export fn audited(value: i64) -> i64 {
 
 const fn hgl_audit(value: i64) -> i64 {
     inject logger
-    logger.info("HGL helper")
+    info(logger, "HGL helper")
     return value
 }
 
@@ -31,7 +31,7 @@ export fn lifted_audited(value: i64) -> i64 => audit(value)
 
 const fn stamp() -> datetime {
     inject clock
-    return clock.evaluation_time()
+    return clock.evaluation_time
 }
 
 export fn stamped(value: i64) -> datetime {

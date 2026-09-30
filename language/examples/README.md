@@ -47,8 +47,8 @@ The entries below identify the implementation tests for each example.
   C++ binding and checks source ticks, duplicate sink ticks and fresh runs.
 - [`lifecycle-capabilities.hgl`](lifecycle-capabilities.hgl) injects the
   node scheduler and the evaluation clock: a scheduler-driven source with no
-  temporal input (`start { scheduler.schedule(0s) }`, `when scheduled()`),
-  `passivate(input)` after a count, and `clock.evaluation_time()` (ADR 0010).
+  temporal input (`start { schedule(scheduler, 0s) }`, `when scheduled()`),
+  `passivate(input)` after a count, and `clock.evaluation_time` (ADR 0010).
 - [`native-provider.hgl`](native-provider.hgl) separates native scalar declarations
   from their providers and exercises injectable propagation through helpers.
   Implementations and provider binding tests live with each compiler/runtime.

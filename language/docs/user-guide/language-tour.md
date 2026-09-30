@@ -199,8 +199,13 @@ modified()
 valid()
 all_valid(book)
 last_modified(price)
-delta(positions)
+delta_value(price)
 ```
+
+`delta_value(endpoint)` reads the delta published by an endpoint;
+`delta<S>(...)` constructs a sparse update. They are distinct operations, and
+`delta(...)` is not an accessor. The [delta-value contract](../design/delta-value-metadata.md)
+defines scalar admission and the generic pass-through body.
 
 `modified(a, b, ...)` is true when any argument changed. `valid(a, b, ...)` is
 true only when every argument is valid. `valid(value)` tests the endpoint
@@ -253,7 +258,7 @@ fn running_total(value: f64) -> f64 {
     inject out, logger
 
     start {
-        logger.info("starting")
+        info(logger, "starting")
     }
 
     when modified(value) && valid(value) {
@@ -262,7 +267,7 @@ fn running_total(value: f64) -> f64 {
     }
 
     stop {
-        logger.info("stopping")
+        info(logger, "stopping")
     }
 }
 ```

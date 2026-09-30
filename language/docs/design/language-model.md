@@ -641,7 +641,7 @@ fn combined_total(a: f64, b: f64) -> f64 {
     inject out, logger
 
     start {
-        logger.info("starting")
+        info(logger, "starting")
     }
 
     when modified(a) && valid(a) {
@@ -655,7 +655,7 @@ fn combined_total(a: f64, b: f64) -> f64 {
     }
 
     stop {
-        logger.info("stopping")
+        info(logger, "stopping")
     }
 }
 ```
@@ -685,7 +685,7 @@ injectable whose type comes from the function result and permits the runtime
 body to inspect or incrementally update its output. Other injectables, such as
 `logger`, `clock`, `scheduler` and `alarm`, map to their hgraph selector
 contracts (`LoggerView`, `EvaluationClockView`, `NodeScheduler`,
-`SingleShotScheduler`; ADR 0010 fixes the clock and scheduler method
+`SingleShotScheduler`; ADR 0010 fixes the clock property and scheduler function
 surfaces, [ADR 0015](decisions/0015-pull-sources.md) the alarm's).
 
 `start` and `stop` execute once at node startup and teardown. State storage and
@@ -810,7 +810,7 @@ modified()
 valid()
 all_valid(book)
 last_modified(value)
-delta(value)
+delta_value(value)
 ```
 
 The language does not expose `value.modified`, `value.valid`, or `value.value`.
@@ -825,8 +825,11 @@ validity; `all_valid(value)` additionally checks each immediate live child
 of a TSD, TSB or TSL for `valid`, without recursion. Removed dictionary keys
 do not participate. TSW intentionally uses a separate rule: `all_valid` checks
 the window minimum while `valid` becomes true on the first value. In runtime evaluation, `last_modified(value)` returns the
-endpoint's native `last_modified_time` as `datetime`. The `delta` result shape
-remains open.
+endpoint's native `last_modified_time` as `datetime`. Canonical
+[delta_value(value)](delta-value-metadata.md) returns the ordinary scalar
+delta in the admitted valid-and-modified runtime scalar profile. Structural
+contextual delta shape/application remain separate open contracts.
+`delta<S>(...)` is the constructor, not an alternative accessor.
 
 ## Collection traversal
 
@@ -892,7 +895,10 @@ Status: proposed (2026-09-03); the record is
 A module carries its own tests. A `test` declaration is a named block in
 module scope that sees every declaration of the module, exported or not; its
 body is composition-phase code plus `assert`. The `eval` form drives a
-function through hgraph's replay and record harness:
+function through replay source operators and a record sink operator, wired
+and configured by eval. Eval owns the typed input and capture buffers; the
+operators remain ordinary library operators with their own contracts. See
+[Eval operator composition](eval-operator-composition.md). For example:
 
 ```hgl
 test midpoint_waits_for_both_sides {
@@ -903,10 +909,12 @@ test midpoint_waits_for_both_sides {
 
 A dense sequence is one element per engine cycle, `_` meaning "no tick" on
 the input side and "did not tick" on the output side; a timed sequence keys
-each element by an offset or absolute time. Both map exactly onto hgraph's
-own `eval_node` alignment and its sparse absolute-time recording, so a test
-in the language and a test of the same operator in C++ or Python observe the
-same ticks. Tests never lower into a build artifact; `hgl test` runs them.
+each element by an offset or absolute time. Dense position i is the run's
+start plus i smallest engine steps. A dense result retains the supplied input
+horizon even if there are no output ticks: all-silent input yields all-silent
+output, and an empty supplied input with no output ticks yields `[]`. A
+recording with no captures is empty, not missing. Tests never lower into a
+build artifact; `hgl test` runs them.
 
 There is no `main` and no in-language run call. A module describes graphs;
 running binds an exported function without temporal parameters to a mode, a
