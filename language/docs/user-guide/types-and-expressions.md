@@ -1064,8 +1064,10 @@ windows, `all_valid` checks the minimum window requirement.
 In a `when` condition, these predicates also control when a function may run.
 The canonical [delta_value(value)](../design/delta-value-metadata.md) call
 reads the current scalar delta when that specific input is valid and modified.
-The scalar contract is specified separately from structural contextual delta
-transport and output-application contract.
+The proposed [collection publication contract](../design/contextual-collection-deltas.md)
+adds shape-derived contextual deltas and own-output application for a bounded
+nonempty structural profile. Empty-event application and full-state changes
+remain outside that extension.
 
 In a runtime function, `last_modified(value)` returns the hgraph engine time at
 which the endpoint last changed. Its type is `datetime`.

@@ -1313,7 +1313,11 @@ generic_constructor
                  "(", [ struct_arguments ], ")";
 delta_expression
                = "delta", "<", type, ">", "(",
-                 [ struct_arguments ], ")";
+                 [ delta_arguments ], ")";
+delta_arguments = delta_argument, { ",", delta_argument }, [ "," ];
+delta_argument  = identifier, ":", ( expression | sparse_entries );
+sparse_entries  = "[", [ sparse_entry, { ",", sparse_entry }, [ "," ] ], "]";
+sparse_entry    = const_expression, ":", expression;
 struct_arguments
                = named_argument, { ",", named_argument }, [ "," ];
 named_argument = identifier, ":", expression;
@@ -1544,9 +1548,12 @@ then evaluates the struct's `requires` clause. Every parameter must resolve;
 `Maybe()` without either a type-bearing field or an expected `Maybe<T>` type is
 an inference error.
 
-`delta<S>(...)` requires a fully applied nominal struct `S`, accepts named
-fields only, and
-produces a contextual update value rather than an ordinary source type. Every
+For a fully applied nominal struct `S`, `delta<S>(...)` accepts named
+fields only and produces a contextual update value rather than an ordinary
+source type. The proposed [collection delta extension](../design/contextual-collection-deltas.md)
+also admits shape-specific set, fixed-list, tuple and map constructors. Its
+sparse entry lists are contextual constructor arguments only; they do not
+extend ordinary sequence literals. Every
 field may be omitted independently of the complete constructor's requirements
 or defaults. Omission means no change and does not apply a default. Explicit
 `null` means clear an optional field and is distinct from omission; it is an
@@ -1712,9 +1719,12 @@ The canonical [delta_value(endpoint)](../design/delta-value-metadata.md)
 metadata call has the ordinary scalar result type for the admitted eight
 scalar endpoints in a valid and modified runtime context. The particular
 endpoint must be proven valid and modified; an any-input-modified condition
-alone does not establish this for every input. Structural contextual delta
-results/application remain open; `delta<S>(...)` is a distinct constructor,
-not an alternative accessor.
+alone does not establish this for every input. The proposed
+[collection delta extension](../design/contextual-collection-deltas.md)
+specifies contextual results and own-output application for its ordinary
+nonempty publication profile. Empty-event application and full-state changes
+remain separate boundaries. `delta<S>(...)` is a distinct constructor, not
+an alternative accessor.
 
 `last_modified(value)` is a runtime metadata operation returning `datetime`.
 It lowers to the endpoint's public `last_modified_time` view and does not

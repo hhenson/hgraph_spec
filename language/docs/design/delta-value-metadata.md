@@ -3,7 +3,8 @@
 Status: scalar contract clarification, 2026-09-30. This specifies the
 canonical delta accessor, its scalar type and admission, and the generic
 pass-through function. Structural delta transport and application require
-separate contracts.
+separate contracts. The proposed [collection publication contract](contextual-collection-deltas.md)
+extends admission to its bounded nonempty structural profile.
 
 ## Canonical spelling and typing
 
