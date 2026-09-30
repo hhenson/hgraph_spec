@@ -22,8 +22,8 @@ An operator **contract** gives its identity, signature, domain and behaviour.
 A **candidate** implements it. [Wiring](../wiring/wiring.md) now defines
 reference-aware type resolution, bundle matching, candidate selection and
 minimum operator contracts (WIR-1–24); it is specified apart from the
-runtime, and the [library](../library/operators.md) holds the behaviour
-contracts.
+runtime, and the [library](../library/README.md) holds the behaviour
+contracts of library operators.
 Its Deferred section retains defaults, conditions, packs, type arguments and
 conditional wiring. Duplicate-candidate registration policy remains separate
 from ambiguity when selecting a call.

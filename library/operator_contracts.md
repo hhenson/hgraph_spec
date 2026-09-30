@@ -1,20 +1,25 @@
-Operator contracts
-==================
+Library operator contracts
+==========================
 
 Status: draft, 2026-09-24; moved from the runtime chapters to the library on
-2026-09-30 (owner). Derived while triaging the open parity issues; covers the
-operator families those issues exercised. The rest of the library remains
-open (OPEN-10, OPEN-11 in [Beyond the runtime core](../runtime/boundaries.md)).
+2026-09-30 (owner), provisionally: the standard library's specification is
+its own project ([README](README.md)). Derived while triaging the open
+parity issues; covers the operator families those issues exercised. The
+rest of the library remains open (OPEN-10, OPEN-11 in
+[Beyond the runtime core](../runtime/boundaries.md)).
 [Parity validation](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/parity/README.md) records each derivation
 against the Python 0.5.41 and C++ observations.
 
-An operator **contract** says what a library operator publishes as a
-function of its inputs. It is stated in terms of the runtime chapters: once
-wired, an operator is a node or a graph of nodes and obeys the node and
-time-series rules like any other. The library is not the runtime: nothing
-here adds a runtime concept, and a contract that needs one names the missing
-component in the runtime's points to settle. How a call selects an operator's
-candidate is [wiring](../wiring/wiring.md), not a contract.
+"Operator" in this document means a **library operator**: one of the
+operators the standard library provides, such as `union` or `format_`. A
+**contract** says what such an operator publishes as a function of its
+inputs, stated in terms of the runtime chapters: once wired, a library
+operator is a node or a graph of nodes and obeys the node and time-series
+rules like any other. How a call to it is resolved to an implementation is
+the wiring concept of an operator ([wiring](../wiring/wiring.md), Part 3)
+and is not repeated here. The library is not the runtime: nothing here
+adds a runtime concept, and a contract that needs one names the missing
+component in the runtime's points to settle.
 
 
 Admission and nil

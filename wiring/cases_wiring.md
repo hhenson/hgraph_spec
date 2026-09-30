@@ -1,225 +1,290 @@
 # Wiring cases
 
-Status: validated expectations with recorded variations; see
-[results](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/wiring/README.md). The HGL modules named below live in [runtime/validation/wiring](../runtime/validation/wiring/).
+Status: validated expectations with recorded variations; rewritten for
+clarity on 2026-09-30 with the case names, rule references and expected
+decisions unchanged. The observations are in the
+[wiring validation](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/wiring/README.md).
 
-Each case wires a small graph and observes what wiring decided: the type of
-a port (written without spaces), which candidate a call selected, whether a
-call failed, and, where the decision shows at run time, the values a node
-sees. Values are per cycle from `MIN_ST`; `—` means no publication.
+## How to read a case
 
-`_identity(ts: TIME_SERIES_TYPE) -> TIME_SERIES_TYPE` is a generic node that
-publishes its input. `_to_ref(ts: REF[TS[int]]) -> REF[TS[int]]` publishes a
-reference to its input. `tsl_to_tsd` publishes a map with a reference per
-key, the shape a `map_` output has.
+Each case describes a small graph in words, then says what wiring
+**decided** — the type of a port, which candidate a call selected, whether
+a call failed — and which rule made it decide so. Where a decision only
+shows once the graph runs, the case also gives the values a node sees, per
+cycle from the first; `—` means nothing was published that cycle.
+
+Type notation is the runtime's: `TS<i64>` is a series of integers,
+`TSL<TS<i64>, 3>` a fixed list of three, `TSD<str, TS<i64>>` a dictionary
+keyed by strings, `TSB{a: TS<i64>}` a bundle with one field, `REF<X>` a
+reference to a time-series of type `X`, and `T` a type variable. In the
+recorded runs these are hgraph's Python spellings (`TS[int]`,
+`TSD[str, REF[TS[int]]]`); the correspondence is one to one.
+
+Three helper nodes recur:
+
+| Node | Signature | What it does |
+|---|---|---|
+| `identity<T>` | `(ts: T) -> T` | publishes its input unchanged: the plainest generic node |
+| `to_ref` | `(ts: REF<TS<i64>>) -> REF<TS<i64>>` | publishes a reference to its input |
+| `to_map` | `(list: TSL<TS<i64>, 3>) -> TSD<str, REF<TS<i64>>>` | publishes a dictionary with keys `a`, `b`, `c`, each holding a *reference* to one element of the list. This is the shape a keyed nested construct's output has |
 
 ## WIRE-GENERIC-DEPTH — WIR-7, WIR-8
 
-A list of three ints, `(1, 2, 3)` then `{1: 30}`, becomes a map with keys
-`a`, `b`, `c` through `tsl_to_tsd`. A generic node shows the map's values.
+*The rule of rules: a generic binds the value type, with every reference
+removed, at every depth.*
 
-| Observation | Expected |
+**Setup.** A source publishes a list of three integers: `(1, 2, 3)` at
+cycle 0, then element 1 becomes 30 at cycle 1. `to_map` turns the list into
+`TSD<str, REF<TS<i64>>>`. That dictionary is passed to `identity<T>`.
+
+**What wiring decides.**
+
+| Question | Answer |
 |---|---|
-| The map's type | `TSD[str,REF[TS[int]]]` |
-| `_identity(map)`'s type: what the variable binds | `TSD[str,TS[int]]` |
-| What the generic node sees at 0 | `a=1,b=2,c=3` |
-| At 1 | `a=1,b=30,c=3` |
+| The type of `to_map`'s port | `TSD<str, REF<TS<i64>>>` |
+| What `T` binds when that port is passed to `identity<T>` | `TSD<str, TS<i64>>`: the references are removed, one level down |
+| The type of `identity`'s port | `TSD<str, TS<i64>>` |
 
-The variable binds the map with its element references removed. The input
-follows each reference, so it sees values, and a value tick behind a
-reference (`b` at 1) makes it modified. This is issue #847.
+**What the graph then shows.** `identity`'s input follows each reference,
+so it sees values, not references: at cycle 0 `a=1, b=2, c=3`; at cycle 1
+`a=1, b=30, c=3`, and the input reads modified at cycle 1 because a value
+behind a reference ticked.
+
+**Why.** WIR-7 removes references at every depth when a variable binds
+from an argument; WIR-8 says the generic input therefore observes values.
+(hgraph issue #847.)
 
 ## WIRE-GENERIC-TOP — WIR-7, WIR-8
 
-`_to_ref(value)` with value `1` then `2`.
+*The same rule at the top level.*
 
-| Observation | Expected |
+**Setup.** A source publishes `1` at cycle 0 and `2` at cycle 1. `to_ref`
+publishes a reference to it, and that reference is passed to `identity<T>`.
+
+| Question | Answer |
 |---|---|
-| The source's type | `REF[TS[int]]` |
-| `_identity(source)`'s type | `TS[int]` |
-| What a generic node sees at 0, 1 | `1`, `2` |
+| The type of `to_ref`'s port | `REF<TS<i64>>` |
+| What `T` binds | `TS<i64>` |
+| What `identity` sees at cycles 0 and 1 | `1`, then `2` |
 
 ## WIRE-REF-PATTERN — WIR-10
 
-A node declares `ts: REF[TIME_SERIES_TYPE]`.
+*A reference in the pattern is how a node asks for one.*
 
-| Observation | Expected |
-|---|---|
-| Its output `REF[TIME_SERIES_TYPE]`, given the map above | `REF[TSD[str,TS[int]]]` |
-| Given a plain `TS[int]`, does it receive a reference? | yes |
+**Setup.** A node `holds<T>` declares its input as `ts: REF<T>` and its
+output as `REF<T>`.
 
-The variable binds beneath the declared reference; below it, references are
-removed. Given a value output, the declared reference input receives a
-reference to it.
+| Call | What `T` binds | The output type |
+|---|---|---|
+| `holds(to_map(...))`, the dictionary of references above | `TSD<str, TS<i64>>`: beneath the declared reference, then references removed | `REF<TSD<str, TS<i64>>>` |
+| `holds(source)`, a plain `TS<i64>` | `TS<i64>` | `REF<TS<i64>>`; the input receives a reference to the source, since a reference and its target are interchangeable at a binding |
+
+**Why.** WIR-10: the variable binds beneath the pattern's reference;
+below that, references are removed as for any argument.
 
 ## WIRE-STATED — WIR-11
 
-`_identity` with its variable stated before matching.
+*A caller who states the binding keeps the references.*
 
-| Observation | Expected |
-|---|---|
-| Stated `TSD[str, REF[TS[int]]]`, given the map above | `TSD[str,REF[TS[int]]]` |
-| Stated `REF[TS[int]]`, given `_to_ref(value)` | `REF[TS[int]]` |
+**Setup.** `identity<T>` is called with `T` stated before matching.
+
+| Stated `T` | Argument | Result |
+|---|---|---|
+| `TSD<str, REF<TS<i64>>>` | the dictionary of references | wires; `T` stays as stated, references and all |
+| `REF<TS<i64>>` | `to_ref(source)` | wires; `T` stays `REF<TS<i64>>` |
+
+**Why.** WIR-11: a stated resolution is kept, references included, and an
+argument matches it as supplied or with its references removed.
 
 ## WIRE-REQUESTED — WIR-12
 
-`nothing` produces an output of the requested type and never ticks. Its
-output pattern is a bare variable.
+*A requested output type is honoured as written.*
 
-| Observation | Expected |
+**Setup.** `nothing` is a source whose output pattern is a bare variable;
+it publishes nothing and exists so that a caller can ask for an output of
+a given type.
+
+| Requested output | The port's type |
 |---|---|
-| `nothing[TSD[str, REF[TS[int]]]]` | `TSD[str,REF[TS[int]]]` |
-| `nothing[REF[TS[int]]]` | `REF[TS[int]]` |
-| `nothing[TSD[str, TS[int]]]` | `TSD[str,TS[int]]` |
+| `TSD<str, REF<TS<i64>>>` | `TSD<str, REF<TS<i64>>>` |
+| `REF<TS<i64>>` | `REF<TS<i64>>` |
+| `TSD<str, TS<i64>>` | `TSD<str, TS<i64>>` |
+
+**Why.** WIR-12: a variable that is the whole output pattern binds the
+requested type with its references kept.
 
 ## WIRE-PROJECTION — WIR-5, WIR-13
 
-A node's declared output is a bundle with fields `routed: REF[TS[int]]` and
-`plain: TS[int]`. The graph returns `routed` as a `TS[int]`; the input
-publishes `1` then `2`.
+*Selecting a known part of a port adds no node and keeps the declared
+type.*
 
-| Observation | Expected |
+**Setup.** A node publishes a bundle `TSB{routed: REF<TS<i64>>, plain:
+TS<i64>}`. A graph selects the `routed` field, by index, by name and by
+attribute spelling, and returns it as its own `TS<i64>` output. The source
+behind `routed` publishes `1` at cycle 0 and `2` at cycle 1.
+
+| Selection | Type of the selected part |
 |---|---|
-| `bundle["routed"]` | `REF[TS[int]]` |
-| `bundle.routed` | `REF[TS[int]]` |
-| `getattr_(bundle, "routed")` | `REF[TS[int]]` |
-| `bundle["plain"]` | `TS[int]` |
-| The graph's output at 0, 1 | `1`, `2` |
+| `bundle["routed"]` | `REF<TS<i64>>` |
+| `bundle.routed` | `REF<TS<i64>>` |
+| `getattr(bundle, "routed")` | `REF<TS<i64>>` |
+| `bundle["plain"]` | `TS<i64>` |
 
-Each spelling selects a field known at wiring: a projection, with no node
-and no variable. The graph's `TS[int]` output follows the projected
-reference.
+The graph's `TS<i64>` output shows `1` then `2`: an output declared as a
+value, bound to a reference, follows it.
+
+**Why.** WIR-5: a part known while describing is a structural projection,
+with no node and no variable. WIR-13: a field declared as a reference
+stays a reference.
 
 ## WIRE-PROJECTION-THROUGH-REF — WIR-5
 
-`if_(condition, value)` publishes a reference to a bundle of references.
-`condition` is true then false; `value` is `1` then `2`.
+*A part beneath a reference is not known until the graph runs.*
 
-| Observation | Expected |
+**Setup.** A routing node `if_(condition, value)` publishes a reference to
+a bundle of references: which bundle it designates depends on the
+condition. The graph selects the `true` field of that output. The condition
+is true at cycle 0 and false at cycle 1; `value` is `1` then `2`.
+
+| Question | Answer |
 |---|---|
-| `if_(...)["true"]` | `REF[TS[int]]` |
-| The graph's `TS[int]` output at 0, 1 | `1`, `—` |
+| The type of the selected part | `REF<TS<i64>>`, published by a node that wiring adds for the purpose |
+| The graph's `TS<i64>` output at cycles 0 and 1 | `1`, then `—` |
 
-The field beneath a reference is known only at run time, so a node
-publishes a reference to it. When the condition turns false the field's
-reference becomes empty: the follower unbinds, which does not tick (TS-15,
-TS-17).
+At cycle 1 the condition turns false, the selected field's reference
+becomes empty, and the follower unbinds. Unbinding is not a tick (TS-15,
+TS-17), so nothing is published.
+
+**Why.** WIR-5: beneath a reference the part is known only at run time, so
+selecting it adds a node that publishes a reference to it.
 
 ## WIRE-SPECIFICITY — WIR-16, WIR-18
 
-An operator `_pick` has three candidates: `TS[int]` returning `"int"`,
-`TIME_SERIES_TYPE` returning `"generic"`, and `TSL[TIME_SERIES_TYPE, SIZE]`
-returning `"tsl-generic"`.
+*The most specific matching candidate wins.*
 
-| Call | Expected |
+**Setup.** An operator `pick` has three candidates, each publishing a label
+that says which one ran:
+
+| Candidate's parameter | Publishes |
 |---|---|
-| `_pick(TS[int])` | `int` |
-| `_pick(TS[float])` | `generic` |
-| `_pick(TSL[TS[int], Size[2]])` | `tsl-generic` |
-| `_pick(REF[TS[int]])` | `int` |
+| `TS<i64>` | `"int"` |
+| `T` (any time-series) | `"generic"` |
+| `TSL<T, n>` (a list of any time-series, any size) | `"list-generic"` |
 
-A concrete candidate beats a variable, a variable inside a list beats a bare
-one, and a reference adds no specificity.
+| Call | Selected |
+|---|---|
+| `pick(TS<i64>)` | `"int"`: a concrete type beats a variable |
+| `pick(TS<f64>)` | `"generic"`: only the variable matches |
+| `pick(TSL<TS<i64>, 2>)` | `"list-generic"`: a variable inside a structure beats a bare one |
+| `pick(REF<TS<i64>>)` | `"int"`: a reference adds no specificity and matches as its target |
 
 ## WIRE-FAILURES — WIR-4, WIR-16
 
-| Call | Expected |
+*A call that cannot be resolved fails there, and fails the graph.*
+
+| Situation | Result |
 |---|---|
-| An operator with two `TS[int]` candidates, called with `TS[int]` | fails (ambiguous) |
-| An operator with only a `TS[int]` candidate, called with `TS[str]` | fails (no candidate) |
+| An operator with two candidates that both take `TS<i64>`, called with `TS<i64>` | fails: ambiguous, and the error names both |
+| An operator `only_int` with one candidate taking `TS<i64>`, called with `TS<str>` | fails: no candidate |
 
-A graph `failing_outer` calls a graph `_failing_inner`, which calls that
-operator, `_only_int`, with `TS[str]`. The graph fails to wire, and the
-error says:
+**The error's content.** A graph `outer` calls a graph `inner`, which makes
+the failing call to `only_int` with a `TS<str>`. The error names: the
+operator as its author declared it (`only_int`); the argument's type
+(`TS<str>`); the candidate's parameter type (`TS<i64>`); and the path of
+graph calls that led there (`outer`, then `inner`).
 
-| Observation | Expected |
-|---|---|
-| The operator, as declared (`_only_int`) | named |
-| The argument's type, `TS[str]` | named |
-| The candidate's parameter type, `TS[int]` | named |
-| The graph path, `failing_outer` then `_failing_inner` | named |
-
-A graph `g` calls a graph `attempt`, which adds a node and then makes that
-failing call. `g` catches the error and returns its input instead.
-
-| Observation | Expected |
-|---|---|
-| Wiring `g` | fails: a caught failure still fails the graph |
+**A caught failure.** A graph `g` calls a graph `attempt`, which adds a
+node and then makes the failing call; `g` catches the error and returns its
+own input instead. Describing `g` still fails: what `attempt` already added
+cannot easily be undone, so the session is failed (WIR-4).
 
 ## WIRE-REPEATED — WIR-7, WIR-17
 
-A node `_same(a: TIME_SERIES_TYPE, b: TIME_SERIES_TYPE)`.
+*A variable that appears twice binds once.*
 
-| Call | Expected |
+**Setup.** A node `same<T>(a: T, b: T)`.
+
+| Call | Result |
 |---|---|
-| `_same(REF[TS[int]], TS[int])` | wires; the variable binds `TS[int]` once |
-| `_same(TS[int], TS[float])` | fails |
+| `same(REF<TS<i64>>, TS<i64>)` | wires: the first argument binds `T` to `TS<i64>` with its reference removed, and the second is the same type |
+| `same(TS<i64>, TS<f64>)` | fails: the second argument does not match the bound `T` |
 
 ## WIRE-BUNDLE-IDENTITY — WIR-15, WIR-17
 
-`Foo` and `Bar` are named bundles with the same single field `a: TS[int]`;
-`{a: TS[int]}` is an unnamed bundle with that field. `_same(a: T, b: T)` is
-the repeated-variable node above; `_takes_foo` and `_takes_unnamed` declare
-a `Foo` and an unnamed input.
+*Fields decide, unless both bundles are named.*
 
-| Call | Expected |
+**Setup.** `Foo` and `Bar` are named bundle types with the same single
+field `a: TS<i64>`; `{a}` denotes an unnamed bundle with that field. Nodes:
+`same<T>(a: T, b: T)` as above; `takes_foo(x: Foo)`; `takes_unnamed(x: {a})`.
+
+| Call | Result | Because |
+|---|---|---|
+| `same(Foo, {a})` | wires | one is unnamed, so fields decide |
+| `same(Foo, Foo)` | wires | same named type |
+| `same(Foo, Bar)` | fails | both named, different names |
+| `takes_foo({a})` | wires | an unnamed bundle matches a named one by its fields |
+| `takes_unnamed(Foo)` | wires | likewise |
+| `takes_foo(Bar)` | fails | both named, different names |
+
+**Field order.** `Pair` is a named bundle with fields `a` then `b`, both
+`TS<i64>`; `Riap` a named bundle with the same fields declared `b` then `a`;
+`{b, a}` the unnamed bundle with those fields. Sources publish `a = 1` and
+`b = 2`; `takes_pair` and `takes_ba` each publish `a * 10 + b`, so a wrong
+pairing would show.
+
+| Call | Result |
 |---|---|
-| `_same(Foo, {a})` | wires: one is unnamed, so fields decide |
-| `_same(Foo, Foo)` | wires |
-| `_same(Foo, Bar)` | fails: both named, different names |
-| `_takes_foo({a})` | wires |
-| `_takes_unnamed(Foo)` | wires |
-| `_takes_foo(Bar)` | fails |
-
-Field order. `Pair` is a named bundle with fields `a: TS[int]` and
-`b: TS[int]`; `Riap` is a named bundle with the same fields declared `b`
-then `a`, and `{b, a}` an unnamed one. The sources publish `a = 1`, `b = 2`;
-`_takes_pair` and `_takes_ba` publish `a * 10 + b`.
-
-| Call | Expected |
-|---|---|
-| `_takes_pair({b, a})` | wires, and publishes `12`: fields pair by name |
-| `_takes_ba(Pair)` | wires, and publishes `12` |
-| `_same(Pair, {b, a})` | wires |
-| `_takes_pair(Riap)` | fails: both named, different names |
+| `takes_pair({b, a})` | wires and publishes `12`: fields pair by name, not position |
+| `takes_ba(Pair)` | wires and publishes `12` |
+| `same(Pair, {b, a})` | wires |
+| `takes_pair(Riap)` | fails: both named, different names |
 
 ## WIRE-OPERATOR-CONTRACT — WIR-21 to WIR-24
 
-Four operators and their candidates. `_declares_generic(ts: T)` has one
-candidate, `(ts: TS[int], scale: int = 2)`, with a parameter the operator
-does not declare. `_refinable(ts: T)` has one candidate accepting only
-`TS[int]`. `_needs_extra(ts: T)` has a fallback candidate `(ts: T)` and one
-registered here, `(ts: TS[int], scale: int)`, whose extra parameter has no
-default. `_declares_int(ts: TS[int])` gets a candidate accepting any
-`TIME_SERIES_TYPE`.
+*A candidate may extend and narrow its operator, never widen it.*
 
-| Call | Expected |
+**Setup.** Four operators, each with the candidates shown. Every candidate
+publishes a label so that the selection is visible.
+
+| Operator, as declared | Candidates |
 |---|---|
-| `_declares_generic(TS[int])` | `extra 2`: the extra parameter's default (WIR-22) |
-| `_declares_generic(TS[int], scale=5)` | `extra 5`: the call supplies it (WIR-22) |
-| `_refinable(TS[int])` | `refined`: a narrower candidate is selected (WIR-23) |
-| Registering `(ts: TS[int], scale: int)` | registered: no default is needed (WIR-22) |
-| `_needs_extra(TS[int])` | `fallback`: the scaled candidate requires `scale` and does not match |
-| `_needs_extra(TS[int], scale=3)` | `scaled 3`: both match; `TS[int]` is more specific |
-| Registering the wider candidate for `_declares_int` | rejected (WIR-23, WIR-24) |
-| `_declares_int(TS[float])` | fails: no candidate remains |
+| `declares_generic(ts: T)` | one: `(ts: TS<i64>, scale: i64 = 2)`, with a parameter the operator does not declare and a default |
+| `refinable(ts: T)` | one: `(ts: TS<i64>)`, narrower than the operator |
+| `needs_extra(ts: T)` | two: a fallback `(ts: T)`, and `(ts: TS<i64>, scale: i64)` whose extra parameter has no default |
+| `declares_int(ts: TS<i64>)` | a candidate `(ts: T)` is offered for registration: wider than the operator |
 
-The HGL modules [contract_superset.hgl](../runtime/validation/wiring/contract_superset.hgl)
-and [contract_required_extra.hgl](../runtime/validation/wiring/contract_required_extra.hgl)
-declare an implementation with a `const scale` parameter its operator does
-not declare, with and without a default; HGL must accept both (WIR-22).
-[contract_extra_argument.hgl](../runtime/validation/wiring/contract_extra_argument.hgl)
-passes `scale: 5.0` through the operator's call; HGL must accept it.
-[contract_widening.hgl](../runtime/validation/wiring/contract_widening.hgl) is a wider
-implementation; HGL must reject it (WIR-23, WIR-24).
+| Action | Result | Rule |
+|---|---|---|
+| `declares_generic(TS<i64>)` | publishes `extra 2`: the undeclared parameter takes its default | WIR-22 |
+| `declares_generic(TS<i64>, scale = 5)` | publishes `extra 5`: the call supplied it | WIR-22 |
+| `refinable(TS<i64>)` | publishes `refined`: the narrower candidate is selected | WIR-23 |
+| registering `(ts: TS<i64>, scale: i64)` for `needs_extra` | accepted: a candidate may require what the operator does not declare | WIR-22 |
+| `needs_extra(TS<i64>)` | publishes `fallback`: the candidate that requires `scale` does not match a call without it | WIR-22 |
+| `needs_extra(TS<i64>, scale = 3)` | publishes `scaled 3`: both match, and `TS<i64>` is more specific than `T` | WIR-18, WIR-22 |
+| registering the wider candidate for `declares_int` | rejected | WIR-23, WIR-24 |
+| `declares_int(TS<f64>)` | fails: no candidate remains | WIR-16 |
+
+The HGL modules under [runtime/validation/wiring](../runtime/validation/wiring/)
+state the same expectations for the HGL front end: an implementation with a
+`const scale` parameter its operator does not declare, with a default
+([contract_superset.hgl](../runtime/validation/wiring/contract_superset.hgl))
+and without ([contract_required_extra.hgl](../runtime/validation/wiring/contract_required_extra.hgl)),
+must be accepted; an argument passed through the operator's call for such
+a parameter ([contract_extra_argument.hgl](../runtime/validation/wiring/contract_extra_argument.hgl))
+must be accepted; a wider implementation
+([contract_widening.hgl](../runtime/validation/wiring/contract_widening.hgl))
+must be rejected.
 
 ## WIRE-FRONT-END — WIR-14, WIR-7
 
-The HGL module [front_end.hgl](../runtime/validation/wiring/front_end.hgl) calls a
-generic `pass<T>(value: T) -> T` with the argument types above. HGL must
-bind as the runtime does.
+*Every front end binds as the shared rules say.*
 
-| Call | Expected binding of `T` |
+**Setup.** The HGL module [front_end.hgl](../runtime/validation/wiring/front_end.hgl)
+declares a generic `pass<T>(value: T) -> T` and calls it with the argument
+types below. The compiler resolves these calls itself, and must reach the
+bindings the runtime would.
+
+| Argument type | `T` must bind |
 |---|---|
-| `pass(value)`, `value: ref<f64>` | `f64` |
-| `pass(values)`, `values: list<ref<f64>, 2>` | `list<f64, 2>` |
+| `ref<f64>` | `f64` |
+| `list<ref<f64>, 2>` | `list<f64, 2>` |

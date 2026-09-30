@@ -6,13 +6,19 @@ computes from its scalars and inputs.
 
 ## SCALAR-IDENTITY — VAL-2, VAL-3, VAL-4, VAL-5
 
+Two types are the same type when a value of one may be used wherever a
+value of the other is expected: as a node's scalar, as an element of a
+set, as the value carried by a time-series bound to an input declared
+with the other. Where the table says "two types", no such substitution is
+admitted in either direction.
+
 | Declaration | Result |
 |---|---|
-| The struct `Quote{bid: f64, ask: f64}` declared twice, in two places | one type: an output of one binds to an input of the other |
-| `Quote` and `Level{bid: f64, ask: f64}` | two types: the binding is refused |
-| A tuple `(f64, f64)` and a tuple `(f64, f64)` | one type |
-| `Box<i64>` and `Box<f64>` | two types, neither a subtype of the other |
-| `Quote` re-declared with a third field | an error, not a third type |
+| The struct `Quote{bid: f64, ask: f64}` declared twice, in two places | one type: a `Quote` from either declaration is a `Quote` |
+| `Quote` and `Level{bid: f64, ask: f64}`, same fields, different names | two types: a `Quote` is not a `Level`, and a `Level` is not a `Quote`, although their fields coincide (VAL-3) |
+| A tuple `(f64, f64)` and a tuple `(f64, f64)` | one type: a tuple's identity is its positions' types |
+| `Box<i64>` and `Box<f64>` | two types, and neither may stand in for the other (VAL-4) |
+| `Quote` re-declared with a third field | an error, not a third type (VAL-5) |
 
 ## SCALAR-CAPABILITIES — VAL-9, VAL-10, VAL-11
 

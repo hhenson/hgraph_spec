@@ -365,7 +365,7 @@ Beside the runtime, and not part of it:
 | Specification | File | State |
 |---|---|---|
 | Wiring | [../wiring/wiring.md](../wiring/wiring.md) | first draft; type resolution validated |
-| Library operator contracts | [../library/operators.md](../library/operators.md) | draft, parity-derived families |
+| Library operator contracts | [../library/operator_contracts.md](../library/operator_contracts.md) | draft, parity-derived families; a provisional home |
 
 Cases and supporting notes:
 
@@ -407,7 +407,7 @@ Outside the runtime: wiring (calls and ports, type and operator resolution:
 (HGL's source semantics are in its own documentation; where they resolve a
 call they follow Wiring, WIR-14); the library built on the nested-graph
 operations (map, switch, reduce, mesh, try/except, feedback as an operator)
-and the rest of the operator library ([../library/](../library/operators.md));
+and the rest of the operator library ([../library/](../library/README.md));
 services, adaptors and contexts; language bridges; distribution.
 Checkpointing and recovery, recording and replay are optional runtime
 behaviour ([Conformance](conformance.md)) and are not yet specified.
@@ -495,6 +495,7 @@ Vocabulary
 | Valid | The endpoint supplies a value under its shape and binding rules. An owned output has a last modified time other than *never* |
 | View / copy | A view is a read-only look at a value someone else owns, stable for the cycle. A copy is an independent value, and the only way to keep one beyond the cycle |
 | Wiring | The phase in which a graph is described, specified in [../wiring/wiring.md](../wiring/wiring.md). Nothing is instantiated and nothing can tick |
+| Operator | In wiring: a name resolved to one of several implementations at each call. A *library operator* is one the standard library provides; what it publishes is a [library contract](../library/README.md). Neither is a runtime concept: after wiring there are only nodes |
 | Builder | The runtime's representation of its own interface: what wiring produces and the runtime instantiates from |
 
 

@@ -37,7 +37,7 @@ The runtime begins where wiring ends: at the builder boundary.
    cases_scalar
    wiring <../wiring/wiring.md>
    wiring cases <../wiring/cases_wiring.md>
-   library operator contracts <../library/operators.md>
+   library operator contracts <../library/operator_contracts.md>
    validation <https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation.md>
    validation/README <https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/README.md>
    validation/fixed/README <https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/fixed/README.md>

@@ -400,7 +400,7 @@ owner 2026-09-30): a reference designates an output that must already have
 been evaluated when the consumer reads through it (TS-20), and a source
 ranked before the designated output cannot promise that. A feedback of a
 reference type is refused when the graph is described. The feedback operator
-itself is library ([../library/](../library/operators.md)).
+itself is a library operator ([../library/](../library/README.md)).
 
 
 Rules
