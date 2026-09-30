@@ -1,12 +1,8 @@
 # ADR 0008: temporal programming, value functions, and target mappings
 
-Status: accepted design direction; local fixed-arity `const fn`, role selection,
-and default lifting are implemented. Generic/pack value functions and exported
-value-function descriptors remain follow-up work. The cache concept and lifecycle
-are agreed; its complete declaration syntax, native-type lifecycle syntax, and
-target-mapping syntax remain open. Cache and target examples below remain
-design material; executable value-function examples live in
-[`value-functions.hgl`](https://github.com/hhenson/hgraph/blob/main/language/tests/codegen/value-functions.hgl).
+Status: accepted design direction. Value-function roles, cache semantics and
+native target contracts are defined below. Unresolved syntax is identified
+separately from agreed behavior.
 
 ## Context
 
@@ -17,9 +13,8 @@ types with explicit lifetime operations. An alternative C++ engine should be
 able to share some mappings while replacing others; a future Rust or Zig
 target may require different representations entirely.
 
-This is a language design decision, not authorization to implement another
-runtime inside the compiler. The current target remains the public C++ hgraph
-SDK, including its type, operator, lifecycle, and record/replay semantics.
+A target preserves the shared type, operator, lifecycle and record/replay
+contracts independently of its native language or storage representation.
 
 ## HGL is a temporal programming language
 
@@ -72,7 +67,7 @@ the function is non-temporal.
 
 ### HGL example and C++ expectation
 
-The following uses the implemented local `const fn` spelling:
+The following uses `const fn`:
 
 ```hgl
 const fn scale(value: f64, factor: f64) -> f64 =>
@@ -128,28 +123,10 @@ required. The harness does not implement a second scheduling policy.
 
 ### Compiler layering
 
-The AST preserves function-level constness separately from parameter constness.
-Typed HIR selects the execution role and records a declaration-order input
-mask only for calls requiring lifting. It also propagates native execution
-phase restrictions through value-call dependencies, independently of source
-order. A value parameter is not permission to read temporal metadata or pass
-an endpoint to a native input-view parameter.
+An implementation could resolve execution roles and lifting before native
+emission. The checked call must retain argument binding, capabilities and
+result type; the emitter must not reselect a different contract.
 
-Hgraph IR owns `ValueFunction` as a distinct callable kind. Lowering interns
-one internal runtime adapter per target/mask, with ordinary parameter bindings,
-an ordinary activation block, and a value-call result. Both the scripted
-harness and AOT emitter consume those same adapters. Neither emitter nor
-runtime performs overload selection per tick. The C++ representation is a
-plain value helper, called by a small generated static node when lifted.
-
-This implementation supports module-local, fixed-arity, non-generic value
-functions, defaults, named/positional calls, and immediate `const(function)`
-selection with scalar parameter/result types (or a void result). Structural
-value signatures are rejected during checking until their runtime-value and
-ownership conversions are implemented; schema markers are not payload types.
-Generic/pack value functions are diagnosed explicitly. Public
-value-function descriptors, modifier combinations, native-family migration,
-and general first-class callable storage are not implied by this slice.
 
 ### Operators and native implementations
 
@@ -246,15 +223,10 @@ there only if its recordability contract is supplied. Opaque native storage
 does not remove this distinction. Cache is also not a blanket permission to
 own external resources or introduce I/O outside a native lifecycle contract.
 
-A node may need both recordable history and a derived cache. The
-[C++ static-node API](https://github.com/hhenson/hgraph/blob/main/include/hgraph/types/static_node.h) supports one
-`State` and one `RecordableState` together, with independent planned storage.
-Checkpoint restoration precedes `start`, which rebuilds the fresh cache. HGL
-scalar cache declarations, aggregation and mixed state/cache lowering are
-implemented; generic native cache construction remains separate implementation
-work. Shared graph-IR admission no longer rejects the mixed HGL case: a function
-may declare both, and the generated node carries one `RecordableState` and one
-`State` with independent planned storage.
+A node may declare both recordable history and a derived cache. Restoration
+precedes `start`; cache rebuilding uses the restored state. Their storage may
+be planned independently, but that choice must not change initialization order
+or observable recovery behavior.
 
 For **HGL-MIG-005**, this settles the reconstructible-cache distinction, not
 generic recordable-state construction. Non-default-constructible generic
@@ -323,44 +295,13 @@ handling, and cleanup need explicit contracts. Their source spelling remains
 open. Node `start`/`stop` hooks and type construction/destruction are separate
 layers, even when both ultimately call native functions.
 
-## Implementation boundary and next work
+## Target boundary
 
-The existing [descriptor model](https://github.com/hhenson/hgraph/blob/main/language/include/hgl/native_package.h)
-already records native type categories, phase,
-effect, and ownership information, but its `cpp_type`, `cpp_symbol`, headers,
-and build metadata describe the current C++ target. It is a starting point,
-not a completed target-mapping system. The exploratory runtime-contract
-prototype in [PR #796](https://github.com/hhenson/hgraph/pull/796) is related
-design input; this decision neither adopts its entire provisional syntax nor
-claims a specification parser or generator exists.
+A target binding preserves the language contract: execution role, type,
+ownership, effects, capabilities and lifetime. It may choose native types,
+symbols and storage without changing those obligations. A new target requires
+independent validation of the same acceptance scenarios.
 
-Extend the existing typed HIR and hgraph semantic IR boundaries deliberately.
-Represent execution roles and required capabilities before emission; perform
-target-specific realization through an explicit mapping boundary. Emitters
-must not invent language semantics or reimplement resolution. The current
-compiler remains hgraph-specific; another engine or language requires a
-separately validated target integration, not just a different output suffix.
-
-Suggested bounded implementation order, not additional syntax decisions:
-
-1. Define execution-role metadata and `const fn` checking/lowering, including
-   value results and diagnostics for illegal cross-phase calls. Settle modifier
-   combinations and compatibility with existing native declarations.
-2. Settle cache declarations and native type-construction contracts. Add the
-   public C++ path for a node containing both state categories, with pre-`start`
-   construction and restart/teardown coverage.
-3. Specify requirements and target mappings with one native cache type and one
-   operator having value-level and temporal implementations. Separate logical
-   identity from target compatibility metadata.
-4. Probe mapping reuse with an alternative C++ engine and portability with a
-   Rust or Zig realization. Use the same semantic conformance scenarios; do
-   not claim backend support from a specification-only example.
-
-Acceptance must cover current-value versus wiring-value calls, no accidental
-temporal lifting, domain-specific operator selection, construction before
-`start`, cache reconstruction after restore, partial initialization cleanup,
-borrowed/REF lifetime rejection, and missing-capability diagnostics. Changes
-to runtime behavior require native C++ tests and matching Python coverage
-where exposed. The local value-function slice has HGL execution and public
-C++ wiring tests; the remaining cache and target-mapping extensions are not
-implemented by it.
+Acceptance covers call phase, lifting, operator selection, construction before
+`start`, cache rebuilding after restore, cleanup on abort, borrowing and REF
+lifetimes, and missing-capability diagnostics.

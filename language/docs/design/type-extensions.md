@@ -1,13 +1,7 @@
 # Imported values, reference types, `signal` inputs, and enums
 
-Status: agreed source semantics, 2026-09-05; explicit `ref<T>` parsing, type
-checking, metadata, descriptors, and generated reference-routing nodes are
-implemented. The lowercase `signal` input marker is also implemented through
-parsing, semantic checking, descriptor validation, direct-wiring type
-materialization, generated C++, and scripted runtime behavior tests.
-Wiring-time access through a reference and imported native types remain
-compiler work. A map of references, `map<K, ref<V>>`, is settled and
-implemented (below). This record introduces no native declaration syntax.
+Status: agreed source semantics. Reference access and native type mapping
+questions are identified below. This record introduces no native declaration syntax.
 
 ## Enum types
 
@@ -22,7 +16,7 @@ constant switch case values. Duplicate resolved switch cases are rejected;
 covering all declared members establishes exhaustiveness, while partial
 switches remain permitted with the existing no-match failure. String conversion
 uses the agreed Python-style `str(value)` spelling. Remaining conversion details and native
-mapping are still open; compiler support is not implemented.
+mapping are still open.
 
 The agreed declaration form is:
 
@@ -230,18 +224,12 @@ Checked conversion timing for constant, wiring-time, and temporal operands is
 agreed above; it is not an open phase decision. Native representation and
 import-boundary work must preserve those semantics.
 
-The existing native [enum registration contract](https://github.com/hhenson/hgraph/blob/main/include/hgraph/types/metadata/type_registry.h)
-accepts an ordered member-name/assigned-integer table. Its
-[enum value operations](https://github.com/hhenson/hgraph/blob/main/src/hgraph/types/metadata/type_registry.cpp)
-currently stringify a known number using its member name, and fall back to
-numeric text for an unknown number. This is native implementation context,
-not an agreement that HGL admits unknown enum values or must use that fallback.
-HGL must reject duplicate member numbers before registering the table; native
-registration is not a substitute for that source check.
+Enum registration preserves the ordered member names and assigned integers.
+Duplicate numbers and unknown members are rejected by the language rules;
+a native representation must not broaden the admitted enum values.
 
 No implicit integer conversion, flag-enum behaviour, or exemption from
-no-match failure is introduced by this agreement. Enum declarations and these
-design fixtures remain outside the implemented compiler surface.
+no-match failure is introduced by this agreement.
 
 ## Imported types are atomic values
 
@@ -325,8 +313,6 @@ reaches for the same call.
   declared signatures exactly; it infers nothing.
 
 A generic therefore sees a reference only where its signature writes `ref`.
-The compiler's inference is `GenericSubstitution::infer_from_argument` and
-`infer_from_result`; exact comparison is `unify`.
 
 ## Node access and ticks
 
@@ -417,10 +403,6 @@ This permits graph composition to select fields or collection elements through
 reference-backed sources while preserving the node-level access restriction.
 Reference binding and adaptation belong to the existing hgraph runtime.
 
-This is not implemented in composition bodies yet. The compiler currently
-rejects field or index access through `ref<T>` in every phase rather than
-silently reading a value. Simple reference forwarding and normal hgraph
-endpoint adaptation are supported.
 
 ## `signal` inputs
 
@@ -445,7 +427,7 @@ The source spelling is lowercase `signal`. It is a contextual type marker that
 is legal only as the complete type of a non-`const` function or operator
 parameter. It cannot be nested, used as a field or result, declared `const`, or
 given a default value. Uppercase `SIGNAL` remains unknown in HGL. The generated
-C++ schema spelling is `hgraph::SIGNAL`.
+native schema representation is an implementation choice.
 
 `signal` is primarily meaningful inside a node, where those observation
 operations can control evaluation. Graph functions may also accept `signal`
@@ -466,14 +448,9 @@ during the discussion, `REF[TSD[int, REF[TS[str]]]]`, is withdrawn. As with
 `list<ref<T>, S>`, the map is outside the reference boundary and each value
 is an opaque reference.
 
-The compiler still rejects a nested `ref<ref<T>>` boundary instead of
-relying on native REF normalization; that is a fail-closed implementation
-boundary, not a source-level decision.
 
 ## Scope of this agreement
 
 This record does not settle native declaration syntax, reference construction
 or mutation operations, or additional restrictions on reference placement.
-Those remain separate discussion items. Implemented
-reference forms are exercised by `examples/reference-routing.hgl`; unresolved
-forms continue to fail closed.
+Those remain separate discussion items.

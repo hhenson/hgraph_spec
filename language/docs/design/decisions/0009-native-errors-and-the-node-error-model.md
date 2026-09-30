@@ -1,8 +1,6 @@
 # ADR 0009: native functions may raise, under hgraph's node error model
 
-Status: accepted. Implemented for source-defined and imported evaluation-time
-native functions (`throws`, descriptor policy `translated`), and used by the
-first checked kernels in `hgraph.native` (power, shifts).
+Status: accepted.
 
 ## Context
 

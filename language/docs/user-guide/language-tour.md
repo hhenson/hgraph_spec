@@ -47,7 +47,7 @@ overload family.
 The concise `=> expression` form is useful for a single-expression function.
 A block uses its final expression as its result. Explicit `return` is an early
 exit: in a composition function the rest of the body becomes the continuation
-of the path that did not return, in both backends
+of the path that did not return
 ([Functions](functions.md#conditional-control-flow)).
 
 `tob[0]` and `tob[1]` are source operations over a temporal value. They do not

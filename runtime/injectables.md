@@ -293,11 +293,5 @@ Points to settle
    cannot be told apart. Adding `lag` to HGL's `clock` is a language
    extension, so it lands in hgraph first.
 
-Sources
--------
-
-In hgraph: `docs/source/developer_guide/architecture.rst` (clock, engine
-control, run logger); `user_guide/cpp/authoring_nodes.rst` (what a node may
-request); `include/hgraph/runtime/node_scheduler.h` and `executor.h`; HGL's
-`language-model.md` (`inject`) and ADR 0010 (the clock and scheduler
-surfaces).
+Implementation source references are recorded in the
+[audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes).

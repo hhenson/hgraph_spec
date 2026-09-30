@@ -90,33 +90,17 @@ Its second tick uses the retained `value`, and the third uses the retained
 `eval(scale, ...)` tests the temporal definition when present. For a name with
 only a `const fn`, the wrapper is unnecessary. At least one argument must be a
 tick sequence when evaluating a value function; use a direct call/assertion to
-test an all-scalar invocation. The current harness recognizes sequence literals
+test an all-scalar invocation. The harness recognizes sequence literals
 as temporal inputs and scalar expressions as configuration; its existing
 structural replay limitations remain in force.
 
-## Current implementation boundary
+## Value-function boundary
 
-Local, non-generic, fixed-arity `const fn` declarations, positional/named calls,
-scalar defaults, direct value calls, same-name role selection, automatic lifting,
-and `const(function)` selection are implemented for compiled packages and scripted execution on Unix. The executable fixture is
-[`value-functions.hgl`](https://github.com/hhenson/hgraph/blob/main/language/tests/codegen/value-functions.hgl), with matching
-public C++ wiring tests.
 
-Value-function signatures currently accept scalar value types, with `void`
-also allowed as a result. Structural parameters and results, including tuples,
-collections, and structs, are rejected
-during checking. This restriction also applies to explicitly `const` parameters.
-Value helpers may call later declarations, but recursive calls are not supported.
+Value functions compute with scalar values rather than time-series ports.
+Structural and generic value-function forms require defined type and lifetime
+contracts; an implementation must diagnose forms it cannot represent.
 
-Value bodies use the supported value expressions and runtime statements.
-Tuple/list literals, constant field access, and `if` used as a runtime value
-remain restricted.
-
-Generic and parameter-pack value functions are explicitly diagnosed, not
-silently emitted as incomplete templates. Exported HGL value-function descriptors
-and `impl const fn` still need separate integration. `native const fn` value
-contracts, including imported overloads, follow the same value-call rules.
-Legacy inline native declarations still require explicit migration.
 
 A value function cannot declare `when`, node state or lifecycle hooks, or inject
 its own output or scheduler. It may `inject logger` or `inject clock` from its

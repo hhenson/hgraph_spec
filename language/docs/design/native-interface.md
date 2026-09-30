@@ -1,130 +1,29 @@
 # Native interface
 
-Status: accepted boundary; descriptor validation, native declaration metadata,
-canonical fingerprints, the lifecycle ABI, explicit descriptor authoring,
-source-defined inline C++ value/view functions, exact canonical-value,
-overloaded collection-input-view, and payload-erased input-view evaluation
-calls in AOT modules implemented; opaque state and external scripted dependency
-loading remain
+Status: accepted native boundary. Target-specific authoring and ABI details
+belong to implementation documentation.
 
-The agreed replacement authoring model is [ADR 0014](decisions/0014-native-implementation-interfaces.md):
-shared declarations, generated C++ adapters/Rust traits and implementations in
-native source. `native` preserves ordinary temporal and `const` typing. The
-inline value/view forms below describe the legacy implementation during migration.
+The agreed authoring model is [ADR 0014](decisions/0014-native-implementation-interfaces.md):
+shared declarations and selected implementations in native source. `native`
+preserves ordinary temporal and `const` typing.
 
 ## Purpose
 
-HGL is intentionally not a general-purpose language. Native C++ is nevertheless
-necessary for efficient algorithms, stateful resources, and capabilities that
-cannot be implemented as graph composition. This record defines two deliberate
-boundaries: a small top-level source form for exact C++ value/view functions,
-and versioned descriptors for separately built libraries. C and other
-implementation languages remain future descriptor providers; the implemented
-source escape is C++ only.
+HGL is not a general-purpose foreign-function interface. Native providers
+supply algorithms, resources and capabilities through checked declarations
+and the shared package lifecycle.
 
 This interface extends the package and lifecycle model in
 [Modules and native extensions](modules.md). It is not a second module system.
 
-The subsequent agreed direction is recorded in
-[ADR 0008](decisions/0008-temporal-contracts-and-target-mappings.md): value-level
-`const fn`, reconstructible node-local cache, native type lifecycles, and
-semantic contracts separated from target-specific mappings. Those extensions
-are not implemented. The source examples and C++ descriptors below describe
-the existing native-function interface, not a new generalized mapping syntax.
+The direction for value functions, caches and native target contracts is
+specified in [ADR 0008](decisions/0008-temporal-contracts-and-target-mappings.md).
 
 ## Source native C++ functions
 
-An HGL module may define a top-level exact native function and name the headers
-required by its C++ projection:
-
-[Native example 1](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/native-interface.md#example-1)
-
-The outer HGL signature is authoritative for name resolution, generic
-selection, constraints, parameter access, result type, and the generated module
-descriptor. A temporal collection parameter is passed as its live typed hgraph
-input view; an ordinary scalar temporal parameter is passed as its current C++
-value. The input-only `signal` marker instead passes
-`const hgraph::TSInputView &`. It is a payload-erased endpoint pattern which
-accepts atomic values, structs, collections, windows, references, and
-payload-free signals without exposing their payload type to HGL. The contextual
-`schema` type is narrower still: it may appear only as a non-`const` native
-parameter and projects to `const hgraph::TSValueTypeMetaData *`. Runtime pack
-code obtains such a borrowed handle through `schemas(pack)`. It is the metadata
-already owned by the child endpoint, not a new HGL value, and cannot be returned
-or retained.
-
-Passing a `signal` native argument is an endpoint inspection, not a payload
-read: it need not be dominated by `valid`. The native helper must tolerate an
-invalid or unbound endpoint, or check it before accessing a payload. Native
-input-view arguments still must be runtime input parameters, not arbitrary
-indexed/field expressions. Ordinary scalar and typed collection native
-arguments retain the existing validity checks. A native call does not itself
-establish HGL flow-sensitive validity for subsequent payload reads.
-
-The `cpp(...)` list states the exact C++ parameter declarations received by the
-body. The compiler supplies the function name and C++ result type, adds
-`noexcept` unless `throws` is declared, then emits a plain function in the generated module's `native` namespace.
-Same-named HGL candidates use distinct generated symbols: the first keeps the
-short name and later candidates use `__candidate_N`. This is necessary because
-two distinct HGL patterns can intentionally project to the same erased C++
-view type, such as fixed and unbounded lists.
-
-The source form is deliberately top-level. It cannot occur inside a graph or
-node body, so it cannot introduce new wiring. A call is a direct C++ call on
-current values or views. A native whose parameters are all values is
-available in every node hook (`start`, `when`, `stop`), which is how a node
-validates its configuration in `start` as the native library does; a native
-that takes a live input view is evaluation-only, because lifecycle blocks
-have no inputs. The descriptor records the phases accordingly. A native declaration is automatically public because a
-downstream module must be able to import it, and declarations with the same
-name form one HGL overload family. Source-native `requires` clauses are rejected
-until the version-one descriptor catalog can reconstruct them; the compiler
-must not publish a contract it cannot enforce on import. Parameter defaults are
-rejected because descriptor format v1 has no native-default contract.
-
-HGL balances the C++ parameter list and compound statement while respecting
-C++ comments, quoted literals, escapes, and raw string literals. It does not
-implement a second C++ parser. The native compiler validates the projected C++
-declarations and body. The generated header and source are run through the same
-embedded `clang-format` policy as all other emitted code, so the escape remains
-readable in review.
-
-`cpp include <header>` and `cpp include "header"` accept literal system and
-project header names. The compiler retains their delimiter form, deduplicates
-after the first occurrence, and emits them before native declarations in the
-generated header. They are local to the defining source module and do not
-propagate through HGL imports. Macro, computed, and conditional includes are
-rejected; CMake supplies header search paths and linked targets.
-
-A native function whose body may raise says so with `throws` after its
-signature ([ADR 0009](decisions/0009-native-errors-and-the-node-error-model.md)):
-
-[Native example 2](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/native-interface.md#example-2)
-
-The generated function then has no exception specification and the descriptor
-records the `translated` policy. A raise ends the evaluation under hgraph's
-node error model; HGL has no exception surface of its own. Without `throws`
-the function is emitted `noexcept`.
-
-There is currently no general HGL spelling for a link dependency, effect,
-state type, lifecycle phase, or ownership annotation. The `schema` parameter's
-immutable call-confined borrow is fixed by that type; separately built
-libraries use descriptors for all other ownership concerns. A future source
-feature must define those contracts before widening this form.
-
-This decision is recorded in
-[ADR 0005](decisions/0005-inline-cpp-native-functions.md) and, for `throws`,
-[ADR 0009](decisions/0009-native-errors-and-the-node-error-model.md).
-
-The first shipped use of this form is
-[`hgraph.native`](https://github.com/hhenson/hgraph/blob/main/language/stdlib/hgl/hgraph/native.hgl). Its compiled
-`hgl::core_native` target provides `len` and `is_empty` for strings and typed
-collection views, tick-window metadata, and string queries. It also provides
-payload-erased `valid`, `all_valid`, `modified`,
-`last_modified`, `bound`, and `active` functions over every standard time-series
-shape. The module is split into explicit source parts, keeping one import and
-descriptor identity. The parts, generated library, header, and descriptor are
-installed together and exercised by an isolated SDK consumer.
+The legacy inline C++ authoring form is superseded by shared declarations and
+selected [implementation parts](native-implementation-parts.md). Native source
+and build dependencies belong to the provider, not the portable declaration.
 
 ## Descriptor is the contract
 
@@ -148,31 +47,15 @@ For every exposed native declaration the descriptor records:
 - whether a parameter receives its current scalar value or its live typed input
   view;
 - exception and thread-safety policy;
-- canonical C++ symbol or generated wrapper identity;
-- required public headers, CMake packages, imported targets, and runtime image;
+- target-specific binding identity and native dependencies;
 - module lifecycle entry points, provider identity, compatibility versions, and
   descriptor fingerprint.
 
-The serialized representation is the canonical, versioned JSON selected in
-[ADR 0004](https://github.com/hhenson/hgraph/blob/main/language/docs/design/decisions/0004-json-module-descriptors.md). The current compiler
-emits its envelope, public/provider inventories, structured HGL signatures,
-struct layouts, defaults, canonical types and constraints, and generated build
-metadata. `hgl check` reads and validates one such descriptor without loading a
-library or consulting a registry. Native declarations now encode exact C++
-symbols, permitted phases, effects, parameter/result ownership and dependent
-lifetimes, exception policy, thread-safety policy, opaque or atomic native type
-associations, runtime images, and lifecycle ABI metadata. The reader enforces
-the non-blocking evaluation envelope, declared exception policy, explicit mutable state,
-borrow rules, and lifecycle consistency. The compiler can build an explicit
-module catalog from one or more descriptors, resolve a selective or aliased
-`use`, select an exact overload from canonical scalar or collection types,
-carry that candidate through HIR and HGraph IR, and emit its reviewed
-`cpp_symbol` as a direct call. A source `native fn` produces the same descriptor
-record using its generated exact symbol. The AOT CMake helper obtains
-descriptors from directly linked targets. Locked transitive dependency closure
-and external-package resolution for the scripted loader remain to be added.
-Native `requires` clauses also remain blocked until the catalog can reconstruct
-their constraint arena.
+An imported native declaration retains its full signature, phases, effects,
+ownership, dependent lifetimes, exception policy and provider identity.
+Checking must validate these before execution. The representation and format
+version are implementation choices; serializing a declaration must not weaken
+its contract.
 
 ## Native declaration categories
 
@@ -193,32 +76,28 @@ hgraph operator implementation explicitly.
 An exact native function is callable only in phases allowed by its descriptor.
 A value parameter receives the current canonical scalar payload. A collection
 `input-view` parameter receives the corresponding live `TSL`, `TSS`, `TSD`, or
-rolling input view. A complete `signal` parameter with `input-view` access
-receives the common `TSInputView` base instead. This permits constant-time
-metadata operations and erased current-value behavior without materializing a
-collection or switching on its runtime kind. Construction or cleanup of private
-native state is the next stateful slice.
+rolling input. A `signal` input permits metadata access without payload
+access. The native representation of the borrowed input is target-specific;
+it must preserve the source's access and lifetime restrictions.
 
-The installed `hgraph.native` module exposes this common endpoint surface:
+The endpoint metadata surface follows the runtime time-series rules:
 
-| Native function | Erased hgraph operation | HGL result |
+| Native function | Observation | HGL result |
 | --- | --- | --- |
-| `valid(value)` | `TSInputView::valid()` | `bool` |
-| `all_valid(value)` | `TSInputView::all_valid()` | `bool` |
-| `modified(value)` | `TSInputView::modified()` | `bool` |
-| `last_modified(value)` | `TSInputView::last_modified_time()` | `datetime` |
-| `bound(value)` | `TSInputView::bound()` | `bool` |
-| `active(value)` | `TSInputView::active()` | `bool` |
+| `valid(value)` | Top-level validity | `bool` |
+| `all_valid(value)` | Validity under the shape's all-valid rule | `bool` |
+| `modified(value)` | Modification in this evaluation cycle | `bool` |
+| `last_modified(value)` | Last modification time | `datetime` |
+| `bound(value)` | Whether the input is bound | `bool` |
+| `active(value)` | Whether the input is active | `bool` |
 
-The one declaration for each operation covers `TS<T>` for every canonical or
-registered atomic value, nominal `TSB`, fixed and unbounded `TSL`, `TSS`,
-`TSD`, tick- and duration-based `TSW`, `REF`, and `SIGNAL`. That coverage comes
-from hgraph's existing `SIGNAL` input compatibility and common view contract;
-the implementation does not enumerate or branch over those types.
+These observations apply to the admitted scalar, bundle, list, set, map,
+window and reference shapes. A target may share one native metadata interface
+across shapes; it need not expose that interface's representation in HGL.
 
 Representation erasure belongs behind the implementation boundary. HGL uses
 ordinary value expressions and `delta_value` for every supported shape, not
-separate erased-value accessors. The remaining implementation gaps are:
+separate erased-value accessors. Additional operations require the following contracts:
 
 | Missing surface | Required language or ABI feature |
 | --- | --- |
@@ -235,16 +114,14 @@ cannot be represented by an erased scalar result without iterator and borrowed
 element contracts.
 
 See the [native surface completion record](native-surface-proposal.md) for
-accepted collection accessors, implemented coverage and remaining decisions. In particular, the existing
+accepted collection accessors and remaining decisions. In particular, the existing
 TSL/TSS/TSD input patterns do not imply native access to atomic List/Set/Map
 values; their signature and borrowing contracts must be supported explicitly.
 
-Runtime pack schema inspection is the deliberately narrow exception. A
-source-native helper accepts one borrowed `schema` parameter, and generated C++
-passes the current child input's existing metadata pointer directly. The
-descriptor records the parameter as runtime metadata with borrowed immutable
-ownership. This does not expose a constructible, storable, or returnable schema
-value through the general native ABI.
+Runtime pack schema inspection is a narrow borrowed capability. A helper may
+inspect the current child's metadata only during the call; it may not retain
+it or turn it into a payload value. Target-specific pointers or handles are
+not source-level types.
 
 Native declarations may share one canonical identity when their HGL signatures
 differ. The compiler treats them as one overload family, unifies generic
@@ -262,7 +139,7 @@ loaded image path.
 Calls from wiring-time constant evaluation, automatic temporal lifting, and
 general compile-time execution are outside the first interface. Although the
 phase metadata can describe wiring, start, evaluation, and stop, the compiler
-accepts a call only in a phase named by the descriptor and the implemented
+accepts a call only in a phase named by the descriptor and the agreed
 canonical-value and collection-view slices are exercised in evaluation.
 
 ### Opaque native state
@@ -389,10 +266,8 @@ fn observe(value: signal) -> datetime {
 }
 ```
 
-The generated node accepts any standard time-series shape, while the C++ helper
-receives only `const hgraph::TSInputView &`. HGL still cannot inspect the
-payload of `value`; the native declaration exposes one reviewed operation on
-that erased endpoint.
+The node accepts any admitted time-series shape. The helper borrows metadata
+without exposing its payload; `signal` does not grant value access.
 
 The source spelling and inference rules for an imported opaque state type are
 not settled, so this record does not invent an example for them. The native
@@ -401,99 +276,26 @@ syntax is insufficient.
 
 ## Producing descriptors
 
-The installed `hgl::native_package` C++ API is the first producer. A small
-build-time executable owned by the native package fills an
-`hgl::native::Package` and calls `write_descriptor`. The authoring model can
-name canonical scalars, nominal native types declared by that same package,
-generic collection input-view patterns, and a complete payload-erased signal
-input-view pattern. It sorts set-like inventories and
-declarations, creates the shared descriptor schema records, seals the result,
-and runs the same validator used by `hgl check` before writing anything.
-
-For example, this describes a non-throwing scalar operation:
-
-[Native example 4](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/native-interface.md#example-4)
-
-The named `cpp_symbol` must already be an exact directly callable public C++
-symbol. Multiple descriptor declarations may name the same C++ overload family
-and HGL identity when their HGL signatures differ. If a template, throwing
-function, or ownership-heavy API needs normalization, the package supplies a
-small reviewed wrapper and names that wrapper. Automatic wrapper emission is a
-remaining Stage F slice; the authoring API does not parse headers or accept
-arbitrary C++ declarations.
-
-For example, an erased list-view overload is described as:
-
-[Native example 5](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/native-interface.md#example-5)
-
-The named C++ overload accepts `const hgraph::TSLInputView &` (or the view by
-value) and returns `hgraph::Int`. Parallel declarations for `set<T>` and
-`map<K, V>` form the same HGL overload family.
-
-An erased endpoint declaration uses `ValueType::signal()` and must select
-`ParameterAccess::InputView`:
-
-[Native example 6](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/native-interface.md#example-6)
-
-For AOT compilation, place the descriptor path on the native dependency
-target's `HGL_MODULE_DESCRIPTORS` property and link that target from the HGL
-module. `hgl_add_module()` passes those descriptors to every HGL compilation
-and links the target that supplies the public header and symbol:
-
-```cmake
-set_property(TARGET acme_stats PROPERTY
-    HGL_MODULE_DESCRIPTORS "${acme_stats_descriptor}")
-
-hgl_add_module(my_hgl_nodes STATIC
-    HGL smooth.hgl
-    LINK_LIBRARIES acme_stats)
-```
-
-This bootstrap follows direct CMake target edges only. It does not yet compute
-the locked transitive descriptor closure or teach `hgl test`, `hgl run`, and
-the REPL how to resolve arbitrary external CMake packages and runtime images.
-
-An optional Clang-based binding generator may later derive the same artifact
-from annotated public headers. Clang is then a descriptor-generation tool, not
-part of HGL parsing or the definition of which arbitrary C++ constructs the
-language accepts. The generated descriptor remains reviewable and versioned.
+Native libraries supply reviewable module interfaces. An implementation could
+generate them from annotated source or checked declarations. The generated
+interface must carry the same contract and dependency identity; reflection
+must not broaden what HGL admits.
 
 ## Module lifecycle and ABI
 
-The descriptor participates in the existing closed package universe. Its
-provider initializes transactionally, installs all registrations through one
-module-owned handle, and deinitializes in reverse dependency order. Graphs,
-plans, native call targets, and metadata retain provider leases.
+A provider initializes transactionally, installs its contributions through an
+owned registration, and deinitializes in reverse dependency order. Graphs,
+plans, call targets and metadata retain a lease on their provider.
 
-The installed, C-compatible `hgl/native_module_abi.h` defines version one of
-the dynamic lifecycle boundary. A provider exports the fixed
-`hgl_query_native_module_v1` symbol. The host requests ABI version one and
-validates the returned immutable table before activation. The table contains
-its byte size, canonical module identity, descriptor fingerprint, opaque
-module-owned context, and `init`, `deinit`, and `is_active` callbacks. An ABI
-error record is host-allocated and has a fixed capacity; callbacks return a
-status code and must not let exceptions cross the boundary.
+Initialization and deinitialization are idempotent. Before activation, a loader
+checks module identity and interface compatibility. An implementation could
+use a versioned function table and a fingerprint of the semantic interface;
+its layout, symbol names and digest encoding are not language requirements.
 
-The module, rather than the host loader, owns the hgraph provider handle and
-all registration state behind the opaque context. Initialization and
-deinitialization are idempotent. The scripted compiler bootstrap implements
-this contract and catches registration/removal failures through hgraph's common
-exception-boundary helper. The host validates the ABI version, table size,
-identity, required callbacks, and exact descriptor fingerprint before it
-retains the image and invokes lifecycle callbacks.
-
-Descriptors are sealed with `sha256:` followed by the lowercase digest of their
-canonical version-one semantic model with the fingerprint field empty. Input
-whitespace and object ordering therefore do not affect identity. Compatible
-unknown version-one members remain outside that projection; a security-relevant
-semantic addition requires a format-version increment. The generated bootstrap
-embeds the fingerprint, and the loader rejects an image whose module identity or
-fingerprint differs before invoking `init`.
-
-Calls within generated code may still use direct C++ types and functions when
-the descriptor permits them. Logical provider removal and native-image
-unloading are distinct: the first implementation deinitializes registrations
-but deliberately keeps loaded images resident for process lifetime.
+Logical removal and physical unloading are distinct. Removing a provider
+prevents future selection, but unloading must wait until no reachable code or
+metadata depends on it. An implementation may retain removed images until
+process exit.
 
 ## Acceptance
 
@@ -506,12 +308,10 @@ The native boundary proves:
   evaluation, and destroyed after stop;
 - rejection of the same calls in an unpermitted phase;
 - rejection of a borrowed value that escapes;
-- generated C++ that is a direct, readable call through public headers;
-- a source `native fn` emitted as a formatted plain C++ function, exported in
-  the module descriptor, imported by another HGL module, and executed through
-  generated C++;
-- scripted and ahead-of-time execution with identical ticks once external
-  dependency resolution is implemented;
+- native calls bound to the selected contract without per-tick name lookup;
+- a native declaration exported, imported and executed through its selected
+  provider;
+- interpreted and compiled execution with identical ticks;
 - descriptor/provider fingerprint mismatch before graph wiring;
 - failed activation rollback and provider removal without stale registrations;
 - an installed-SDK consumer build, not only an in-tree test.

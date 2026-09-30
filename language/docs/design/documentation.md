@@ -147,5 +147,5 @@ impl fn add_<L, R, O>(lhs: L, rhs: R) -> O
 | Descriptor/documentation round trip | Same text, signatures and ownership. |
 | Comment-only edit | Same checked behavior and semantic provider fingerprint. |
 
-Compiler implementations test the scenarios for the language forms they support.
-The smaller Rust compiler still rejects unsupported language forms explicitly.
+Conformance checks cover these scenarios independently of the compiler or
+rendering backend. Unsupported source forms must be diagnosed explicitly.

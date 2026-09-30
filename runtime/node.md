@@ -510,12 +510,5 @@ Points to settle
    for switch and mesh; that is an implementation gap, not a rule.
 
 
-Sources
--------
-
-In hgraph: `docs/source/developer_guide/architecture.rst` (lifecycle, node
-evaluation, the node scheduler); `developer_guide/error_handling.rst`;
-`user_guide/cpp/authoring_nodes.rst`; RFC 0027 (push source queues);
-`include/hgraph/runtime/node.h` and `node_scheduler.h`; HGL's
-`language-model.md` (function abstraction, `state`, `cache`, `when`) and ADRs
-0008 to 0011.
+Implementation source references are recorded in the
+[audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes).

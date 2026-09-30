@@ -1,6 +1,6 @@
 # Representations
 
-Status: proposed; neither storage candidate is implemented here.
+Status: proposed storage examples, not required representations.
 
 A dictionary may own child objects or store fixed child paths in columns.
 Both must give the same values, deltas and times at every level. The
