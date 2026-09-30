@@ -44,8 +44,10 @@ destruction. BorrowLive takes precedence over WrongPhase on release.
 
 Fail at entry to right's constructor, before any right subobject is live.
 From fresh: `allocate; construct left; fail right; destroy left; release region`.
-Return ConstructionFailed and `(released, false, 0, false, false)`. Observe
-changes nothing. Never destroy right, call stop or release twice.
+Propagate ConstructionFailed; cleanup leaves `(released, false, 0, false, false)`.
+Observe changes nothing. Never destroy right, call stop or release twice.
+This tests resource cleanup on abort, not recovery: no usable pair is returned
+and no continuation or retry of the failed construction is specified.
 
 ## PAIR-NEVER-STARTED
 

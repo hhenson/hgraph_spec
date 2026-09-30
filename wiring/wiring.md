@@ -142,13 +142,11 @@ State
 | port type | fixed when the port is made | Nobody |
 | resolution | one type per variable of the callee, fixed when the call is made | Nobody |
 
-A call that cannot be wired fails, and a failed call fails the session:
-what it had already added to the description cannot easily be taken back,
-so the description is never produced (WIR-4). Catching the failure in the
-code that describes the graph does not reopen the session. Choosing between
-two ways of describing a graph is done by an explicit test of whether a
-call *can* be wired, not by trying and catching (Deferred, conditional
-wiring).
+Wiring either produces a complete description or fails. A failure propagates
+out of wiring, logically equivalent to a compiler failure; no description is
+produced and there is no recovery (WIR-4). Partial wiring effects need not be
+reversible. Conditional wiring is deferred; catching a failure is not a
+supported way to choose another graph.
 
 ```mermaid
 stateDiagram-v2
@@ -197,8 +195,13 @@ flowchart TD
   carries a reference (TS-28).
 - **WIR-4** A call that cannot be wired fails at that call. It is not
   repaired: wiring never substitutes another candidate, drops an argument
-  or skips the call. The failure fails the session even when the describing
-  code catches it. The error says *where* — the call as its author named
+  or skips the call. The exception propagates out of wiring and no graph
+  description is produced. There is no recovery, fallback or retry within
+  the failed session. Where a host language permits catching the exception,
+  suppressing it and continuing construction is **undefined behavior**;
+  implementations need not detect or reject that continuation. Cleanup does
+  not promise rollback to a reusable construction state. The error says
+  *where* — the call as its author named
   it, and the chain of graph calls that led to it — and *why*: the
   arguments' types and, for an operator, each candidate's reason for not
   matching.
@@ -414,11 +417,9 @@ on them, so they need rules and cases as type resolution has.
 - **Diagnostics**: labels and source locations carried into the
   description.
 - **Conditional wiring**: an explicit test of whether a call *can* be
-  wired, that includes a block of describing only when it passes. Since a
-  failure cannot be caught (WIR-4), this is how a graph chooses between two
-  ways of describing itself. It is to be designed for HGL first (owner,
-  2026-09-26) and needs an RFC. Until then implementations do not enforce
-  WIR-4 against a caught failure.
+  wired, that includes a block of describing only when it passes. It is to
+  be designed for HGL first (owner, 2026-09-26) and needs an RFC. It does not
+  imply recovery from a failed attempt (WIR-4).
 - **Nested-graph constructs**: how map, switch, reduce and mesh build their
   child descriptions from the ports as supplied. They are library
   ([runtime overview](../runtime/overview.md)).
@@ -433,9 +434,10 @@ requested reference to a bundle is satisfied by the bundle (WIR-12);
 selecting an element by a key known only when the graph runs declares a
 value input and a reference output (WIR-5, WIR-7, and a run-time type
 check on the selected element); a language's map of references is a map
-containing references, not a reference around a map; a caught wiring
-failure still fails the session (WIR-4); a candidate never widens its
-operator (WIR-23, WIR-24).
+containing references, not a reference around a map; wiring failure has no
+recovery (WIR-4); a candidate never widens its operator (WIR-23, WIR-24).
+The owner clarified on 2026-09-30 that continuing after suppressing a wiring
+failure in a host language is undefined behavior, not a required rejection.
 
 
 Evidence and cases

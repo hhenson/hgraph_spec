@@ -216,7 +216,9 @@ flowchart TD
 - **GRF-8** A node's scalars conform to its node type's scalars type.
 - **GRF-9** Instantiation either produces a complete graph or produces none.
   An implementation identity that cannot be resolved is a failure, not a
-  node left out.
+  node left out. Construction errors propagate to the caller; a partial
+  graph cannot be run or repaired. Cleanup on failure does not promise
+  rollback to a reusable builder state. Wiring failure is governed by WIR-4.
 - **GRF-10** A child graph's bindings name only positions in its owner's
   input and endpoints inside the child. They preserve recursive peering,
   empty children and live REF routes. Rebinding a captured input reaches

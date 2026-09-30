@@ -173,6 +173,17 @@
         "WIR-4"
       ],
       "note": "WV-10 stays a recorded, pinned variation; conditional wiring is deferred to an HGL design session."
+    },
+    {
+      "date": "2026-09-30",
+      "issue": null,
+      "question": "Does failed graph construction promise rollback or recovery, and what if host-language code catches the wiring exception?",
+      "ruling": "Graph construction passes or fails. Failure propagates out of wiring and is logically a compiler failure; there is no recovery. Continuing after suppressing the exception in a host language is undefined behavior.",
+      "rules": [
+        "WIR-4",
+        "GRF-9"
+      ],
+      "note": "Clarifies the 2026-09-26 caught-failure rulings. The catching example was hypothetical, not an intended usage. Cleanup on abort does not promise rollback to reusable construction state. caught_failure now records observations without asserting an outcome; WV-10 is historical evidence, not a required implementation correction."
     }
   ]
 }
