@@ -1908,6 +1908,14 @@ temporal parameters must inject `scheduler` or `alarm`, or be a generator
 and `alarm.schedule_at(time)`, earliest request wins, nothing recorded or
 recovered, admitted in sources only.
 
+The proposed [scalar replay/capture extension](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
+adds node-scoped `replay_input` and `capture` capabilities only for its eight
+scalar types and fresh dense eval profile. They borrow per-node buffers bound
+at graph construction; they are not general resource values or supported
+state/cache types. Its method and phase table, construction failures and
+translated runtime errors are specified in that record. This proposal does
+not change the implemented-capability claim above.
+
 `start` runs once after replay-aware state initialization. `stop` runs once at
 teardown. State storage and injected capabilities are runtime-owned and are
 destroyed automatically; `stop` represents semantic finalization. The language

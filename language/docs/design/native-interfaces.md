@@ -104,3 +104,15 @@ explicit borrowed access; that spelling remains unsettled.
 [Implementation-part rules and acceptance cases](native-implementation-parts.md)
 cover matching, selection, ownership and lifecycle diagnostics. Binding-shape
 checks and runtime trace conformance are separate obligations.
+
+## Proposed scalar eval buffer capabilities
+
+[ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) proposes two
+node-scoped typed injectables for normal HGL replay/record operator bodies.
+Their native methods only inspect immutable dense slots or begin/append an
+owned capture. HGL owns scheduling, publication and capture decisions.
+These capabilities cannot be passed as native value-helper arguments or
+propagated through value functions in this slice. This adds no generic
+resource type, borrowed-TS helper ABI or temporal native provider.
+The record specifies exact methods and translated failure behavior; support
+must be implemented and checked independently on each backend.

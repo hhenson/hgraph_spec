@@ -143,3 +143,8 @@ fixtures, or the bridge API used by the operators. TS-5 still requires
 child-validity and membership information beyond published-value deltas when
 reconstructing full collection state. These require separate specification
 extensions.
+
+The proposed [scalar buffer capability extension](decisions/0016-eval-scalar-buffer-capabilities.md)
+addresses the narrow fresh dense scalar profile with typed node-scoped
+`replay_input` and `capture` injectables. The broader delta and resource
+questions above remain separate.

@@ -160,6 +160,13 @@ not restrict their independent library APIs. Materializing a dense eval
 result from an empty recording preserves its input horizon with no-tick
 cells; it does not publish those cells as ticks.
 
+The proposed [scalar replay/record contracts](../language/docs/design/decisions/0016-eval-scalar-buffer-capabilities.md)
+fix `replay<T>() -> T` and `record<T>(ts: T)` for eight scalar types, with
+per-node typed buffer bindings and HGL control flow. Their capabilities are
+not general storage handles, and their admission does not imply collection
+or persistent recording support.
+
+
 
 Rules
 -----

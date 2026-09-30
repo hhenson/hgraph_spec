@@ -284,6 +284,11 @@ declared or bound. Piped input (`hgl repl < session.hgl`) reads plain lines,
 so scripts behave as before; `HGL_NO_LINE_EDITING=1` forces that mode on a
 terminal too.
 
+The proposed [scalar replay/capture capability contract](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
+lets HGL implementations of replay and record use typed buffers supplied by
+eval. It does not add arguments to the test's eval call. The capability
+surface is a proposal; it does not enlarge the implemented subset below.
+
 ## First-pass limits
 
 Compiler coverage and platform limits are implementation concerns, recorded
