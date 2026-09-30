@@ -1,0 +1,7 @@
+module examples.stdlib_const_debug
+
+use hgraph.std::{const, debug_print}
+
+export fn main() {
+    debug_print("answer", const(42))
+}

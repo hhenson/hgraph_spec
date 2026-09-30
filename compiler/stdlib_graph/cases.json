@@ -1,0 +1,8 @@
+[
+  {"name":"constant","kind":"source","value":42,"delay_us":0,"sample":-1,"ticks":[42],"lines":["answer: 42"]},
+  {"name":"delayed-negative","kind":"source","value":-7,"delay_us":2,"sample":-1,"ticks":[null,null,-7],"lines":["answer: -7"]},
+  {"name":"fresh-run","kind":"source","value":42,"delay_us":0,"sample":-1,"ticks":[42],"lines":["answer: 42"]},
+  {"name":"sampled-single","kind":"source","value":42,"delay_us":0,"sample":2,"ticks":[42],"lines":[]},
+  {"name":"missing-and-equal","kind":"sink","input":[null,42,null,42,-7],"sample":-1,"ticks":[null,42,null,42,-7],"lines":["answer: 42","answer: 42","answer: -7"]},
+  {"name":"sampled-input","kind":"sink","input":[null,42,null,42,-7],"sample":2,"ticks":[null,42,null,42,-7],"lines":["[2] answer: 42"]}
+]
