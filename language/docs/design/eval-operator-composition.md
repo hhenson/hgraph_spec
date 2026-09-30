@@ -30,22 +30,26 @@ Eval calls the target as declared. A composition function may wire an existing
 input through. A test that claims to exercise delta application by a compute
 node must instead use a runtime function: it consumes the replayed input and
 writes a distinct output owned by that node. A wiring identity does not test
-that operation. For scalar inputs, where delta equals the published scalar,
-the following is a runtime compute fixture:
+that operation. The generic runtime fixture explicitly obtains its input delta. Its admitted
+scalar instantiations are specified by [delta-value metadata](delta-value-metadata.md):
 
 ```hgl
-fn pass_through(value: i64) -> i64 {
-    when { return value }
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
 }
 
+fn pass_through_i64(value: i64) -> i64 => pass_through(value)
+
 test owns_and_publishes_output {
-    assert eval(pass_through, value: [7, _, 7, 9]) == [7, _, 7, 9]
+    assert eval(pass_through_i64, value: [7, _, 7, 9]) == [7, _, 7, 9]
 }
 ```
 
 The `when` makes this a runtime function; its return publishes its own output
 on each admitted evaluation. Equal repeated publications remain ticks. This
-example makes no assumption about the still-open result type of `delta_value(x)`.
+example fixes the scalar delta type. Structural contextual delta types and
+application remain separate. The exact wrapper also fixes T when a sequence
+has no present payload from which to infer it.
 
 ## Typed buffers and ownership
 
@@ -91,9 +95,9 @@ Consequently, for the scalar fixture above:
 
 ```hgl
 test silent_horizon {
-    assert eval(pass_through, value: [_, _, _]) == [_, _, _]
-    assert eval(pass_through, value: []) == []
-    assert eval(pass_through, value: [_, 7, _, _]) == [_, 7, _, _]
+    assert eval(pass_through_i64, value: [_, _, _]) == [_, _, _]
+    assert eval(pass_through_i64, value: []) == []
+    assert eval(pass_through_i64, value: [_, 7, _, _]) == [_, 7, _, _]
 }
 ```
 
@@ -136,7 +140,8 @@ These cases follow the rules above:
 
 ## Deferred extensions
 
-This foundation does not decide `delta_value(x)`'s result type, first-class delta
+Beyond the scalar [delta-value contract](delta-value-metadata.md), this
+foundation does not decide structural delta result types, first-class delta
 storage, set/map/list harness literals, a generic apply-delta operation,
 explicit child invalidation or invalid-child membership encoding, reference
 fixtures, or the bridge API used by the operators. TS-5 still requires

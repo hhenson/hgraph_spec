@@ -810,7 +810,8 @@ modified()
 valid()
 all_valid(book)
 last_modified(value)
-delta(value)
+delta_value(value)
+delta(value)       # compatibility spelling
 ```
 
 The language does not expose `value.modified`, `value.valid`, or `value.value`.
@@ -825,8 +826,11 @@ validity; `all_valid(value)` additionally checks each immediate live child
 of a TSD, TSB or TSL for `valid`, without recursion. Removed dictionary keys
 do not participate. TSW intentionally uses a separate rule: `all_valid` checks
 the window minimum while `valid` becomes true on the first value. In runtime evaluation, `last_modified(value)` returns the
-endpoint's native `last_modified_time` as `datetime`. The `delta` result shape
-remains open.
+endpoint's native `last_modified_time` as `datetime`. Canonical
+[delta_value(value)](delta-value-metadata.md) returns the ordinary scalar
+delta in the admitted valid-and-modified runtime scalar profile; `delta(value)`
+is its compatibility synonym. Structural contextual delta shape/application
+remain separate open contracts.
 
 ## Collection traversal
 

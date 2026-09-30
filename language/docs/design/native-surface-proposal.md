@@ -14,6 +14,12 @@ This decision does not claim that the compiler already lowers every value and
 delta shape. Missing transport, borrowing, and operator implementations are
 compiler/library work behind the same language surface.
 
+The [scalar delta-value contract](delta-value-metadata.md) specifies runtime
+admission and scalar typing for `delta_value`, retains `delta(x)` as a
+compatibility spelling, and gives the generic explicit-delta pass-through
+fixture. Structural contextual delta transport/application remain separate.
+
+
 ## Membership and access
 
 | Function | Contract |

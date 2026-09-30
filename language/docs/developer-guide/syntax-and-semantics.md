@@ -135,7 +135,8 @@ clause, and an ordinary identifier elsewhere. `out` and the names of other
 injectables are contextual names resolved only by an `inject` declaration.
 `struct` is both a declaration keyword and the corresponding constraint
 category. `delta` is contextual: followed by `<` it introduces a structured
-delta constructor, while `delta(value)` remains the temporal metadata function.
+delta constructor, while `delta(value)` is the compatibility spelling of
+canonical `delta_value(value)` metadata.
 It is not a general type constructor. `fields`, `has_fields`, `field_type`,
 and the pack-reflection functions `len`, `keys`, `types`, and `type_at` are
 compile-time intrinsics inside a `requires` clause.
@@ -1125,7 +1126,7 @@ An unqualified name resolves, innermost first, to:
    (a `test` is not a value and is a `name` diagnostic in an expression);
 4. a selectively imported operator;
 5. a prelude intrinsic: `valid`, `modified`, `all_valid`, `last_modified`,
-   `delta`, `key_set`, `keys`, `values`, `elements`, `items`, `added`,
+   `delta_value`, `delta`, `key_set`, `keys`, `values`, `elements`, `items`, `added`,
    `removed`, `insert`, `update`, `upsert`, `remove`, `discard`, `invalidate`,
    `clear`, `push`, `pop`.
 
@@ -1657,7 +1658,8 @@ modified()
 valid()
 all_valid(book)
 last_modified(value)
-delta(value)
+delta_value(value)
+delta(value)       # compatibility spelling
 ```
 
 The parser treats these as ordinary calls resolved through the prelude or
@@ -1705,7 +1707,15 @@ the top-level endpoint even when the endpoint is structural or a collection;
 TSB or TSL for `valid`, not for its own `all_valid`. Removed dictionary keys
 do not participate. The check never recurses into grandchildren. TSW is an
 intentional exception: its `all_valid` checks minimum-window readiness, while
-`valid` becomes true on the first value. The result shape of `delta` remains open.
+`valid` becomes true on the first value.
+
+The canonical [delta_value(endpoint)](../design/delta-value-metadata.md)
+metadata call has the ordinary scalar result type for the admitted eight
+scalar endpoints in a valid and modified runtime context. The particular
+endpoint must be proven valid and modified; an any-input-modified condition
+alone does not establish this for every input. `delta(endpoint)` is retained
+as a compatibility synonym for that domain. Structural contextual delta
+results/application remain open; `delta<S>(...)` is a distinct constructor.
 
 `last_modified(value)` is a runtime metadata operation returning `datetime`.
 It lowers to the endpoint's public `last_modified_time` view and does not
@@ -1842,7 +1852,7 @@ After classification, phase and effect checking gives identifiers different
 meanings in the two phases. A temporal parameter is a port in a composition
 body. In a runtime expression it denotes the current admitted payload, while
 `modified(parameter)`, `valid(parameter)`, `last_modified(parameter)`, and
-`delta(parameter)` retain access to its endpoint metadata.
+`delta_value(parameter)` retain access to its endpoint metadata.
 
 Runtime validity checking is flow-sensitive and follows Boolean short-circuit
 order. A payload read is valid when the node's ordinary no-`when` policy admits

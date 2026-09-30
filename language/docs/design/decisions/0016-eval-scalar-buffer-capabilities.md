@@ -192,8 +192,9 @@ Validate the following preconditions before changing a buffer:
    one buffer append does not roll back an entire node evaluation. Allocation
    errors propagate; their diagnostic message is not standardized.
 
-The standard record body below calls append once per admitted tick and uses
-last_modified(ts), which equals evaluation time for that modified scalar
+The standard record body below obtains the scalar delta explicitly with
+[delta_value(ts)](../delta-value-metadata.md), calls append once per admitted
+tick and uses last_modified(ts), which equals evaluation time for that modified scalar
 input. Adjacent equal payloads have increasing timestamps and are recorded
 separately. A second append at the same time is an error rather than implicit
 replacement or deduplication.
@@ -239,7 +240,7 @@ requires T in {bool, i64, f64, str, date, time, datetime, duration}
     }
 
     when {
-        capture.append(last_modified(ts), ts)
+        capture.append(last_modified(ts), delta_value(ts))
     }
 }
 ```

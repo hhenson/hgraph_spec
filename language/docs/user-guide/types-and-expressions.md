@@ -1031,7 +1031,8 @@ modified()
 valid()
 all_valid(book)
 last_modified(value)
-delta(value)
+delta_value(value)
+delta(value)       # compatibility spelling
 ```
 
 Source does not expose `value.modified`, `value.valid`, or `value.value`.
@@ -1062,8 +1063,12 @@ temporal children, so their `all_valid` is the same as `valid`. For rolling
 windows, `all_valid` checks the minimum window requirement.
 
 In a `when` condition, these predicates also control when a function may run.
-The result shape of the proposed `delta(value)` operation remains open; use
-the supported `delta_value` operations described below.
+The canonical [delta_value(value)](../design/delta-value-metadata.md) call
+reads the current scalar delta when that specific input is valid and modified;
+`delta(value)` is retained as its compatibility spelling. The scalar contract
+is specified separately from the still-open structural contextual delta
+transport and output-application contract. This clarification does not claim
+new implementation coverage.
 
 In a runtime function, `last_modified(value)` returns the hgraph engine time at
 which the endpoint last changed. Its type is `datetime`.
