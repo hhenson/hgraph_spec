@@ -58,6 +58,14 @@ not callable HGL syntax or an ordinary source type annotation.
 | `capture.begin()` | Unchanged: create the present empty recording. |
 | `capture.append(time: datetime, delta: delta_of(T))` | Contextual delta argument for the sink's exact input shape T; independent owned capture. |
 
+The index still identifies a zero-based position in the configured replay
+sequence, as explained in [the meaning of `delta_at`](decisions/0016-eval-scalar-buffer-capabilities.md#meaning-of-delta_atindex).
+This extension changes the delta payload's shape, not the meaning of the
+index or the source of the data. For example, a slot containing
+`delta<map<i64, i64>>(upsert: [1: 11])` supplies that sparse update when read.
+It does not supply a complete map or fill in other keys from earlier slots.
+`delta_value(v)` instead reads the current publication from a live endpoint.
+
 `delta_at` is admitted only in evaluation, with an in-bounds present slot.
 Its contextual result can be returned directly by replay. `append` remains
 evaluation-only, and `begin` remains start-only. No method is admitted in
