@@ -4,7 +4,7 @@ native const fn print_i64(value: i64)
 
 export fn const_(const value: i64) -> i64 {
     inject scheduler
-    start { scheduler.schedule(0s) }
+    start { schedule(scheduler, 0s) }
     when scheduled() { return value }
 }
 

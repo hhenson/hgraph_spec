@@ -114,5 +114,5 @@ owned capture. HGL owns scheduling, publication and capture decisions.
 These capabilities cannot be passed as native value-helper arguments or
 propagated through value functions in this slice. This adds no generic
 resource type, borrowed-TS helper ABI or temporal native provider.
-The record specifies the methods and their type, phase, lifetime and failure
+The record specifies the source operations and their type, phase, lifetime and failure
 rules.

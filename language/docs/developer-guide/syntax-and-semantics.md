@@ -1917,21 +1917,27 @@ requests only the selectors it uses. Unknown capabilities and use from an
 unsupported phase are diagnostics. `out` is a
 special injectable inferred from the result type; it is invalid on an
 outputless function and is initially available only during evaluation, not in
-`start` or `stop`. The clock and scheduler methods, the `scheduled()` handler
+`start` or `stop`. The clock and scheduler functions, the `scheduled()` handler
 selector, and the `passivate`/`activate` statements are fixed by
 [ADR 0010](../design/decisions/0010-lifecycle-capabilities.md); `scheduled`,
 `passivate` and `activate` are intrinsic names. A runtime function without
 temporal parameters must inject `scheduler` or `alarm`, or be a generator
 (`yield`). `alarm` is the stateless one-shot scheduler
-([ADR 0015](../design/decisions/0015-pull-sources.md)): `alarm.schedule(delay)`
-and `alarm.schedule_at(time)`, earliest request wins, nothing recorded or
+([ADR 0015](../design/decisions/0015-pull-sources.md)): `schedule(alarm, delay)`
+and `schedule_at(alarm, time)`, earliest request wins, nothing recorded or
 recovered, admitted in sources only.
+
+Capability calls use [receiver-first function syntax](../design/capability-function-syntax.md),
+such as `evaluation_time(clock)`, `schedule(alarm, delay)` and
+`info(logger, value)`. HGL has no method-call alias for these operations.
+The capability is a direct approved borrowing operand, not a first-class
+argument that can be passed to an arbitrary function.
 
 The proposed [scalar replay/capture extension](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
 adds node-scoped `replay_input` and `capture` capabilities only for its eight
 scalar types and fresh dense eval profile. They borrow per-node buffers bound
 at graph construction; they are not general resource values or supported
-state/cache types. Its method and phase table, construction failures and
+state/cache types. Its operation and phase table, construction failures and
 runtime errors are specified in that record. The proposed
 [collection eval extension](../design/eval-collection-deltas.md) widens the
 same capability contracts to its recursive ordinary-publication profile,

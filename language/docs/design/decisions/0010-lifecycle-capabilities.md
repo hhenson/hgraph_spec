@@ -24,16 +24,20 @@ blocker LIB-002). Both are the scheduler case.
 
 ## Decision
 
+All source calls below use the
+[capability-function syntax](../capability-function-syntax.md); no receiver
+method-call aliases are admitted.
+
 1. **`inject clock`** provides the evaluation clock as `clock` in every
-   hook. `clock.evaluation_time()`, `clock.now()` (wall clock) and
-   `clock.next_cycle_evaluation_time()` return `datetime`.
+   hook. `evaluation_time(clock)`, `now(clock)` (wall clock) and
+   `next_cycle_evaluation_time(clock)` return `datetime`.
 
 2. **`inject scheduler`** provides the node scheduler as `scheduler` in
-   every hook. `scheduler.schedule(delay)` and
-   `scheduler.schedule(delay, on_wall_clock)` take a `duration`;
-   `scheduler.schedule_at(time)` and `scheduler.schedule_at(time, on_wall_clock)`
-   take a `datetime`; `scheduler.is_scheduled()` returns `bool`;
-   `scheduler.next_scheduled_time()` returns `datetime`. Wall-clock alarms
+   every hook. `schedule(scheduler, delay)` and
+   `schedule(scheduler, delay, on_wall_clock)` take a `duration`;
+   `schedule_at(scheduler, time)` and `schedule_at(scheduler, time, on_wall_clock)`
+   take a `datetime`; `is_scheduled(scheduler)` returns `bool`;
+   `next_scheduled_time(scheduler)` returns `datetime`. Wall-clock alarms
    follow hgraph's rule: only a real-time executor accepts them, and a due
    alarm fires on the next evaluatable cycle. Tags are not exposed.
 
@@ -50,7 +54,7 @@ blocker LIB-002). Both are the scheduler case.
    empty activation set; `modified()` keeps its complete-list meaning.
 
 4. **A runtime function may have no temporal parameters when it injects
-   `scheduler`.** It is a source: `start { scheduler.schedule(0s) }` asks
+   `scheduler`.** It is a source: `start { schedule(scheduler, 0s) }` asks
    for evaluation in the starting cycle, which is how a static node's
    `schedule_on_start` is spelled. The implicit `valid()` of such a
    function is vacuously true and its implicit `modified()` never holds.
@@ -77,7 +81,7 @@ blocker LIB-002). Both are the scheduler case.
 - The language model's open questions on bare handlers without temporal
   parameters and on the explicit empty activation set are closed by
   decisions 3 and 4. LIB-002 (collection startup) can now be spelled with
-  `start { scheduler.schedule(0s) }` and `when scheduled()`; closing it is
+  `start { schedule(scheduler, 0s) }` and `when scheduled()`; closing it is
   library work, not language work.
 - `scheduled`, `passivate` and `activate` are intrinsic names and cannot be
   used as identifiers.

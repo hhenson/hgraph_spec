@@ -258,7 +258,7 @@ fn running_total(value: f64) -> f64 {
     inject out, logger
 
     start {
-        logger.info("starting")
+        info(logger, "starting")
     }
 
     when modified(value) && valid(value) {
@@ -267,7 +267,7 @@ fn running_total(value: f64) -> f64 {
     }
 
     stop {
-        logger.info("stopping")
+        info(logger, "stopping")
     }
 }
 ```

@@ -55,8 +55,8 @@ or process-global lookup operation.
 - A node cannot request both capabilities. They are not admitted in value
   functions, native value-helper signatures or composition bodies, and their
   requirements do not propagate transitively through value helpers in this
-  slice. Direct capability methods are the only storage-access primitives.
-- A borrowed capability cannot be assigned, returned, passed as a value,
+  slice. Approved capability functions are the only storage-access primitives.
+- A borrowed capability cannot be assigned, returned, passed as an ordinary value,
   put in a closure, or kept in state/cache. No capability reference may be
   retained outside its call. Its owned scalar results
   follow the ordinary value rules instead.
@@ -86,22 +86,23 @@ input position contains a tick. Empty input does not bypass graph start/stop.
 Physical sharing of immutable input data is allowed; mutable cursor and
 capture state cannot leak between nodes or separate eval invocations.
 
-## Exact capability methods
+## Exact capability operations
 
-These are receiver methods of the injected capability, not ordinary HGL
-resource-type declarations. T below is the concrete contextual payload type.
+These use [receiver-first capability functions](../capability-function-syntax.md),
+not methods or ordinary HGL resource-type declarations. T below is the
+concrete contextual payload type.
 Names and argument types are fixed by this extension; ordinary positional
 and named argument binding applies.
 
 | Signature | Allowed phase | Result or effect |
 |---|---|---|
-| `replay_input.length() -> i64` | start, evaluation | Number of slots, including absent slots. |
-| `replay_input.has_tick(index: i64) -> bool` | start, evaluation | Presence at an in-bounds position, independent of payload truthiness or equality. |
-| `replay_input.delta_at(index: i64) -> T` | evaluation | Owned scalar delta at an in-bounds present position. |
-| `capture.begin()` | start | Mark the configured empty recording begun. No output, scheduling or publication. |
-| `capture.append(time: datetime, delta: T)` | evaluation | Append one time and independent owned scalar delta to a begun recording. |
+| `len(replay_input) -> i64` | start, evaluation | Number of slots, including absent slots. |
+| `has_tick(replay_input, index: i64) -> bool` | start, evaluation | Presence at an in-bounds position, independent of payload truthiness or equality. |
+| `delta_at(replay_input, index: i64) -> T` | evaluation | Owned scalar delta at an in-bounds present position. |
+| `begin(capture)` | start | Mark the configured empty recording begun. No output, scheduling or publication. |
+| `append(capture, time: datetime, delta: T)` | evaluation | Append one time and independent owned scalar delta to a begun recording. |
 
-No capability method is admitted in stop. No method schedules, publishes an
+No replay/capture operation is admitted in stop. No operation schedules, publishes an
 endpoint, deduplicates values, applies a delta to an output, advances a
 cursor, inserts no-tick cells, or performs dense-result padding. HGL determines
 when to call these storage operations.
@@ -115,19 +116,19 @@ extraction. The returned eval sequence is owned independently of disposed
 graph storage. Extraction may copy or transfer owned storage; no borrowed
 hook view escapes in either case.
 
-## Meaning of `delta_at(index)`
+## Indexed replay reads
 
 `replay_input` gives a replay source access to its configured input sequence.
-`delta_at(index)` reads the delta supplied at one position in that sequence.
+`delta_at(replay_input, index)` reads the delta supplied at one position in that sequence.
 The index is zero-based and counts every slot, including `_` slots; it is
 not a timestamp, an offset from the current evaluation, or an output index.
 A delta here means the update to publish to the time series, not an
 arithmetic difference between successive scalar values. For this scalar
 profile, the update is the scalar itself, so the result type is T.
 
-For the input sequence `[10, _, 12]`, `replay_input.length()` is 3:
+For the input sequence `[10, _, 12]`, `len(replay_input)` is 3:
 
-| Index | Supplied slot | `has_tick(index)` | `delta_at(index)` |
+| Index | Supplied slot | `has_tick(replay_input, index)` | `delta_at(replay_input, index)` |
 |---|---|---|---|
 | 0 | `10` | `true` | Returns an owned `10`. |
 | 1 | `_` | `false` | Raises `replay_input: slot has no tick`. |
@@ -135,18 +136,18 @@ For the input sequence `[10, _, 12]`, `replay_input.length()` is 3:
 
 An absent slot has no delta to read. Reading it does not return the previous
 held value or a default value. The presence check and read have separate
-roles: `has_tick(index)` tests whether a delta was supplied, and `delta_at(index)`
+roles: `has_tick(replay_input, index)` tests whether a delta was supplied, and `delta_at(replay_input, index)`
 retrieves that delta when present.
 
 The read does not consume the slot, advance the index, schedule the source,
 or publish to its output. The replay body owns its cursor and timing;
-`return replay_input.delta_at(current)` reads the configured delta and then
+`return delta_at(replay_input, current)` reads the configured delta and then
 publishes it through the normal runtime return operation. Repeated valid
 reads of one slot retrieve the same supplied delta with independent ownership.
-The index need not equal a current-cycle counter: this method is indexed
+The index need not equal a current-cycle counter: this function is indexed
 buffer access, and the replay body establishes the sequence-to-cycle mapping.
 
-`delta_at(index)` is a method of `replay_input`, not a time-series accessor.
+`delta_at(replay_input, index)` is a buffer function, not a time-series accessor.
 `delta_value(v)` reads the delta that a live temporal endpoint v published in
 the current cycle. The two operations read different sources: a configured
 input-sequence slot versus a live endpoint's current publication. Neither
@@ -161,7 +162,7 @@ node starts. Diagnostics name the capability and the rejected requirement.
 No failure is converted into a default scalar, an absent slot, or successful
 empty output.
 
-Within an admitted hook, fallible capability methods use the `translated`
+Within an admitted hook, fallible capability operations use the `translated`
 error policy and [node error model](0009-native-errors-and-the-node-error-model.md). During
 evaluation a failure ends that evaluation and follows the node error
 output/enclosing graph propagation rules. Start failures follow
@@ -215,19 +216,19 @@ requires T in {bool, i64, f64, str, date, time, datetime, duration}
     cache index: i64 = 0
 
     start {
-        if replay_input.length() > 0 {
-            alarm.schedule(0s)
+        if len(replay_input) > 0 {
+            schedule(alarm, 0s)
         }
     }
 
     when {
         let current = index
         index += 1
-        if index < replay_input.length() {
-            alarm.schedule_at(clock.next_cycle_evaluation_time())
+        if index < len(replay_input) {
+            schedule_at(alarm, next_cycle_evaluation_time(clock))
         }
-        if replay_input.has_tick(current) {
-            return replay_input.delta_at(current)
+        if has_tick(replay_input, current) {
+            return delta_at(replay_input, current)
         }
     }
 }
@@ -238,11 +239,11 @@ requires T in {bool, i64, f64, str, date, time, datetime, duration}
     inject capture
 
     start {
-        capture.begin()
+        begin(capture)
     }
 
     when {
-        capture.append(last_modified(ts), delta_value(ts))
+        append(capture, last_modified(ts), delta_value(ts))
     }
 }
 ```
@@ -276,6 +277,6 @@ slots. Presence depends only on the slot, not on its payload.
 
 No persistence/checkpoint/restart contract, timed input interface, general
 resource ownership language, shared capture writer, untyped global registry,
-or collection delta API is introduced. The source/capture methods are a
+or collection delta API is introduced. The source/capture operations are a
 bounded language facility borrowing an already-owned run resource; they do
 not settle the broader resource concept left open by runtime state/cache.

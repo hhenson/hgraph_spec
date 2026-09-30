@@ -107,9 +107,9 @@ The wrapper composes the generic compute node; it does not replace that
 node with identity wiring. No explicit generic-call syntax is introduced.
 
 For the same reason the ADR 0016 record body calls
-`capture.append(last_modified(ts), delta_value(ts))`. Its scalar delta is an
+`append(capture, last_modified(ts), delta_value(ts))`. Its scalar delta is an
 ordinary T, so the capability signature is unchanged. Replay already obtains
-explicit deltas through `replay_input.delta_at(index)`.
+explicit deltas through `delta_at(replay_input, index)`.
 
 ## Consequences
 

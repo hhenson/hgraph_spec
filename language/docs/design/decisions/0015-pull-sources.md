@@ -25,10 +25,10 @@ write an explicit resume state machine.
 ### 1. `inject alarm` binds the stateless scheduler
 
 `alarm` is an injectable that maps to `SingleShotScheduler`. It offers
-`alarm.schedule(delay)` and `alarm.schedule_at(time)`, both available in
+`schedule(alarm, delay)` and `schedule_at(alarm, time)`, both available in
 `start` and during evaluation. Repeated requests keep the earliest time; a
 later request never cancels or postpones an earlier one. There is no
-`is_scheduled()`, no `next_scheduled_time()`, no tag, no `un_schedule`, and
+`is_scheduled(alarm)`, no `next_scheduled_time(alarm)`, no tag, no `un_schedule`, and
 no wall-clock argument; using any of them names `scheduler` in the
 diagnostic.
 
@@ -56,8 +56,8 @@ generator (decision 3).
 | --- | --- | --- |
 | Node state | none | pending events (tagged inside hgraph; tags are not exposed, ADR 0010) |
 | After a restore | `start` re-arms; nothing is restored | pending alarms are restored |
-| Requests | `schedule(delay)`, `schedule_at(time)`; earliest wins | the same, plus `is_scheduled()` and `next_scheduled_time()` |
-| Wall clock | no | `schedule(delay, true)` under a real-time executor |
+| Requests | `schedule(alarm, delay)`, `schedule_at(alarm, time)`; earliest wins | `schedule(scheduler, delay)`, `schedule_at(scheduler, time)`, `is_scheduled(scheduler)`, `next_scheduled_time(scheduler)` |
+| Wall clock | no | `schedule(scheduler, delay, true)` under a real-time executor |
 | Admitted in | sources only | any runtime function |
 
 A source injects one of the two, never both: it has one wake-up mechanism.
@@ -74,7 +74,7 @@ library's `const` itself is a consequence, not this decision).
 ```hgl
 fn constant(const value: i64, const delay: duration = 0s) -> i64 {
     inject alarm
-    start { alarm.schedule(delay) }
+    start { schedule(alarm, delay) }
     when { return value }
 }
 

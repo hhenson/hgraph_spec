@@ -45,21 +45,21 @@ fn pass_through<T>(value: T) -> T {
 }
 ```
 
-## Typed buffers and exact method relationships
+## Typed buffers and exact operation relationships
 
 The following table uses `delta_of(T)` solely as specification notation,
 not callable HGL syntax or an ordinary source type annotation.
 
-| Capability method | Contextual result or argument |
+| Capability operation | Contextual result or argument |
 |---|---|
-| `replay_input.length() -> i64` | Unchanged: number of present and absent slots. |
-| `replay_input.has_tick(index: i64) -> bool` | Unchanged: the slot's presence flag. |
-| `replay_input.delta_at(index: i64)` | Owned contextual result `delta_of(T)`, where T is the source output shape. |
-| `capture.begin()` | Unchanged: create the present empty recording. |
-| `capture.append(time: datetime, delta: delta_of(T))` | Contextual delta argument for the sink's exact input shape T; independent owned capture. |
+| `len(replay_input) -> i64` | Unchanged: number of present and absent slots. |
+| `has_tick(replay_input, index: i64) -> bool` | Unchanged: the slot's presence flag. |
+| `delta_at(replay_input, index: i64)` | Owned contextual result `delta_of(T)`, where T is the source output shape. |
+| `begin(capture)` | Unchanged: create the present empty recording. |
+| `append(capture, time: datetime, delta: delta_of(T))` | Contextual delta argument for the sink's exact input shape T; independent owned capture. |
 
 The index still identifies a zero-based position in the configured replay
-sequence, as explained in [the meaning of `delta_at`](decisions/0016-eval-scalar-buffer-capabilities.md#meaning-of-delta_atindex).
+sequence, as explained in [the meaning of `delta_at`](decisions/0016-eval-scalar-buffer-capabilities.md#indexed-replay-reads).
 This extension changes the delta payload's shape, not the meaning of the
 index or the source of the data. For example, a slot containing
 `delta<map<i64, i64>>(upsert: [1: 11])` supplies that sparse update when read.
@@ -68,7 +68,7 @@ It does not supply a complete map or fill in other keys from earlier slots.
 
 `delta_at` is admitted only in evaluation, with an in-bounds present slot.
 Its contextual result can be returned directly by replay. `append` remains
-evaluation-only, and `begin` remains start-only. No method is admitted in
+evaluation-only, and `begin` remains start-only. No replay/capture operation is admitted in
 stop. Existing bounds, absence, beginning, timestamp and allocation-failure
 rules, validation order and diagnostic prefixes remain unchanged.
 
@@ -85,11 +85,11 @@ teardown cannot change an earlier capture. No borrowed child view, member
 range or endpoint reference escapes. Immutable physical sharing is allowed
 only when these independence guarantees hold.
 
-The methods do not schedule, publish, apply, deduplicate, advance a cursor,
+These operations do not schedule, publish, apply, deduplicate, advance a cursor,
 or insert silent cells. The HGL record evaluation remains:
 
 ```hgl
-when { capture.append(last_modified(ts), delta_value(ts)) }
+when { append(capture, last_modified(ts), delta_value(ts)) }
 ```
 
 ## Dense literals, validation and comparison

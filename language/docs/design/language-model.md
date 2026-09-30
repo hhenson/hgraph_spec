@@ -641,7 +641,7 @@ fn combined_total(a: f64, b: f64) -> f64 {
     inject out, logger
 
     start {
-        logger.info("starting")
+        info(logger, "starting")
     }
 
     when modified(a) && valid(a) {
@@ -655,7 +655,7 @@ fn combined_total(a: f64, b: f64) -> f64 {
     }
 
     stop {
-        logger.info("stopping")
+        info(logger, "stopping")
     }
 }
 ```
@@ -685,7 +685,7 @@ injectable whose type comes from the function result and permits the runtime
 body to inspect or incrementally update its output. Other injectables, such as
 `logger`, `clock`, `scheduler` and `alarm`, map to their hgraph selector
 contracts (`LoggerView`, `EvaluationClockView`, `NodeScheduler`,
-`SingleShotScheduler`; ADR 0010 fixes the clock and scheduler method
+`SingleShotScheduler`; ADR 0010 fixes the clock and scheduler function
 surfaces, [ADR 0015](decisions/0015-pull-sources.md) the alarm's).
 
 `start` and `stop` execute once at node startup and teardown. State storage and

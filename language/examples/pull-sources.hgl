@@ -12,7 +12,7 @@ impl fn sink(ts: signal) { when { } }
 # runs on every evaluation, which is the alarm firing.
 export fn constant_after(const value: i64, const delay: duration = 0s) -> i64 {
     inject alarm
-    start { alarm.schedule(delay) }
+    start { schedule(alarm, delay) }
     when { return value }
 }
 
