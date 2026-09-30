@@ -6,8 +6,9 @@ reasoned traces and accepted decisions. No Python, C++ or Rust code lives here.
 - [Language model](language/docs/design/language-model.md)
 - [Source documentation](language/docs/design/documentation.md)
 - [Language guide](language/docs/user-guide/language-tour.md)
-- [Runtime model](runtime/overview.md) and [wiring](runtime/wiring.md)
-- [Conformance method](runtime/conformance.md)
+- [Runtime model](runtime/overview.md) and [conformance method](runtime/conformance.md)
+- [Wiring](wiring/wiring.md): how every front end describes a graph
+- [Library contracts](library/README.md): what standard library operators publish
 - [Historical reference](historical/README.md)
 
 [hgraph_spec_audit](https://github.com/hhenson/hgraph_spec_audit) owns executable

@@ -56,9 +56,11 @@ output. That is a cost choice, not a different collection contract.
 An input may also be **local**, holding a time-series of its own with no
 output behind it.
 
-An input is **active** or **passive**. A notification on an active input
-schedules its node. A passive input is just as readable, and keeps track of
-what it has seen, but wakes nothing.
+An input is **active** or **passive**, or, for a collection with
+membership, **structural**. A notification on an active input schedules its
+node. A passive input is just as readable, and keeps track of what it has
+seen, but wakes nothing. A structural input wakes its node when members come
+and go and not when their values tick (see Node, NOD-28).
 
 ### Notification
 
@@ -80,7 +82,7 @@ discover the change through *valid*.
 | **TSL** | `list<T, n>`, `list<T>` | A list of time-series: a fixed number of them, or a list that grows and shrinks at its end |
 | **TSS** | `set<T>` | A set of scalar values, with what was added and removed |
 | **TSD** | `map<K, V>` | A dictionary from scalar keys to time-series, whose keys come and go while the graph runs |
-| **TSW** | `rolling<T, size>` | A window over the most recent values of one scalar: the last *n* ticks, or the last span of time |
+| **TSW** | `rolling<T, size>` | A window over the most recent values of one scalar: the last *n* ticks (a **tick window**), or the last span of time (a **duration window**) |
 | **REF** | — | A reference to another time-series: a value that says *which* time-series, not what it holds |
 | **SIGNAL** | `signal` | A tick with no payload |
 
@@ -142,7 +144,7 @@ State
 | watchers | An output | The inputs bound to it |
 | bound to | An input | An output, or nothing |
 | role | An input | Peered, non-peered or local. A reference may change a fixed collection between whole-output and child bindings |
-| active | An input | Set from the node type when the node starts; the node may change it |
+| active | An input | Active, passive or structural. Set from the node type when the node starts; the node may change it |
 
 A **non-peered** fixed input is valid when any child is valid, and all valid
 when itself and every child are valid. While it remains valid, child ticks
@@ -172,10 +174,10 @@ stateDiagram-v2
 | TS | The scalar | The same scalar | Same as valid |
 | TSB | Every declared field, with nil for an invalid child | The valid modified fields, by name, each with its own delta | Every field valid |
 | TSL, fixed | The elements, by position | The valid modified elements, by position, each with its own delta | Every element valid |
-| TSL, growing | The elements, by position | Positions removed from the end, and the modified elements by position. Never both added and removed positions in one cycle | Every element valid |
+| TSL, growing | The elements, by position | Positions removed from the end, and the modified elements by position; a position that joined is a modified position. Never both added and removed positions in one cycle | Every element valid |
 | TSS | The set | The elements **added** and the elements **removed** | Same as valid |
 | TSD | The live keys, each with its child's value — nil where the child is not yet valid | The keys **removed**, and the modified keys each with its child's delta. Which keys were **added** in this cycle is asked of the dictionary; it is not a separate part of the delta | Every live key's child valid. Removed keys do not count |
-| TSW | The values in the window, oldest first, each with the time it arrived | The value that arrived in this cycle | The window holds its minimum: enough ticks, or enough span |
+| TSW | The values in the window, oldest first, each with the time it arrived | The value that arrived in this cycle. The value it evicted, if any, is readable beside it as the **removed value** | The window holds its minimum: enough ticks, or enough span |
 | REF | The reference | The reference | Same as valid |
 | SIGNAL | True | True | Same as valid |
 
@@ -248,7 +250,37 @@ times reset to *never* instead (TS-26).
   child is gone, and inputs that were bound to it are unbound.
 - **Growing lists** shrink only from the end. Removed elements are kept for
   the rest of the cycle in the same way, and growing again in that cycle
-  brings the same elements back.
+  brings the same elements back, with their values and times. Growth and
+  truncation in one cycle net out: a list that goes from five to three to
+  four elements reports positions from four removed and position three
+  modified, and applying that delta in order — truncate to the lowest
+  removed position, then apply the modified positions — reproduces the
+  result. The list's own tick is the net change; a cycle in which it grew and
+  shrank back to the same size with no element written is not a tick.
+
+### Windows
+
+A window holds the most recent values of one scalar, each with the time it
+arrived. A **tick window** holds the last *n* values; a **duration window**
+holds the values that arrived within the last span of time. Each has a
+**minimum**: a number of values, or a span, below which the window is not
+yet *all valid*.
+
+- A value arrives when the window's node writes one; that is the window's
+  tick, and its delta.
+- Arrival evicts. A full tick window drops its oldest value to make room; a
+  duration window drops every value older than the span, measured from the
+  arriving value's time. What a cycle evicted is readable in that cycle as
+  the window's removed value, and only then. Eviction happens on arrival and
+  at no other time: a duration window whose values are ageing does not tick
+  or shrink until something arrives.
+- A window is **valid** from its first value and **all valid** once it holds
+  its minimum; it does not become less than all valid again by eviction,
+  since eviction only follows arrival.
+- Reading the window gives its values oldest first, and their times.
+
+Clearing a window, and evicting on a timer rather than on arrival, are not
+part of the window (Deferred).
 - A dictionary's **key set** is itself a time-series, a TSS, that can be
   bound to on its own. It ticks when keys come and go and not when their
   values change.
@@ -332,6 +364,43 @@ A SIGNAL input may be bound to an output of any kind. It shows only that the
 output ticked: it reads modified when the output does, and has no value worth
 reading. It is how a node says "wake me when that changes; I do not care what
 it is".
+
+### What may bind to what
+
+An input of one type may be bound to an output of another only when the rule
+below admits it (TS-29). Wiring checks it before the edge exists; a runtime
+loading a stored description checks it again (GRF-7); a re-binding while the
+graph runs is held to it too.
+
+| Input | May be bound to an output of |
+|---|---|
+| any type X | X |
+| SIGNAL | any type |
+| REF of X | X, or REF of X |
+| X | REF of X: the input follows the reference |
+| a bundle | a bundle with the same fields, each field admitting the other's; names pair fields, order does not matter; when both bundles are named the names must be equal, and an unnamed bundle matches a named one by its fields |
+| a fixed list | a fixed list of the same size whose element admits the other's |
+| a growing list | a growing list whose element admits the other's |
+| a dictionary | a dictionary with the same key type whose child admits the other's |
+| a set, a window | the same type |
+
+The rule applies at every depth: a bundle field that is a reference stays a
+reference, and a field that is a bundle is matched by the bundle row.
+Nothing else is admitted; in particular no scalar conversion happens at a
+binding, and a fixed list never binds to a growing one.
+
+### Feedback
+
+A **feedback** carries a value from a later-ranked node to an earlier one
+without a backward binding: a sink takes the value in one cycle, and a pull
+source publishes it in the next, one smallest step later at the earliest.
+The delivered value is a copy taken by the sink; the source publishes it as
+its own tick. A feedback carries values only, never references (TS-28,
+owner 2026-09-30): a reference designates an output that must already have
+been evaluated when the consumer reads through it (TS-20), and a source
+ranked before the designated output cannot promise that. A feedback of a
+reference type is refused when the graph is described. The feedback operator
+itself is a library operator ([../library/](../library/README.md)).
 
 
 Rules
@@ -435,13 +504,34 @@ Rules
   consumer. Time and modification may be maintained locally from child events;
   reads need not recompute them. Caches obey invalidation and rebind resets.
   Several consumers may instead share one assembly node and output.
+- **TS-28** A feedback carries a value, never a reference. A reference is
+  bound through only by a consumer of higher rank than the output it
+  designates; no construct carries one to a lower rank (owner, 2026-09-30).
+- **TS-29** An input is bound to an output only when the table under "What
+  may bind to what" admits the pair, at every depth. There is no conversion
+  at a binding.
+- **TS-30** A window ticks when a value arrives; its delta is that value.
+  Arrival is the only cause of eviction: a full tick window drops its oldest
+  value, a duration window drops the values older than its span from the
+  arriving value's time. What a cycle evicted is readable in that cycle only,
+  as the removed value.
+- **TS-31** A window is valid from its first value and all valid once it
+  holds its minimum number of values or span; it stays all valid thereafter.
+- **TS-32** A growing list's delta is the net of the cycle: positions
+  removed from the end and positions modified, including those that joined.
+  Applying it truncates to the lowest removed position and then applies the
+  modified positions. Growing and shrinking back to the same size without a
+  write is not a tick. A truncated element is readable for the rest of the
+  cycle and comes back, with its value and time, if the list grows over its
+  position again in that cycle; from the next cycle it is gone (GRF-25).
 
 
 Deferred
 --------
 
 - **Clearing a window**, and windows that evict on a timer rather than on
-  arrival (hgraph RFCs 0006 and 0007, neither accepted).
+  arrival (hgraph RFCs 0006 and 0007, neither accepted). Optional if
+  provided.
 - **How the two directions of reference binding are carried out.** hgraph
   has the *output* own a converted view of itself for each kind of input that
   asks; that is a mechanism, and only what an input sees is specified here.
@@ -461,23 +551,14 @@ Points to settle
 3. **Expired stored references** follow TS-23, confirmed 2026-09-21.
    REF-EXPIRES fixes the cycle boundary and distinguishes using a saved
    reference from inserting a new dictionary member.
-4. **A reference carried backward.** TS-20 holds by construction so long as
-   references travel only along edges. The one way to break it is to carry a
-   reference backward — through a feedback, into a lower-ranked node — and
-   bind through it there: that node would then read an output not yet
-   evaluated in the cycle. Is that simply a mistake in the graph, or
-   something the runtime should refuse when the input is bound?
-5. **When are two types compatible at a binding?** GRF-7 requires an edge's
-   source and target to have compatible types, and nothing yet says what
-   that means in full. The pieces that are stated: the same type is
-   compatible; a reference and what it refers to are interchangeable; a
-   SIGNAL input accepts any output. The piece that is not: hgraph lets a
-   named bundle and an un-named bundle with the same fields be bound to each
-   other, but not two bundles with different names. It needs one rule, here,
-   before bundles are built.
-6. **Structural inputs.** hgraph lets a node type mark a collection input as
-   waking the node only when members come and go. It is a third setting
-   beside active and passive, and is not defined here yet.
+4. **A reference carried backward.** Settled 2026-09-30 (owner): a feedback
+   may not operate on a reference; a reference is always of lower rank than
+   its consumer (TS-28). Wiring refuses a feedback of a reference type.
+5. **When are two types compatible at a binding?** Settled 2026-09-30: the
+   table under "What may bind to what" and TS-29, with the bundle rule the
+   owner gave on 2026-09-26 (WIR-15).
+6. **Structural inputs.** Settled 2026-09-30: a third input activity,
+   defined in Node (NOD-28).
 7. **The delta of a whole value.** HGL leaves the result shape of `delta(x)`
    open. The table under State is hgraph's.
 8. **Before the first tick.** HGL leaves `valid` and `last_modified` before a

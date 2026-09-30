@@ -305,7 +305,7 @@ Ignoring REF for compatibility does not make an invalid type formation legal.
 ## Generic inference through references
 
 HGL resolves a generic call by the runtime specification's
-[Wiring](../../../runtime/wiring.md) rules, which every front
+[Wiring](../../../wiring/wiring.md) rules, which every front
 end shares (WIR-14): the bindings HGL infers are the bindings the runtime
 reaches for the same call.
 

@@ -43,7 +43,7 @@
       "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
     },
     {
-      "path": "runtime/cases_wiring.md",
+      "path": "wiring/cases_wiring.md",
       "source_project": "hgraph",
       "source_path": "docs/source/runtime_spec/cases_wiring.md",
       "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
@@ -97,7 +97,7 @@
       "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
     },
     {
-      "path": "runtime/operators.md",
+      "path": "library/operators.md",
       "source_project": "hgraph",
       "source_path": "docs/source/runtime_spec/operators.md",
       "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
@@ -565,7 +565,7 @@
       "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
     },
     {
-      "path": "runtime/wiring.md",
+      "path": "wiring/wiring.md",
       "source_project": "hgraph",
       "source_path": "docs/source/runtime_spec/wiring.md",
       "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
@@ -1159,7 +1159,7 @@
       "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
     },
     {
-      "path": "runtime/cases_wiring.md",
+      "path": "wiring/cases_wiring.md",
       "source_project": "hgl",
       "source_path": "docs/runtime_spec/cases_wiring.md",
       "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
@@ -1657,7 +1657,7 @@
       "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
     },
     {
-      "path": "runtime/wiring.md",
+      "path": "wiring/wiring.md",
       "source_project": "hgl",
       "source_path": "docs/runtime_spec/wiring.md",
       "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
