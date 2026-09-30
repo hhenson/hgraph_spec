@@ -8,7 +8,9 @@ Its admitted profile is a fresh, finite, dense eval of `bool`, `i64`, `f64`,
 `str`, `date`, `time`, `datetime`, or `duration`. In this profile a TS delta
 is its scalar value. Collection and structured types, `atomic` wrappers,
 references, signals, windows, other scalars, persistence, checkpointing and
-restarting a stopped instance are not admitted by this extension.
+restarting a stopped instance are not admitted by this extension. The separate
+[collection eval extension](../eval-collection-deltas.md) widens the shape
+and contextual-payload domain for ordinary nonempty publication traces.
 
 ## Operator signatures
 

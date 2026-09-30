@@ -299,3 +299,10 @@ in the [audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs
 An implementation may interpret a graph or compile it to native code. Both
 must preserve the same test outcomes, ticks and effects. Toolchain, cache and
 platform requirements belong to the implementation's documentation.
+
+The proposed [collection delta eval profile](../design/eval-collection-deltas.md)
+uses `delta<T>(...)` literals for sets, fixed lists, bundles and integer-key maps,
+including recursive child updates. The target still uses `delta_value(value)`;
+eval owns replay and recording. Its ordinary nonempty publication admission
+excludes empty events, invalidation and REF designation pending separate
+contracts. `_` continues to mean no publication.
