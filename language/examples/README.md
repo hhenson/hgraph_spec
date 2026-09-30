@@ -48,7 +48,7 @@ The entries below identify the implementation tests for each example.
 - [`lifecycle-capabilities.hgl`](lifecycle-capabilities.hgl) injects the
   node scheduler and the evaluation clock: a scheduler-driven source with no
   temporal input (`start { schedule(scheduler, 0s) }`, `when scheduled()`),
-  `passivate(input)` after a count, and `evaluation_time(clock)` (ADR 0010).
+  `passivate(input)` after a count, and `clock.evaluation_time` (ADR 0010).
 - [`native-provider.hgl`](native-provider.hgl) separates native scalar declarations
   from their providers and exercises injectable propagation through helpers.
   Implementations and provider binding tests live with each compiler/runtime.

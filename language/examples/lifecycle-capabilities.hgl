@@ -51,7 +51,7 @@ export fn stamped(value: i64) -> datetime {
     inject clock
 
     when modified(value) && valid(value) {
-        return evaluation_time(clock)
+        return clock.evaluation_time
     }
 }
 
@@ -91,7 +91,7 @@ export fn controlled(value: i64, enabled: bool) -> i64 {
 export fn at_time(const alarm: datetime) -> datetime {
     inject clock, scheduler
     start { schedule_at(scheduler, alarm, false) }
-    when scheduled() { return evaluation_time(clock) }
+    when scheduled() { return clock.evaluation_time }
 }
 
 # A `cache` is node-local data outside record/replay: it is re-initialized on

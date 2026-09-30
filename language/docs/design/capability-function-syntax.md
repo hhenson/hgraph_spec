@@ -1,29 +1,32 @@
-# Capability functions in HGL source
+# Capability access in HGL source
 
 Status: source-syntax clarification, 2026-09-30.
 
-HGL invokes capability operations with ordinary function-call syntax and the
-capability as the first argument. It does not have a capability method-call
-form or method-call aliases. A dot selects a field where field projection is
-admitted; it does not supply an implicit receiver to a call.
+HGL reads [clock observations](clock-properties.md) through read-only
+properties and replay slots through indexing. Capability actions and the
+other specified queries use ordinary function-call syntax with the
+capability as the first argument. There are no capability method calls or
+method-call aliases. A dot selects a property or field where admitted;
+it does not supply an implicit receiver to a call.
 
-The first capability argument is a direct name introduced by `inject`.
+In a capability function call, the first argument is a direct name introduced
+by `inject`.
 It is an approved borrowing position of the selected capability operation,
 not an ordinary first-class value. This rule does not permit assigning,
 returning, storing or passing a capability to arbitrary user functions.
 Existing capability availability, phases, ownership and failure rules remain
 unchanged. Native implementation interfaces do not prescribe HGL spelling.
 
-| Capability | Source forms |
-|---|---|
-| `clock` | `evaluation_time(clock)`, `now(clock)`, `next_cycle_evaluation_time(clock)` |
-| `scheduler` | `schedule(scheduler, delay)`, `schedule(scheduler, delay, on_wall_clock)`, `schedule_at(scheduler, time)`, `schedule_at(scheduler, time, on_wall_clock)`, `is_scheduled(scheduler)`, `next_scheduled_time(scheduler)` |
-| `alarm` | `schedule(alarm, delay)`, `schedule_at(alarm, time)` |
-| `logger` | `info(logger, value)` for the existing informational logging operation |
-| `replay_input` | `len(replay_input)`; slot access uses `replay_input[index]` |
-| `capture` | `begin(capture)`, `append(capture, time, delta)` |
+| Capability | Access form | Source forms |
+|---|---|---|
+| `clock` | Read-only properties, each `datetime` | `clock.evaluation_time`, `clock.now`, `clock.next_cycle_evaluation_time` |
+| `scheduler` | Receiver-first functions | `schedule(scheduler, delay)`, `schedule(scheduler, delay, on_wall_clock)`, `schedule_at(scheduler, time)`, `schedule_at(scheduler, time, on_wall_clock)`, `is_scheduled(scheduler)`, `next_scheduled_time(scheduler)` |
+| `alarm` | Receiver-first functions | `schedule(alarm, delay)`, `schedule_at(alarm, time)` |
+| `logger` | Receiver-first functions | `info(logger, value)` for the existing informational logging operation |
+| `replay_input` | Length function and indexing | `len(replay_input)`; slot access uses `replay_input[index]` |
+| `capture` | Receiver-first functions | `begin(capture)`, `append(capture, time, delta)` |
 
-These operation names are prelude names, not new reserved words. The direct
+These function names are prelude names, not new reserved words. The direct
 capability operand distinguishes these forms from ordinary graph operators
 with the same name, such as the standard `schedule` operator. No ordinary
 overload may receive the capability as a first-class value. Existing named

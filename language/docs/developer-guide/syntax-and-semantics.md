@@ -1919,7 +1919,7 @@ requests only the selectors it uses. Unknown capabilities and use from an
 unsupported phase are diagnostics. `out` is a
 special injectable inferred from the result type; it is invalid on an
 outputless function and is initially available only during evaluation, not in
-`start` or `stop`. The clock and scheduler functions, the `scheduled()` handler
+`start` or `stop`. The clock properties and scheduler functions, the `scheduled()` handler
 selector, and the `passivate`/`activate` statements are fixed by
 [ADR 0010](../design/decisions/0010-lifecycle-capabilities.md); `scheduled`,
 `passivate` and `activate` are intrinsic names. A runtime function without
@@ -1929,11 +1929,12 @@ temporal parameters must inject `scheduler` or `alarm`, or be a generator
 and `schedule_at(alarm, time)`, earliest request wins, nothing recorded or
 recovered, admitted in sources only.
 
-Capability calls use [receiver-first function syntax](../design/capability-function-syntax.md),
-such as `evaluation_time(clock)`, `schedule(alarm, delay)` and
-`info(logger, value)`. HGL has no method-call alias for these operations.
-The capability is a direct approved borrowing operand, not a first-class
-argument that can be passed to an arbitrary function.
+Capability access uses [read-only clock properties](../design/clock-properties.md),
+such as `clock.evaluation_time`, and [receiver-first functions](../design/capability-function-syntax.md),
+such as `schedule(alarm, delay)` and `info(logger, value)`. HGL has no
+method-call aliases; the clock properties have no free-function aliases.
+The direct capability access or approved first argument does not make the
+capability a first-class value that can be passed to an arbitrary function.
 
 `replay_input[index]` uses ordinary indexing syntax with an i64 index. An
 in-bounds absent slot returns `null`; an out-of-bounds index raises the

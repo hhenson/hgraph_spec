@@ -31,7 +31,7 @@ export fn lifted_audited(value: i64) -> i64 => audit(value)
 
 const fn stamp() -> datetime {
     inject clock
-    return evaluation_time(clock)
+    return clock.evaluation_time
 }
 
 export fn stamped(value: i64) -> datetime {

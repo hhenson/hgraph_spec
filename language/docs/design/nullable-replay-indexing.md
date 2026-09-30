@@ -109,7 +109,7 @@ when {
     let current = index
     index += 1
     if index < len(replay_input) {
-        schedule_at(alarm, next_cycle_evaluation_time(clock))
+        schedule_at(alarm, clock.next_cycle_evaluation_time)
     }
     let item = replay_input[current]
     if item != null {

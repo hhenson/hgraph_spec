@@ -24,13 +24,21 @@ blocker LIB-002). Both are the scheduler case.
 
 ## Decision
 
-All source calls below use the
-[capability-function syntax](../capability-function-syntax.md); no receiver
+Clock observations use [read-only properties](../clock-properties.md).
+Capability actions and the scheduler queries below use
+[receiver-first functions](../capability-function-syntax.md); no receiver
 method-call aliases are admitted.
 
 1. **`inject clock`** provides the evaluation clock as `clock` in every
-   hook. `evaluation_time(clock)`, `now(clock)` (wall clock) and
-   `next_cycle_evaluation_time(clock)` return `datetime`.
+   hook. `clock.evaluation_time`, `clock.now` and
+   `clock.next_cycle_evaluation_time` are read-only `datetime` properties.
+   Evaluation time is the current cycle's logical time and remains constant
+   throughout that cycle. Next-cycle evaluation time is evaluation time plus
+   the engine's smallest step and is equally stable within the cycle. Now is
+   the engine's current wall-time estimate: UTC computer time in real time,
+   or evaluation time plus the current cycle's elapsed lag in simulation.
+   Repeated reads of now may differ. Neither method-call nor free-function
+   aliases are admitted for these properties.
 
 2. **`inject scheduler`** provides the node scheduler as `scheduler` in
    every hook. `schedule(scheduler, delay)` and
