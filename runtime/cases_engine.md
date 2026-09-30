@@ -1,0 +1,83 @@
+# Engine cases
+
+Status: proposed 2026-09-30, reasoned from ENG-1 to ENG-16; not yet run.
+Times are offsets from the run's start time in smallest steps. `—` means no
+cycle.
+
+## ENGINE-BOUNDS — ENG-1, ENG-3, ENG-5
+
+Simulation. A source on the scheduler publishes at 0, 3, 6 and 9 (it
+requests the start time in start, then 3 cycles on each time). The run's end
+time is 6.
+
+| Offset | Cycle runs | Published |
+|---|---|---|
+| 0 | yes | 0 |
+| 3 | yes | 3 |
+| 6 | no: the end time is exclusive | — |
+
+The run ends when the next scheduled time is not before the end time. The
+source is stopped once; its pending request is discarded with it. A second
+run from the same description starts fresh at 0.
+
+## ENGINE-NOTHING-SCHEDULED — ENG-5
+
+Simulation. A source publishes at 0 and asks for nothing more. The run ends
+after cycle 0 although the end time is far later: a simulation with nothing
+scheduled is finished. In real time the same graph would wait for an outside
+event or the end time.
+
+## ENGINE-NO-SKIP — ENG-4
+
+Simulation. Two sources: one due at 1, 2, 3, 4; another at 2 and 4. Four
+cycles run, at 1, 2, 3 and 4; at 2 and 4 both sources are evaluated in one
+cycle. No time is skipped and no two are merged.
+
+## ENGINE-STOP-REQUEST — ENG-9, ENG-10, INJ-10
+
+A source publishes every cycle from 0. A sink requests a stop when it sees
+the value 2 (at offset 2). The cycle at 2 completes: every node scheduled for
+2 after the sink in rank order is still evaluated. No cycle runs at 3. Every
+started node is stopped, in reverse rank order.
+
+## ENGINE-FAILURE — ENG-10, NOD-20, Engine point 1
+
+A node's eval fails at 1 without capture. The failure leaves the root graph;
+no further cycle runs; every started node is stopped in reverse rank order;
+the report names the node and the phase (evaluate). In a second variant the
+failing node's start fails: the nodes started before it are stopped in
+reverse order, it is not stopped, and the report names the phase (start).
+
+## ENGINE-CLOCK — ENG-2, ENG-11, ENG-13, ENG-14, INJ-7
+
+Simulation, cycles at 0 and 5. In each cycle two nodes of different rank
+read the clock.
+
+| Reading | Both nodes see |
+|---|---|
+| evaluation time | the cycle's time: 0, then 5 |
+| next cycle evaluation time | one smallest step on: 1, then 6 |
+| now | not before the evaluation time; the second node's reading is not before the first's |
+| lag | not negative; the second node's reading is not less than the first's |
+
+Nothing a node does changes the clock (ENG-11).
+
+## ENGINE-REAL-TIME-ORDER — ENG-2, ENG-6, ENG-8
+
+Real time. A scheduled source is due at wall-clock time T; a push source's
+sender admits an event just before T. The event's cycle runs first, at a
+time not later than T; the scheduled cycle runs at T or one smallest step
+after the event's cycle, whichever is later. Evaluation time never repeats
+and never decreases. When the engine is late for T it evaluates at once.
+
+## ENGINE-NESTED-CLOCK — ENG-12
+
+A nested graph's node reads the same evaluation time and next cycle time as
+a root node in the same cycle.
+
+## Outside these cases
+
+Externally driven stepping, observers, one-shot callbacks, run-wide shared
+state, the runaway guard and pausing are optional facilities with no cases
+here. The order of stop and report on failure (Engine point 1) is not
+observable by a graph and has no case.

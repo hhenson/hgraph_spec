@@ -6,6 +6,10 @@ storage and implementation language. Its chapters, conformance cases and
 source evidence distinguish established behaviour, proposals and open work.
 It is incomplete and does not certify an implementation.
 
+Wiring (how a graph is described, and how calls resolve) is specified apart
+from the runtime in ``wiring/``; library operator contracts in ``library/``.
+The runtime begins where wiring ends: at the builder boundary.
+
 .. toctree::
    :maxdepth: 1
 
@@ -16,16 +20,24 @@ It is incomplete and does not certify an implementation.
    time_series
    scalar_types
    injectables
-   wiring
-   operators
    conformance
+   open_points
+   design_options
    cases_atomic
    cases_collections
+   cases_windows
+   cases_growing_lists
    cases_lifecycle
    cases_references
    cases_nested
    cases_fixed
-   cases_wiring
+   cases_sources
+   cases_engine
+   cases_injectables
+   cases_scalar
+   wiring <../wiring/wiring.md>
+   wiring cases <../wiring/cases_wiring.md>
+   library operator contracts <../library/operators.md>
    validation <https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation.md>
    validation/README <https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/README.md>
    validation/fixed/README <https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/fixed/README.md>

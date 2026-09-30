@@ -30,7 +30,9 @@ Three properties make it what it is:
   description gives the root graph of a run, or gives a nested node as many
   child graphs as it asks for, whenever it asks.
 
-hgraph calls this a *graph builder*.
+hgraph calls this a *graph builder*: the builder is the description in the
+form the runtime consumes, and is the runtime's interface to whatever
+described the graph ([Overview](overview.md), "The builder boundary").
 
 
 Part 1 — The graph description
@@ -404,10 +406,33 @@ A stopped graph is never started again.
   graphs when it chooses — at its own start, or during any evaluation. A
   nested graph is always stopped before it is disposed of, and is not
   disposed of in the cycle in which it is stopped: inputs elsewhere may still
-  be reading what it produced in that cycle.
+  be reading what it produced in that cycle. The stop is the removal; the
+  disposal is the reclamation, which may come any time after the cycle ends
+  (Overview rule 15). Keeping a stopped graph longer — until the owner next
+  changes shape, say — is a design option.
 - **Failure.** A failure inside a nested graph leaves it through the owner's
   evaluation. The owner may capture it; otherwise it continues outward, and
   if it leaves the root graph it ends the run.
+
+#### What a nested node may do
+
+This is the operation set the library builds on. `map_`, `switch_`,
+`reduce`, `mesh_` and `try_except` are written against it; none of them
+needs anything the list does not give (a construct that did would be asking
+for a missing runtime component, not a node). An owner may, from its own
+start or any of its evaluations:
+
+| Operation | Rules |
+|---|---|
+| Instantiate a graph from one of its child descriptions, under a key or a branch of its choosing | GRF-1, GRF-2, GRF-9 |
+| Bind the child's boundary inputs to the outputs its own inputs are bound to, and re-bind them later, preserving peering and live references | GRF-10, TS-14, TS-17, TS-25 |
+| Nominate which time-series inside the child, or which of its own inputs, is its output | GRF-10 |
+| Start the child, in its own start or evaluation | GRF-18, GRF-21 |
+| Evaluate the child at the current evaluation time, and read its next scheduled time | GRF-21, GRF-22 |
+| Be scheduled for the child's next time, or when something inside the child is scheduled while the child is idle | GRF-22 |
+| Stop the child, and dispose of it no earlier than the next cycle | GRF-18, GRF-23, GRF-25 |
+| Capture a failure that leaves a child, or let it continue outward | NOD-19, NOD-29 |
+| Keep any number of children, with no relation between them | GRF-24 |
 
 This, with inputs that can be re-bound (see Time-series types), is the whole
 of what the runtime provides for a graph that changes shape as it runs.
@@ -444,6 +469,12 @@ of what the runtime provides for a graph that changes shape as it runs.
 - **GRF-24** An input is bound only to an output in its own graph or in a
   graph that encloses it. Graphs owned by the same node share nothing but
   their parent.
+- **GRF-25** A removal — a stopped nested graph, a removed dictionary child,
+  a truncated list element, a reference whose target went away — is
+  finalised at the end of the cycle in which it happens, and what was
+  removed stays readable until then. Reclamation of its storage happens no
+  earlier than the start of the next cycle and may happen later; nothing
+  observable depends on when (owner, 2026-09-30).
 
 
 Deferred
@@ -469,7 +500,7 @@ Points to settle
 ----------------
 
 1. **How an implementation is named.** This is the crux of a storable
-   description. In hgraph today a node's behaviour is held as function
+   description and of the builder boundary (Overview, point 3). In hgraph today a node's behaviour is held as function
    pointers and a process-local token; the builder can also retain opaque
    extension state. None of that can be written out, which is why hgraph's
    RFC 0022 manifest can identify a wired graph but not rebuild one. A stable
@@ -513,11 +544,14 @@ Points to settle
    not a binding: a feedback is a sink scheduling a source for a later cycle,
    and the paired source and sink that services are built from are library.
    Across graphs the rule is GRF-24: a nested graph reads from inside itself
-   or from its parent, never from a parallel graph. The one residue is a
-   reference carried backward through a feedback (Time-series types,
-   point 4).
-10. **How long a stopped nested graph is kept.** GRF-23 says only "not in the
-    same cycle". hgraph keeps a switch's old branch until the next switch.
+   or from its parent, never from a parallel graph. The residue, a reference
+   carried backward through a feedback, is closed by TS-28 (owner,
+   2026-09-30): a feedback carries values only.
+10. **How long a stopped nested graph is kept.** Settled 2026-09-30 (owner):
+    GRF-25 is the rule and the minimum — finalised at the end of the cycle,
+    reclaimable from the start of the next. hgraph keeping a switch's old
+    branch until the next switch, or holding two address spaces for a switch,
+    is a design option ([Design options](design_options.md)).
 
 
 Sources

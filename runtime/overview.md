@@ -15,16 +15,25 @@ The runtime covers:
 4. TimeSeries Types
 5. Scalar Types
 6. Injectables, system API types such as "Clock", "logger", etc.
-7. Wiring: the interface a graph is described through, and the type and
-   operator resolution it performs
+7. The builder boundary: how a runtime is exposed to whatever describes a
+   graph (to be specified; see "The builder boundary" below)
+
+**Wiring is not the runtime.** How a graph is described — calls, ports,
+type resolution, operator resolution — is the [wiring
+specification](../wiring/wiring.md), kept apart because it is shared by
+every front end (Python, C++, HGL) and is what keeps them in line. Once
+wiring is complete there are no operators, no type variables and no calls:
+there is a description of runtime elements, handed across the builder
+boundary, and from then on only the rules in these chapters apply (owner,
+2026-09-30).
 
 The runtime provides these structures and nothing above them. It does **not**
-specify special nodes such as map, switch, reduce or mesh; it specifies the
-components such nodes are built from — a node that owns graphs, a graph that
-can be built, started, evaluated and stopped while its parent runs, inputs
-that can be re-bound, collections whose members come and go. If a special
-node cannot be built from what is specified here, the specification is
-missing a component, not a node.
+specify special nodes such as map, switch, reduce or mesh; those are
+library, and it specifies the components such nodes are built from — a node
+that owns graphs, a graph that can be built, started, evaluated and stopped
+while its parent runs, inputs that can be re-bound, collections whose members
+come and go. If a library construct cannot be built from what is specified
+here, the specification is missing a component, not a node.
 
 
 What the runtime is
@@ -269,6 +278,29 @@ process-local. hgraph does not do this today; it is a goal the description is
 specified to allow.
 
 
+The builder boundary
+--------------------
+
+Status: named by the owner on 2026-09-30; the chapter that specifies it is
+under discussion and not yet written.
+
+A runtime is exposed through **builders**. A builder is the runtime's own
+representation of its interface: it is what wiring produces once wiring is
+complete, and what the runtime is given in order to instantiate and
+evaluate. Builders produce and connect the runtime elements — graphs, nodes,
+time-series inputs and outputs, state, schedulers — and they clean them up.
+The graph description of [Graph](graph.md) is the content a builder carries;
+the builder is that content in the form the runtime consumes. hgraph's
+`GraphBuilder` and `NodeBuilder` are the present shape of this boundary.
+
+Everything above the boundary is wiring or a language; everything below it
+is the runtime. The chapter to come specifies what a builder must be able to
+say and do: name a node's type and implementation, describe its inputs with
+their peering, describe the edges, own child descriptions for nested nodes,
+instantiate a graph, and dispose of one. What it must not contain follows
+from GRF-1: nothing live, nothing process-local.
+
+
 Fundamental rules
 -----------------
 
@@ -283,7 +315,8 @@ rests on.
 5. An input is bound only to an output of lower rank — whether by an edge, at
    the boundary of a nested graph, or through a reference. Nothing reads
    downstream. What must flow backward is a feedback: a sink scheduling a
-   source for a later cycle, not a binding.
+   source for a later cycle, not a binding, and it carries a value, never a
+   reference (TS-28).
 6. The schedule is the only activation gate. There is no other way to cause a
    node to be evaluated.
 7. A node may schedule a later-ranked node for the current time, and any node
@@ -306,6 +339,12 @@ rests on.
     ticks, provided no node depends on *now* or the lag — both are measured
     on the computer's clock.
 14. Start runs in rank order; stop runs in reverse; stop is final.
+15. A removal is finalised only at the end of the cycle in which it happens:
+    a removed dictionary child, a truncated list element, a stopped nested
+    graph, an expired reference's target. Until then something may still be
+    reading it. The earliest an implementation may reclaim what was removed
+    is the start of the next cycle; it may reclaim later (GRF-25, TS-11,
+    TS-23).
 
 
 Chapters
@@ -319,13 +358,28 @@ Chapters
 | 4 | Time-series types | [time_series.md](time_series.md) | first draft |
 | 5 | Scalar types | [scalar_types.md](scalar_types.md) | first draft |
 | 6 | Injectables | [injectables.md](injectables.md) | first draft |
-| 7 | Wiring | [wiring.md](wiring.md) | first draft; type resolution validated |
+| 7 | The builder boundary | — | under discussion |
+
+Beside the runtime, and not part of it:
+
+| Specification | File | State |
+|---|---|---|
+| Wiring | [../wiring/wiring.md](../wiring/wiring.md) | first draft; type resolution validated |
+| Library operator contracts | [../library/operators.md](../library/operators.md) | draft, parity-derived families |
 
 Cases and supporting notes:
 
-- [Conformance](conformance.md) and cases for [atomic series](cases_atomic.md),
-  [collections](cases_collections.md), [lifecycle](cases_lifecycle.md), and
-  [wiring](cases_wiring.md).
+- [Conformance](conformance.md), which separates required from optional
+  behaviour, and cases for [atomic series](cases_atomic.md),
+  [collections](cases_collections.md), [windows](cases_windows.md),
+  [growing lists](cases_growing_lists.md), [lifecycle](cases_lifecycle.md),
+  [references](cases_references.md), [nested graphs](cases_nested.md),
+  [sources](cases_sources.md), the [engine](cases_engine.md),
+  [injectables](cases_injectables.md) and [scalar types](cases_scalar.md);
+  [wiring cases](../wiring/cases_wiring.md) sit with wiring.
+- [Open points](open_points.md): every point to settle, in one register.
+- [Design options](design_options.md): implementation choices that meet the
+  rules, with their trade-offs; not rules.
 - [Representations](representations.md) and the bounded [layout example](layout_example.md).
 - [Boundary contracts](boundaries.md), [evidence](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/evidence.md), and the
   [PR extraction and model review](extraction.md).
@@ -343,15 +397,20 @@ the others:
 | Push and pull sources, sinks, queues and threads | Node |
 | Node errors and the error output | Node; what ends a run is in Execution engine |
 | State and recordable state | Node |
-| The node scheduler | Node, which contains it; a node reaches it as an injectable, and its effect on the schedule is in Graph |
-| Value, delta, valid, modified, notification; binding, peered and non-peered, active and passive, references | Time-series types |
-| Calls and ports; type resolution, including what a generic binds when references are involved; operator resolution | Wiring |
+| The node schedulers: the recoverable scheduler and the one-shot alarm | Node, which contains them; a node reaches them as injectables, and their effect on the schedule is in Graph |
+| Value, delta, valid, modified, notification; binding and what may bind to what; peered and non-peered; active, passive and structural; references; windows and growing lists | Time-series types |
+| Removal, retention and reclamation | Overview rule 15; Graph (nested graphs), Time-series (dictionaries, lists, references) |
+| What a nested node may do with the graphs it owns | Graph, "A graph owned by a node" |
 
-Outside this specification: the language and its compiler (HGL's source
-semantics are in its own documentation; where they resolve a call they
-follow Wiring, WIR-14); special nodes (map, switch, reduce, mesh, feedback, try/except)
-and the rest of the operator library; services, adaptors and contexts;
-language bridges; checkpointing; distribution.
+Outside the runtime: wiring (calls and ports, type and operator resolution:
+[../wiring/wiring.md](../wiring/wiring.md)); the language and its compiler
+(HGL's source semantics are in its own documentation; where they resolve a
+call they follow Wiring, WIR-14); the library built on the nested-graph
+operations (map, switch, reduce, mesh, try/except, feedback as an operator)
+and the rest of the operator library ([../library/](../library/operators.md));
+services, adaptors and contexts; language bridges; distribution.
+Checkpointing and recovery, recording and replay are optional runtime
+behaviour ([Conformance](conformance.md)) and are not yet specified.
 
 
 How this specification is written
@@ -365,6 +424,15 @@ only as far as working behaviour requires. A facility hgraph has that no
 concept here yet needs — externally driven stepping, observers, run-wide
 shared state, pausing a cycle — is *deferred*, not rejected: it is named in
 its chapter's Deferred section and specified when an implementation needs it.
+Deferred facilities are **optional** behaviour; the chapter rules are
+**required** ([Conformance](conformance.md)).
+
+**Rules, and design options.** A rule is what a test can observe. How an
+implementation meets a rule — when it reclaims removed storage, whether a
+switch keeps two address spaces, whether an assembled input caches its
+observations — is a design option, recorded in
+[Design options](design_options.md) with its rationale and trade-offs so
+that the reasoning is not lost, and never promoted to a rule.
 
 **Every chapter has the same shape**, moving from concept to explicit detail:
 
@@ -417,13 +485,17 @@ Vocabulary
 | Now | The engine's estimate of wall-clock time. In real time, the computer's clock; in simulation, evaluation time plus the lag |
 | Peered / non-peered | A peered input is bound to one output and is a view of it. A non-peered collection input has no output behind it; its children are bound separately and its state is its own |
 | Rank | A node's position in the evaluation order |
+| Reclaim | Free or reuse the storage of something removed. Never before the start of the cycle after the removal |
+| Required / optional | A chapter rule every implementation meets, versus a deferred facility an implementation may provide ([Conformance](conformance.md)) |
 | Sampled | An input reports modified because it was (re)bound, not because its output ticked |
+| Structural | Of an input: it schedules its node when a collection's membership changes and not when a member's value ticks |
 | Schedule | For each node, the next time it needs evaluating |
 | Signature | A node's inputs, output and scalars: what a caller sees and wiring connects. State, recordable state and the other injectables are not in it |
 | Tick | A modification of a time-series |
 | Valid | The endpoint supplies a value under its shape and binding rules. An owned output has a last modified time other than *never* |
 | View / copy | A view is a read-only look at a value someone else owns, stable for the cycle. A copy is an independent value, and the only way to keep one beyond the cycle |
-| Wiring | The phase in which a graph is described. Nothing is instantiated and nothing can tick |
+| Wiring | The phase in which a graph is described, specified in [../wiring/wiring.md](../wiring/wiring.md). Nothing is instantiated and nothing can tick |
+| Builder | The runtime's representation of its own interface: what wiring produces and the runtime instantiates from |
 
 
 Points to settle
@@ -438,20 +510,26 @@ Points to settle
    *identify* a wired program but not rebuild one.
 2. **How much of the wiring phase is specified depends on how HGL is
    compiled.** Settled 2026-09-26 (owner): the first route below is kept,
-   and [Wiring](wiring.md) specifies the wiring interface, type resolution
-   and operator resolution. The description stays complete and
+   and [Wiring](../wiring/wiring.md) specifies the wiring interface, type
+   resolution and operator resolution. Settled further on 2026-09-30
+   (owner): wiring is specified apart from the runtime, and the runtime
+   begins at the builder boundary. The description stays complete and
    self-contained, so the second route remains possible.
    - *The compiler emits code that does the wiring when run* — what has been
-     done so far. The runtime must then provide everything that code calls:
-     the wiring interface, type resolution, operator resolution. All of it
-     has to be specified here.
+     done so far. The runtime distribution then provides everything that
+     code calls: the wiring interface, type resolution, operator resolution.
+     All of it is specified in Wiring.
    - *The compiler does the wiring itself and emits a stored graph
      description* that the runtime loads and instantiates. Wiring then lives
      in the compiler, and the runtime tracks only the description.
-
-   The description remains complete and self-contained, so the second route
-   remains possible. [Wiring](wiring.md) specifies the interface and resolution
-   required by the selected first route.
+3. **The builder boundary.** Named by the owner on 2026-09-30 as the
+   runtime's API: builders instantiate and clean up, and produce and connect
+   graphs, nodes and time-series. To be discussed before it is written: how
+   a builder names a node's implementation (Graph, point 1), what implements
+   an HGL body (Graph, point 2), how types are carried (Graph, point 3),
+   whether the builder is also the storable form of the description or a
+   process-local realisation of it, and what the nested-graph operations
+   look like at this boundary.
 
 
 Notes for the chapters
@@ -469,7 +547,11 @@ Settled here, with a detail left for the chapter that owns it.
   that compatibility question explicit.
 - **Time-series: dictionaries.** *Added* and *removed* are about membership.
   A key is added when it joins, whether or not its child is valid (TS-19).
-- **Time-series: references keep rank order** (TS-20).
+- **Time-series: references keep rank order** (TS-20), and a feedback
+  never carries one (TS-28; owner, 2026-09-30).
+- **Removal is finalised at the end of the cycle** (rule 15; owner,
+  2026-09-30). Anything an implementation does beyond the minimum — delayed
+  reclamation, paired address spaces for a switch — is a design option.
 - **Scalar types: the list.** `any` is a value kind of the runtime. Cyclic
   buffer and queue are not: hgraph has them to implement windows, and they
   are an implementation's concern. `zoned_time` is new in HGL and is to be

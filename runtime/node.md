@@ -42,9 +42,10 @@ data; it follows from the shape of the node's signature.
 | **Sink** | yes | none | Inputs to an effect outside the graph: a write, a send, a log, a recording |
 | **Nested** | any | any | Owns one or more graphs and evaluates them as part of its own evaluation |
 
-The special nodes that build larger behaviour — switch, map, reduce, mesh,
-feedback, try/except — are nested nodes, or pairs of a sink and a pull
-source. They are not specified here; they are written against this chapter.
+The library constructs that build larger behaviour — switch, map, reduce,
+mesh, try/except — are nested nodes written against this chapter and the
+nested-graph operations in [Graph](graph.md); feedback is a pair of a sink
+and a pull source. None of them is specified here.
 
 
 Relationships
@@ -107,6 +108,7 @@ State
 | recordable state | A time-series | The implementation | The implementation; and anything bound to it |
 | state | A scalar value | The implementation | The implementation only |
 | scheduler | Pending requests: a time, and optionally a tag, each | The implementation; and the runtime, which removes requests as they fall due | The implementation |
+| alarm | Nothing: the one-shot scheduler holds no state on the node | — | — |
 | push queue | Events admitted and not yet delivered | Senders on other threads add; eval removes | The implementation |
 | nested graphs | Graphs in any lifecycle state | The implementation | The implementation |
 
@@ -168,10 +170,10 @@ Behaviour
 ### Start
 
 1. The inputs the node type declares active are made active (by default, all
-   of them).
+   of them), and those it declares structural are made structural.
 2. The implementation's **start** is called. It may read scalars, set up
-   state, give recordable state its first value, schedule the node, and —
-   for a push source — receive its sender. It may read its output — which
+   state, give recordable state its first value, schedule the node (through
+   either scheduler), and — for a push source — receive its sender. It may read its output — which
    has normally not ticked, so that what it reads is the output's type — but
    does not write it. Following HGL, start does not read inputs.
 3. The node is started.
@@ -201,6 +203,9 @@ Admission does not look at *modified*. A node is woken by notifications, and
 a notification is not always a tick (see Time-series types): an implementation
 that cares which input changed asks the input.
 
+A node with no inputs has nothing to check: whenever it is scheduled it is
+admitted. That is the whole admission rule for a pull source.
+
 ```mermaid
 flowchart TD
     A(["the scan reaches a node scheduled for now"]) --> B{"valid inputs valid, and all-valid inputs all valid"}
@@ -225,8 +230,8 @@ During eval an implementation may:
   delta; repeated writes to the same child keep the last;
 - read and write its state and its recordable state;
 - use its scheduler;
-- make an input active or passive. This changes what will wake the node from
-  now on; it never makes an input appear modified;
+- make an input active, passive or structural. This changes what will wake
+  the node from now on; it never makes an input appear modified;
 - instantiate, start, evaluate, stop and dispose of graphs it owns, and
   re-bind their inputs;
 - use any injectable it asked for (see Injectables);
@@ -245,10 +250,39 @@ It is for ending what start began. It may read its output — what the node
 last produced — but does not write it. After stop the node is never started
 again.
 
-### The scheduler
+### The schedulers
 
-A node that asks for one has a scheduler: its own control over when it is
-next evaluated, independent of its inputs.
+A node may control when it is next evaluated, independent of its inputs, in
+one of two ways. They are distinct concepts, not two sizes of one thing
+(owner, 2026-09-29): the **scheduler** keeps requests, and what it keeps is
+recoverable; the **alarm** keeps nothing.
+
+**The alarm** is the one-shot scheduler. A node that asks for it may, in
+start or in eval, ask to be evaluated *now*, after a delay, or at an
+instant. That is all it does:
+
+- a request is a mark on the graph's schedule and nothing else. The node
+  holds no pending request, so there is nothing to tag, cancel, query or
+  restore; a node that uses only the alarm carries no scheduler state;
+- several requests in one evaluation keep the earliest (the graph's
+  schedule keeps the earliest time, GRF-14);
+- a request for the past is refused, as for the scheduler; the start time
+  is allowed during start;
+- it never asks the wall clock: an alarm is an evaluation-time request;
+- after a restore, whatever the alarm had marked is gone; the node's start
+  runs again and re-arms whatever it arms. This is the reconstructible
+  policy of state, not the recovered policy of the scheduler.
+
+A source with no inputs on the alarm is evaluated exactly when the alarm
+fires: every evaluation is its own wake-up, and it needs no selector to say
+so. In HGL this is `inject alarm` (ADR 0015), and its handler is a plain
+`when`. A source that must be woken again after a restore, be cancelled or
+replaced, coexist with input ticks, or follow the wall clock uses the
+scheduler instead. A node injects one or the other, never both.
+
+**The scheduler** is the recoverable one. A node that asks for it has its
+own control over when it is next evaluated, independent of its inputs, with
+pending requests it can inspect.
 
 - A **request** is a time, given as an instant or as a delay from the
   evaluation time, with an optional **tag**.
@@ -267,11 +301,26 @@ next evaluated, independent of its inputs.
   evaluation time. It becomes an ordinary request when the wall clock reaches
   it. In simulation a wall-clock request is refused.
 
+### Structural inputs
+
+An input to a collection may be **structural** instead of active or
+passive: it schedules its node when the collection's membership changes —
+a key joins or leaves a dictionary, a set gains or loses an element, a
+growing list grows or shrinks — and not when a member's value ticks. It is
+otherwise an ordinary input: readable, following its binding, sampled on a
+rebind. It is how a node that manages something per member (a child graph
+per key, say) avoids being woken by every value the members carry. On a
+time-series that has no membership — a TS, a fixed collection, a window —
+structural means passive.
+
 ### Sources
 
 A **pull source** has no inputs, so nothing wakes it but itself. It schedules
 itself in start, and again in each eval for as long as it has more to
-produce.
+produce, on the alarm or on the scheduler. A source written as a
+**generator** — a body that yields a time and a value, suspends, and resumes
+when that time comes — is a compiler's lowering onto the alarm and node
+state, not a runtime concept (HGL ADR 0015).
 
 A **push source** is how another thread gets data into a graph. It is a node
 with a **push queue**, and the two are separate things.
@@ -331,6 +380,16 @@ where in the graph it sits, the message, and — to the depth the node type
 asks for — the chain of upstream nodes whose ticks led to this evaluation,
 optionally with the values they carried.
 
+A **nested node** that captures errors catches a failure that leaves one of
+its graphs, in its own eval, and ticks a node error for it. The child graph
+that failed is kept, not stopped: the failure of one evaluation is data, and
+the next cycle evaluates the child again. A nested node that keys its
+children may capture per child, on a keyed error output whose entries follow
+the children's lifetime: a child's failure updates its key only and does not
+stop the other children being evaluated; a child that is removed takes its
+error entry with it. A nested node that does not capture lets the failure
+continue outward.
+
 A failure in start or stop is never captured. It always goes to the graph.
 
 
@@ -389,6 +448,22 @@ Rules
   TS of a tuple of `X`, or an equivalent, when everything pending is taken at
   once. A queue that takes everything at once never hands over an empty
   tuple.
+- **NOD-25** The alarm holds no state on the node. A request through it
+  marks the graph's schedule and nothing else; several requests keep the
+  earliest; a request for the past is refused, and the start time is
+  accepted during start; it never takes a wall-clock time.
+- **NOD-26** A node injects the scheduler or the alarm, never both. A node
+  that injects neither is woken only by its inputs and by schedule-on-start.
+- **NOD-27** A node with no inputs is admitted whenever it is scheduled.
+- **NOD-28** A structural input schedules its node on a change of the
+  collection's membership and not on a member's value tick. It reads, follows
+  its binding and samples as any input does. On a time-series with no
+  membership it behaves as a passive input.
+- **NOD-29** A nested node that captures errors ticks one node error for a
+  failure that leaves a child graph, keeps that child, and continues. A keyed
+  nested node may capture per child on a keyed error output; a child's
+  failure never prevents the evaluation of its siblings in that cycle, and a
+  removed child's error entry is removed with it.
 
 
 Deferred
@@ -398,10 +473,8 @@ Deferred
   scheduler requests, and which nodes can be left out.
 - **Run-wide shared state** as something a node can ask for (see Execution
   engine).
-- **A lighter scheduler** for nodes that only ever ask to be woken and never
-  cancel or query. hgraph has one so that such a node carries no scheduler
-  state; it is an optimisation of the scheduler above, not a second concept.
-- **Pausing**: a node suspending the cycle it is in.
+- **Pausing**: a node suspending the cycle it is in (optional; see Execution
+  engine).
 - **Values owned by a language bridge**, and the marking of nodes that handle
   them.
 
@@ -428,12 +501,13 @@ Points to settle
    node's implementation and its type (see Graph). Is the queue's type part
    of the push source's implementation identity, or a separate item in the
    node description that instantiation checks against the output type?
-5. **Structural inputs** — inputs that notify on changes of membership only —
-   are in the node type (see Graph) and not yet defined anywhere.
-6. **Error capture for nested nodes.** hgraph captures errors for ordinary
-   nodes and lists capture for nested, switch and mesh nodes as unfinished.
-   Here a nested node that wants to capture a child's failure does so in its
-   own eval.
+5. **Structural inputs.** Settled 2026-09-30: defined above and in NOD-28,
+   from hgraph's third input activity. Whether the key set of a dictionary,
+   bound on its own, is the same observation as a structural input on the
+   dictionary is a question for the cases.
+6. **Error capture for nested nodes.** Settled 2026-09-30 from hgraph's
+   `try_except` and keyed `map_` capture: NOD-29. hgraph does not yet capture
+   for switch and mesh; that is an implementation gap, not a rule.
 
 
 Sources

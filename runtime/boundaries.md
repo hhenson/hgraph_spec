@@ -19,9 +19,11 @@ and operation contracts. [Scalar types](scalar_types.md) owns the type rules;
 formation must also cover aliases, recursion, variance, constraints and nulls.
 
 An operator **contract** gives its identity, signature, domain and behaviour.
-A **candidate** implements it. [Wiring](wiring.md) now defines reference-aware
-type resolution, bundle matching, candidate selection and minimum operator
-contracts (WIR-1–24).
+A **candidate** implements it. [Wiring](../wiring/wiring.md) now defines
+reference-aware type resolution, bundle matching, candidate selection and
+minimum operator contracts (WIR-1–24); it is specified apart from the
+runtime, and the [library](../library/operators.md) holds the behaviour
+contracts.
 Its Deferred section retains defaults, conditions, packs, type arguments and
 conditional wiring. Duplicate-candidate registration policy remains separate
 from ambiguity when selecting a call.
@@ -55,9 +57,12 @@ pending work. Recovery also needs topology, bindings, clocks, timers, child
 membership, source positions and effects. Seeding inputs alone cannot promise
 exact recovery or exactly-once effects.
 
-Map, switch, reduce, mesh, feedback, services and adaptors need library
-contracts built on the core. Numeric overflow, NaN, division, Unicode and
-algebraic laws need explicit scalar/operator rules.
+Map, switch, reduce, mesh, services and adaptors are library, built on the
+nested-graph operations the runtime specifies ([Graph](graph.md), "A graph
+owned by a node"); each needs a library contract that names which runtime
+components it uses. Feedback carries values only (TS-28). Numeric overflow,
+NaN, division, Unicode and algebraic laws need explicit scalar/operator
+rules.
 
 ## Earlier open questions
 
@@ -68,7 +73,7 @@ algebraic laws need explicit scalar/operator rules.
 | OPEN-04 | Engine, graph, node; stepping and phase hooks |
 | OPEN-05 | Time-series; compatibility, structural observation, expired references |
 | OPEN-06 | Collections and windows; delta adapters and eviction boundaries |
-| OPEN-07 | [Wiring](wiring.md); remaining resolution details in Deferred |
+| OPEN-07 | [Wiring](../wiring/wiring.md); remaining resolution details in Deferred |
 | OPEN-08 | Lifecycle; nested capture and effects after failure |
 | OPEN-09 | Recovery |
 | OPEN-10 | Special-node library contracts |

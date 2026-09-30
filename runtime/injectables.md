@@ -49,13 +49,14 @@ Three things follow from making these requests explicit.
 | **logger** | the run | Somewhere to write messages, identified as coming from this node |
 | **engine control** | the run | The run's mode, start time and end time; whether a stop has been requested; and the means to request one |
 | **scheduler** | the node instance | The node's own scheduler: request, cancel, query (see Node) |
+| **alarm** | nothing: it holds no state | The one-shot scheduler: mark the node to evaluate now, after a delay or at an instant (see Node, "The schedulers"). A node injects the scheduler or the alarm, never both |
 | **output** | the node instance | The node's own output, to read what it holds and to write it piece by piece rather than all at once |
 | **state** | the node instance | The node's private state: a value |
 | **recordable state** | the node instance | The node's recordable state: a time-series value |
 
 In HGL, `inject out, logger, clock, scheduler` asks for the output, the
-logger, the clock and the scheduler; `state` and `cache` declarations ask for
-recordable state and state.
+logger, the clock and the scheduler, and `inject alarm` for the alarm (ADR
+0015); `state` and `cache` declarations ask for recordable state and state.
 
 The agreed [language capability contract](https://github.com/hhenson/hgraph_spec/blob/main/language/docs/design/native-interfaces.md#implementation-parts-and-injectables)
 also permits context services in value functions. Its requirements are visible
@@ -138,6 +139,7 @@ for one does not have one.
 |---|---|---|---|
 | clock | yes; evaluation time is the start time | yes | yes |
 | scheduler | yes; may request the start time itself | yes | yes, though a request made in stop can never fall due |
+| alarm | yes; may request the start time itself | yes | no: there is nothing it could mark |
 | output | read | read and write | read |
 | state, recordable state | yes | yes | yes |
 | logger | yes | yes | yes |
@@ -170,6 +172,12 @@ clock; cancel; ask whether anything is pending, when the next request is, and
 whether the node is scheduled *now*. HGL exposes a subset: request by delay
 or by instant, optionally on the wall clock; whether anything is pending; and
 the next request. Tags are not exposed in HGL.
+
+**Alarm.** The one-shot scheduler of Node: a request now, after a delay or
+at an instant, and nothing else — no tag, no cancellation, no query, no
+wall clock, no state on the node and nothing to restore. It is what a source
+that only needs waking asks for; the scheduler is what a node asks for when
+it needs to keep, replace, cancel or recover its requests.
 
 **Output.** Without it a node's only way to write is to return a complete
 value from eval. With it a node can read what its output currently holds —
@@ -222,7 +230,8 @@ Rules
   supplied to, and not beyond. What it gives access to may last longer: state
   and recordable state are held on the node instance, from instantiation to
   disposal, and keep their contents from one call to the next.
-- **INJ-4** A node has a scheduler only if its type requests one.
+- **INJ-4** A node has a scheduler only if its type requests one, and an
+  alarm only if it requests that; it requests at most one of the two.
 - **INJ-5** There is one clock, one logger and one engine control per run,
   and every node of every graph in the run is given the same ones.
 - **INJ-6** Nothing a node can be injected with lets it change the clock.
@@ -251,7 +260,6 @@ Deferred
   control in hgraph (see Execution engine).
 - **Evaluation time on its own**, as a shorthand for asking for the clock and
   reading one thing.
-- **A lighter scheduler** for nodes that only ask to be woken (see Node).
 
 
 Points to settle

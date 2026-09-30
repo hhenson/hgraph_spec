@@ -310,7 +310,9 @@ Deferred
 --------
 
 Facilities hgraph's engine has that no concept above needs yet. Each is
-specified when an implementation requires it.
+specified when an implementation requires it, and each is **optional**
+behaviour ([Conformance](conformance.md)): a conformance claim says which of
+them it includes, and none of them changes a required observation.
 
 - **Externally driven mode.** A third mode with no loop: the caller starts
   the run, steps it one cycle at a time supplying each evaluation time, and
@@ -333,7 +335,9 @@ specified when an implementation requires it.
   smallest step ahead for more than a configured number of cycles.
 - **Pausing a cycle.** hgraph lets a node pause the cycle it is in and have
   it resumed at the same evaluation time (mesh uses this while waiting on a
-  dependency). ENG-2 assumes no such thing exists.
+  dependency). ENG-2 assumes no such thing exists. Whether the mesh library
+  construct needs this facility, or a design without it, is a decision to
+  take before mesh gets a library contract (point to settle 2).
 
 
 Points to settle
@@ -367,3 +371,8 @@ Points to settle
    Deferred, as a facility for hosts and debuggers; or keep both as run
    configuration, as drafted. Since no graph can tell the difference, the
    test for what belongs here says defer.
+2. **Pausing a cycle, for mesh.** hgraph's mesh pauses the cycle while a
+   dependency is resolved. Either pausing becomes an optional engine facility
+   with rules of its own, or mesh is designed without it (a dependency
+   resolved in a later cycle, one smallest step on). Until decided, ENG-2
+   stands and mesh has no library contract.

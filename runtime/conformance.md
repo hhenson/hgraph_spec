@@ -27,14 +27,38 @@ and complete admitted actions under the stated resource assumptions. Where
 several outcomes are allowed, list them. An unanswered question is not a
 licence for arbitrary behaviour.
 
+## Required and optional behaviour
+
+The rules of the seven chapters are **required**: an implementation that
+claims the runtime conforms to every one of them, and every case below is a
+check of a required rule. Everything a chapter lists under **Deferred** is
+**optional** behaviour (owner, 2026-09-30): observers, externally driven
+stepping, one-shot cycle callbacks, run-wide shared state, the phase hook,
+the runaway guard, pausing, checkpointing and recovery, recording and
+replay, serial forms, and values owned by a language bridge. An
+implementation may provide any of them; when it does, the rules written for
+that facility apply, and a conformance claim names which optional facilities
+it includes. An optional facility never changes a required observation: a
+graph that uses none of them behaves identically on an implementation that
+has them all.
+
+[Design options](design_options.md) are neither: they are ways of meeting
+the required rules, recorded with their trade-offs, and never a rule.
+
 ## Cases
 
 - [Atomic](cases_atomic.md): first tick, idle cycles, equal publications and repeated reads.
 - [Collections](cases_collections.md): validity, membership, deltas and per-level time.
+- [Windows](cases_windows.md): tick and duration windows, eviction, the minimum.
+- [Growing lists](cases_growing_lists.md): growth, truncation, retention and resurrection.
 - [Lifecycle](cases_lifecycle.md): activation, construction failure and teardown.
 - [References](cases_references.md): sampling, dictionary withdrawal and expiry.
 - [Nested graphs](cases_nested.md): keyed routing, state, deadlines and failure.
-- [Wiring](cases_wiring.md): what a generic binds, projections, and operator selection.
+- [Sources](cases_sources.md): pull sources on either scheduler, push queues and senders.
+- [Engine](cases_engine.md): run bounds, ending, the clock and the real-time loop.
+- [Injectables](cases_injectables.md): what each injectable shows, and when.
+- [Scalar types](cases_scalar.md): identity, capabilities, nil and time arithmetic.
+- [Wiring](../wiring/cases_wiring.md): what a generic binds, projections, and operator selection.
 - [Representations](representations.md) and [layout](layout_example.md): physical contracts.
 
 Each case names its rules, limits, initial state, actions and observation
