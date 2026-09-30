@@ -1,5 +1,5 @@
 {
-  "_about": "Expectations for the wiring cases, derived from the Wiring chapter's rules before either runtime was run. Types are normalised (whitespace removed). An observation listed under 'recorded' is kept as context, not asserted.",
+  "_about": "Expectations for the wiring cases, derived from the Wiring chapter's rules before either runtime was run. Types are normalised (whitespace removed). An observation listed under 'recorded' is kept as context, not asserted. The caught_failure outcome is historical context only: continuing after suppressing a wiring failure is undefined behavior (WIR-4, owner clarification 2026-09-30).",
   "generic_depth": {
     "source": {
       "expected": "TSD[str,REF[TS[int]]]",
@@ -447,13 +447,9 @@
     }
   },
   "caught_failure": {
-    "outcome": {
-      "expected": "fails",
-      "rules": [
-        "WIR-4"
-      ],
-      "derivation": "The graph's own code catches the failed call's error and wires a fallback; the failure still fails the graph, since the node the failed attempt added cannot be undone."
-    }
+    "recorded": [
+      "outcome"
+    ]
   },
   "bundle_field_order": {
     "named_input_from_unnamed_reordered": {

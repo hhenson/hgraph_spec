@@ -15,7 +15,10 @@ empty, invalid and boundary cases. Prose, diagrams and cases must agree.
 
 A precondition limits a case; it does not invent an error outside it. A
 rejection has a specified error and post-state. Failure after partial work
-also needs cleanup and surviving effects. Omitted observations are untested.
+also needs cleanup and surviving effects. Cleanup does not imply recovery:
+a wiring failure propagates out with no graph description (WIR-4). Suppressing
+it and continuing is undefined behavior, with no conformance result to assert.
+Omitted observations are untested.
 
 Compare values, validity, modification, deltas, times, bindings, admission,
 lifecycle, errors and effects. Include type identity and wiring errors where

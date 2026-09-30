@@ -193,10 +193,15 @@ operator as its author declared it (`only_int`); the argument's type
 (`TS<str>`); the candidate's parameter type (`TS<i64>`); and the path of
 graph calls that led there (`outer`, then `inner`).
 
-**A caught failure.** A graph `g` calls a graph `attempt`, which adds a
-node and then makes the failing call; `g` catches the error and returns its
-own input instead. Describing `g` still fails: what `attempt` already added
-cannot easily be undone, so the session is failed (WIR-4).
+**Partial construction.** A graph `g` calls a graph `attempt`, which adds a
+node and then makes the failing call. The exception propagates through `g`
+and out of wiring. No description is returned; no graph is run and no
+fallback or retry is attempted. Cleanup need not undo partial wiring effects.
+
+**A caught failure.** If `g` instead suppresses the exception and returns
+its own input, behavior is undefined (WIR-4). This hypothetical host-language
+example has no required result; historical observations are not evidence of
+supported recovery.
 
 ## WIRE-REPEATED — WIR-7, WIR-17
 
