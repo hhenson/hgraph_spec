@@ -5,18 +5,9 @@ evolve through time. This guide describes it from an author's point of view:
 how functions and types look, how change and validity affect computation, and
 how source calls reach hgraph.
 
-> **Design preview:** the current `hgl` command checks the compiler example corpus and
-> runs composition functions directly and, for file-based `hgl test` and
-> `hgl run`, supports the documented runtime-function subset on Unix with a C++
-> toolchain. Failed REPL declarations leave the last working session intact.
-> The remaining limits are listed in
-> [Testing and running](testing-and-running.md#first-pass-limits), and the
-> status of every surface (implemented, partial, provisional, or blocked) in
-> the [roadmap status matrix](https://github.com/hhenson/hgraph/blob/main/language/docs/design/roadmap.md#feature-status-matrix-2026-09-07).
-> The documents record syntax agreed during design discussion, not a source
-> compatibility promise. Sections marked provisional or not implemented are
-> design material, not accepted compiler examples; open syntax is identified
-> separately from agreed syntax.
+> This guide describes the language, independently of a compiler or runtime.
+> Agreed syntax and unresolved design questions are distinguished below.
+> Implementation coverage and limitations belong to the audit repository.
 
 ## Read in this order
 
@@ -37,9 +28,7 @@ how source calls reach hgraph.
    `eval` with dense and timed sequences, running an entry from the command
    line and the REPL. Configuration-file execution remains planned.
 
-Source files are collected under [`language/examples`](https://github.com/hhenson/hgraph/blob/main/language/examples). The
-frontend checks every example; the scripted backends run the supported subset described in
-[Testing and running](testing-and-running.md#first-pass-limits).
+Source examples are collected under [language/examples](../../examples/README.md).
 
 ## Current language shape
 
@@ -77,9 +66,8 @@ persistent semantic history uses recordable `state`.
 The agreed extension adds [value-level `const fn`](functions.md#value-level-functions)
 for direct computations without independent ticks, and
 [reconstructible caches](functions.md#reconstructible-cache) for node-local
-data excluded from record/replay. Local fixed-arity value functions and
-[default lifting](value-functions.md) are implemented, as are scalar caches,
-including beside `state`. Non-scalar cache storage remains unsupported.
+data excluded from record/replay. See [default lifting](value-functions.md).
+Non-scalar cache construction remains a separate design question.
 `const fn` does not mean compile-time-only or pure; its role is distinct from
 parameter-level `const`.
 

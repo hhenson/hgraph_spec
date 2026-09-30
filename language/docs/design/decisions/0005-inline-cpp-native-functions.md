@@ -1,7 +1,7 @@
 # ADR 0005: Module-local exact native functions may contain C++
 
-Status: accepted and implemented for value/view functions; value functions are
-available in every node hook, view functions in evaluation only (2026-09-18)
+Status: accepted legacy authoring form (2026-09-18), superseded by the
+shared native interfaces in [ADR 0014](0014-native-implementation-interfaces.md).
 
 ## Context
 

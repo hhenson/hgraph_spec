@@ -1,14 +1,9 @@
 # Testing and running
 
-Status: `test`, `assert`, and `eval` over dense sequences, `hgl run` from the
-command line, and the REPL are implemented; every example on this page runs
-as written unless it is labelled provisional. Timed sequences and the TOML
-run configuration are provisional: their agreed form is shown in labelled
-snippets that the current `hgl` rejects. The specification is
+This page describes tests, evaluation and run configuration. Provisional
+forms are labelled. The language rules are in
 [Tests and the evaluation harness](../developer-guide/syntax-and-semantics.md#tests-and-the-evaluation-harness)
-and [Running a module](../developer-guide/syntax-and-semantics.md#running-a-module);
-the [roadmap status matrix](https://github.com/hhenson/hgraph/blob/main/language/docs/design/roadmap.md#feature-status-matrix-2026-09-07)
-records the status of each form.
+and [Running a module](../developer-guide/syntax-and-semantics.md#running-a-module).
 
 A module carries its own tests, and a module is run from outside its source.
 This page shows both from the author's side.
@@ -80,7 +75,7 @@ import them, and helpers cannot be exported. A test helper may shadow a
 production function; the production definition is unaffected. Within each
 scope, the ordinary const/temporal function selection rules still apply.
 
-The implemented context contains private `fn` and `const fn` declarations and
+A test context contains private `fn` and `const fn` declarations and
 named `test` cases. Put assertions inside a named case, not directly in the
 context. Nested contexts, test-local types, imports, native declarations, and
 operator implementations are not supported in this first slice.
@@ -143,13 +138,14 @@ test scale_applies_factor {
 A function without an output can still be evaluated as a statement, which
 runs it to completion.
 
+
 > **Provisional: structural tuple elements.** For a structural
 > `tuple<f64, f64>` parameter the agreed element shape is a tuple literal
 > whose positions are values or `_` for a field that does not tick, so a
 > bid-only cycle would be written `(1.0, _)`:
 >
 > ```hgl
-> fn midpoint(tob: tuple<f64, f64>) -> f64 =>          // not runnable today
+> fn midpoint(tob: tuple<f64, f64>) -> f64 =>          # provisional structural replay
 >     (tob[0] + tob[1]) / 2.0
 >
 > test midpoint_waits_for_both_sides {
@@ -157,18 +153,11 @@ runs it to completion.
 >         == [_, 2.0, 2.5]
 > }
 > ```
->
-> The current `hgl test` rejects it (`a structural tuple has no time-series
-> schema; use atomic<tuple<...>> for one value`): `eval` drives scalar and
-> `atomic` parameters only.
 
 ## Timed sequences
 
-> **Provisional.** Timed sequences parse, but the harness does not run them
-> (`timed sequences are not supported by the first pass; write one value per
-> cycle`), and `eval` does not yet accept a `rolling` parameter. The agreed
-> form is recorded here so that dense tests are not written in a shape that
-> will change.
+> **Provisional.** Timed sequences and rolling-input replay use the agreed
+> forms below; their remaining harness rules are separate design work.
 
 When the timing matters, key each element by a time. A `duration` key is an
 offset from the start of the run; a `datetime` key is an absolute instant and
@@ -177,7 +166,7 @@ fixes the run's start:
 ```hgl
 use hgraph.std::{mean}
 
-fn recent_mean(price: rolling<f64, 5m>) -> f64 => mean(price)   # not runnable today
+fn recent_mean(price: rolling<f64, 5m>) -> f64 => mean(price)   # provisional timed replay
 
 test recent_mean_spans_five_minutes {
     assert eval(recent_mean, price: [0s: 1.0, 2m: 3.0, 5m: 5.0, 9m: 7.0])
@@ -224,7 +213,6 @@ starts now.
 
 > **Provisional: configuration file.** The agreed `--config run.toml` form
 > mirrors the command line, with command-line options overriding the file.
-> The current `hgl run` does not read it, so this is not runnable today:
 >
 > ```toml
 > [run]
@@ -284,42 +272,11 @@ terminal too.
 
 ## First-pass limits
 
-The current `hgl` runs every example on this page that is not labelled
-provisional. The limits, each reported by name:
-
-- `eval` drives scalar and `atomic` parameters; a structural tuple, list,
-  set, map, or rolling parameter is reported as unsupported;
-- timed sequences are reported as unsupported; write one value per cycle;
-- `eval` takes a module `fn`; wrap an operator in a `fn` to evaluate it;
-- `hgl run` takes its configuration from the command line only; the
-  `--config` file is not read;
-- file-based `test` and `run`, and the REPL, compile supported runtime
-  functions and generic `impl fn` candidates on Unix only; an unresolved
-  generic composition call is still outside the direct-wiring path, while the
-  generated backend supports the concrete generic operator and window forms
-  used by the examples;
-- complete scalar struct values, type-only generic struct specializations,
-  `atomic<S>` harness values, and simple field-wise temporal struct
-  construction run; generic constructor inference, `const` generic struct
-  identity, multiple inheritance, temporal structured deltas, and explicit
-  optional-field clearing are reported as unsupported;
-- a `for` statement inside a `test` body is reported as unavailable;
-- types in diagnostics are printed with hgraph's names (`float`,
-  `TS[float]`, `Tuple[float,float]`).
-
-The [roadmap status matrix](https://github.com/hhenson/hgraph/blob/main/language/docs/design/roadmap.md#feature-status-matrix-2026-09-07)
-is the complete list.
+Compiler coverage and platform limits are implementation concerns, recorded
+in the [audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes).
 
 ## What runs where
 
-Composition-only programs can run directly. Programs with runtime functions,
-value functions, or operator implementations need a native toolchain for
-scripted execution, which is currently supported on Unix. Windows supports
-building such programs as native packages. The test-context example above
-contains a runtime helper and therefore needs that toolchain.
-
-A failed native build reports a directory containing its diagnostics. The REPL
-keeps the previous working declarations if a replacement fails. See
-[Execution requirements](modules-and-tools.md#execution-requirements) for tool
-and cache settings, and the [developer guide](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/native-modules-and-packages.md#one-execution-model)
-for compiler and loader internals.
+An implementation may interpret a graph or compile it to native code. Both
+must preserve the same test outcomes, ticks and effects. Toolchain, cache and
+platform requirements belong to the implementation's documentation.

@@ -556,15 +556,5 @@ Points to settle
     is a design option ([Design options](design_options.md)).
 
 
-Sources
--------
-
-In hgraph: `docs/source/developer_guide/architecture.rst` (rank, the graph
-schedule, the cycle, start and stop order) and `nested_graphs.rst` (boundary
-binding, scheduling delegation — for the components, not the nodes built on
-them); `include/hgraph/runtime/graph.h` (the graph builder, edges);
-`runtime/node.h` (node builder, node type, node type descriptor);
-`types/time_series/endpoint_schema.h` (peered, non-peered, local);
-`runtime/nested_graph_node.h` and `runtime/child_graph_inspection.h` (child
-graphs and their bindings); RFC 0022 (the manifest). The original Python
-builder was not available to check against.
+Implementation source references are recorded in the
+[audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes).

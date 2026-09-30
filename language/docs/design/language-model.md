@@ -6,13 +6,13 @@ module, and runtime semantics
 The [User Guide](../user-guide/README.md) is authoritative for observable
 source behavior. The
 [Developer Guide](../developer-guide/syntax-and-semantics.md) records the
-proposed grammar and compiler boundaries.
+grammar and semantic boundaries.
 
 HGL is a temporal programming language: values, change, validity, activation,
 and history form its programming model. The agreed direction for value-level
 functions, reconstructible caches, and native type/target contracts is in
 [ADR 0008](decisions/0008-temporal-contracts-and-target-mappings.md). Its
-unimplemented extensions are distinguished from the current model below.
+unresolved design questions are distinguished from agreed rules below.
 
 ## Design principles
 
@@ -89,7 +89,7 @@ The agreed declaration forms are:
 - `export abstract struct` for a public abstract data family;
 - anonymous `fn(...) => expression` values.
 
-The agreed, not-yet-implemented `const fn` extension declares direct
+The agreed `const fn` form declares direct
 value-level functions. It does not add `graph` or `node` keywords or alter
 parameter-level `const`. Modifier combinations with `impl`, `native`, and
 `export` remain open; see [value-level functions](../user-guide/functions.md#value-level-functions).
@@ -123,13 +123,12 @@ const settings: map<str, str>
 Ordinary temporal `fn` results are temporal unless the function is outputless.
 The agreed `const fn` extension instead returns a value, which may be computed
 at wiring time or inside a runtime node when the helper's phase contract
-permits. It is not yet implemented.
+permits.
 
 ## Structured values and deltas
 
-One struct declaration supplies the value schema and temporal shape that
-Python currently expresses separately as `CompoundScalar` and
-`TimeSeriesSchema`:
+One struct declaration supplies both the scalar value schema and its temporal
+shape:
 
 ```hgl
 export struct Quote {
@@ -160,11 +159,9 @@ field type because temporal schemas already define their own delta shapes.
 Runtime code returns it or assigns it to injected `out`; there is no separate
 output keyword.
 
-The runtime already supports sparse TSB delta fields through Bundle validity.
-Explicit optional-field clearing still needs a distinct public native
-operation or delta encoding, because the existing unset delta field means no
-change. The compiler must preserve that distinction through checked HIR and
-reject the clear form until its native contract exists.
+An omitted delta field means no change; clearing an optional field is a
+distinct operation. An implementation must preserve that distinction. The
+encoding of explicit clearing remains open.
 
 ### Abstract structs and final values
 
@@ -351,7 +348,7 @@ nominal operator must have a viable candidate for that type relationship. It
 does not introduce another overload namespace or allow same-named operators to
 compete.
 
-The language preserves this symbolic type information through checked HIR.
+Type checking preserves this symbolic type information.
 Code generation may use one erased implementation when the body uses only
 operations valid for every admitted substitution, or specialize an
 implementation when representation-specific code is required. This is an
@@ -421,18 +418,14 @@ candidate. This is declaration-time materialization, not explicit generic
 application at an operator call.
 
 Retention does not imply that a resolved generic value is available to the
-body. A retained marker used only in a signature is type-erased after resolver
-matching; a retained generic referenced by the body must be reified through a
-defined read-only contract. The first implemented retained marker is a fixed
-list size, lowered to hgraph's named `SIZE` variable. Generic reification and
-residual constraints are deliberately unresolved rather than simulated by
-runtime schema inspection.
+body. A retained generic referenced by the body needs a defined read-only
+reification contract. Generic reification and residual constraints remain
+unresolved; a signature alone does not authorize runtime schema inspection.
 
-The compiler implements this rule for local and selectively imported operator
-contracts. Imported contracts retain their external C++ marker and nominal
-identity through both IRs. The import catalog rejects unsupported contract
-constraints, properties, generic packs, and type shapes before registration;
-see `src/descriptor/import_catalog.cpp` and the imported-operator codegen tests.
+The same rules apply to local and imported operator contracts. Importing a
+contract preserves its nominal identity, requirements and properties. An
+implementation unable to represent a contract must diagnose it rather than
+silently weaken it.
 
 Two operator contracts with the same short name but different defining modules
 are unrelated. A namespace import such as `use my.module as mm` permits an
@@ -472,17 +465,11 @@ installed in the environment do not participate.
 
 ## Compiled module lifetime
 
-The target module model gives every compiled HGL module compiler-generated
-initialization and deinitialization entry points. The current implementation
-provides that versioned lifecycle ABI for dynamically loaded scripted modules;
-AOT output currently provides its descriptor and explicit
-`register_operators()` entry point while the linked application owns its
-lifetime. Completing the AOT lifecycle bootstrap remains compiler work.
-Initialization records a keyed installer for all type and operator
-contributions, including the concrete candidates produced by `instantiate`;
-the installer can be replayed after an hgraph registry reset
-without repeating one-time module initialization. The final application
-explicitly initializes the complete target closure before wiring.
+A compiled module has initialization and deinitialization entry points.
+Initialization contributes its types and operator candidates, including those
+produced by `instantiate`. An implementation may use replayable installers to
+restore registry contributions without repeating one-time initialization. The
+application initializes the complete dependency closure before wiring.
 
 The module manager retains an opaque registration handle. Removing that handle
 deactivates the provider for future resolution, removes its installer intent so
@@ -494,8 +481,8 @@ initialization rolls back its pending contribution.
 Selected implementations give wired graphs and cached plans a lease on their
 provider. A module cannot complete deinitialization, and its native image cannot
 be unloaded, while such a lease is live. Logical registration removal and
-physical library unloading are therefore distinct; the first implementation
-may keep removed native images resident for process lifetime.
+physical library unloading are therefore distinct. An implementation may keep
+removed native images resident for process lifetime.
 
 These lifecycle entry points are compiler and native-module infrastructure.
 HGL source does not acquire arbitrary module-level side effects through `init`
@@ -596,31 +583,28 @@ any of these constructs makes the complete body a runtime function:
 - a `start`, `when`, or `stop` block.
 
 Under the agreed [iteration model](iteration.md), `for`, `keys`, `values`,
-`elements`, and `items` follow the containing phase and do not themselves force runtime
-classification. The classifier and typed HIR implement this rule; backend
-support reaches fixed temporal-list traversal and independent map/list bodies
-over dynamic maps and unbounded lists.
+`elements`, and `items` follow the containing phase. They do not themselves
+classify a function as a runtime node.
 
 Mixing wiring-only and runtime-only constructs is an error. Classification is
 based on the resolved source body, not on the implementation kind selected for
 a called operator.
 
-A graph `if` with a temporal Boolean condition uses native switch-style child
-execution, following the Arrow API. It remains graph composition: the graph
+A graph `if` with a temporal Boolean condition uses conditional child-graph
+execution. It remains graph composition: the graph
 wires the conditional once and the native switch manages branch execution.
 A wiring-time Boolean still selects which branch to wire, and a conditional
 inside node evaluation remains ordinary runtime control flow. See
 [Conditional control flow](control-flow.md) for this agreed strategy and its
-implementation status.
+semantic rules.
 
 The agreed [explicit switch model](switch.md) follows the same phase split:
 wiring-time selection during composition, native `switch_` with branch capture
-and result analysis for a temporal graph selector, and local C++ dispatch
+and result analysis for a temporal graph selector, and local dispatch
 inside a node. Selector suitability is checked before lowering. `default: ...`
 handles unmatched values; no match without a default fails. The agreed form
 is `switch selector { case value: ... default: ... }`, with source-expressible
-constant case values and no implicit fallthrough. Implementation remains
-separate work. [Enum support](type-extensions.md#enum-types), including named
+constant case values and no implicit fallthrough. [Enum support](type-extensions.md#enum-types), including named
 member constants for cases, uses the agreed `enum Mode { first, second }`
 declaration and `Mode::first` reference form. An explicit `= constant` assigns
 an integer number; otherwise the first member starts at zero and later
@@ -711,8 +695,7 @@ threads, and transports remain native extension responsibilities.
 
 Multiple `when` blocks are independent ordered conditions. The compiler uses
 the union of their activation dependencies and the validity requirements common
-to all handlers as the most permissive safe node-level policy. It lowers each
-remaining predicate to a C++ `if` in source order. Later handlers observe state
+to all handlers as the most permissive safe node-level policy. Remaining predicates are evaluated in source order. Later handlers observe state
 and output changes made by earlier handlers.
 
 `modified(a, b, ...)` is true when any listed input was modified, while
@@ -955,8 +938,7 @@ Later decisions must define:
 - `i64` overflow, conversion, and division behavior;
 - NaN comparison;
 - destructuring and copy-with-update syntax; recursive struct fields are
-  agreed in [ADR 0012](decisions/0012-recursive-struct-fields.md) and are
-  rejected by the compiler until it is implemented;
+  agreed in [ADR 0012](decisions/0012-recursive-struct-fields.md);
 - runtime type tests, concrete downcasts, exhaustive abstract-family matching,
   the temporal base-projection spelling, and multiple-parent field ordering;
 - explicit generic arguments on function and operator calls, generic parameter
@@ -978,10 +960,8 @@ Later decisions must define:
 
 ### Open decisions (2026-09-07)
 
-[#767](https://github.com/hhenson/hgraph/issues/767) item 6 owns the
-decisions below. Each entry records what the compiler does today as observed
-behavior; none of it is an agreed language rule until its design record
-exists, and a backend description is not a substitute for one.
+The following questions remain open unless settled by a later design record.
+Observed compiler behavior does not establish a language rule.
 
 - **Error model for runtime nodes.** Decided
   ([ADR 0009](decisions/0009-native-errors-and-the-node-error-model.md)): a
@@ -990,30 +970,12 @@ exists, and a backend description is not a substitute for one.
   writes in that evaluation stand; a captured error output ticks a
   `NodeError`, otherwise the exception propagates. HGL has no exception
   surface of its own.
-- **Integer division, overflow, and NaN.** `i64 / i64` is typed `f64` by the
-  checker (`src/ir/type_check.cpp`, `arithmetic_result`) and folded as a
-  `Float` division (compiler-and-lowering.md, "Bodies"); the other operators
-  on two `i64` operands stay `i64`. A constant `i64` overflow and a constant
-  zero divisor are diagnostics at fold time; runtime overflow, runtime
-  division by zero, `%` on negative operands, and NaN comparison are
-  undefined.
-- **String operators.** `str + str` is typed `str` and folds to
-  concatenation, and constant `str` comparisons fold. Equality and ordering
-  of temporal strings, indexing, length, and Unicode normalization are
-  undefined.
-- **First-tick validity.** `valid(out)` before the node's first output and
-  `last_modified(x)` before `x` first ticks return whatever hgraph's endpoint
-  returns; the language states nothing.
-- **Descriptor parameter `kind`.** Format v1 writes `"kind": "signal"` for
-  every temporal parameter and `"const"` for a `const` one, so the label
-  collides with the `signal` type. A rename is a format v2 decision with
-  reader compatibility.
-- **`elements` and `values`.** `elements` traverses lists and sets; `values`
-  projects values from keyed or named structures. They are distinct operations,
-  not compatibility aliases ([Iteration](iteration.md)).
-- **Type-keyword callees.** `str(...)` and `Mode(...)` need a grammar rule for
-  a type keyword or type name in callee position; today `str` is not an
-  expression start and `Mode(...)` is an ordinary call to an unknown name.
+- **Numeric edge cases.** True division of two `i64` values produces `f64`.
+  Overflow, zero divisors and NaN behavior need explicit domain contracts;
+  a backend's arithmetic is not an implicit language policy.
+- **String operations.** Concatenation, comparison, indexing and Unicode
+  handling require operation-specific contracts.
+- **Endpoint metadata.** Validity and modification time follow the runtime
+  time-series rules, including before the first tick.
 
-Diagnostics should identify the source concept and expanded hgraph shape while
-preserving candidate rejection reasons from hgraph.
+Descriptor field names and format versions are implementation concerns.

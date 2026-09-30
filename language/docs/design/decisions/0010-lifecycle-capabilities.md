@@ -1,8 +1,6 @@
 # ADR 0010: clock and scheduler capabilities, scheduled handlers, and input activity
 
-Status: accepted. Implemented for `inject clock`, `inject scheduler`, the
-`scheduled()` handler selector, scheduler-driven sources, and the
-`passivate`/`activate` input-activity statements.
+Status: accepted.
 
 ## Context
 
@@ -26,11 +24,11 @@ blocker LIB-002). Both are the scheduler case.
 
 ## Decision
 
-1. **`inject clock`** binds `hgraph::EvaluationClockView` as `clock` in every
+1. **`inject clock`** provides the evaluation clock as `clock` in every
    hook. `clock.evaluation_time()`, `clock.now()` (wall clock) and
    `clock.next_cycle_evaluation_time()` return `datetime`.
 
-2. **`inject scheduler`** binds `hgraph::NodeScheduler` as `scheduler` in
+2. **`inject scheduler`** provides the node scheduler as `scheduler` in
    every hook. `scheduler.schedule(delay)` and
    `scheduler.schedule(delay, on_wall_clock)` take a `duration`;
    `scheduler.schedule_at(time)` and `scheduler.schedule_at(time, on_wall_clock)`

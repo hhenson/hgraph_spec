@@ -108,15 +108,11 @@ default or fail without one. Generated dispatch retains no-match failure even
 for exhaustive coverage. These rules apply in both function phases; see
 [enum switch examples](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/enum-switch-cpp-mappings.md).
 
-Native C++/Python mapping remains open. Enums are agreed design, not implemented
-compiler support; see the
-[paired examples](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/enum-cpp-mappings.md)
-and [Enum types](../design/type-extensions.md#enum-types).
+Native enum mapping remains open. See [Enum types](../design/type-extensions.md#enum-types).
 
 ## String conversion
 
-Status: `str(value)` is the agreed source spelling; these examples describe
-the target language contract, not implemented compiler support.
+Status: `str(value)` is the agreed source spelling.
 
 With the enum above:
 
@@ -244,11 +240,8 @@ are accessed by position, lists are sized and traversed.
 
 ## Imported values and references
 
-Status: partially implemented. Explicit `ref<T>` signatures, transparent
-underlying-type compatibility, opaque node access, forwarding, and fixed-list
-reference selection are available. Wiring-time access through a reference and
-imported native types remain compiler work. See
-[Type extensions](../design/type-extensions.md) for the complete agreement.
+Reference signatures, compatibility, opacity and forwarding follow
+[Type extensions](../design/type-extensions.md).
 
 Imported C++ and Python types are scalar values, like `i64`, `f64`, and `str`.
 They are atomic leaves in a temporal signature, require no `atomic` annotation,
@@ -297,8 +290,7 @@ than normalizing it implicitly.
 
 ## `signal` inputs
 
-Status: implemented for function and operator inputs. See
-[`signal` inputs](../design/type-extensions.md#signal-inputs).
+See [`signal` inputs](../design/type-extensions.md#signal-inputs).
 
 `signal` accepts any concrete time-series input and exposes only `modified`,
 `valid`, and `last_modified`. It has no accessible value or delta payload,
@@ -351,11 +343,6 @@ and removed after wiring.
 
 ## Structured values
 
-> **Implementation status:** declarations, type-generic applications,
-> abstract-only single inheritance, construction, optional fields, and sparse
-> delta syntax are implemented. Constructor inference, typed `const` generic
-> metadata, explicit optional-field clearing, and the remaining nested/runtime
-> forms are rejected as listed in the roadmap.
 
 A `struct` declares one nominal structured type. It is module-internal unless
 it is exported, and its fields are public and immutable:
@@ -407,25 +394,18 @@ fn flat(symbol: str, price: f64) -> atomic<Tick> =>
 
 A value built here crosses back to `market.data` without conversion and both
 modules see one schema. The importing module never re-declares the struct:
-generated C++ refers to the exporter's own definition and includes its header.
+the imported type retains the exporter's nominal identity.
 
-An importing module needs the exporting module's descriptor, which the build
-supplies (`hgl check --module-descriptor`, or the `LINK_LIBRARIES` of
-`hgl_add_module`).
+An importing module needs the exporting module's complete interface, supplied
+by the application's module dependency closure.
 
-**What cannot be imported yet.** A struct an importer cannot rebuild whole is
-refused by name rather than rebuilt short, and today that includes any struct
-with a **field default other than `null`** — the descriptor records the
-default, but the catalog cannot yet reconstruct its value, so `Quote` above,
-with `currency: str = "USD"`, is not importable.
+An imported struct preserves all construction metadata, including defaults and
+overrides. If an implementation cannot reconstruct it completely, it must name
+the unsupported part and reject the import rather than produce a partial type.
 
-`= null` does cross, because it says the field is optional and carries no
-value to rebuild — and that is what lets a recursive struct import, since its
-edge must be declared `= null`. It crosses on the struct that **declares** the
-field, and on a child that merely inherits it. What does not cross is a child
-**overriding** an inherited default: the child's copy of the field is rebuilt
-from the parent's record, so an override would be lost rather than rebuilt
-short.
+A `null` default marks an optional field, including a recursive edge. An
+inherited field keeps its declaring ancestor and an explicit override must
+not be lost when the struct crosses a module boundary.
 
 `examples/struct-imports/` is the pair end to end: `market-data.hgl` publishes
 the shape and `instrument-book.hgl` imports it, extends the family and builds
@@ -517,8 +497,7 @@ When multiple abstract parents contribute the same field name, its type and
 optionality must agree. Equal defaults merge. Different defaults, or a default
 from only one of otherwise compatible parents, require the child to choose an
 explicit default. A type or optionality conflict is always an error. The exact
-stable ordering rule for fields contributed by multiple parents will be fixed
-before this syntax is implemented.
+stable ordering rule for fields contributed by multiple parents remains open.
 
 A scalar or `atomic<Abstract>` value carries one concrete final member of the
 family and preserves its concrete type. The compiled target's module closure
@@ -562,18 +541,15 @@ A bare `Box`, an unresolved argument, and partial application such as
 `Pair<_, str>` are errors. Generic parameter defaults are not part of the
 initial design, so explicitly applying a type supplies every argument.
 
-Status: constructor inference is provisional. The rule below is agreed but
-not implemented: the compiler rejects a generic constructor without its
-explicit type arguments, so write `Box<f64>(value: 1.5)` today. The snippets
-in the rest of this subsection that omit the arguments are design fixtures,
-not accepted programs.
+Status: constructor inference is an agreed design. The examples distinguish
+inferred arguments from explicit arguments; neither selects an implementation.
 
 Struct constructors are intended to infer the complete argument list from
 their named fields and expected type:
 
 ```hgl
 let inferred = Box(value: 1.5)              # provisional: Box<f64>
-let explicit = Box<f64>(value: 1.5)         # implemented
+let explicit = Box<f64>(value: 1.5)         # explicit arguments
 let expected: Box<f64> = Box(value: 1.5)    # provisional
 ```
 
@@ -588,7 +564,7 @@ struct Maybe<T> {
 }
 
 let empty: Maybe<f64> = Maybe()            # provisional
-let also_empty = Maybe<f64>()              # implemented
+let also_empty = Maybe<f64>()              # explicit arguments
 let ambiguous = Maybe()                    # error: cannot infer T
 ```
 
@@ -1114,10 +1090,8 @@ described above; they are not subject to borrowed-iterator escape restrictions.
 
 Status: `elements` is the element-iteration spelling for lists and sets. Like
 `for`, `keys`, `values`, and `items`, it follows the containing phase rather
-than itself forcing a runtime node. The compiler implements graph-phase
-`elements` and `items` over fixed temporal lists by expanding the body once per
-child connection; `items` also supplies its wiring-time `i64` index. Scalar
-wiring-time iterables and bundles remain future compiler work. Independent
+than itself forcing a runtime node. Over fixed temporal lists, each iteration
+receives a child connection; `items` also supplies its wiring-time `i64` index. Independent
 `values`/`items` bodies over maps and `elements`/`items` bodies over unbounded
 lists apply independently to each live key or index. Captured temporal
 inputs are available to every iteration.
@@ -1180,11 +1154,9 @@ These calls currently take positional arguments. Indices are zero-based;
 window samples are ordered oldest to newest, including after wraparound.
 Missing keys, invalid child value reads, empty `front`/`back`, and out-of-range
 indices are errors. They do not fabricate default values. `contains` checks
-membership, not child validity. Atomic collection values still require further
-compiler support; this implemented slice uses structural time-series inputs.
+membership, not child validity. The access rules here describe structural time-series inputs.
 
-The safe counterpart `get(value, key_or_index, default=null)` is accepted but
-not implemented yet. The nullable result and the treatment of a present
+The safe counterpart `get(value, key_or_index, default=null)` is accepted in principle. The nullable result and the treatment of a present
 but invalid child remain outstanding; see the
 [surface completion record](../design/native-surface-proposal.md).
 

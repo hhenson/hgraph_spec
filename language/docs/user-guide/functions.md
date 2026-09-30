@@ -45,9 +45,8 @@ smooth(bid, ask, window: 50)
 
 ## Value-level functions
 
-Local, non-generic value functions and their default temporal lifting are
-implemented. See [Value functions and lifting](value-functions.md) for selection,
-`const(function)`, testing, and the remaining implementation boundaries.
+See [Value functions and lifting](value-functions.md) for role selection,
+`const(function)` and testing.
 
 ```hgl
 const fn scale(value: f64, factor: f64) -> f64 =>
@@ -79,10 +78,6 @@ this section.
 
 ## Parameter packs
 
-> **Implementation status:** Pack signatures, calls, composition and runtime
-> traversal are implemented, including cardinality suffixes. `len`, `keys`,
-> `types`, `type_at`, and the `each` conjunction are implemented in `requires`,
-> as are borrowed runtime schema views for native inspection.
 
 HGL supports three variadic call shapes:
 
@@ -158,8 +153,7 @@ positional pack; `items` yields zero-based indexes. For a named pack, use
 
 A `schema` can only be passed to an approved native helper during that
 evaluation. It cannot be stored, returned, captured, compared, or used in
-arithmetic. See [native helper authoring](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/compiler-and-lowering.md#runtime-pack-schema-views)
-for extension integration.
+arithmetic.
 
 ## Public functions
 
@@ -498,9 +492,8 @@ template and its requested candidates remain hidden behind the public
 operator contract. A generic implementation with no materialization is valid
 source but contributes no generated candidate.
 
-> **Current compiler boundary:** explicit materialization is implemented for an
-> operator declared locally or selectively imported from a module with a supported
-> contract. See [separate implementations](modules-and-tools.md#compiling-a-separate-implementation).
+Materialization follows the same contract for local and imported operators.
+See [separate implementations](modules-and-tools.md#compiling-a-separate-implementation).
 
 Operator identity is nominal and includes its defining module. Two modules may
 therefore declare unrelated operators with the same short name. Name and import
@@ -633,11 +626,11 @@ unbounded lists apply separately to each live key or index, and may capture
 temporal inputs. During evaluation, traversal reads current children or scalar
 elements. Loop-carried reductions, graph iterator predicates, `const` captures
 in dynamic graph loops, escaping assignments, and loop returns are unsupported.
-Scalar wiring-time iterables are not implemented yet.
+
 
 ## Conditional control flow
 
-Status: partially implemented. Temporal conditions support branch values,
+Temporal conditions support branch values,
 outputless branches, early returns, and assignments to variables declared
 before the conditional. Several variables may be assigned together. A branch
 may retain a variable's incoming binding; otherwise every path reaching a later
@@ -720,12 +713,10 @@ the enclosing graph. The graph body describes the wiring; the sink nodes
 perform the printing. With no `else`, the false path contributes no conditional
 sink. The conditional has no output or escaping binding to remap.
 
-This form is implemented in scripted and compiled modes. See the runnable
-[conditional-sinks.hgl](../../examples/conditional-sinks.hgl) example.
+See [conditional-sinks.hgl](../../examples/conditional-sinks.hgl).
 The example also returns a value after a discarded sink conditional, showing
 that the conditional does not inherit the enclosing function's result type.
-Temporal `else if` is not supported yet;
-use a block `else` in the current compiler.
+A nested conditional must preserve its branch semantics.
 
 Whether the switch needs an output depends on the conditional's results and
 escaping variables, not on whether the enclosing function is outputless. See
@@ -797,9 +788,8 @@ default, fail during wiring or evaluation as appropriate to the selector's
 phase. Do not invent a never-ticking result or silently continue. Default is
 not an exception handler and does not permit reading an invalid selector.
 
-The [paired HGL/C++ scenarios](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/control-flow-cpp-mappings.md)
-show node-style `when` handlers, wiring-time selectors, temporal selectors,
-multiple results, early returns, sinks, and state lifetime.
+See [Conditional control flow](../design/control-flow.md) for selectors,
+results, early returns, sinks and state lifetime.
 
 ## State
 
@@ -876,11 +866,9 @@ the callable signature:
 inject out, logger, clock, scheduler
 ```
 
-All four are implemented: `out` and `logger` since the first runtime slice,
-`clock` and `scheduler` under
-[ADR 0010](../design/decisions/0010-lifecycle-capabilities.md), and a
-fifth, `alarm`, under [ADR 0015](../design/decisions/0015-pull-sources.md);
-see the next section.
+The capability contracts are specified in
+[ADR 0010](../design/decisions/0010-lifecycle-capabilities.md) and
+[ADR 0015](../design/decisions/0015-pull-sources.md); see the next section.
 
 The comma-separated form may span lines and may have a trailing comma:
 

@@ -448,29 +448,13 @@ Evidence and cases
 on hgraph's Python implementation (0.5.41) and its C++ implementation, and
 on the HGL front end.
 
-| Rules | Evidence |
-|---|---|
-| WIR-5, WIR-6 to WIR-13 | The wiring cases, run on both implementations and held by their contract tests; the C++ matcher and its static unifier are checked row by row |
-| WIR-14 | The HGL front end was observed to vary and is corrected; the front-end case is replayed in its compiler tests |
-| WIR-15 | The bundle-identity case, run on both implementations |
-| WIR-21 to WIR-24 | The operator-contract case, run on both implementations and the HGL front end, and through native C++ wiring, which also checks the registration check (WIR-24) |
-| WIR-4, WIR-16 to WIR-18 | Wiring cases for selection, ambiguity, no candidate and repeated variables, in both implementations' contract tests |
-| WIR-1 to WIR-3, WIR-19, WIR-20 | Source reading only |
+Implementation comparisons and test coverage are maintained in the
+[audit evidence](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/wiring/README.md).
 
 The owner's ruling of 2026-09-24 states WIR-7 and WIR-9: "whenever resolving
 a generic, we de-reference everything. If the code depends on REF it must
 express that."
 
 
-Sources
--------
-
-In hgraph: `docs/source/developer_guide/writing_nodes.rst` (the
-dereferenced binding of a generic parameter; the matcher and unifier
-contract), `operators.rst` (resolution, ranking, reference transparency,
-type arguments), `graph_wiring.rst` and `wiring.rst`; the runtime matcher,
-the static unifier and the dispatcher in `src/hgraph/types/`. WIR-22's
-"arguments the operator does not declare" is Python's `*args, **kwargs`
-convention, which hgraph's operators follow. For HGL:
-`language/docs/design/type-extensions.md` (`ref<T>`) and the compiler's
-generic inference.
+Implementation source references are recorded in the
+[audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes).

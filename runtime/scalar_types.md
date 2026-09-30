@@ -305,22 +305,11 @@ Points to settle
    when its *key* has equality and hash; the value type is not mentioned. It
    presumably has to have equality too. The capability table follows the
    registry and should be checked.
-7. **Recursive fields across modules.** VAL-18 is settled. HGL ADR 0012 is
-   accepted and implemented for its admitted domain in both backends at the
-   [audited revision](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/evidence.md). A recursive edge is optional and an atomic
-   boundary, so temporalization terminates. Direct and mutual recursive edges
-   are supported; recursion through containers remains excluded by that ADR.
-   Importing a struct from another module still waits for general struct
-   imports. The earlier statement that HGL rejects all recursive fields is
-   superseded.
+7. **Recursive fields across modules.** VAL-18 and HGL ADRs 0012 and 0013
+   govern local and imported recursive types. A recursive edge is optional
+   and atomic, so temporalization terminates. Direct and mutual recursion
+   are admitted; recursion through containers remains excluded by ADR 0012.
 
 
-Sources
--------
-
-In hgraph: `docs/source/developer_guide/data_structures/schemas/scalar.rst`
-and `core_concepts.rst`; RFC 0002 (the date and time types), RFC 0028 (shared
-values), RFC 0033 (types as values), RFC 0035 (the type layer without
-Python); the capability rules in `src/hgraph/types/metadata/
-type_registry.cpp`; HGL's `language-model.md` (structs, families, generics,
-enums) and `type-extensions.md`.
+Implementation source references are recorded in the
+[audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes).

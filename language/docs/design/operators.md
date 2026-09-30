@@ -1,8 +1,6 @@
 # System operators and domain properties
 
-Status: agreed design; executable declarations, descriptor metadata, and the
-current symbol set, including floor division, are implemented. HGL comments use
-`#` or `/* ... */` (see below).
+Status: agreed design. HGL comments use `#` or `/* ... */` (see below).
 
 ## Decisions from the discussion
 
@@ -48,7 +46,7 @@ current symbol set, including floor division, are implemented. HGL comments use
 
 `+=`, `-=`, `*=`, and `/=` combine assignment with the corresponding binary
 operation; they do not introduce four more operator identities. Assignment and
-comparison are distinct. Node Boolean expressions retain C++ short-circuit
+comparison are distinct. Node Boolean expressions use short-circuit
 evaluation; graph Boolean expressions do not conditionally wire their RHS.
 
 Floor division maps `a // b` to the fixed `floordiv_` system identity, including
@@ -64,7 +62,7 @@ identity, not the nearest function with a matching short name.
 
 ## Execution role and native implementations
 
-Status: agreed direction, not implemented. The existing symbol mapping and
+Status: agreed direction. The existing symbol mapping and
 domain-property syntax are unchanged.
 
 An operator may have both temporal and value-level implementations, with
@@ -118,7 +116,7 @@ This selects `(i64, i64) -> i64`, not every candidate containing an `i64`.
 It says nothing about `(i64, f64) -> f64`. The domain must satisfy the operator's
 `requires` clause. Unknown properties, repeated properties, repeated domains,
 wrong selector arity, non-concrete types, and incorrectly typed identities are
-errors. The first implementation admits concrete type selectors and scalar
+errors. The current property syntax admits concrete type selectors and scalar
 constant identities; const-generic selectors, partial domains, and value-range
 or numerical-policy predicates are deferred. `ref` and `signal` are not value
 domains for these algebraic declarations.
@@ -148,21 +146,15 @@ values, not just a mathematical analogy:
   selection are observable. Custom native/Python scalar operators inherit no
   laws merely because C++ supplies an overloaded operator.
 
-The native lifted kernels now publish conservative, specialization-specific
-metadata. Unknown guarantees are false in that API. Known string concatenation,
-Boolean logic, integral bitwise operations, and supported total-order extrema
-retain their applicable guarantees. Closed unsigned arithmetic can use modular
-laws; that does not change HGL `i64` into an unsigned or wrapping type.
+An implementation may attach verified, specialization-specific laws to native
+kernels. Unknown guarantees remain absent. Such metadata does not change the
+source type or its arithmetic policy.
 
-The compiler checks and preserves HGL declarations in HIR, graph IR and JSON
-module descriptors. It does **not** prove arbitrary implementations, copy those
-claims into trusted native kernel flags, or enable new optimizations from them.
-Descriptor loading validates metadata shape and checks identity literals against
-the result type after substituting the declared domain (including the normal
-`i64` to `f64` widening). It does not verify mathematical truth. The
-descriptor import catalog supports operator contracts as well as native
-functions, but rejects operator contracts carrying properties until property
-reconstruction is implemented. Optimizer proof transport is also unimplemented.
+Property declarations survive checking and module import. Checking validates
+the metadata shape and identity value against the substituted result type,
+including ordinary `i64` to `f64` widening; it does not prove a mathematical
+law. Declarations alone neither establish trusted kernel guarantees nor
+authorize optimization. Proof transport remains open.
 
 An explicitly requested `reduce` retains its own contract. Removing an unsafe
 native law prevents the lifted reduction fast path; it does not silently change

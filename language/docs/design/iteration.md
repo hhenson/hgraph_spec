@@ -1,14 +1,9 @@
 # Iteration in graph composition and node evaluation
 
-Status: phase-dependent iteration and the independent-body boundary for
-dynamic graph loops agreed, 2026-09-05. The compiler implements fixed temporal
-list traversal and independent dynamic map/unbounded-list traversal in graph
-composition. Map/reduce lowering of loop-carried accumulators remains a future
-extension and is explicitly unsupported in the initial implementation.
-Graph-phase iterator predicates were also deferred on 2026-09-06; further
-loop design is paused while other language features are discussed. The
-`elements` spelling for lists and sets was agreed on 2026-09-06 and remains
-compiler work; it does not expand the supported graph-loop subset.
+Status: phase-dependent iteration and independent dynamic graph-loop bodies
+are agreed. Loop-carried accumulation and graph-phase predicates are deferred.
+Lists and sets use `elements`; this spelling does not expand the admitted
+graph-loop forms.
 
 ## Iteration follows the containing phase
 
@@ -69,14 +64,10 @@ independent temporal children. Supported node-time predicates and borrowed
 view lifetimes are unchanged; for example, `elements(symbols, added)` selects
 the set's added members.
 
-This supersedes the earlier rule excluding `elements`. The compiler still
-implements list/set traversal under `values`; retention of that spelling as
-a compatibility alias remains undecided. The worked examples below and
-[elements-iteration.hgl](../../stdlib/examples/elements-iteration.hgl) use the
-agreed target spelling, not implemented compiler support. Dynamic-list loops
-retain their existing independent-body restriction, and graph-phase set
-traversal remains unsupported. No predicate-to-switch or reduction inference
-is introduced.
+This supersedes the earlier rule excluding `elements`. Whether `values`
+remains a compatibility alias for lists and sets is unresolved. Dynamic-list
+loops retain the independent-body restriction; graph-phase set traversal is
+not admitted. No predicate-to-switch or reduction inference is introduced.
 
 ## Fixed temporal structure at wiring time
 
@@ -94,15 +85,12 @@ current payload. No sample value needs to exist during wiring. Source value
 ticks subsequently reach those sinks through their fixed connections; they do
 not cause the graph function to iterate again.
 
-The expected C++ wiring is:
+An illustrative native realization is recorded in the audit:
 
 [Native example 1](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/iteration.md#example-1)
 
-This uses the public native `tsl_element` contract and assumes the standard
-operators are registered before wiring. Both compiler backends already perform
-this expansion for the older `values` spelling in
-[fixed-list-iteration.hgl](../../examples/fixed-list-iteration.hgl). The
-`elements` example is the agreed migration target, not current emitted output.
+An implementation could expand a fixed traversal into one connection per child.
+This preserves index order and does not make the graph body run on later ticks.
 
 ## Node-time traversal
 
@@ -170,19 +158,16 @@ Here the body is outputless, so the lowering uses a sink map. The runnable
 example covers `values`/`items` over maps and `elements`/`items` over
 unbounded lists.
 
-The current compiler accepts temporal captures such as `offset`. Capturing a
-`const` configuration value in a dynamic child is still unsupported: the
-native mapping contract accepts time-series boundary inputs, while the scalar
-capture ABI and identity rules have not yet been agreed. Such a capture is
-diagnosed rather than silently promoted to a time series.
+Temporal captures such as `offset` preserve time-series boundary bindings.
+Scalar capture identity and binding remain open; a `const` capture must not
+be silently promoted to a time series.
 
 Map keys determine child identity. Dynamic lists use index identity, not the
 identity of a stored value. Updating an existing member does not recreate its
 child; membership removal or list truncation stops the affected children using
 the native lifetime protocol. Surviving children retain their own node state.
-The native ownership, binding, and scheduling contracts remain authoritative;
-see [Nested graphs](https://github.com/hhenson/hgraph/blob/main/docs/source/developer_guide/nested_graphs.rst) and
-the public-wiring coverage in [test_map.cpp](https://github.com/hhenson/hgraph/blob/main/tests/cpp/test_map.cpp).
+Ownership, binding and scheduling follow the runtime's
+[nested graph rules](../../../runtime/graph.md).
 
 Independent bodies may capture surrounding inputs and compose stateful nodes
 or sinks within each child. Independence does not mean that every node must be
@@ -244,9 +229,8 @@ The incoming accumulator binding must also be preserved. Native associative
 does not include it for two or more live values. It is therefore not a general
 loop initializer: changing `result` above to start at `10.0` cannot simply
 become `zero=10.0`. Ordered reduction provides a true initial accumulator.
-See the [native reduce contract](https://github.com/hhenson/hgraph/blob/main/include/hgraph/lib/std/operators/higher_order.h),
-[ordered dynamic-list tests](https://github.com/hhenson/hgraph/blob/main/tests/cpp/test_reduce.cpp), and
-[zero-semantics tests](https://github.com/hhenson/hgraph/blob/main/python/tests/test_reduce_zero_semantics.py).
+Reduction must preserve its specified empty, singleton and multi-element
+behavior rather than borrowing the target language's fold semantics.
 
 Initially, the compiler should diagnose a dynamic graph loop requiring a
 loop-carried reduction as unsupported. It must not silently choose a reduction
@@ -277,24 +261,3 @@ contains no existing construct that selects runtime evaluation. Whether this
 needs an explicit phase marker or another rule is deliberately unresolved. No
 new source spelling for that distinction, explicit `map`, `reduce`, or their
 policies is introduced here.
-
-## Implementation status
-
-The classifier and typed HIR keep `for`, `keys`, `values`, `elements`, and
-`items` phase-neutral. In a composition function, both direct wiring and
-generated C++ implement `elements(fixed_list)` and `items(fixed_list)` by
-statically expanding the body in index order. `items` supplies an `i64`
-wiring-time index and a child time-series connection.
-
-For maps and unbounded lists, both backends lower independent map
-`values`/`items` bodies and list `elements`/`items` bodies to hgraph's
-outputless native `map_` path. The child signature
-uses the native `key` or `ndx` convention for `items`; temporal captures are
-explicit pass-through broadcast inputs, including captured maps and lists. The
-shared HGraph-IR `TraversalPlan` rejects
-assignments to enclosing bindings and returns before either backend lowers the
-loop.
-
-Graph-phase `keys`, iterator predicates, scalar captures, bundles, sets,
-loop-result construction, reductions, and loop exits remain design or
-implementation boundaries and fail closed.

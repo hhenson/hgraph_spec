@@ -3,7 +3,6 @@
 The shared declaration owns the callable signature. A selected implementation
 part supplies execution shape, injectables and lifecycle requirements.
 Shared HGL contracts cross repositories; implementations belong to their runtime.
-`hgraph` owns C++ parts and providers; `hgl` owns Rust parts and providers.
 A library selects one implementation, never both.
 
 ```hgl
@@ -71,9 +70,8 @@ reasoned/Python/C++ helper and clock traces remain the runtime oracle.
 | Native temporal call inside node evaluation | Reject; no implicit lifecycle or ownership |
 | Export/import selected metadata | Preserve shape, hooks and capabilities |
 
-## Implementation boundary
+## Binding boundary
 
-The compiler checks and carries graph/node contracts. Existing value adapters
-consume selected implementation requirements. Temporal graph/node provider
-execution and borrowed-TS helper binding are not implemented by this change;
-backends must diagnose them rather than emit a value ABI.
+A temporal graph or node requires a provider binding that preserves its
+execution shape and lifecycle. An implementation lacking that binding must
+diagnose the contract rather than emit a scalar value call.

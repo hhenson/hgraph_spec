@@ -1,6 +1,6 @@
 # ADR 0006: Explicit source parts form one logical module
 
-Status: accepted and implemented
+Status: accepted.
 
 ## Context
 

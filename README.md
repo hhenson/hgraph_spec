@@ -18,7 +18,12 @@ stay here; observations never silently replace them.
 [hgraph](https://github.com/hhenson/hgraph) owns the C++ compiler/runtime and
 native providers. The Rust compiler/runtime implementation remains private.
 
-Implementation descriptions explain a rule; they do not make an ABI or layout
-part of the language. Sources and extraction revisions are recorded in
+Rules state observable behavior independently of a compiler or runtime.
+Non-normative explanations may describe how an implementation could satisfy a
+rule; they must not require particular source files, internal passes, native
+symbols or layouts. Implementation status, source references, build recipes
+and test locations belong in [audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes)
+or the implementation repository. Agreed rules and open design questions stay
+here; lack of implementation support does not change either. Sources and extraction revisions are recorded in
 [PROVENANCE.json](PROVENANCE.json). This repository is a source/data package;
 it has no importable Python package or native implementation.
