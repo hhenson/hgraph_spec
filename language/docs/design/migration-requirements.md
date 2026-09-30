@@ -57,12 +57,16 @@ disguised as recordable state (ADR 0008 fixes that distinction).
 
 ### MIG-007: delta capture and forwarding
 
-The general `pass_through` operator
-requires the complete input delta, including structural and collection
-removals, applied to an output of the same temporal schema. `delta(value)` has
-no result type today. The choice is a first-class, type-preserving delta value
-or a dedicated forwarding effect; either must work through the public runtime
-contract across implementations.
+`pass_through<T>` applies the input's delta to an independent output of the
+same temporal shape. The accessor is `delta_value(value)`, as specified by
+the [delta-value contract](delta-value-metadata.md), including the generic
+runtime body. Its scalar result and admission are defined for the eight
+scalar domains. Structural and collection delta types and output application,
+including removals, need a separate contextual contract; replacing them with
+complete value snapshots does not satisfy this requirement.
+
+`delta<S>(...)` is the distinct sparse-update constructor. It is not an
+accessor and does not introduce a first-class storable delta type.
 
 ### MIG-008: output and type resolution
 

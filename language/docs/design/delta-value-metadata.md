@@ -16,6 +16,11 @@ resolution; a call to an undeclared `delta` is a name error, not a metadata
 accessor. An unrelated user-declared callable named delta follows the ordinary
 call rules.
 
+| Form | Meaning |
+|---|---|
+| `delta_value(endpoint)` | Read the delta published by this endpoint in the current cycle. |
+| `delta<S>(field: value, ...)` | Construct a sparse update for the nominal struct S; omitted fields do not change. |
+
 The result is derived from the endpoint's **temporal shape**, not from the
 stored representation. In generic checking, retain that
 derived relationship symbolically. Writing `DeltaOf(T)` in this specification
