@@ -286,8 +286,8 @@ terminal too.
 
 The proposed [scalar replay/capture capability contract](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
 lets HGL implementations of replay and record use typed buffers supplied by
-eval. It does not add arguments to the test's eval call. The capability
-surface is a proposal; it does not enlarge the implemented subset below.
+eval. It does not add arguments to the test's eval call. Its admitted scalar
+types, phases and failure conditions are defined by that contract.
 
 ## First-pass limits
 

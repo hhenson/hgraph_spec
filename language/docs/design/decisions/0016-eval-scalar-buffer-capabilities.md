@@ -1,10 +1,7 @@
 # ADR 0016: typed scalar buffer capabilities for replay and record
 
 Status: proposed source extension, 2026-09-30. This proposal uses
-node-scoped typed injectables rather than general resource types. The
-behavioral evidence below concerns reference graph execution and storage;
-it is not a claim that either Python/C++ HGL or another HGL implementation
-already supports this source surface.
+node-scoped typed injectables rather than general resource types.
 
 This builds on [eval operator composition](../eval-operator-composition.md).
 Its admitted profile is a fresh, finite, dense eval of `bool`, `i64`, `f64`,
@@ -34,9 +31,9 @@ function-call syntax nor a first-class delta type.
 
 Eval wires and configures these operators. Its caller still writes
 `eval(pass_through, value: [...])`, with no resource, recording key or
-operator configuration argument. Normal operator resolution and HGL bodies
-remain in use; the compiler must not substitute a special native temporal
-implementation for these HGL bodies when claiming this profile.
+operator configuration argument. Normal operator resolution applies. The
+HGL bodies below determine publication and capture; the capabilities supply
+only the storage operations defined by this contract.
 
 ## Construction and typed binding
 
@@ -58,8 +55,8 @@ or process-global lookup operation.
   requirements do not propagate transitively through value helpers in this
   slice. Direct capability methods are the only storage-access primitives.
 - A borrowed capability cannot be assigned, returned, passed as a value,
-  put in a closure, or kept in state/cache. A native implementation must not
-  retain a capability reference outside its call. Its owned scalar results
+  put in a closure, or kept in state/cache. No capability reference may be
+  retained outside its call. Its owned scalar results
   follow the ordinary value rules instead.
 
 While constructing the graph, eval binds each replay node instance to its
@@ -70,7 +67,8 @@ wrong role/type, or two writers bound to one capture fails graph construction.
 A body using these capabilities outside a configured graph therefore fails
 construction; it never falls back to ambient or process-global storage.
 Another graph builder may supply equivalent bindings under this contract.
-The provider ABI and its representation are not language syntax.
+A provider is the graph-construction binding that grants a node access to
+its run-owned buffer; it is not an ordinary HGL value.
 
 Input buffers are finite immutable sequences of typed present/absent slots.
 Every position counts, including absent ones. Their length must fit a
@@ -103,9 +101,7 @@ and named argument binding applies.
 
 No capability method is admitted in stop. No method schedules, publishes an
 endpoint, deduplicates values, applies a delta to an output, advances a
-cursor, inserts no-tick cells, or performs dense-result padding. Native
-implementations provide only these storage operations. HGL determines when
-to call them. `delta_at` uses that name because it returns the input slot's
+cursor, inserts no-tick cells, or performs dense-result padding. HGL determines when to call these storage operations. `delta_at` uses that name because it returns the input slot's
 delta; in this admitted profile the return type is the ordinary scalar T.
 It does not settle a future collection delta type.
 
@@ -126,11 +122,10 @@ node starts. Diagnostics name the capability and the rejected requirement.
 No failure is converted into a default scalar, an absent slot, or successful
 empty output.
 
-Within an admitted hook, fallible capability methods use the **translated
-native error policy** of [ADR 0009](0009-native-errors-and-the-node-error-model.md).
-They may raise an ordinary native exception; they are not noexcept calls.
-During evaluation the raise ends that evaluation and follows the existing
-node error output/enclosing graph propagation rules. Start failures follow
+Within an admitted hook, fallible capability methods use the `translated`
+error policy and [node error model](0009-native-errors-and-the-node-error-model.md). During
+evaluation a failure ends that evaluation and follows the node error
+output/enclosing graph propagation rules. Start failures follow
 NOD-11/NOD-20: the failing node never becomes started and is not stopped;
 previously started nodes are stopped by the graph. This introduces no HGL
 try/catch or error-valued return.
@@ -158,21 +153,19 @@ Validate the following preconditions before changing a buffer:
    nothing and preserves all earlier captures. Successful earlier calls and
    node state/output effects remain, as ADR 0009 requires. The atomicity of
    one buffer append does not roll back an entire node evaluation. Allocation
-   errors propagate; their platform-specific message is not standardized.
+   errors propagate; their diagnostic message is not standardized.
 
 The standard record body below calls append once per admitted tick and uses
 last_modified(ts), which equals evaluation time for that modified scalar
 input. Adjacent equal payloads have increasing timestamps and are recorded
 separately. A second append at the same time is an error rather than implicit
-replacement or deduplication. These invalid-call rules are new capability
-contract choices; ordinary reference replay/record traces do not establish
-that existing APIs expose the same failure interface.
+replacement or deduplication.
 
-## HGL implementations
+## Operator bodies
 
-These bodies are executable-intent source under this proposed extension.
-They use existing alarm, clock, cache, start and when syntax. They are not
-labelled implemented on an existing backend.
+These bodies define the operators using alarm, clock, cache, start and when
+syntax. The capabilities provide storage access; the bodies define cursor
+advancement, scheduling, publication and capture.
 
 ```hgl
 impl fn replay<T>() -> T
@@ -218,16 +211,15 @@ The replay cursor advances and the next wake-up is requested before return,
 because return ends the evaluation. A silent slot causes no publication;
 zero length schedules no replay evaluation. The recorder's start still
 runs, producing a present empty recording. HGL holds the replay cursor;
-the capability cannot silently move it. A more efficient HGL body may skip
-silent positions only if it preserves the contract's observable behavior.
+the capability cannot silently move it.
 
-## Reasoned acceptance cases
+## Examples
 
-Keep expected traces before execution, separately from observations. For all
-eight admitted scalars use two typed values, including false/zero/empty text
-where appropriate so presence never depends on truthiness.
+For each admitted scalar type, a and b below are values of that type.
+False, zero and empty text are present values; they do not denote absent
+slots. Presence depends only on the slot, not on its payload.
 
-| Case | Expected observation | Basis |
+| Case | Result | Basis |
 |---|---|---|
 | `[a, _, a, b]` | Three output ticks at positions 0, 2, 3; equal a retained twice. | Scalar delta and own-output return; no deduplication. |
 | `[_, _, _, _]` | Recorder starts and stops; zero appends; four dense no-tick cells. | OP-11, NOD-11, EVAL-5. |
@@ -240,50 +232,7 @@ where appropriate so presence never depends on truthiness.
 | Wrong time, repeated current time, or decreasing time | Validation order above selects the error; no extra capture. | The new timestamp contract. |
 | Unsupported type/phase or escaped capability | Checking fails; no graph runs. | The new admission/borrowing rules. |
 
-Native binding tests must verify method signatures, phases, contextual type,
-fallibility and escape restrictions. Those are not proven by scalar parity.
-HGL test syntax cannot yet assert errors (ADR 0009); do not invent such syntax
-here. Backend/native acceptance tests may cover these failures until that
-separate harness feature is specified.
-
-## Evidence and remaining scope
-
-The foundation [reference audit](https://github.com/hhenson/hgraph_spec_audit/blob/codex/delta-eval-foundation/runtime/validation/delta_eval/README.md)
-records frozen scalar cases, raw results, normalization and engine identity.
-The [direct native scalar supplement](https://github.com/hhenson/hgraph_spec_audit/blob/codex/delta-eval-foundation/runtime/validation/delta_eval/native_observed.json)
-corroborates the scalar traces through native C++ authoring. It uses the same
-C++ runtime as the Python authoring facade, not a third independent engine.
-Native eval already returns dense empty/silent vectors; the two Python-facing
-harnesses return raw None in those cases and require explicit normalization.
-
-The separate [lifecycle expectations](https://github.com/hhenson/hgraph_spec_audit/blob/codex/delta-eval-foundation/runtime/validation/delta_eval/lifecycle_reasoned.json)
-precede the [lifecycle observations](https://github.com/hhenson/hgraph_spec_audit/blob/codex/delta-eval-foundation/runtime/validation/delta_eval/lifecycle_observed.json).
-Both engines directly invoke recorder start and stop on empty and all-silent
-runs. Graph-stop callbacks precede eval return. Repeated runs in one scope
-using the same recording key do not append to earlier results. Captured TSD
-deltas survive reuse and mutation of the producer dictionary, later updates,
-eval return, further producer mutation and garbage collection. That bounded
-retention probe supports VAL-17; it does not prove arbitrary atomic-payload
-copying or admit collection types under this new source capability.
-
-Python exposes a present empty external recording after recorder stop. The
-separate [positive control](https://github.com/hhenson/hgraph_spec_audit/blob/codex/delta-eval-foundation/runtime/validation/delta_eval/lifecycle_control_observed.json)
-confirms that both engines expose two external entries for input [1,2]. A
-subsequent all-silent run exposes a present empty recording in Python and an
-absent recording key through the C++ facade, repeated consistently in three
-fresh processes. This preserves a specific disagreement with the expected
-accessible empty recording; it is not normalized into an observed empty
-buffer. External lookup is not the native graph-local buffer, so it does
-not prove missing internal allocation at start or a failure to run recorder
-lifecycle. Before-first-tick storage accessibility and the exact destruction
-point remain unestablished by these probes. OP-11 remains the independent
-empty-recording requirement; the proposed capture.begin contract satisfies it.
-
-These are behavioral observations of existing operators, not tests of this
-new injectable surface. The missing-provider, scalar-type, phase, bounds,
-begin and timestamp rejections above are explicit proposed contract choices;
-they require compiler/provider acceptance tests. No existing reference API
-is claimed to expose those exact methods or diagnostics.
+## Excluded behaviors
 
 No persistence/checkpoint/restart contract, timed input interface, general
 resource ownership language, shared capture writer, untyped global registry,
