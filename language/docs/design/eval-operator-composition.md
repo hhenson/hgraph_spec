@@ -2,9 +2,7 @@
 
 Status: proposed foundation extension, 2026-09-30. This specifies the graph
 behind `eval` and its ownership and dense-result boundary. It does not extend
-the set of delta values expressible in HGL. The existing
-[testing guide](../user-guide/testing-and-running.md#first-pass-limits)
-continues to state the implemented subset.
+the set of delta values expressible in HGL.
 
 ## Operator composition
 
@@ -21,16 +19,12 @@ typed input buffers → replay operator(s) → target → record operator → ca
 
 The test author calls `eval(target, ...)`; eval constructs and configures the
 operators and owns the buffers for that run. Replay and record remain normal
-operators with their own callable contracts and implementations. They may be
+operators with their own callable contracts. They may be
 declared in the standard library and used independently. This arrangement
 places no visibility restriction on them and does not require the eval
 caller to select recording keys, seed storage, or configure a recorder.
 
-The operator contract is independent of its implementation language. Replay
-and record behavior can be authored in HGL where the language admits it;
-engine integration and buffer access may require native capabilities. This
-foundation specifies neither those capabilities' signatures nor a new
-ordinary HGL type for a harness sequence.
+This composition introduces no ordinary HGL type for a harness sequence.
 
 Eval calls the target as declared. A composition function may wire an existing
 input through. A test that claims to exercise delta application by a compute
@@ -51,9 +45,16 @@ test owns_and_publishes_output {
 
 The `when` makes this a runtime function; its return publishes its own output
 on each admitted evaluation. Equal repeated publications remain ticks. This
-example makes no assumption about the still-open result type of `delta(x)`.
+example makes no assumption about the still-open result type of `delta_value(x)`.
 
 ## Typed buffers and ownership
+
+
+A **replay input buffer** is a typed sequence of positions, each containing a
+delta or no tick. A **capture** is a pair containing an output tick's
+evaluation time and an owned copy of its delta. A **recording** is the ordered
+sequence of captures made by one recorder. An empty recording has zero
+captures; it is distinct from having no recording.
 
 Each temporal parameter determines the type of its replay input buffer; the
 target result determines the type of the capture buffer. The buffers contain
@@ -63,8 +64,7 @@ structural endpoint's value must not silently replace its sparse delta.
 
 Eval owns the configured input data and recorded result for the duration
 needed by that run and its result. Separate eval invocations do not share or
-accumulate recordings. How the buffers are represented, named, or passed to
-the operators is not specified here.
+accumulate recordings.
 
 A node reads a borrowed view that is stable for the current cycle. The replay
 operator publishes into its own output; a compute target publishes into its
@@ -102,13 +102,6 @@ new source-only eval form or an end bound for a source. These examples have
 no independent scheduled work. Explicit source end bounds remain open under
 [ADR 0015](decisions/0015-pull-sources.md#consequences).
 
-A reference harness may return a raw no-output sentinel rather than an empty
-sequence when it records no ticks. At the HGL boundary, a **successful** run
-with no recorded ticks is materialized using the input horizon: three silent
-input cells give three `_` output cells, and zero cells give `[]`. This is
-result normalization, not a new output tick and not evidence that raw
-reference return objects are identical. Audit records must preserve both the
-raw result and the normalized HGL result, and identify this conversion.
 
 ## Rules
 
@@ -125,13 +118,13 @@ raw result and the normalized HGL result, and identify this conversion.
 - **EVAL-5** A dense result preserves the supplied input horizon, including
   silent cells, and any later output ticks. With no output ticks and an input
   horizon of zero, its result is empty. Silent materialization is not a tick.
-- **EVAL-6** Reference comparison preserves raw no-output results and names
-  any normalization to the HGL sequence. A failed run or absent observation
-  is never a successful empty trace.
+- **EVAL-6** A failed run is not a successful empty result. An eval with an
+  output must obtain its recording; a missing recording is an error, not an
+  empty recording.
 
-## Reasoned cases and evidence boundary
+## Examples
 
-These expectations were derived before reference execution:
+These cases follow the rules above:
 
 | Case | Input | Output | Derivation |
 |---|---|---|---|
@@ -139,30 +132,14 @@ These expectations were derived before reference execution:
 | all silent | `[_, _, _]` | `[_, _, _]` | No compute publication; OP-11 recording is empty; EVAL-5 retains input horizon. |
 | empty | `[]` | `[]` | No publication and zero input horizon; no scheduled work in this fixture. |
 | leading and trailing silence | `[_, 7, _, _]` | `[_, 7, _, _]` | Only one publication; input horizon includes both trailing silent cells. |
-| retained capture | publish A, then B through a scalar/atomic output | first recorded value stays A | VAL-17 requires independence from later output writes; an unchanged final value alone does not verify this. |
-
-Reference observations and implementation identities are recorded in the
-[delta-eval audit](https://github.com/hhenson/hgraph_spec_audit/blob/codex/delta-eval-foundation/runtime/validation/delta_eval/README.md),
-including its frozen expectations and
-[raw observations with normalization](https://github.com/hhenson/hgraph_spec_audit/blob/codex/delta-eval-foundation/runtime/validation/delta_eval/observed.json). The
-bounded reference comparison uses genuine Python 0.5.41 and a C++ runtime
-accessed through Python authoring; the latter is not a third independent
-engine. Both return raw `None` for the audited empty and all-silent scalar
-runs. The adapter explicitly materializes the dense input horizon, retaining
-that raw result as evidence.
-
-This comparison supports the stated no-output normalization; it does not by
-itself observe whether an empty recorder was allocated or prove independent
-ownership of captures. Document status does not assert implementation
-conformance. The audit's bounded family cases do not settle HGL collection
-delta syntax or imply reference-designation coverage.
+| retained capture | publish A, then B through a scalar/atomic output | first recorded value stays A | VAL-17 requires independence from later output writes; the first capture is independent of the second publication. |
 
 ## Deferred extensions
 
-This foundation does not decide `delta(x)`'s result type, first-class delta
+This foundation does not decide `delta_value(x)`'s result type, first-class delta
 storage, set/map/list harness literals, a generic apply-delta operation,
 explicit child invalidation or invalid-child membership encoding, reference
 fixtures, or the bridge API used by the operators. TS-5 still requires
 child-validity and membership information beyond published-value deltas when
 reconstructing full collection state. These require separate specification
-extensions and pre-observation traces.
+extensions.

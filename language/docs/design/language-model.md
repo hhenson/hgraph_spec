@@ -906,13 +906,12 @@ test midpoint_waits_for_both_sides {
 
 A dense sequence is one element per engine cycle, `_` meaning "no tick" on
 the input side and "did not tick" on the output side; a timed sequence keys
-each element by an offset or absolute time. Their timing follows hgraph's
-`eval_node` alignment and sparse absolute-time recording. A dense HGL result retains the supplied input horizon even if
-there are no output ticks: all-silent input yields all-silent output, and an
-empty supplied input with no output ticks yields `[]`. A raw reference
-no-output sentinel is preserved and explicitly normalized when comparing
-that result; raw return-object identity is not promised. Tests never lower
-into a build artifact; `hgl test` runs them.
+each element by an offset or absolute time. Dense position i is the run's
+start plus i smallest engine steps. A dense result retains the supplied input
+horizon even if there are no output ticks: all-silent input yields all-silent
+output, and an empty supplied input with no output ticks yields `[]`. A
+recording with no captures is empty, not missing. Tests never lower into a
+build artifact; `hgl test` runs them.
 
 There is no `main` and no in-language run call. A module describes graphs;
 running binds an exported function without temporal parameters to a mode, a

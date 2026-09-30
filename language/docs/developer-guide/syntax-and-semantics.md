@@ -2068,23 +2068,19 @@ foundation rules and the distinction between a compute pass-through and a
 composition identity.
 
 Elements of a dense sequence are consecutive engine cycles: element `i` is
-the cycle at the run's start plus `i` engine steps, hgraph's `eval_node`
-alignment. Reference comparison preserves the raw result as well as any
-no-output normalization described below. The observed output sequence has
-one element per
-cycle from the first cycle through the later of the last input cycle and the
-last output tick, with `_` where the output did not tick, and `==` requires
-equal length and element-wise equality under hgraph's canonical delta
-equality (`Value::equals`; scalars compare exactly).
+the cycle at the run's start plus `i` smallest engine steps. The observed
+output sequence has one element per cycle from the first cycle through the
+later of the last input cycle and the last output tick, with `_` where the
+output did not tick. `==` requires equal length and element-wise equality
+under the delta type's equality rule; scalars compare exactly.
 
 The input horizon includes silent cells and is the longest supplied temporal
 sequence length. With no output ticks, a successful run produces that many
 `_` cells; an empty supplied input with no output ticks produces `[]`.
-The recorder still exists and holds an empty recording. A raw reference
-no-output sentinel from a successful run must be preserved in the audit and
-explicitly normalized to this dense HGL result. This introduces neither an
-output tick nor source-only evaluation nor an explicit source end bound.
-A failed run or unavailable observation is not an empty successful result.
+The recorder still exists and holds an empty recording. Missing recording
+state or a failed run is not an empty successful result. This introduces
+neither an output tick nor source-only evaluation nor an explicit source
+end bound.
 
 A *timed* sequence places each element at an explicit time: a `duration`
 key is an offset from the run's start and a `datetime` key is an absolute

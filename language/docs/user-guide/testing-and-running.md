@@ -133,14 +133,11 @@ is `atomic`, it arrives whole and `_` stands for the whole element. The
 observed sequence runs through the later of the last input cycle and the
 last output tick, and `==` requires the same length and equal elements.
 
-The [proposed foundation clarification](../design/eval-operator-composition.md)
-makes explicit that silent cells count toward the input horizon even when
-no output is produced.
+Silent cells count toward the input horizon even when no output is produced.
 For a scalar runtime pass-through, all-silent input `[_, _, _]` therefore
 compares with `[_, _, _]`, and empty input `[]` compares with `[]`. These
-runs require an empty recording, as OP-11 already specifies. A reference harness's raw no-output
-sentinel is explicitly normalized to this HGL sequence during comparison;
-errors and missing observations are not empty successful results.
+runs require an empty recording, as OP-11 specifies. A failed run or missing
+recording is not an empty successful result.
 
 A `const` parameter receives a constant, not a sequence:
 
