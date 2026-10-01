@@ -111,8 +111,9 @@ checks and runtime trace conformance are separate obligations.
 reusable `global_state` injectable with receiver-first get/set operations.
 It borrows a store shared throughout the run, independent of node role or
 temporal shape. Primitive scalar reads are owned values. The
-[mutable-value contract](mutable-value-types.md) defines typed aggregate
-borrowing and owner authority, with conflicts rejected before execution;
+[value-mutability contract](value-mutability.md) defines typed aggregate
+borrowing: typed `let` lends read-only access and typed `var` lends exclusive
+writable entry access, with conflicts rejected before execution;
 ordinary container operations retain their separate contracts. This foundation
 does not specify a native aggregate ABI, a borrowed-TS helper ABI, or new
 value-helper capability forwarding. Its unresolved value-container contracts

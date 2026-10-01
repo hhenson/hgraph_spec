@@ -78,24 +78,22 @@ list through the input.
 
 ## SCALAR-MUTABLE-OWNER — VAL-1, VAL-3, VAL-16, VAL-17
 
-An owner holds a mutable list and lends scoped mutable access. An admitted
-in-place update is visible through that live owner access. A separately kept
-owning copy retains its original contents, including nested mutable values.
-The copy has the same exact mutable schema and may be changed independently
-by its new owner. No read-only input consumer gains write permission from
-that schema. An immutable list does not admit immediate content mutation merely
-because its binding or owning slot can be replaced.
+An owner lends scoped writable access to an ordinary list. An admitted
+in-place update is visible through that live access. A separately kept
+owning copy retains its original contents, including nested values. The copy
+has the same canonical type and may be changed independently through its own
+writable binding. No read-only input consumer gains write permission.
 
-An owner-local immutable Outer contains a field whose type is mutable Inner.
-The owner can change Inner's amount field; it cannot replace Outer's inner
-field. Constructing Outer from an existing Inner retains an independent copy,
-so changing the owned child does not change that source Inner.
+An ordinary `let outer: Outer` prevents both replacing its inner field and
+changing that child's contents. An owning `var independent = outer` copies
+recursively; changing independent's child does not change outer's child.
+Constructing another parent retains its ordinary arguments independently.
 
-Read-only access to an immutable aggregate containing mutable children does
-not expose writable child access. A retained snapshot of that aggregate must
-own those children independently; the immutable outer type is not a reason
-to retain live aliases. Borrowing does not change the bound value type or
-provide an implicit conversion between mutable and immutable schemas.
+A typed aggregate get bound by `let` is a read-only lexical borrow. Bound by
+`var`, it is exclusive writable entry access: both field mutation and whole
+value assignment update the stored entry. A separate get or set of that key
+conflicts while this borrow is live. A primitive scalar get bound by `var`
+remains an independent local copy; assigning it does not update the entry.
 
 ## SCALAR-TIME — VAL-15, ENG-16
 

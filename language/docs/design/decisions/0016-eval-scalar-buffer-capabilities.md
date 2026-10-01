@@ -117,19 +117,20 @@ stored in an entry. Reads of `bool`, `i64`, `f64`, `str`, `date`, `time`,
 `datetime` and `duration` produce ordinary owned scalar values under their
 existing copy rules. A later set at the same key cannot change such a value.
 
-[Mutable ordinary value types](../mutable-value-types.md) supply the
-aggregate access contract: get lends a typed hook-local value view, with
-mutable owner access only for a mutable-schema entry. Borrowed access uses a
-typed `let` and cannot escape its lexical block or hook. Conflicting same-key
-get/set lifetimes fail checking or binding before start. The qualifier is
-part of the entry's exact bound type; get adds no type or key dispatch.
-Value mutability does not supply missing construction or list operations.
+[Value mutability](../value-mutability.md) supplies the aggregate access
+contract. A typed `let` initialized by get borrows read-only access; a typed
+`var` borrows exclusive writable access to the existing entry, without a
+whole-value copy. The borrow ends at its lexical block or hook. Entries are
+mutable storage, regardless of the access used to read them. Access mode is
+not part of their exact bound type. Conflicting same-key get/set lifetimes
+fail checking or binding before start; get adds no type or key dispatch.
+This access contract does not supply missing construction or list operations.
 
 Set retains its argument under the ordinary value type's ownership contract.
 The scalar types above use their existing value-copy rules; later changes
 to a scalar source do not change the stored value. The store does not promise
-a recursive snapshot merely because an aggregate is read. Under the mutable
-value contract, aggregate get borrows, while an admitted retention operation
+a recursive snapshot merely because an aggregate is read. Under the
+value-mutability contract, aggregate get borrows, while an admitted retention operation
 stores an independent owning value rather than a view handle. Set's value
 argument is such an owning retention boundary for admitted ordinary values;
 it cannot replace an entry with a live conflicting borrow. Independently
@@ -315,8 +316,8 @@ replay/record bodies. The keyed store supplies none of them implicitly:
    const sequence element type and temporal result, and between a record
    input and its ordinary recording value. No injectable silently supplies
    a missing shape constraint or inference rule.
-5. **Aggregate operations.** The mutable-value contract defines qualified
-   types, borrowed entry access, conflicting lifetimes and independent owning
+5. **Aggregate operations.** The value-mutability contract defines binding
+   authority, borrowed entry access, conflicting lifetimes and independent owning
    retention. General list operations, source construction and any explicit
    general copying operation still require their value contracts. A borrowed
    aggregate is not an independently owned retained recording.

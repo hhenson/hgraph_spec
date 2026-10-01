@@ -96,12 +96,12 @@ parameter-level `const`. Modifier combinations with `impl`, `native`, and
 
 Within a function body, `let` introduces an immutable lexical binding and
 `var` introduces a mutable lexical binding. Neither persists between runtime
-evaluations. [The mut qualifier](mutable-value-types.md) separately marks a
-mutable aggregate value schema. Mutation requires owner or authorized
-borrowed access; a `let` can hold such access without permitting rebinding.
-Persistent node data is declared with `state`; fixed caller-supplied wiring
-policy is declared with a `const` parameter. Neither input nor const
-configuration becomes writable because its exact value type is mutable.
+evaluations. For ordinary values, `let` also prevents content mutation through
+its access, recursively; `var` permits owned content mutation using admitted
+operations. [Value mutability](value-mutability.md) is an access rule, not a
+type qualifier. Inputs and const configuration remain read-only. Persistent
+node data is declared with `state`; fixed caller-supplied wiring policy is
+declared with a `const` parameter.
 
 An `fn` may use a concise expression body or a brace-delimited block with a
 tail expression. An outputless function omits its return arrow. An `operator`
@@ -338,9 +338,9 @@ substitution.
 must be fully applied before use. In scalar context a concrete specialization
 denotes a Bundle-like value; temporal context recursively temporalizes its
 fields into a named TSB-like shape; `atomic<S>` stops that recursion and carries
-the complete scalar value. Fields are publicly readable; the unqualified
-value type is immutable. A `mut` qualification permits owner-authorized
-content writes under the mutable-value contract.
+the complete scalar value. Fields are publicly readable. Ordinary values
+owned through `var` admit field assignment; `let` and input access are
+recursively read-only. These permissions do not change the nominal type.
 Complete construction uses named arguments, enforces required fields, applies
 ordinary defaults, and permits fields declared with `= null` to remain unset.
 The contextual `delta<S>(...)` form instead permits every field to be omitted,
@@ -536,11 +536,7 @@ rolling<f64, 5m, 1m>             # the last five minutes, all-valid from a 1m sp
 ```
 
 `const` bypasses temporalization. `const value: atomic<T>` is invalid because
-atomicity describes a runtime temporal boundary. This also excludes both
-placements of the qualifier in a const atomic type. Ordinary value positions
-may use `mut V`; temporal mutable aggregates require the explicit boundary
-`mut atomic<V>`, which normalizes to `atomic<mut V>`. The payload qualifier
-does not grant an input consumer mutation authority.
+atomicity describes a runtime temporal boundary.
 
 The temporal scalars are the RFC 0002 core types: `date` and `time` are civil
 values, `datetime` is an instant on the UTC timeline (the engine clock type),

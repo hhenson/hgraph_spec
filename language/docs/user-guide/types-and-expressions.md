@@ -345,8 +345,7 @@ and removed after wiring.
 
 
 A `struct` declares one nominal structured type. It is module-internal unless
-it is exported, and its fields are public. The unqualified value type is
-immutable:
+it is exported, and its fields are public. Read-only access cannot change them:
 
 ```hgl
 export struct Quote {
@@ -710,12 +709,11 @@ fn make_snapshot(bid: f64, ask: f64) -> atomic<Quote> =>
     Quote(bid: bid, ask: ask)
 ```
 
-Unqualified struct values are immutable. `var` may rebind a complete value;
-it does not make that value's fields mutable. A value of type `mut Quote`
-has a mutable aggregate schema. Its owner may write fields through existing
-assignment syntax, including through a `let` binding that cannot itself be
-rebound. Read-only parameters and temporal inputs still cannot be mutated.
-See [mutable value types](../design/mutable-value-types.md).
+An ordinary struct value owned through `var` permits both whole-value
+assignment and field assignment. `let`, parameters and temporal inputs are
+recursively read-only. This is an access distinction, not a different struct
+type. Copying an ordinary owned value into a new owning binding creates an
+independent copy. See [value mutability](../design/value-mutability.md).
 
 ### Sparse delta values
 
@@ -916,14 +914,6 @@ fn midpoint(
 Both extracted components observe the atomic tuple's tick. Without `atomic`,
 the tuple's children may tick independently.
 
-For a mutable aggregate payload, `mut atomic<list<i64>>` and
-`atomic<mut list<i64>>` normalize to one endpoint carrying a complete
-`mut list<i64>` value. `mut` does not authorize an input consumer to change
-that value. A mutable aggregate in temporal position requires this explicit
-atomic boundary; unwrapped `mut list<i64>` is rejected in that position.
-An ordinary value context instead uses `mut list<i64>` directly. Primitive
-scalar mutability is outside this aggregate profile.
-
 Wrapping a scalar leaf, such as `atomic<f64>`, is redundant. The frontend may
 accept it for symmetry and normalize it to `f64`; that choice is not yet fixed.
 
@@ -948,12 +938,11 @@ fn moving_average(
 
 ## Local bindings
 
-`let` prevents rebinding; `var` permits rebinding. Value contents have a
-separate type-level mutability qualifier, [mut](../design/mutable-value-types.md):
-a mutable value may be changed only through owner or authorized borrowed
-access. Neither `var` nor a mutable schema grants write access to an input.
-
-For ordinary scalar bindings:
+`let` introduces a recursively read-only lexical binding. `var` introduces
+a writable lexical binding: an ordinary owned value may be replaced and its
+contents changed through admitted operations. Both bindings have the same
+value type. Input access remains read-only; composition wire rebinding does
+not modify a producer's value:
 
 ```hgl
 let scale = 2.0

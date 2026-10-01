@@ -170,10 +170,10 @@ booleans, numbers, strings, bytes, the date and time types, and enums. The
 composite kinds are tuple, struct, list, set and map, and **any**, which
 holds a value of whatever type it is given. **Nil** is the one representation
 of no value, used wherever a value may be absent. A value has a type with a
-stable identity, including an aggregate's immutable or mutable form.
+stable identity independent of binding or access permissions.
 Consumers receive stable read-only observations. Content changes require
 owner authority or explicitly authorized, scoped mutable owner access;
-a mutable payload type alone never grants input consumers that access.
+ordinary input access never grants that authority.
 Live owner access is not a consumer snapshot. Keeping a value beyond its
 borrowed lifetime requires an independent owning copy, including its nested
 contents. A time-series type is derived from the scalar type it carries.
@@ -561,8 +561,8 @@ Settled here, with a detail left for the chapter that owns it.
   are an implementation's concern. `zoned_time` is new in HGL and is to be
   supported by hgraph; `bytes` exists in hgraph and HGL has not spelled it
   yet. Both are in the runtime's scalar list.
-- **Scalar types: who may change a value.** Content changes require a mutable
-  value type and owner or explicitly delegated mutable access. Consumer
+- **Scalar types: who may change a value.** Content changes require writable
+  owner access or explicitly delegated mutable access. Consumer
   snapshots remain stable; scoped live owner access is different. Retained
   owning copies are independent recursively (VAL-1, VAL-16, VAL-17).
 

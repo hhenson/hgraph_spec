@@ -4,54 +4,55 @@ struct Box {
     amount: i64
 }
 
+struct Envelope {
+    inner: Box
+}
+
 const fn change_owned_contents() -> i64 {
-    let box: mut Box = Box(amount: 1)
+    var box: Box = Box(amount: 1)
     box.amount = 2
     return box.amount
 }
 
-const fn replace_immutable_value() -> i64 {
+const fn replace_owned_value() -> i64 {
     var box: Box = Box(amount: 1)
     box = Box(amount: 3)
     return box.amount
 }
 
-const fn construct_independent_value() -> i64 {
-    let source: mut Box = Box(amount: 4)
-    let independent: mut Box = Box(amount: source.amount)
-    source.amount = 9
-    return independent.amount
-}
-
-struct Envelope {
-    inner: mut Box
-}
-
-const fn copy_owned_binding() -> i64 {
-    let source: mut Box = Box(amount: 5)
-    let independent = source
-    independent.amount = 8
+const fn copy_readonly_value() -> i64 {
+    let source: Box = Box(amount: 4)
+    var independent = source
+    independent.amount = 9
     return source.amount
 }
 
+const fn copy_owned_binding() -> i64 {
+    var source: Box = Box(amount: 5)
+    let independent = source
+    source.amount = 8
+    return independent.amount
+}
+
 const fn retain_constructor_argument() -> i64 {
-    let source: mut Box = Box(amount: 6)
+    var source: Box = Box(amount: 6)
     let retained: Envelope = Envelope(inner: source)
     source.amount = 9
     return retained.inner.amount
 }
 
 const fn mutate_owned_child() -> bool {
-    let child: mut Box = Box(amount: 7)
+    let child: Box = Box(amount: 7)
     let outer: Envelope = Envelope(inner: child)
-    outer.inner.amount = 10
-    return outer.inner.amount == 10 && child.amount == 7
+    var independent = outer
+    independent.inner.amount = 10
+    return independent.inner.amount == 10 && outer.inner.amount == 7 && child.amount == 7
 }
 
 test ordinary_value_mutability {
     assert change_owned_contents() == 2
-    assert replace_immutable_value() == 3
-    assert construct_independent_value() == 4
+    assert replace_owned_value() == 3
+    assert copy_readonly_value() == 4
     assert copy_owned_binding() == 5
     assert retain_constructor_argument() == 6
     assert mutate_owned_child()

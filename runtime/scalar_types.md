@@ -14,8 +14,8 @@ Concept
 
 - **Consumers receive stable read-only values; mutation requires owner
   authority.** A node reading an input or a function passed an ordinary
-  argument receives read-only access. A mutable schema does not authorize
-  that reader to write. An owner may change a mutable value or explicitly
+  argument receives recursively read-only access. An owner with writable
+  access may change a value or explicitly
   lend bounded mutable owner access. That live owner access observes its
   own changes; it is not a stable consumer snapshot. An output is changed
   only by its own node during evaluation, preserving the consumer's stable
@@ -70,28 +70,22 @@ Concept
 | **map** | Distinct keys of one type, each with a value of another |
 | **any** | A value of whatever type it is given, or nil. The value carries its type with it |
 
-### Aggregate mutability
+### Value access and storage
 
-An aggregate value type has an immutable or mutable form. The form is part
-of its exact type; it is not a different nominal struct family. Mutability
-is shallow: it applies to that aggregate and does not change the types of
-its children. An immutable parent's own field or position cannot be
-replaced, but its owner may change the contents of an explicitly mutable
-child. A read-only view of that parent grants no such child authority.
-A mutable type permits content changes only through authorized owner access
-and the operations admitted for that type. An immutable value
-can be replaced in an owning slot without making its contents writable.
+An ordinary value has one canonical type regardless of whether its binding
+permits mutation. Writable owner access permits admitted content changes;
+read-only access recursively prevents them. An independent owning copy has
+the same type and no shared mutable children observable by its source.
 
-Mutable storage, read-only observation and independent copies are distinct.
-A read-only view does not grant access to mutate nested mutable children.
-A copy preserves the complete type, including mutability, while independently
-owning retained content. Later changes to any original child cannot appear
-through the retained copy. A new owner may change its own mutable copy.
+Physical mutable and compact read-only representations may differ without
+creating different HGL value types. A provider promising writable access must
+supply storage that supports it, even when a value originated in a read-only
+representation. Consumers receive read-only observations, not that authority.
 
-The [HGL aggregate profile](../language/docs/design/mutable-value-types.md)
-spells the qualifier `mut`, separates binding reassignment from content
-mutation, and specifies lexical borrowed-access checking. It does not
-introduce source mutation operations for every runtime container kind.
+The [HGL value-mutability contract](../language/docs/design/value-mutability.md)
+uses `let` for read-only access and `var` for writable access, and specifies
+lexical global-entry borrowing. It adds no source mutation operation for a
+container kind that has no admitted operation.
 
 ### Structs
 
@@ -181,7 +175,6 @@ explicitly delegated mutable access. A **type** holds:
 |---|---|---|
 | kind | every type | Atomic, tuple, struct, list, set, map, any |
 | name | enums, structs, native atomics | The qualified name that is the type's identity |
-| mutability | aggregates | Immutable or mutable contents under owner authority; part of exact type identity |
 | parts | composites | Position types; fields (name, type, optional or not, default); element type; key and value types; fixed length or capacity |
 | members | enums | The ordered members, each a name and an integer |
 | parents | structs | The abstract structs it inherits from |
@@ -245,15 +238,13 @@ Behaviour
 Rules
 -----
 
-- **VAL-1** Content mutation requires an owner or explicitly authorized
-  mutable owner access and a mutable value type. Ordinary input and parameter
-  access is read-only, even for a mutable payload. A type qualifier alone
-  never delegates mutation authority.
+- **VAL-1** Content mutation requires writable owner access or explicitly
+  authorized mutable owner access. Ordinary input and parameter access is
+  recursively read-only. Access permission does not change a value's type.
 - **VAL-2** The same description of a type, given twice, is one type.
 - **VAL-3** A struct or enum is identified by its qualified name and type
-  arguments; a tuple by the types of its positions. Aggregate mutability is
-  also part of exact value-type identity without creating a new nominal
-  family. A named type never equals an unnamed one.
+  arguments; a tuple by the types of its positions. A named type never equals
+  an unnamed one. Binding and access permissions are not part of type identity.
 - **VAL-4** Generic struct types with different type arguments are different
   types, and neither is a subtype of the other.
 - **VAL-5** Re-declaring a named type with a different definition is an
@@ -279,8 +270,8 @@ Rules
   cannot be retained as a read-only snapshot by merely dropping write access.
 - **VAL-17** A value kept beyond the cycle in which it was read is an owning
   copy. The copy is independent recursively: no later change to the original
-  or its children is visible through it. Its exact type, including aggregate
-  mutability, is preserved. Keeping a borrowed handle is not copying a value.
+  or its children is visible through it. Its canonical value type is
+  preserved. Keeping a borrowed handle is not copying a value.
 - **VAL-18** A struct may have a field of its own type, directly or through
   other structs. Every such field is optional. Equality, hash, order and copy
   follow the whole depth of the value.
