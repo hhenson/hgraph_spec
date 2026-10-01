@@ -56,8 +56,8 @@ Clock properties do not change the spelling of capability actions or the
 other admitted queries. Those keep
 [receiver-first function syntax](capability-function-syntax.md), including
 `schedule(alarm, delay)`, `schedule_at(scheduler, time)`,
-`is_scheduled(scheduler)`, `begin(capture)` and
-`append(capture, time, delta)`. For example:
+`is_scheduled(scheduler)`, `get(global_state, key)` and
+`set(global_state, key, value)`. For example:
 
 ```hgl
 schedule_at(alarm, clock.next_cycle_evaluation_time)

@@ -105,14 +105,13 @@ explicit borrowed access; that spelling remains unsettled.
 cover matching, selection, ownership and lifecycle diagnostics. Binding-shape
 checks and runtime trace conformance are separate obligations.
 
-## Proposed scalar eval buffer capabilities
+## Run-wide keyed state
 
-[ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) proposes two
-node-scoped typed injectables for normal HGL replay/record operator bodies.
-Their native methods only inspect immutable dense slots or begin/append an
-owned capture. HGL owns scheduling, publication and capture decisions.
-These capabilities cannot be passed as native value-helper arguments or
-propagated through value functions in this slice. This adds no generic
-resource type, borrowed-TS helper ABI or temporal native provider.
-The record specifies the source operations and their type, phase, lifetime and failure
-rules.
+[ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) specifies a
+reusable `global_state` injectable with receiver-first get/set operations.
+It borrows a store shared throughout the run, independent of node role or
+temporal shape. Ordinary scalar reads are owned values; aggregate source
+access and retention require their separate value contracts. This foundation
+does not specify a native aggregate ABI, a borrowed-TS helper ABI, or new
+value-helper capability forwarding. Its unresolved value-container contracts
+must be settled before complete HGL replay/record bodies can be given.

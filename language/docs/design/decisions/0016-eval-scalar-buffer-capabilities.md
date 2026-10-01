@@ -1,263 +1,228 @@
-# ADR 0016: typed scalar buffer capabilities for replay and record
+# ADR 0016: run-wide keyed state and eval configuration
 
-Status: proposed source extension, 2026-09-30. This proposal uses
-node-scoped typed injectables rather than general resource types.
+Status: proposed foundation extension, 2026-09-30.
 
-This builds on [eval operator composition](../eval-operator-composition.md).
-Its admitted profile is a fresh, finite, dense eval of `bool`, `i64`, `f64`,
-`str`, `date`, `time`, `datetime`, or `duration`. In this profile a TS delta
-is its scalar value. Collection and structured types, `atomic` wrappers,
-references, signals, windows, other scalars, persistence, checkpointing and
-restarting a stopped instance are not admitted by this extension. The separate
-[collection eval extension](../eval-collection-deltas.md) widens the shape
-and contextual-payload domain for ordinary nonempty publication traces.
+This promotes the run-wide shared-state concept to a reusable `global_state`
+injectable. It supplies ordinary keyed value storage to any requesting node,
+independent of that node's inputs, result, name or role. It does not introduce
+replay-specific or recording-specific injectables. The
+[eval composition contract](../eval-operator-composition.md) remains in force;
+complete HGL replay and record bodies require the source contracts listed
+below.
 
-## Operator signatures
+## Run ownership and access
 
-The standard library declares these ordinary operators:
+A run owns one string-keyed store. Every graph nested within that run shares
+it. Separate runs own separate stores even when they instantiate the same
+graph description or use identical keys. A run owner may seed ordinary typed
+values before graph start and read the final store after all graph stop hooks
+have completed. The store lives through that read; an independently owned
+result may outlive the run. This is a lifecycle contract, not a new HGL
+syntax for constructing or running graphs.
 
-```hgl
-operator replay<T>() -> T
-requires T in {bool, i64, f64, str, date, time, datetime, duration}
+A runtime function requests `inject global_state`. Access is available in
+start, evaluation and stop, borrowed for the current hook under INJ-3. The
+request adds no signature parameter. Provision one shared store for the run
+before any node starts; an unprovisioned request fails graph construction.
+There is no fallback to a process-wide store. Nested graphs do not copy or
+shadow the store. Independent runs do not inherit earlier entries implicitly.
 
-operator record<T>(ts: T)
-requires T in {bool, i64, f64, str, date, time, datetime, duration}
-```
+Keys are ordinary `str` values, compared by their ordinary value equality.
+The store assigns no meaning to a key's spelling. There are no reserved
+replay/record keys, per-node namespaces, source/sink roles, or single-writer
+restrictions. Normal graph execution orders accesses; this extension adds no
+concurrent access, transaction or atomic read-modify-write construct.
 
-`replay` is a source and `record` a sink. These are the profile's overloads,
-not a prohibition on other independently specified library overloads.
-The result context of each replay resolves T to the corresponding target
-parameter; the record input resolves T to the target result. All such types
-are concrete before graph construction. This adds neither explicit generic
-function-call syntax nor a first-class delta type.
+## Receiver-first operations
 
-Eval wires and configures these operators. Its caller still writes
-`eval(pass_through, value: [...])`, with no resource, recording key or
-operator configuration argument. Normal operator resolution applies. The
-HGL bodies below determine publication and capture; the capabilities supply
-only the storage operations defined by this contract.
+These are approved capability calls, using
+[receiver-first syntax](../capability-function-syntax.md). V in this table is
+specification notation for an ordinary concrete value type, not a new source
+type or explicit generic-call syntax.
 
-## Construction and typed binding
-
-Two contextual injectable names are added: `replay_input` and `capture`.
-They borrow the buffers owned by the enclosing eval run. They are not
-ordinary source values, native atomic types, const arguments, time series,
-state or cache. They have no constructor, equality, serialization, address,
-or process-global lookup operation.
-
-- `replay_input` is admitted only in a runtime source with no temporal
-  parameters and one result in the eight-type domain above. Its payload
-  type T is exactly that result type. The source still needs `alarm` or
-  another already-admitted source mechanism; storage access is not a wake-up.
-- `capture` is admitted only in an outputless runtime sink with exactly one
-  temporal parameter in that domain. Its payload type T is exactly that
-  parameter's type. This profile's operator names that parameter `ts`.
-- A node cannot request both capabilities. They are not admitted in value
-  functions, native value-helper signatures or composition bodies, and their
-  requirements do not propagate transitively through value helpers in this
-  slice. Approved indexing and capability functions are the only storage-access primitives.
-- A borrowed capability cannot be assigned, returned, passed as an ordinary value,
-  put in a closure, or kept in state/cache. No capability reference may be
-  retained outside its call. Its owned scalar results
-  follow the ordinary value rules instead.
-
-While constructing the graph, eval binds each replay node instance to its
-input buffer and each record node instance to its capture buffer. A binding
-identifies the run and node, its role and exact scalar type. Validate all
-required bindings before starting any node. Missing binding, wrong run,
-wrong role/type, or two writers bound to one capture fails graph construction.
-A body using these capabilities outside a configured graph therefore fails
-construction; it never falls back to ambient or process-global storage.
-Another graph builder may supply equivalent bindings under this contract.
-A provider is the graph-construction binding that grants a node access to
-its run-owned buffer; it is not an ordinary HGL value.
-
-Input buffers are finite immutable sequences of typed present/absent slots.
-Every position counts, including absent ones. Their length must fit a
-nonnegative i64. For a nonempty buffer the final dense instant, run start
-plus `(length - 1)` engine steps, must be representable; reject invalid
-configuration at construction instead of wrapping an index or time.
-This adds no new general i64 overflow rule.
-
-Each capture is initially unbegun and empty, belongs to one run and has one
-writer. Binding it does not begin a recording: the HGL record-node start
-hook does that. Retain the sink as part of the evaluated graph even when no
-input position contains a tick. Empty input does not bypass graph start/stop.
-Physical sharing of immutable input data is allowed; mutable cursor and
-capture state cannot leak between nodes or separate eval invocations.
-
-## Exact capability operations
-
-These use [receiver-first capability functions](../capability-function-syntax.md),
-not methods or ordinary HGL resource-type declarations. T below is the
-concrete contextual payload type.
-Names and argument types are fixed by this extension; ordinary positional
-and named argument binding applies.
-
-| Signature | Allowed phase | Result or effect |
+| Form | Phase | Contract |
 |---|---|---|
-| `len(replay_input) -> i64` | start, evaluation | Number of slots, including absent slots. |
-| `replay_input[index]`, with i64 index | evaluation | Owned scalar delta when present; `null` for an absent in-bounds slot. |
-| `begin(capture)` | start | Mark the configured empty recording begun. No output, scheduling or publication. |
-| `append(capture, time: datetime, delta: T)` | evaluation | Append one time and independent owned scalar delta to a begun recording. |
+| `get(global_state, key: str)` with expected result type V | start, evaluation, stop | Read the value stored at key with exactly type V. A missing key or different stored type is an error. |
+| `set(global_state, key: str, value: V)` | start, evaluation, stop | Store a value of type V at key under its ordinary ownership contract, inserting or replacing that entry. No result value. |
 
-No replay/capture operation is admitted in stop. No operation schedules, publishes an
-endpoint, deduplicates values, applies a delta to an output, advances a
-cursor, inserts no-tick cells, or performs dense-result padding. HGL determines
-when to call these storage operations.
+The checker obtains the expected type of `get` from ordinary value context,
+for example `let count: i64 = get(global_state, "count")`. The context must
+determine one concrete type. An unconstrained read is a checking error;
+there is no type inferred from the key, the runtime contents, or an enclosing
+replay/record node's temporal shape. Types must match exactly, including
+nominal identity and applicable container shape; get performs no conversion.
+A set infers V from its ordinary value argument. Replacement may change an
+entry's type; a later read with the earlier expected type then fails.
 
-A present indexed read returns an owned scalar result, including for str (ADR 0009).
-`append` copies the scalar and time before returning. Later output changes,
-input destruction, another run and graph teardown cannot change an earlier
-successful capture (VAL-17). This is independence, not mandated allocation.
-The run owner keeps configured storage alive through graph stop and result
-extraction. The returned eval sequence is owned independently of disposed
-graph storage. Extraction may copy or transfer owned storage; no borrowed
-hook view escapes in either case.
+Stored values are ordinary typed values with an admitted owned value
+representation. Temporal endpoints, references to endpoints, injectable
+capabilities and borrowed hook views cannot be stored. A contextual
+`delta_of(T)` relationship is not by itself an ordinary storable type. This
+extension does not make nullable locals or structural delta expressions
+storable merely because a key can be chosen for them.
 
-## Indexed replay reads
+Borrowed store access is bounded to the current hook. The capability cannot
+be retained in state/cache, returned from the hook, captured in a closure or
+stored in an entry. Reads of `bool`, `i64`, `f64`, `str`, `date`, `time`,
+`datetime` and `duration` produce ordinary owned scalar values under their
+existing copy rules. A later set at the same key cannot change such a value.
 
-`replay_input[index]` reads one configured slot. The zero-based i64 index
-counts every position, including `_` slots. For `[10, _, 12]`,
-`len(replay_input)` is 3 and reads yield present 10, `null`, and present 12.
-An in-range absent read succeeds; it does not return a held or default value.
+An aggregate get requires a separately admitted value-access contract. This
+foundation does not decide whether such a read copies or borrows, how a
+mutable aggregate is updated, or how replacement interacts with an earlier
+aggregate view. Any eventual borrowed view is bounded to its hook and cannot
+be retained as a capture. Until its aggregate access contract is specified,
+a source program cannot obtain such a view through get. The store's general
+value domain is not implicit authorization for an unspecified aggregate
+source operation.
 
-The result is contextually nullable. Bind it with `let item = replay_input[index]`
-and establish `item != null` before using its scalar payload. The
-[nullable indexing contract](../nullable-replay-indexing.md) defines branch
-facts, short-circuit propagation, alias rules and rejected unproven uses.
-It introduces no ordinary nullable source type and does not redefine null
-field clearing or general runtime returns.
+Set retains its argument under the ordinary value type's ownership contract.
+The scalar types above use their existing value-copy rules; later changes
+to a scalar source do not change the stored value. The store does not promise
+a recursive snapshot of every aggregate. Aggregate aliasing, copying,
+mutation and replacement lifetimes require that aggregate's admitted
+ownership contract before source get/set can use it. Independently owned
+retained captures remain a separate obligation of record (VAL-17, EVAL-3),
+not an automatic effect of putting any value in shared storage.
 
-The read is evaluation-only and does not publish, schedule, consume or move
-a cursor. Repeated reads preserve slot contents with independent ownership.
-The index need not be the current cycle number; the replay body determines
-how positions map to evaluation times. `delta_value(endpoint)` instead reads
-a live temporal endpoint's current publication. The old separate replay
-presence/read functions are not admitted or retained as aliases.
+A failed set leaves the preceding entry unchanged; it does not undo earlier
+successful operations. The run owner must obtain an independently owned
+result before disposing of storage on which that result would otherwise
+depend. This record does not invent an aggregate copying operation.
 
-## Failure and validation
+Missing-key and wrong-type reads are distinct failures, never `null`, a
+default value, or an empty collection. Within hooks, fallible operations use
+the [translated node error contract](0009-native-errors-and-the-node-error-model.md):
+start failure, evaluation failure and stop failure follow their existing
+lifecycle rules. Diagnostics identify the key and distinguish absence from a
+type mismatch. Allocation/copy failures propagate without partial entry
+replacement. Owner reads after stop likewise fail on missing or wrong-type
+entries; they do not manufacture a successful empty result.
 
-Unsupported host types, phases, or capability escapes are checking errors.
-Invalid provider configuration is a graph-construction error, before any
-node starts. Diagnostics name the capability and the rejected requirement.
-No failure is converted into a default scalar, an absent slot, or successful
-empty output.
+Neither operation schedules a node, publishes an endpoint, interprets a
+delta, validates a timestamp, deduplicates data, appends to a sequence, or
+pads a dense result. Such actions belong to callers and their ordinary value
+operations.
 
-Within an admitted hook, fallible capability operations use the `translated`
-error policy and [node error model](0009-native-errors-and-the-node-error-model.md). During
-evaluation a failure ends that evaluation and follows the node error
-output/enclosing graph propagation rules. Start failures follow
-NOD-11/NOD-20: the failing node never becomes started and is not stopped;
-previously started nodes are stopped by the graph. This introduces no HGL
-try/catch or error-valued return.
-
-Validate the following preconditions before changing a buffer:
-
-1. Indexing requires `0 <= index < len(replay_input)`. Otherwise raise
-   with message beginning `replay_input: index out of range` and leave input
-   and capture unchanged. An in-bounds absent slot returns `null` successfully.
-2. `begin` requires an unbegun recording. A repeated call raises with
-   message beginning `capture: already begun`, preserving its state. A
-   successful call makes an empty recording present even if append is never
-   called. It never clears an existing recording.
-3. `append` first requires begin to have succeeded; otherwise raise with
-   message beginning `capture: not begun`. Then require time to equal the
-   owning record node's current evaluation time, otherwise raise with
-   message beginning `capture: timestamp is not evaluation time`. Finally,
-   if there is a preceding capture, time must be strictly greater than its
-   time; otherwise raise with message beginning
-   `capture: timestamp did not advance`. These checks occur in that order.
-4. Failed validation or failure to copy/allocate the new capture appends
-   nothing and preserves all earlier captures. Successful earlier calls and
-   node state/output effects remain, as ADR 0009 requires. The atomicity of
-   one buffer append does not roll back an entire node evaluation. Allocation
-   errors propagate; their diagnostic message is not standardized.
-
-The standard record body below obtains the scalar delta explicitly with
-[delta_value(ts)](../delta-value-metadata.md), calls append once per admitted
-tick and uses last_modified(ts), which equals evaluation time for that modified scalar
-input. Adjacent equal payloads have increasing timestamps and are recorded
-separately. A second append at the same time is an error rather than implicit
-replacement or deduplication.
-
-## Operator bodies
-
-These bodies define the operators using alarm, clock, cache, start and when
-syntax. The capabilities provide storage access; the bodies define cursor
-advancement, scheduling, publication and capture.
+For example, a node hook may update an ordinary count whose i64 entry was
+seeded by the run owner:
 
 ```hgl
-impl fn replay<T>() -> T
-requires T in {bool, i64, f64, str, date, time, datetime, duration}
-{
-    inject replay_input, alarm, clock
-    cache index: i64 = 0
-
-    start {
-        if len(replay_input) > 0 {
-            schedule(alarm, 0s)
-        }
-    }
-
+fn count_ticks(value: i64) {
+    inject global_state
     when {
-        let current = index
-        index += 1
-        if index < len(replay_input) {
-            schedule_at(alarm, clock.next_cycle_evaluation_time)
-        }
-        let item = replay_input[current]
-        if item != null {
-            return item
-        }
-    }
-}
-
-impl fn record<T>(ts: T)
-requires T in {bool, i64, f64, str, date, time, datetime, duration}
-{
-    inject capture
-
-    start {
-        begin(capture)
-    }
-
-    when {
-        append(capture, last_modified(ts), delta_value(ts))
+        let count: i64 = get(global_state, "count")
+        set(global_state, "count", count + 1)
     }
 }
 ```
 
-The replay cursor advances and the next wake-up is requested before return,
-because return ends the evaluation. A silent slot causes no publication;
-zero length schedules no replay evaluation. The recorder's start still
-runs, producing a present empty recording. HGL holds the replay cursor;
-the capability cannot silently move it.
+The store neither knows that this entry is a count nor derives its type from
+the temporal input. Two nodes choosing the same key see each other's earlier
+successful writes in execution order. This source checking is independent of
+eval: any runtime function with the requested store may perform the same
+scalar calls in its start, evaluation or stop hook.
 
-## Examples
+| Scalar use | Result |
+|---|---|
+| Read an i64 entry with `let count: i64 = get(global_state, "count")` | An ordinary owned i64. |
+| Read stored `false`, zero or empty text with the matching expected type | The present scalar value, never absence. |
+| Read with no context determining a concrete result type | Checking error. |
+| Read a missing key | Missing-key error. |
+| Read an i64 entry in a bool context | Type-mismatch error, no conversion. |
+| Replace an i64 entry with a str, then read in an i64 context | Type-mismatch error. |
 
-For each admitted scalar type, a and b below are values of that type.
-False, zero and empty text are present values; they do not denote absent
-slots. Presence depends only on the slot, not on its payload.
+## Eval, replay and record
 
-| Case | Result | Basis |
-|---|---|---|
-| `[a, _, a, b]` | Three output ticks at positions 0, 2, 3; equal a retained twice. | Scalar delta and own-output return; no deduplication. |
-| `[_, _, _, _]` | Recorder starts and stops; zero appends; four dense no-tick cells. | OP-11, NOD-11, EVAL-5. |
-| `[]` | Recorder starts and stops; zero replay evaluations or appends; empty dense result. | Empty scheduling branch, OP-11, EVAL-5. |
-| Two fresh runs using the same operator definitions | Each observes only its own configured data and captures. | Per-node/run binding and fresh ownership. |
-| Capture a then publish b; dispose graph | Earlier capture remains a and is readable in the owned result. | VAL-17, EVAL-3. |
-| Missing/wrong-type/wrong-run provider; two capture writers | Graph construction fails before any start effect. | The new binding contract. |
-| Index -1 or length | Specified translated error and no buffer mutation. | Bounds rule. |
-| In-bounds absent slot | Read returns `null`; guarded replay produces no publication. | Nullable indexed read and ordinary no-output path. |
-| Repeated begin; append before begin | Specified failure; earlier state preserved. | The new lifecycle preconditions. |
-| Wrong time, repeated current time, or decreasing time | Validation order above selects the error; no extra capture. | The new timestamp contract. |
-| Unsupported type/phase or escaped capability | Checking fails; no graph runs. | The new admission/borrowing rules. |
+The test author still writes `eval(pass_through, value: [...])`. Eval
+constructs normal replay source operators, the selected target and a normal
+record sink. The generic target remains:
 
-## Excluded behaviors
+```hgl
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+```
 
-No persistence/checkpoint/restart contract, timed input interface, general
-resource ownership language, shared capture writer, untyped global registry,
-or collection delta API is introduced. The source/capture operations are a
-bounded language facility borrowing an already-owned run resource; they do
-not settle the broader resource concept left open by runtime state/cache.
+Replay receives its finite input sequence directly as an ordinary const
+argument. It does not require a global-state key or a storage injectable.
+Its exact parameter type depends on the ordinary sequence contracts still
+open below; no special replay-data type is introduced to bypass them.
+Replay's output type is the corresponding temporal target parameter type.
+Const data access does not itself schedule or publish; replay must implement
+its cursor, alarm and output behavior.
+
+Record receives the target result and an ordinary const string key:
+
+```hgl
+operator record<T>(ts: T, const key: str)
+```
+
+This signature states the operator's shape, not universal type admission.
+The admitted scalar and collection publication profiles remain specified by
+[delta-value metadata](../delta-value-metadata.md) and
+[collection eval](../eval-collection-deltas.md). Its implementation requests
+`global_state`; the store does not learn a value type from T. Record must
+construct an ordinary typed recording value and use a corresponding typed
+get/set context. Its recording exists from recorder start even if no tick
+arrives (OP-11, EVAL-4). Captured deltas are independently owned (VAL-17,
+EVAL-3). The precise ordinary container operations needed to implement this
+remain separate source contracts.
+
+Eval owns the recorder's key, replay configuration and any initial values
+needed by its graph. It retrieves the recording with its expected ordinary
+value type after stop. Its callers do not select keys or configure operators.
+Eval chooses distinct recording keys when it constructs distinct recordings
+within one run; that is eval's responsibility, not a store writer restriction.
+An independent caller of record may supply its own key under that operator's
+contract. A missing recording remains an error, not successful silence.
+
+Dense input horizons, repeated equal publications and empty/all-silent
+results keep the rules of eval composition. In-range absent sequence elements
+are distinct from missing store entries: the former yield `null` under the
+[nullable indexing rules](../nullable-replay-indexing.md); the latter fail.
+
+## Unresolved source contracts
+
+These dependencies must be specified before claiming complete executable HGL
+replay/record bodies. The keyed store supplies none of them implicitly:
+
+1. **Present/absent sequence elements.** Ordinary `list<value_type>` values,
+   homogeneous list literals and const value parameters already exist. What
+   remains open is their element representation and construction when a slot
+   may be absent, including nullable indexing's relationship to that source
+   element type. Eval's harness `_` and local refinement rules do not provide
+   that ordinary type or constructor. Admission of nullable element reads
+   during wiring or const evaluation also remains to be specified; the
+   current local refinement rules do not grant it implicitly.
+2. **Ordinary structural delta storage.** Represent recursive sparse deltas
+   as ordinary container elements without equating them with held snapshots.
+   `delta_of(T)` remains a specification-only relationship, not an annotation.
+3. **Owned recording values.** Specify ordinary empty construction,
+   timestamp/delta entry representation, growth or functional replacement,
+   and extraction. This includes ownership of nested data; a borrowed
+   endpoint view is not a retained capture. No recording-specific append or
+   begin primitive substitutes for these general value operations.
+4. **Generic source checking.** Express the relationship between replay's
+   const sequence element type and temporal result, and between a record
+   input and its ordinary recording value. No injectable silently supplies
+   a missing shape constraint or inference rule.
+5. **Aggregate access and retention.** Specify ordinary get/set ownership,
+   aliasing, mutable access, replacement lifetime and any copying needed for
+   aggregate values. Hook-bounded borrowed access cannot stand in for an
+   independently owned retained recording. Only the scalar get/set forms
+   above are fully defined here.
+6. **Eval key selection.** Distinct recorder keys alone do not prevent target
+   code from choosing the same ordinary string key. Eval's collision policy
+   with user-chosen entries remains to be specified. This foundation does
+   not reserve a hidden namespace or promise collision-free access through
+   node roles; general store replacement retains its ordinary meaning.
+7. **Replay admission and bounds.** Ordinary const-sequence admission must
+   place finite length/index representability and dense slot-time validation
+   at a defined checking or construction boundary. ENG-3/ENG-16 still bound
+   every executed instant; generic get/set neither checks nor changes those
+   time rules.
+
+Persistence, checkpoint/restart, shared state across separate runs and traits
+remain outside this foundation. It settles a reusable store and eval's
+configuration direction, not a complete general resource language.

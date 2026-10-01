@@ -36,7 +36,7 @@ The rules of the seven chapters are **required**: an implementation that
 claims the runtime conforms to every one of them, and every case below is a
 check of a required rule. Everything a chapter lists under **Deferred** is
 **optional** behaviour (owner, 2026-09-30): observers, externally driven
-stepping, one-shot cycle callbacks, run-wide shared state, the phase hook,
+stepping, one-shot cycle callbacks, the phase hook,
 the runaway guard, pausing, checkpointing and recovery, recording and
 replay, serial forms, and values owned by a language bridge. An
 implementation may provide any of them; when it does, the rules written for

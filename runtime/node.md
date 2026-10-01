@@ -471,8 +471,6 @@ Deferred
 
 - **Checkpointing a node**: saving and restoring inputs, outputs and pending
   scheduler requests, and which nodes can be left out.
-- **Run-wide shared state** as something a node can ask for (see Execution
-  engine).
 - **Pausing**: a node suspending the cycle it is in (optional; see Execution
   engine).
 - **Values owned by a language bridge**, and the marking of nodes that handle

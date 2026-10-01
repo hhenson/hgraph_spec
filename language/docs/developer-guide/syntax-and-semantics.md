@@ -1513,9 +1513,10 @@ A call whose callee resolves to a struct type is a complete-value constructor
 and accepts named arguments only. Required fields must be supplied, ordinary
 defaults fill omitted fields, and a field declared with `= null` may remain
 unset. In struct construction, `null` is accepted only when the expected field is
-optional. The separate [replay indexing contract](../design/nullable-replay-indexing.md)
-also uses `null` for an absent slot and permits presence comparisons on its
-contextual nullable local. Neither form makes null an untyped runtime object.
+optional. The separate [nullable sequence indexing contract](../design/nullable-replay-indexing.md)
+uses `null` for an absent slot of an admitted sequence and permits presence
+comparisons on its contextual nullable local. Its general sequence source
+types remain open. Neither form makes null an untyped runtime object.
 
 A call whose callee resolves to an enum type is a checked conversion from one
 integer or string operand, such as `Mode(10)` or `Mode("first")`. Resolve the
@@ -1914,7 +1915,7 @@ designed.
 
 An `inject` declaration requests compiler-approved runtime selectors without
 adding parameters to the callable contract: `out`, `logger`, `clock`,
-`scheduler` and `alarm`. Each generated hook
+`scheduler`, `alarm` and `global_state`. Each generated hook
 requests only the selectors it uses. Unknown capabilities and use from an
 unsupported phase are diagnostics. `out` is a
 special injectable inferred from the result type; it is invalid on an
@@ -1936,23 +1937,24 @@ method-call aliases; the clock properties have no free-function aliases.
 The direct capability access or approved first argument does not make the
 capability a first-class value that can be passed to an arbitrary function.
 
-`replay_input[index]` uses ordinary indexing syntax with an i64 index. An
-in-bounds absent slot returns `null`; an out-of-bounds index raises the
-specified error. Its contextual nullable result requires an immutable-local
-presence guard before scalar/delta use, including return or capture append;
-see [nullable replay indexing](../design/nullable-replay-indexing.md). This
-introduces no general nullable type, implicit unwrapping or null-return
-suppression rule.
+`result[index]` uses ordinary indexing on a sequence with an admitted
+present/absent element contract. An in-bounds absent slot yields `null`;
+bounds failure is an error. [Presence refinement](../design/nullable-replay-indexing.md)
+requires an immutable-local guard before payload use. This defines neither
+a general nullable source type nor a delta-container type, implicit
+unwrapping or null-return suppression.
 
-The proposed [scalar replay/capture extension](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
-adds node-scoped `replay_input` and `capture` capabilities only for its eight
-scalar types and fresh dense eval profile. They borrow per-node buffers bound
-at graph construction; they are not general resource values or supported
-state/cache types. Its operation and phase table, construction failures and
-runtime errors are specified in that record. The proposed
-[collection eval extension](../design/eval-collection-deltas.md) widens the
-same capability contracts to its recursive ordinary-publication profile,
-using contextual deltas rather than complete held snapshots.
+The [run-wide keyed-state foundation](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
+adds reusable `global_state`, available in start/evaluation/stop. Calls use
+`get(global_state, key)` and `set(global_state, key, value)`. Get needs a
+concrete ordinary expected type; missing and wrong-type entries fail. Stored
+values are ordinary typed values, never temporal endpoints or capabilities.
+Replay is configured with ordinary const data and record with a const string
+key. No node's temporal shape silently determines a stored value type.
+Complete HGL replay/record bodies await the ordinary sequence, structural
+delta storage, recording construction and aggregate access contracts listed
+there. The [collection eval profile](../design/eval-collection-deltas.md)
+defines publication behavior, not a substitute source container facility.
 
 `start` runs once after replay-aware state initialization. `stop` runs once at
 teardown. State storage and injected capabilities are runtime-owned and are

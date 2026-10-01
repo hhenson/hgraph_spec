@@ -421,8 +421,8 @@ These are intended rules. Proposals and implementation gaps are marked in
 
 **Concept first.** The specification starts from the concept and is refined
 only as far as working behaviour requires. A facility hgraph has that no
-concept here yet needs — externally driven stepping, observers, run-wide
-shared state, pausing a cycle — is *deferred*, not rejected: it is named in
+concept here yet needs — externally driven stepping, observers,
+pausing a cycle — is *deferred*, not rejected: it is named in
 its chapter's Deferred section and specified when an implementation needs it.
 Deferred facilities are **optional** behaviour; the chapter rules are
 **required** ([Conformance](conformance.md)).

@@ -284,10 +284,12 @@ declared or bound. Piped input (`hgl repl < session.hgl`) reads plain lines,
 so scripts behave as before; `HGL_NO_LINE_EDITING=1` forces that mode on a
 terminal too.
 
-The proposed [scalar replay/capture capability contract](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
-lets HGL implementations of replay and record use typed buffers supplied by
-eval. It does not add arguments to the test's eval call. Its admitted scalar
-types, phases and failure conditions are defined by that contract.
+The proposed [run-wide keyed-state foundation](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
+configures replay with ordinary const data and record with a const string
+key. The reusable store supplies typed get/set, while ordinary sequence and
+recording-construction source contracts remain open. This direction does
+not change arguments to the test's eval call or claim complete executable
+HGL replay/record bodies.
 
 ## First-pass limits
 

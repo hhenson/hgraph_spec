@@ -77,7 +77,7 @@ a root node in the same cycle.
 
 ## Outside these cases
 
-Externally driven stepping, observers, one-shot callbacks, run-wide shared
-state, the runaway guard and pausing are optional facilities with no cases
+Externally driven stepping, observers, one-shot callbacks, the runaway guard
+and pausing are optional facilities with no cases
 here. The order of stop and report on failure (Engine point 1) is not
 observable by a graph and has no case.

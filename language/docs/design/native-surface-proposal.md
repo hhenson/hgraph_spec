@@ -75,8 +75,11 @@ Open detail for `get`: whether a present but invalid child returns the fallback
 or remains distinct from an absent key/index. The proposed rule is absent-only,
 preserving removal versus invalidation; this detail still needs agreement.
 The general nullable-expression and `get` result contract also remains to be
-specified. The scoped [replay-slot contract](nullable-replay-indexing.md)
-does not settle general child lookup. Neither an invented zero value nor an
+specified. The [nullable indexing contract](nullable-replay-indexing.md)
+preserves local presence refinement but does not settle general sequence
+source types or temporal child lookup. Run-wide `get(global_state, key)` is a
+distinct capability operation: it requires an expected ordinary value type
+and fails on a missing key. Neither an invented zero value nor an
 implicit no-output tick implements nullable lookup.
 
 ## Windows

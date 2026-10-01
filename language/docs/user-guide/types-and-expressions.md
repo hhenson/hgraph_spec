@@ -684,9 +684,10 @@ unset:
 
 In struct construction, the polymorphic absence literal `null` requires an
 optional expected field. Passing `null` to a required field is a type error.
-The separate [replay indexing contract](../design/nullable-replay-indexing.md)
-uses the same literal for an absent configured slot and permits local
-presence comparisons before payload use. Defaults and
+The separate [nullable sequence indexing contract](../design/nullable-replay-indexing.md)
+uses the same literal for an absent slot of an admitted ordinary sequence
+and permits local presence comparisons before payload use; it does not
+supply the general sequence source type. Defaults and
 optionality are authoring metadata; the underlying Bundle validity bitmap
 represents whether a field is set. Defaults apply when constructing a struct;
 they do not replace an invalid field on an existing temporal input.
