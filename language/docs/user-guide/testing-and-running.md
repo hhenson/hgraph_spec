@@ -286,7 +286,9 @@ terminal too.
 
 The proposed [run-wide keyed-state foundation](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
 configures replay with ordinary const data and record with a const string
-key. The reusable store supplies typed get/set, while ordinary sequence and
+key. The reusable store binds const keys and exact value types before start;
+hooks access those entries without name lookup or type dispatch. An entry
+is not initialized merely by binding it. Ordinary sequence and
 recording-construction source contracts remain open. This direction does
 not change arguments to the test's eval call or claim complete executable
 HGL replay/record bodies.

@@ -36,9 +36,11 @@ operand occupies the first positional argument.
 capability access. [Nullable sequence indexing](nullable-replay-indexing.md)
 requires a presence guard before a nullable payload is used; the general
 sequence source-type dependencies remain open. Run-wide get/set, contextual
-result typing and missing-key/type errors are specified in
-[ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md). A missing key is
-an error, distinct from an absent element of a present sequence.
+result typing and errors are specified in
+[ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md). The key is a
+const string expression, bound with one exact ordinary type before start;
+hooks use that prepared entry without key lookup or type dispatch. A bound
+entry without a value fails get, distinct from an absent sequence element.
 Clock/scheduler semantics remain in
 [ADR 0010](decisions/0010-lifecycle-capabilities.md), and the source-only
 alarm remains in [ADR 0015](decisions/0015-pull-sources.md).

@@ -7,6 +7,13 @@ supported `test` blocks and compiles generated fixtures. Native test support
 varies by platform; this source-only repository has no CMake/CTest project.
 The entries below identify the implementation tests for each example.
 
+- [`mutable-values.hgl`](mutable-values.hgl) specifies writable ordinary
+  `var` contents, recursive read-only `let` access, and independent owning
+  copies and construction. Its `test` uses value functions and does not
+  invoke eval. It belongs to the proposed
+  [value-mutability contract](../docs/design/value-mutability.md).
+  This is a normative source example; compiler acceptance and execution of
+  the extended content-mutation cases have not yet been validated.
 - [`test-contexts.hgl`](test-contexts.hgl) keeps a runtime helper in a
   module-wide test scope shared by two contexts. Its two cases run through
   `hgraph_language_test_test-contexts`; cross-part visibility and production

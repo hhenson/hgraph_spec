@@ -1,6 +1,7 @@
 # Scalar type cases
 
-Status: proposed 2026-09-30, reasoned from VAL-1 to VAL-18; not yet run.
+Status: proposed, following VAL-1 to VAL-18. Reasoned contract cases; this
+file is not an executable HGL conformance suite.
 These cases observe the value layer through nodes: a node publishes what it
 computes from its scalars and inputs.
 
@@ -74,6 +75,25 @@ cycle the producer publishes a different list. If the node kept the view it
 sees the old list, because what it kept was a copy taken when it stored it;
 what it reads afresh from the input is the new list. No node can change the
 list through the input.
+
+## SCALAR-MUTABLE-OWNER — VAL-1, VAL-3, VAL-16, VAL-17
+
+An owner lends scoped writable access to an ordinary list. An admitted
+in-place update is visible through that live access. A separately kept
+owning copy retains its original contents, including nested values. The copy
+has the same canonical type and may be changed independently through its own
+writable binding. No read-only input consumer gains write permission.
+
+An ordinary `let outer: Outer` prevents both replacing its inner field and
+changing that child's contents. An owning `var independent = outer` copies
+recursively; changing independent's child does not change outer's child.
+Constructing another parent retains its ordinary arguments independently.
+
+A typed aggregate get bound by `let` is a read-only lexical borrow. Bound by
+`var`, it is exclusive writable entry access: both field mutation and whole
+value assignment update the stored entry. A separate get or set of that key
+conflicts while this borrow is live. A primitive scalar get bound by `var`
+remains an independent local copy; assigning it does not update the entry.
 
 ## SCALAR-TIME — VAL-15, ENG-16
 

@@ -1,6 +1,6 @@
 # ADR 0016: run-wide keyed state and eval configuration
 
-Status: proposed foundation extension, 2026-09-30.
+Status: proposed foundation extension, corrected typed-access profile 2026-10-01.
 
 This promotes the run-wide shared-state concept to a reusable `global_state`
 injectable. It supplies ordinary keyed value storage to any requesting node,
@@ -28,10 +28,58 @@ There is no fallback to a process-wide store. Nested graphs do not copy or
 shadow the store. Independent runs do not inherit earlier entries implicitly.
 
 Keys are ordinary `str` values, compared by their ordinary value equality.
+In this source profile, the key argument must be a const expression resolved
+before the run starts. String literals and ordinary const string parameters
+are admitted; a key depending on a temporal input or a mutable hook local is
+not. This uses existing const-expression checking, not a new key type.
+
 The store assigns no meaning to a key's spelling. There are no reserved
 replay/record keys, per-node namespaces, source/sink roles, or single-writer
 restrictions. Normal graph execution orders accesses; this extension adds no
 concurrent access, transaction or atomic read-modify-write construct.
+
+## Prepared typed entries
+
+Each used key is associated with one exact ordinary value type for the run.
+The type is concrete after generic specialization. Get obtains it from its
+ordinary expected value context; set obtains it from its ordinary argument.
+Neither derives a type from a node role or a key's spelling.
+
+Before any node starts, resolve the const keys, reconcile their type
+requirements, validate supplied seed values, and prepare each node's access
+to the corresponding run-owned typed entry. Equal keys and equal types in
+one run refer to the same entry, including across nested graphs. Different
+runs have independent entries and may use the same key with different types.
+An entry's bound type cannot change during that run.
+
+Known incompatible requirements for the same key within a function or a
+statically assembled run are checking errors. If separately supplied const
+key configurations resolve to the same string with incompatible types,
+graph construction fails before any node starts. A supplied seed whose type
+differs from the bound type also fails construction. Types match exactly,
+including nominal identity and applicable ordinary container shape; there
+is no conversion during binding. Distinct entries with conflicting types
+must not be allocated under the same key to avoid a conflict.
+
+During start, evaluation and stop, a get/set uses its prepared typed entry.
+It performs no string-key lookup, registry search, runtime type dispatch or
+node-role inspection. This does not promise allocation-free scalar copying:
+ordinary `str` ownership rules still apply. Entry bindings are not source
+values, explicit handles, capabilities to store elsewhere, or a new argument
+on the node's callable signature.
+
+Preparing an entry does not give it a value. An unseeded entry is absent
+until a successful set initializes it. Required get tests this presence and
+fails when absent; it never manufactures zero, false, empty text or null.
+A start hook may initialize such an entry for later reads. A get that is not
+executed need not have an initialized value. Type binding is unconditional;
+value presence follows executed writes.
+
+The current profile admits only keys and type requirements resolved before
+root graph start. A later-created nested graph may use already prepared
+entries; introducing a key that depends on runtime child data is outside
+this profile. This does not change graph scheduling or create a per-role
+storage service.
 
 ## Receiver-first operations
 
@@ -42,8 +90,8 @@ type or explicit generic-call syntax.
 
 | Form | Phase | Contract |
 |---|---|---|
-| `get(global_state, key: str)` with expected result type V | start, evaluation, stop | Read the value stored at key with exactly type V. A missing key or different stored type is an error. |
-| `set(global_state, key: str, value: V)` | start, evaluation, stop | Store a value of type V at key under its ordinary ownership contract, inserting or replacing that entry. No result value. |
+| `get(global_state, key: str)` with const key and expected result type V | start, evaluation, stop | Read the prepared V entry. An absent value is an error; its type was validated before start. |
+| `set(global_state, key: str, value: V)` with const key | start, evaluation, stop | Initialize or replace the value in the prepared V entry under its ordinary ownership contract. Its bound type is unchanged. No result value. |
 
 The checker obtains the expected type of `get` from ordinary value context,
 for example `let count: i64 = get(global_state, "count")`. The context must
@@ -51,8 +99,10 @@ determine one concrete type. An unconstrained read is a checking error;
 there is no type inferred from the key, the runtime contents, or an enclosing
 replay/record node's temporal shape. Types must match exactly, including
 nominal identity and applicable container shape; get performs no conversion.
-A set infers V from its ordinary value argument. Replacement may change an
-entry's type; a later read with the earlier expected type then fails.
+A set infers V from its ordinary value argument. Every use of the same key
+must agree with that exact type. A type-changing set is rejected during
+checking or construction, not deferred to a later get. Dynamic runtime keys
+and in-run changes to an entry’s bound type are outside this profile.
 
 Stored values are ordinary typed values with an admitted owned value
 representation. Temporal endpoints, references to endpoints, injectable
@@ -67,37 +117,44 @@ stored in an entry. Reads of `bool`, `i64`, `f64`, `str`, `date`, `time`,
 `datetime` and `duration` produce ordinary owned scalar values under their
 existing copy rules. A later set at the same key cannot change such a value.
 
-An aggregate get requires a separately admitted value-access contract. This
-foundation does not decide whether such a read copies or borrows, how a
-mutable aggregate is updated, or how replacement interacts with an earlier
-aggregate view. Any eventual borrowed view is bounded to its hook and cannot
-be retained as a capture. Until its aggregate access contract is specified,
-a source program cannot obtain such a view through get. The store's general
-value domain is not implicit authorization for an unspecified aggregate
-source operation.
+[Value mutability](../value-mutability.md) supplies the aggregate access
+contract. A typed `let` initialized by get borrows read-only access; a typed
+`var` borrows exclusive writable access to the existing entry, without a
+whole-value copy. The borrow ends at its lexical block or hook. Entries are
+mutable storage, regardless of the access used to read them. Access mode is
+not part of their exact bound type. Conflicting same-key get/set lifetimes
+fail checking or binding before start; get adds no type or key dispatch.
+This access contract does not supply missing construction or list operations.
 
 Set retains its argument under the ordinary value type's ownership contract.
 The scalar types above use their existing value-copy rules; later changes
 to a scalar source do not change the stored value. The store does not promise
-a recursive snapshot of every aggregate. Aggregate aliasing, copying,
-mutation and replacement lifetimes require that aggregate's admitted
-ownership contract before source get/set can use it. Independently owned
-retained captures remain a separate obligation of record (VAL-17, EVAL-3),
-not an automatic effect of putting any value in shared storage.
+a recursive snapshot merely because an aggregate is read. Under the
+value-mutability contract, aggregate get borrows, while an admitted retention operation
+stores an independent owning value rather than a view handle. Set's value
+argument is such an owning retention boundary for admitted ordinary values;
+it cannot replace an entry with a live conflicting borrow. Independently
+owned retained captures remain a separate obligation of record (VAL-17,
+EVAL-3), not an automatic consequence of obtaining mutable access.
 
 A failed set leaves the preceding entry unchanged; it does not undo earlier
 successful operations. The run owner must obtain an independently owned
 result before disposing of storage on which that result would otherwise
 depend. This record does not invent an aggregate copying operation.
 
-Missing-key and wrong-type reads are distinct failures, never `null`, a
-default value, or an empty collection. Within hooks, fallible operations use
-the [translated node error contract](0009-native-errors-and-the-node-error-model.md):
-start failure, evaluation failure and stop failure follow their existing
-lifecycle rules. Diagnostics identify the key and distinguish absence from a
-type mismatch. Allocation/copy failures propagate without partial entry
-replacement. Owner reads after stop likewise fail on missing or wrong-type
-entries; they do not manufacture a successful empty result.
+Missing values and incompatible types remain distinct errors. Type conflicts
+are diagnosed during checking or construction as described above; there is
+no wrong-type alternative after a successful typed binding. An executed get
+of an uninitialized entry fails under the
+[translated node error contract](0009-native-errors-and-the-node-error-model.md).
+Start failure, evaluation failure and stop failure follow their existing
+lifecycle rules. Diagnostics identify the key and distinguish missing value
+from type conflict. Allocation/copy failures propagate without partial entry
+replacement. Owner reads after stop must request the entry's bound type and
+fail on missing values or incompatible requested types; they do not
+manufacture a successful empty result. Owner configuration/extraction may
+resolve keys and validate types outside hooks; hook access uses only the
+prepared typed entry.
 
 Neither operation schedules a node, publishes an endpoint, interprets a
 delta, validates a timestamp, deduplicates data, appends to a sequence, or
@@ -129,8 +186,60 @@ scalar calls in its start, evaluation or stop hook.
 | Read stored `false`, zero or empty text with the matching expected type | The present scalar value, never absence. |
 | Read with no context determining a concrete result type | Checking error. |
 | Read a missing key | Missing-key error. |
-| Read an i64 entry in a bool context | Type-mismatch error, no conversion. |
-| Replace an i64 entry with a str, then read in an i64 context | Type-mismatch error. |
+| Bind an i64 seed to a bool read | Construction error before any node starts. |
+| Set an i64 and a str at the same known key | Checking error; no type-changing write. |
+| Distinct const key parameters resolve to one key with incompatible types | Construction error before any node starts. |
+| Use a temporal string input as key | Checking error: key is not a const expression. |
+
+## Source acceptance and rejection
+
+This reusable sink initializes an ordinary counter in start, increments it
+for admitted ticks and leaves its final value in the shared entry at stop.
+A caller may configure any const string key. The start write initializes the
+value; merely binding the key does not.
+
+```hgl
+fn counter(value: i64, const key: str) {
+    inject global_state
+    start { set(global_state, key, 0) }
+    when {
+        let count: i64 = get(global_state, key)
+        set(global_state, key, count + 1)
+    }
+    stop {
+        let count: i64 = get(global_state, key)
+        set(global_state, key, count)
+    }
+}
+```
+
+The key and i64 type are prepared once, independently of whether the node is
+used under eval or an ordinary entry graph. Reading before that first set
+would fail if no seed supplied a value. Reading stored false, zero or empty
+text succeeds in its exact scalar context.
+
+The following fragments are checking failures:
+
+```hgl
+fn dynamic_key(key: str) {
+    inject global_state
+    when { set(global_state, key, 1) }
+}
+
+fn changing_type(value: i64) {
+    inject global_state
+    when {
+        set(global_state, "counter", 1)
+        set(global_state, "counter", "one")
+    }
+}
+```
+
+The first key is temporal, not const. The second function imposes incompatible
+i64 and str requirements on one key. A same-type replacement is allowed.
+Separately valid counter functions with different configured keys do not
+conflict merely because they use the same generic body. Bind-time conflicts
+are scoped to a single run, not to all functions declared in a module.
 
 ## Eval, replay and record
 
@@ -207,16 +316,17 @@ replay/record bodies. The keyed store supplies none of them implicitly:
    const sequence element type and temporal result, and between a record
    input and its ordinary recording value. No injectable silently supplies
    a missing shape constraint or inference rule.
-5. **Aggregate access and retention.** Specify ordinary get/set ownership,
-   aliasing, mutable access, replacement lifetime and any copying needed for
-   aggregate values. Hook-bounded borrowed access cannot stand in for an
-   independently owned retained recording. Only the scalar get/set forms
-   above are fully defined here.
+5. **Aggregate operations.** The value-mutability contract defines binding
+   authority, borrowed entry access, conflicting lifetimes and independent owning
+   retention. General list operations, source construction and any explicit
+   general copying operation still require their value contracts. A borrowed
+   aggregate is not an independently owned retained recording.
 6. **Eval key selection.** Distinct recorder keys alone do not prevent target
-   code from choosing the same ordinary string key. Eval's collision policy
+   code from choosing the same const string key with the same bound type.
+   Incompatible types fail binding, but eval's same-type collision policy
    with user-chosen entries remains to be specified. This foundation does
    not reserve a hidden namespace or promise collision-free access through
-   node roles; general store replacement retains its ordinary meaning.
+   node roles; same-type replacement retains its ordinary meaning.
 7. **Replay admission and bounds.** Ordinary const-sequence admission must
    place finite length/index representability and dense slot-time validation
    at a defined checking or construction boundary. ENG-3/ENG-16 still bound

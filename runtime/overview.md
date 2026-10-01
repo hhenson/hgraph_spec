@@ -170,10 +170,13 @@ booleans, numbers, strings, bytes, the date and time types, and enums. The
 composite kinds are tuple, struct, list, set and map, and **any**, which
 holds a value of whatever type it is given. **Nil** is the one representation
 of no value, used wherever a value may be absent. A value has a type with a
-stable identity. Only a value's owner can change it, and only in its own
-evaluation: everyone else is handed a read-only view that is stable for the
-cycle, and keeps a value beyond the cycle only by copying it. A time-series
-type is derived from the scalar type it carries.
+stable identity independent of binding or access permissions.
+Consumers receive stable read-only observations. Content changes require
+owner authority or explicitly authorized, scoped mutable owner access;
+ordinary input access never grants that authority.
+Live owner access is not a consumer snapshot. Keeping a value beyond its
+borrowed lifetime requires an independent owning copy, including its nested
+contents. A time-series type is derived from the scalar type it carries.
 
 **Outputs and inputs.** An **output** owns a time-series. An **input** that is
 **bound** to an output is a view of it and owns no value: it is **peered**
@@ -493,7 +496,7 @@ Vocabulary
 | Signature | A node's inputs, output and scalars: what a caller sees and wiring connects. State, recordable state and the other injectables are not in it |
 | Tick | A modification of a time-series |
 | Valid | The endpoint supplies a value under its shape and binding rules. An owned output has a last modified time other than *never* |
-| View / copy | A view is a read-only look at a value someone else owns, stable for the cycle. A copy is an independent value, and the only way to keep one beyond the cycle |
+| View / copy | A consumer view is a stable read-only observation. Explicit scoped owner access may be live and mutable. Neither is an owning copy: retained copies are independent of later changes, including nested changes |
 | Wiring | The phase in which a graph is described, specified in [../wiring/wiring.md](../wiring/wiring.md). Nothing is instantiated and nothing can tick |
 | Operator | In wiring: a name resolved to one of several implementations at each call. A *library operator* is one the standard library provides; what it publishes is a [library contract](../library/README.md). Neither is a runtime concept: after wiring there are only nodes |
 | Builder | The runtime's representation of its own interface: what wiring produces and the runtime instantiates from |
@@ -558,9 +561,10 @@ Settled here, with a detail left for the chapter that owns it.
   are an implementation's concern. `zoned_time` is new in HGL and is to be
   supported by hgraph; `bytes` exists in hgraph and HGL has not spelled it
   yet. Both are in the runtime's scalar list.
-- **Scalar types: who may change a value.** Only its owner, in its own
-  evaluation. Readers get a read-only view, stable for the cycle; to keep a
-  value is to copy it (VAL-1, VAL-16, VAL-17).
+- **Scalar types: who may change a value.** Content changes require writable
+  owner access or explicitly delegated mutable access. Consumer
+  snapshots remain stable; scoped live owner access is different. Retained
+  owning copies are independent recursively (VAL-1, VAL-16, VAL-17).
 
 
 Sources

@@ -469,6 +469,10 @@ value_list_type = "list", "<", value_type, ">";
 value_map_type  = "map", "<", value_type, ",", value_type, ">";
 ```
 
+Types carry no mutability qualifier. Prefixing an input or time-series type
+with `mut` is a syntax error. Ordinary value access is controlled by `let`
+and `var`, as specified in [value mutability](../design/value-mutability.md).
+
 A generic argument is initially parsed without deciding whether an identifier
 names a type or a wiring-time value. Name resolution interprets each position
 from the referenced declaration's type or `const` parameter. Every declared
@@ -1236,17 +1240,26 @@ statement), never inside a value.
 
 Mutation statements are restricted to declared `state` variables, injected
 `out`, declared `var` bindings, and their writable projections. Parameters,
-`let` bindings, and `for` bindings remain immutable. Compound assignment reads
-the previous value and therefore follows the same validity rules as an explicit
-read followed by assignment.
+`let` bindings, and `for` bindings are recursively read-only: neither rebinding
+nor mutation through their projections is allowed. An owning ordinary `var`
+permits whole-value assignment and admitted content mutation; its type is the
+same canonical value type as an equivalent `let`. The [value-mutability
+contract](../design/value-mutability.md) also defines typed aggregate get
+borrows: `let` is read-only and `var` is exclusive writable entry access.
+Primitive scalar get results remain owning values. These rules add no type
+qualifier and grant no mutation authority over temporal inputs. Compound
+assignment reads the previous value and therefore follows the same validity
+rules as an explicit read followed by assignment.
 
 `let` and `var` are lexical declarations. `let` requires an initializer. A
 `var` may omit it only when it has an explicit type. In a `CompositionFn`, an
 initializer may produce a scalar or a port handle; assigning a `var` only
 changes that local handle. In a `RuntimeFn`, locals hold canonical scalar values
-local to the executing block. Runtime `var` storage is recreated on every block
-execution and is never added to the function's recordable state. A value that
-crosses evaluations must use `state`.
+local to the executing block, except for explicitly specified borrowed entry
+access. Owning runtime `var` storage is recreated on every block execution
+and is never added to the function's recordable state. Retention across
+evaluations requires `state` or another facility with an explicit persistent
+storage contract, such as global state.
 
 The agreed
 [conditional-result design](../design/control-flow.md#results-used-after-the-conditional)
@@ -1946,14 +1959,22 @@ unwrapping or null-return suppression.
 
 The [run-wide keyed-state foundation](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
 adds reusable `global_state`, available in start/evaluation/stop. Calls use
-`get(global_state, key)` and `set(global_state, key, value)`. Get needs a
-concrete ordinary expected type; missing and wrong-type entries fail. Stored
-values are ordinary typed values, never temporal endpoints or capabilities.
+`get(global_state, key)` and `set(global_state, key, value)`. Keys are const
+string expressions resolved before root start. Get needs a concrete ordinary
+expected type. Every use of a key binds to the same exact typed entry before
+start; conflicting source types, aliased const configurations or wrong-type
+seeds fail checking/construction. Hook access performs no key lookup or type
+dispatch. Binding does not initialize a value: get checks presence and fails
+if no seed or successful set supplied one. Set preserves the bound type.
+Stored values are ordinary typed values, never endpoints or capabilities.
 Replay is configured with ordinary const data and record with a const string
 key. No node's temporal shape silently determines a stored value type.
 Complete HGL replay/record bodies await the ordinary sequence, structural
 delta storage, recording construction and aggregate access contracts listed
-there. The [collection eval profile](../design/eval-collection-deltas.md)
+there. The [value-mutability contract](../design/value-mutability.md) supplies
+lexical aggregate borrowing and independent owning retention, without adding
+ordinary list operations or structural delta storage. The
+[collection eval profile](../design/eval-collection-deltas.md)
 defines publication behavior, not a substitute source container facility.
 
 `start` runs once after replay-aware state initialization. `stop` runs once at

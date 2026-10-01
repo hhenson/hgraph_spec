@@ -110,8 +110,11 @@ checks and runtime trace conformance are separate obligations.
 [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) specifies a
 reusable `global_state` injectable with receiver-first get/set operations.
 It borrows a store shared throughout the run, independent of node role or
-temporal shape. Ordinary scalar reads are owned values; aggregate source
-access and retention require their separate value contracts. This foundation
+temporal shape. Primitive scalar reads are owned values. The
+[value-mutability contract](value-mutability.md) defines typed aggregate
+borrowing: typed `let` lends read-only access and typed `var` lends exclusive
+writable entry access, with conflicts rejected before execution;
+ordinary container operations retain their separate contracts. This foundation
 does not specify a native aggregate ABI, a borrowed-TS helper ABI, or new
 value-helper capability forwarding. Its unresolved value-container contracts
 must be settled before complete HGL replay/record bodies can be given.

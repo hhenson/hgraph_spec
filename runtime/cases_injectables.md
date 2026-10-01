@@ -62,8 +62,15 @@ key sees only its own seed and writes. These store writes alone schedule no
 node and publish no endpoint.
 
 Reading stored false, zero or empty text with the corresponding expected
-scalar type succeeds and preserves that value. Reading a missing key fails;
-reading an i64 entry as bool fails. Neither failure yields null. A source
-read lacking a concrete expected ordinary type is rejected during checking.
-An owned scalar already read remains unchanged when the entry is replaced.
-These cases do not specify aggregate aliases or borrowing.
+scalar type succeeds and preserves that value. A prepared entry without a
+seed is still absent; reading it fails. Start may initialize it with set,
+after which get succeeds. Presence checking produces no default value.
+
+A source read lacking a concrete expected ordinary type, a runtime-derived
+key, or known incompatible types on one key fails checking. Separately
+configured const keys that alias with incompatible types fail construction
+before any node starts, as does an i64 seed for a bool entry. No failed
+binding yields null or allocates two incompatible entries for one key.
+Same-type writes replace the value without rebinding its type; an already
+owned scalar read remains unchanged. Types may differ at the same key in
+separate runs. These cases do not specify aggregate aliases or borrowing.

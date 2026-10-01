@@ -345,7 +345,7 @@ and removed after wiring.
 
 
 A `struct` declares one nominal structured type. It is module-internal unless
-it is exported, and its fields are public and immutable:
+it is exported, and its fields are public. Read-only access cannot change them:
 
 ```hgl
 export struct Quote {
@@ -709,8 +709,11 @@ fn make_snapshot(bid: f64, ask: f64) -> atomic<Quote> =>
     Quote(bid: bid, ask: ask)
 ```
 
-Struct values are immutable. `var` may rebind a complete value; it does not
-make fields assignable in place.
+An ordinary struct value owned through `var` permits both whole-value
+assignment and field assignment. `let`, parameters and temporal inputs are
+recursively read-only. This is an access distinction, not a different struct
+type. Copying an ordinary owned value into a new owning binding creates an
+independent copy. See [value mutability](../design/value-mutability.md).
 
 ### Sparse delta values
 
@@ -935,8 +938,11 @@ fn moving_average(
 
 ## Local bindings
 
-`let` introduces an immutable lexical binding. `var` introduces a mutable
-lexical binding:
+`let` introduces a recursively read-only lexical binding. `var` introduces
+a writable lexical binding: an ordinary owned value may be replaced and its
+contents changed through admitted operations. Both bindings have the same
+value type. Input access remains read-only; composition wire rebinding does
+not modify a producer's value:
 
 ```hgl
 let scale = 2.0
