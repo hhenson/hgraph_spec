@@ -78,6 +78,7 @@ classDiagram
     class Clock
     class EngineControl
     class Logger
+    class GlobalState
     class Node
     class NodeType
     class Scheduler
@@ -88,6 +89,7 @@ classDiagram
     ExecutionEngine "1" *-- "1" Clock
     ExecutionEngine "1" *-- "1" EngineControl
     ExecutionEngine "1" *-- "1" Logger
+    ExecutionEngine "1" *-- "1" GlobalState
     Node "1" *-- "0..1" Scheduler
     Node "1" *-- "0..1" TimeSeriesOutput
     Node "1" *-- "0..1" State
@@ -96,6 +98,7 @@ classDiagram
     NodeType ..> Clock : may request
     NodeType ..> EngineControl : may request
     NodeType ..> Logger : may request
+    NodeType ..> GlobalState : may request
     NodeType ..> Scheduler : may request
 ```
 
