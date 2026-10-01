@@ -1946,9 +1946,14 @@ unwrapping or null-return suppression.
 
 The [run-wide keyed-state foundation](../design/decisions/0016-eval-scalar-buffer-capabilities.md)
 adds reusable `global_state`, available in start/evaluation/stop. Calls use
-`get(global_state, key)` and `set(global_state, key, value)`. Get needs a
-concrete ordinary expected type; missing and wrong-type entries fail. Stored
-values are ordinary typed values, never temporal endpoints or capabilities.
+`get(global_state, key)` and `set(global_state, key, value)`. Keys are const
+string expressions resolved before root start. Get needs a concrete ordinary
+expected type. Every use of a key binds to the same exact typed entry before
+start; conflicting source types, aliased const configurations or wrong-type
+seeds fail checking/construction. Hook access performs no key lookup or type
+dispatch. Binding does not initialize a value: get checks presence and fails
+if no seed or successful set supplied one. Set preserves the bound type.
+Stored values are ordinary typed values, never endpoints or capabilities.
 Replay is configured with ordinary const data and record with a const string
 key. No node's temporal shape silently determines a stored value type.
 Complete HGL replay/record bodies await the ordinary sequence, structural

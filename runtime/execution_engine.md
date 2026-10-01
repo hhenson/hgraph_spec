@@ -30,9 +30,12 @@ Each run owns one string-keyed store of ordinary typed values, exposed to
 requesting nodes as `global_state` (see Injectables). The run owner may seed
 it before graph start and read its final contents after graph stop. All
 nested graphs share it. Separate runs have separate stores, even when they
-instantiate the same graph description. This store does not define
-persistence or recovery and does not schedule work merely because an entry
-changes. Aggregate source access and ownership depend on their admitted
+instantiate the same graph description. Before root start, const keys and
+concrete types are bound to typed entries and seed types are validated.
+The entry's type is fixed for the run, while its value may remain absent
+until initialized. Hooks use prepared entry access, with no name lookup or
+runtime type dispatch. This store does not define persistence or recovery
+and does not schedule work merely because an entry's value changes. Aggregate source access and ownership depend on their admitted
 ordinary value contracts.
 
 ### Time

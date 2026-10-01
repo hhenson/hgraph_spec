@@ -224,9 +224,13 @@ Logging has no effect on the graph.
 The owner may seed it before graph start and read it after graph stop. Nested
 graphs share the same store; separate runs have separate stores. Nodes ask
 for `global_state` and use `get(global_state, key)` or
-`set(global_state, key, value)` in start, eval or stop. Get requires an
-expected ordinary value type and fails on a missing key or type mismatch.
-No key or temporal node shape determines that expected type. Entries are not
+`set(global_state, key, value)` in start, eval or stop. Each const key and
+exact ordinary type is bound before root start; all uses of the same key
+share that typed entry. Conflicting types or wrong-type seeds fail before
+any node starts. Hook access uses the prepared entry without key lookup or
+type dispatch. Binding does not initialize a value: get fails if no seed or
+successful set supplied one. Set cannot change the bound type.
+No key spelling or temporal node shape determines the expected value type. Entries are not
 endpoints or capabilities. The store assigns no recording-specific roles,
 writer restrictions or timestamp rules. Scalar get/set uses ordinary value
 copy rules; aggregate source access requires a separately admitted ownership
@@ -273,11 +277,13 @@ Rules
   store belongs to the run, is shared by nested graphs and remains available
   to its owner through result extraction after stop. Separate runs do not
   implicitly share entries.
-- **INJ-14** Global-state get/set operates on ordinary string-keyed values.
-  Get requires the expected type and fails on missing or wrong-type entries;
-  it does not produce absence or infer a type from node role. Values follow
-  their ordinary ownership contract; storing a value does not by itself
-  snapshot arbitrary aggregate data.
+- **INJ-14** Global-state accesses bind const string keys to exact ordinary
+  types before start. The same key in one run has one bound type; conflicting
+  requirements and wrong-type seeds fail checking or construction. Hook
+  accesses use prepared entries without name lookup or runtime type dispatch.
+  Binding does not initialize a value: get fails if none has been supplied.
+  Set preserves the bound type. Values follow their ordinary ownership
+  contract; storing one does not by itself snapshot arbitrary aggregate data.
 
 
 Deferred
