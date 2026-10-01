@@ -232,9 +232,13 @@ type dispatch. Binding does not initialize a value: get fails if no seed or
 successful set supplied one. Set cannot change the bound type.
 No key spelling or temporal node shape determines the expected value type. Entries are not
 endpoints or capabilities. The store assigns no recording-specific roles,
-writer restrictions or timestamp rules. Scalar get/set uses ordinary value
-copy rules; aggregate source access requires a separately admitted ownership
-contract. Retained recordings must independently own their captured deltas.
+writer restrictions or timestamp rules. Primitive scalar get/set uses ordinary value
+copy rules. The [mutable-value contract](../language/docs/design/mutable-value-types.md)
+lends hook-scoped aggregate access: exclusive live owner access for mutable
+entries, read-only access otherwise. Conflicting borrows/replacement fail
+checking or binding before start; there is no runtime borrow registry.
+Aggregate operations retain their separate source contracts. Retained
+recordings must independently own their captured deltas.
 The [language contract](../language/docs/design/decisions/0016-eval-scalar-buffer-capabilities.md)
 specifies source admission, lifetime and the remaining aggregate boundaries.
 

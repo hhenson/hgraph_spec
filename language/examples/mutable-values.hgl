@@ -1,0 +1,58 @@
+module examples.mutable_values
+
+struct Box {
+    amount: i64
+}
+
+const fn change_owned_contents() -> i64 {
+    let box: mut Box = Box(amount: 1)
+    box.amount = 2
+    return box.amount
+}
+
+const fn replace_immutable_value() -> i64 {
+    var box: Box = Box(amount: 1)
+    box = Box(amount: 3)
+    return box.amount
+}
+
+const fn construct_independent_value() -> i64 {
+    let source: mut Box = Box(amount: 4)
+    let independent: mut Box = Box(amount: source.amount)
+    source.amount = 9
+    return independent.amount
+}
+
+struct Envelope {
+    inner: mut Box
+}
+
+const fn copy_owned_binding() -> i64 {
+    let source: mut Box = Box(amount: 5)
+    let independent = source
+    independent.amount = 8
+    return source.amount
+}
+
+const fn retain_constructor_argument() -> i64 {
+    let source: mut Box = Box(amount: 6)
+    let retained: Envelope = Envelope(inner: source)
+    source.amount = 9
+    return retained.inner.amount
+}
+
+const fn mutate_owned_child() -> bool {
+    let child: mut Box = Box(amount: 7)
+    let outer: Envelope = Envelope(inner: child)
+    outer.inner.amount = 10
+    return outer.inner.amount == 10 && child.amount == 7
+}
+
+test ordinary_value_mutability {
+    assert change_owned_contents() == 2
+    assert replace_immutable_value() == 3
+    assert construct_independent_value() == 4
+    assert copy_owned_binding() == 5
+    assert retain_constructor_argument() == 6
+    assert mutate_owned_child()
+}

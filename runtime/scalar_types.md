@@ -12,16 +12,17 @@ time-series*; it does not mean small — a map of structs is a scalar value.
 Concept
 -------
 
-- **A value is read-only to everyone but its owner, and stable for a whole
-  cycle.** Whoever is handed a value — a node reading an input, a function
-  passed an argument — is handed a read-only **view** of it and cannot
-  change it. The owner may: an output may hold its value in an efficient
-  mutable form and update it in place. But it does so only in its own node's
-  evaluation, so that from the end of that evaluation to the end of the cycle
-  every reader sees the same thing. A value that changes from cycle to cycle
-  is, in effect, what a time-series *is*.
+- **Consumers receive stable read-only values; mutation requires owner
+  authority.** A node reading an input or a function passed an ordinary
+  argument receives read-only access. A mutable schema does not authorize
+  that reader to write. An owner may change a mutable value or explicitly
+  lend bounded mutable owner access. That live owner access observes its
+  own changes; it is not a stable consumer snapshot. An output is changed
+  only by its own node during evaluation, preserving the consumer's stable
+  observation from the end of that evaluation through the cycle.
 - **To keep a value is to copy it.** A view is good for the cycle in which it
-  was obtained. Anything that outlives the cycle — a node's state, a value
+  was obtained, or a shorter lifetime specified by its provider. Anything
+  retained beyond its borrowed lifetime — a node's state, a value
   written on to another output — holds a **copy**, which is an independent
   value that nothing else will change. How cheap a copy is, and whether one
   is physically made, is an implementation's business; that the holder
@@ -68,6 +69,29 @@ Concept
 | **set** | Distinct values of one type, in no order |
 | **map** | Distinct keys of one type, each with a value of another |
 | **any** | A value of whatever type it is given, or nil. The value carries its type with it |
+
+### Aggregate mutability
+
+An aggregate value type has an immutable or mutable form. The form is part
+of its exact type; it is not a different nominal struct family. Mutability
+is shallow: it applies to that aggregate and does not change the types of
+its children. An immutable parent's own field or position cannot be
+replaced, but its owner may change the contents of an explicitly mutable
+child. A read-only view of that parent grants no such child authority.
+A mutable type permits content changes only through authorized owner access
+and the operations admitted for that type. An immutable value
+can be replaced in an owning slot without making its contents writable.
+
+Mutable storage, read-only observation and independent copies are distinct.
+A read-only view does not grant access to mutate nested mutable children.
+A copy preserves the complete type, including mutability, while independently
+owning retained content. Later changes to any original child cannot appear
+through the retained copy. A new owner may change its own mutable copy.
+
+The [HGL aggregate profile](../language/docs/design/mutable-value-types.md)
+spells the qualifier `mut`, separates binding reassignment from content
+mutation, and specifies lexical borrowed-access checking. It does not
+introduce source mutation operations for every runtime container kind.
 
 ### Structs
 
@@ -150,13 +174,14 @@ classDiagram
 State
 -----
 
-A value has no state beyond its content, and nobody but its owner can change
-that. A **type** holds:
+A value has no state beyond its content. Changing it requires owner or
+explicitly delegated mutable access. A **type** holds:
 
 | Item | For | Meaning |
 |---|---|---|
 | kind | every type | Atomic, tuple, struct, list, set, map, any |
 | name | enums, structs, native atomics | The qualified name that is the type's identity |
+| mutability | aggregates | Immutable or mutable contents under owner authority; part of exact type identity |
 | parts | composites | Position types; fields (name, type, optional or not, default); element type; key and value types; fixed length or capacity |
 | members | enums | The ordered members, each a name and an integer |
 | parents | structs | The abstract structs it inherits from |
@@ -220,12 +245,15 @@ Behaviour
 Rules
 -----
 
-- **VAL-1** A value can be changed only by its owner. Whatever is handed a
-  value is handed a read-only view of it.
+- **VAL-1** Content mutation requires an owner or explicitly authorized
+  mutable owner access and a mutable value type. Ordinary input and parameter
+  access is read-only, even for a mutable payload. A type qualifier alone
+  never delegates mutation authority.
 - **VAL-2** The same description of a type, given twice, is one type.
 - **VAL-3** A struct or enum is identified by its qualified name and type
-  arguments; a tuple by the types of its positions. A named type never equals
-  an unnamed one.
+  arguments; a tuple by the types of its positions. Aggregate mutability is
+  also part of exact value-type identity without creating a new nominal
+  family. A named type never equals an unnamed one.
 - **VAL-4** Generic struct types with different type arguments are different
   types, and neither is a subtype of the other.
 - **VAL-5** Re-declaring a named type with a different definition is an
@@ -245,10 +273,14 @@ Rules
 - **VAL-14** A value of an abstract type is of exactly one concrete member,
   fixed when it was made. The members of a family are fixed when wiring ends.
 - **VAL-15** Time arithmetic that leaves the representable range is an error.
-- **VAL-16** A view does not change during the cycle in which it was
-  obtained.
-- **VAL-17** A value kept beyond the cycle in which it was read is a copy. A
-  copy is independent: no later change to the original is visible through it.
+- **VAL-16** A consumer's read-only value observation is stable for the
+  cycle within its admitted lifetime. Explicit borrowed owner access is live
+  access, not that consumer snapshot; it ends at its specified scope and
+  cannot be retained as a read-only snapshot by merely dropping write access.
+- **VAL-17** A value kept beyond the cycle in which it was read is an owning
+  copy. The copy is independent recursively: no later change to the original
+  or its children is visible through it. Its exact type, including aggregate
+  mutability, is preserved. Keeping a borrowed handle is not copying a value.
 - **VAL-18** A struct may have a field of its own type, directly or through
   other structs. Every such field is optional. Equality, hash, order and copy
   follow the whole depth of the value.
@@ -260,11 +292,10 @@ Deferred
 - **Serial forms.** hgraph has a binary form and a JSON form, registered per
   atomic type. They are needed for recording, replay and distribution, and
   go with those.
-- **How an owner holds a value it changes in place.** hgraph lets a container
-  type be declared mutable, as a separate type from its read-only form, and
-  wraps values so that a reader gets a view and a keeper gets a copy without
-  either having to know. That is how VAL-1, VAL-16 and VAL-17 are *met*; the
-  rules themselves are the concept.
+- **Physical representation of mutable values and copies.** Storage layout,
+  physical sharing and copy elision are implementation choices provided
+  that mutability, access authority and independent retention obey
+  VAL-1, VAL-16 and VAL-17.
 - **Cyclic buffer and queue.** hgraph has both as value kinds. They exist to
   implement windows (TSW) — they are the changing store behind one, not
   values a graph passes around — and so are an implementation's concern.

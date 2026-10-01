@@ -126,8 +126,9 @@ type-constructor call rule. It is provisional too: `str` is not an expression
 start in the current grammar, so `str(x)` is `parse: expected an expression,
 found 'str'`.
 
-`atomic`, `tuple`, `list`, `set`, `map`, and `rolling` are contextual type
-keywords, and `unbounded` is a contextual constant in a list-size position.
+`atomic`, `tuple`, `list`, `set`, `map`, `rolling`, and `mut` are contextual
+type keywords. `mut` prefixes an admitted aggregate value type; it is not an
+expression operator. `unbounded` is contextual in a list-size position.
 Outside a type position, the same spelling can resolve to a function,
 as in `map(values, fn(value) => value * 2.0)`. `in` is contextual: it is the
 separator of a `for` statement, the membership relation in a `requires`
@@ -436,13 +437,21 @@ type            = scalar_type
                 | ref_type
                 | signal_type
                 | named_type
+                | mutable_value_type
+                | mutable_atomic_type
                 | "atomic", "<", value_type, ">";
 value_type      = scalar_type
                 | value_tuple_type
                 | value_list_type
                 | set_type
                 | value_map_type
-                | named_type;
+                | named_type
+                | mutable_value_type;
+mutable_value_type = "mut", mutable_aggregate_type;
+mutable_aggregate_type
+                = value_tuple_type | value_list_type | set_type
+                | value_map_type | named_type;
+mutable_atomic_type = "mut", "atomic", "<", value_type, ">";
 named_type      = ( identifier | qualified_name ), [ generic_arguments ];
 generic_arguments
                 = "<", generic_argument,
@@ -468,6 +477,15 @@ value_tuple_type = "tuple", "<", value_type,
 value_list_type = "list", "<", value_type, ">";
 value_map_type  = "map", "<", value_type, ",", value_type, ">";
 ```
+
+The [mutable value contract](../design/mutable-value-types.md) restricts
+`mut` to admitted ordinary aggregates. A named or generic target must resolve
+to such an aggregate; primitive scalars and opaque native atomics are outside
+this profile. Qualifiers are shallow and invariant. `mut atomic<V>`
+normalizes to `atomic<mut V>`; double qualification of the same aggregate is
+rejected. An unwrapped mutable aggregate in temporal context is a diagnostic,
+not an implicit atomic boundary. No additional container operation follows
+merely from forming a mutable type.
 
 A generic argument is initially parsed without deciding whether an identifier
 names a type or a wiring-time value. Name resolution interprets each position
@@ -1234,11 +1252,16 @@ carries no value and finishes the source, `for` is not admitted, and a
 `yield` sits at statement level (the body, a `while` block, an `if`
 statement), never inside a value.
 
-Mutation statements are restricted to declared `state` variables, injected
-`out`, declared `var` bindings, and their writable projections. Parameters,
-`let` bindings, and `for` bindings remain immutable. Compound assignment reads
-the previous value and therefore follows the same validity rules as an explicit
-read followed by assignment.
+Rebinding assignment is restricted to declared `state` variables, injected
+`out` and declared `var` bindings. Parameters, `let` bindings and `for`
+bindings cannot be rebound. Content mutation additionally requires a mutable
+value schema, owner or authorized mutable-borrow access, and an admitted
+operation. Thus a local `let box: mut Box` that owns its value can use ordinary
+field assignment, while `var box: Box` can only replace its immutable value.
+Const configuration and temporal inputs remain read-only even when their
+exact payload type is mutable. See [mutable values](../design/mutable-value-types.md)
+for authority and lifetime rules. Compound assignment reads the previous
+value and follows the same validity rules as an explicit read then write.
 
 `let` and `var` are lexical declarations. `let` requires an initializer. A
 `var` may omit it only when it has an explicit type. In a `CompositionFn`, an
@@ -1609,7 +1632,12 @@ temporalize(atomic<T>)
 
 `const x: T` bypasses `temporalize` and resolves to canonical value `T`.
 `const x: atomic<T>` is invalid because atomicity describes a temporal
-boundary.
+boundary. This also rejects `const x: mut atomic<T>` and
+`const x: atomic<mut T>`. An ordinary value may instead have type `mut T`
+when T is an admitted aggregate. In temporal context,
+`mut atomic<T>` normalizes to `atomic<mut T>` and carries the complete mutable
+canonical value in one endpoint; input access remains read-only. Unwrapped
+mutable aggregates are not temporalized in this profile.
 
 The compiler must map every expanded shape to an existing public hgraph schema.
 It must not create a language-only runtime representation. A structural tuple
@@ -1958,8 +1986,12 @@ Replay is configured with ordinary const data and record with a const string
 key. No node's temporal shape silently determines a stored value type.
 Complete HGL replay/record bodies await the ordinary sequence, structural
 delta storage, recording construction and aggregate access contracts listed
-there. The [collection eval profile](../design/eval-collection-deltas.md)
-defines publication behavior, not a substitute source container facility.
+there. [Mutable value types](../design/mutable-value-types.md) specify
+hook-local borrowed access to prepared aggregate entries, including exclusive
+mutable access and checking of conflicting get/set lifetimes. They do not
+add ordinary list growth or structural delta storage. The
+[collection eval profile](../design/eval-collection-deltas.md) defines
+publication behavior, not a substitute source container facility.
 
 `start` runs once after replay-aware state initialization. `stop` runs once at
 teardown. State storage and injected capabilities are runtime-owned and are

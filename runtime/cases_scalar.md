@@ -1,6 +1,7 @@
 # Scalar type cases
 
-Status: proposed 2026-09-30, reasoned from VAL-1 to VAL-18; not yet run.
+Status: proposed, following VAL-1 to VAL-18. Reasoned contract cases; this
+file is not an executable HGL conformance suite.
 These cases observe the value layer through nodes: a node publishes what it
 computes from its scalars and inputs.
 
@@ -74,6 +75,27 @@ cycle the producer publishes a different list. If the node kept the view it
 sees the old list, because what it kept was a copy taken when it stored it;
 what it reads afresh from the input is the new list. No node can change the
 list through the input.
+
+## SCALAR-MUTABLE-OWNER — VAL-1, VAL-3, VAL-16, VAL-17
+
+An owner holds a mutable list and lends scoped mutable access. An admitted
+in-place update is visible through that live owner access. A separately kept
+owning copy retains its original contents, including nested mutable values.
+The copy has the same exact mutable schema and may be changed independently
+by its new owner. No read-only input consumer gains write permission from
+that schema. An immutable list does not admit immediate content mutation merely
+because its binding or owning slot can be replaced.
+
+An owner-local immutable Outer contains a field whose type is mutable Inner.
+The owner can change Inner's amount field; it cannot replace Outer's inner
+field. Constructing Outer from an existing Inner retains an independent copy,
+so changing the owned child does not change that source Inner.
+
+Read-only access to an immutable aggregate containing mutable children does
+not expose writable child access. A retained snapshot of that aggregate must
+own those children independently; the immutable outer type is not a reason
+to retain live aliases. Borrowing does not change the bound value type or
+provide an implicit conversion between mutable and immutable schemas.
 
 ## SCALAR-TIME — VAL-15, ENG-16
 
