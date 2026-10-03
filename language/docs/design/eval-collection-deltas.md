@@ -17,7 +17,7 @@ the profile; matching a scalar leaf representation is insufficient.
 Unsupported concrete eval shapes are checking errors. This is an eval
 profile boundary, not a new source constraint predicate or a capability that
 infers a generic implementation's storage type. Generic replay/record source
-checking uses the explicit delta_of(T) relationship and its ordinary type
+checking uses the explicit `delta<T>` relationship and its ordinary type
 formation/matching rules.
 
 The eval caller supplies only the target and typed delta sequences. Eval
@@ -35,13 +35,13 @@ fn pass_through<T>(value: T) -> T {
 
 ## Publication data and owned recording
 
-A present input slot supplies a contextual `delta_of(T)` for its exact
+A present input slot supplies a contextual `delta<T>` for its exact
 parameter shape. For example,
 `delta<map<i64, i64>>(upsert: [1: 11])` supplies that sparse update, not a
 complete map or other keys from earlier slots. `delta_value(v)` reads the
 current publication from a live endpoint. The [nullable indexing rules](nullable-replay-indexing.md)
 require presence before a nullable element's payload can be used. Ordinary
-replay data instead contains present `TimedValue<delta_of(T)>` entries,
+replay data instead contains present `TimedValue<delta<T>>` entries,
 with the dense horizon retained separately; no nullable element is needed.
 
 A recorder retains an independent owned copy of each output delta and its

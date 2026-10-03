@@ -7,7 +7,7 @@ Replay and record use ordinary values. This profile admits `bool`, `i64`,
 scalar publication delta of its own type. The
 [ordinary delta type extension](../language/docs/design/ordinary-delta-types.md)
 generalizes this contract to its admitted structural shapes using
-`list<TimedValue<delta_of(T)>>`; scalar reduction preserves the signatures
+`list<TimedValue<delta<T>>>`; scalar reduction preserves the signatures
 below. Signals, references and windows remain outside that profile.
 
 ## Data and callable contracts
@@ -43,7 +43,7 @@ ticks. Neither `_` nor `null` is an element of this ordinary data contract.
 An empty timed list publishes nothing; it carries no dense horizon.
 
 `delta_value(ts)` extracts the scalar publication to record. `delta<T>(...)`
-remains contextual delta construction; `delta_of(T)` is the ordinary type
+remains contextual delta construction; `delta<T>` is the ordinary type
 expression supplied by the delta type extension and reduces to T here.
 
 ## Replay execution and time boundaries

@@ -299,7 +299,7 @@ the replay list and recording: a present publication is an ordinary
 positions from that list and retains their dense horizon separately.
 The test's eval arguments stay the same. The
 [ordinary delta type extension](../design/ordinary-delta-types.md) supplies
-`TimedValue<delta_of(T)>` for the structural publication profile; general
+`TimedValue<delta<T>>` for the structural publication profile; general
 nullable ordinary sequences remain separate.
 
 ## First-pass limits

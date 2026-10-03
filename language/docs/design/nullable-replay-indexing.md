@@ -22,7 +22,7 @@ It is not a new ordinary value constructor.
 An in-range read yields its present payload or the existing absence literal
 `null`. It never returns a held value or default scalar. A scalar payload has
 its ordinary scalar type; a structural publication payload retains the
-contextual `delta_of(T)` relationship where separately admitted.
+contextual `delta<T>` relationship where separately admitted.
 
 | Sequence slots | Expression | Result |
 |---|---|---|

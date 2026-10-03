@@ -134,10 +134,12 @@ separator of a `for` statement, the membership relation in a `requires`
 clause, and an ordinary identifier elsewhere. `out` and the names of other
 injectables are contextual names resolved only by an `inject` declaration.
 `struct` is both a declaration keyword and the corresponding constraint
-category. `delta` is contextual: followed by `<` it introduces a structured
-delta constructor; `delta_value(value)` is the temporal metadata accessor.
+category. `delta` is contextual: `delta<T>` is the ordinary publication-delta
+type marker in a type position, and `delta<T>(...)` is its constructor in an
+expression. `delta_value(value)` is the temporal metadata accessor.
 There is no `delta(value)` metadata intrinsic.
-It is not a general type constructor. `fields`, `has_fields`, `field_type`,
+Delta type formation retains its finite admitted shape domain.
+`fields`, `has_fields`, `field_type`,
 and the pack-reflection functions `len`, `keys`, `types`, and `type_at` are
 compile-time intrinsics inside a `requires` clause.
 `native` is contextual at the start of a declaration, so it remains available
@@ -445,7 +447,7 @@ value_type      = scalar_type
                 | set_type
                 | value_map_type
                 | named_type;
-delta_type      = "delta_of", "(", type, ")";
+delta_type      = "delta", "<", type, ">";
 named_type      = ( identifier | qualified_name ), [ generic_arguments ];
 generic_arguments
                 = "<", generic_argument,
@@ -477,12 +479,12 @@ Types carry no mutability qualifier. Prefixing an input or time-series type
 with `mut` is a syntax error. Ordinary value access is controlled by `let`
 and `var`, as specified in [value mutability](../design/value-mutability.md).
 
-`delta_of(T)` is contextual type syntax for an ordinary publication-delta
+`delta<T>` is contextual type syntax for an ordinary publication-delta
 value; it is not a value-level call or new reserved word. Its argument is a
 type, and it is admitted only for the finite shapes in the
 [ordinary delta type contract](../design/ordinary-delta-types.md). Scalars
 reduce to their own type; structural deltas retain the exact originating
-shape, including nominal arguments and fixed sizes. Matching delta_of(T)
+shape, including nominal arguments and fixed sizes. Matching `delta<T>`
 binds T from that identity, never from stored payloads. Ordinary storage does
 not admit a new temporal endpoint shape or new inspection/mutation operation.
 
@@ -1601,11 +1603,12 @@ invalidation are excluded from the finite publication profile.
 
 Runtime output, harness/replay, nested constructor and contextual immutable
 `let` positions retain their admitted delta contexts. In an ordinary
-`delta_of(S)` value context, `delta<S>(...)` constructs an independently owned
+`delta<S>` value context, `delta<S>(...)` constructs an independently owned
 value under the [ordinary delta type contract](../design/ordinary-delta-types.md).
 That type is admitted in ordinary bindings, parameters, value-function results,
 struct fields, list elements and prepared global entries for the finite profile.
-`delta<S>` itself is not type syntax. Owned construction and retention preserve
+`delta<S>` names that type; `delta<S>(...)` constructs its value. Owned
+construction and retention preserve
 the existing written-order and failure rules; a borrowed delta observation
 does not become owning merely through an annotation. State/cache admission
 and publication constraints remain separate.
@@ -2006,7 +2009,7 @@ lexical aggregate borrowing and independent owning retention. The
 [ordinary-list contract](../design/ordinary-list-values.md) supplies typed
 empty construction, length, indexed reads and retained end growth. The
 [ordinary delta type contract](../design/ordinary-delta-types.md) supplies
-`list<TimedValue<delta_of(T)>>` and the generic source relationship for
+`list<TimedValue<delta<T>>>` and the generic source relationship for
 admitted scalar/structural shapes. Nullable ordinary elements remain separate.
 The [collection eval profile](../design/eval-collection-deltas.md) retains
 its publication admission; storing delta data does not bypass it.

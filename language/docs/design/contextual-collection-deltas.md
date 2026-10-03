@@ -20,7 +20,7 @@ Every child S or struct field must recursively have one of these shapes.
 Recursive nominal definitions, growing lists, references, signals, windows,
 other scalar types and atomic wrappers are outside this profile.
 
-`delta_of(T)` names T's publication-delta shape. The
+`delta<T>` names T's publication-delta shape. The
 [ordinary delta type extension](ordinary-delta-types.md) admits this spelling
 as an ordinary source type expression. For a scalar it is
 that scalar. For a set it is disjoint added/removed members. For a fixed
@@ -106,7 +106,7 @@ change, a map removal, or at least one recursively valid child publication.
 No included structural child is an empty publication. A child scalar
 publication is present even if its value equals its previous value.
 
-`return d`, where d has exact derived type `delta_of(T)`, applies d to the
+`return d`, where d has exact derived type `delta<T>`, applies d to the
 runtime node's own T output and terminates evaluation. `out = d` applies the
 same update and continues. These operations never return an input port or
 replace the node with identity wiring. Complete-value returns remain a

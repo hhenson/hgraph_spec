@@ -2,10 +2,10 @@
 
 Status: proposed source extension, 2026-10-03.
 
-`delta_of(T)` names the ordinary value type of a publication delta for the
-exact temporal shape T. It extends the previous specification-only notation
-to a source type expression. `delta_value(endpoint)` remains the guarded
-publication accessor and `delta<T>(...)` remains the delta constructor.
+`delta<T>` names the ordinary value type of a publication delta for the
+exact temporal shape T. The same marker followed by arguments,
+`delta<T>(...)`, constructs a delta value. `delta_value(endpoint)` remains
+the guarded publication accessor.
 There are no alternative spellings or compatibility aliases.
 
 ## Formation and canonical identity
@@ -13,15 +13,20 @@ There are no alternative spellings or compatibility aliases.
 Add this alternative to both `type` and `value_type`:
 
 ```ebnf
-delta_type = "delta_of", "(", type, ")";
+delta_type = "delta", "<", type, ">";
 ```
 
 Recognize this form in type positions, including annotations and type
-arguments. `delta_of` is contextual here, not a hard reserved word. This
-introduces no value-level call, reflection operation or conversion named
-delta_of; ordinary expression names retain their existing resolution rules.
+arguments. `delta` is contextual here, not a hard reserved word. In an
+expression, `delta<T>(...)` uses the constructor grammar; `delta<T>` alone
+does not produce a runtime type value. There is no `delta(endpoint)` accessor
+or new reflection/conversion call. Ordinary expression names retain their
+existing resolution rules.
 The argument is a type, never an endpoint expression or runtime type value.
 Generic argument positions retain their existing type-versus-const checking.
+The unified spelling adds no constructor argument forms: scalar deltas remain
+ordinary scalar values, while structural constructors keep their admitted
+named arguments and sparse entries.
 
 T must have a finite shape admitted by the
 [collection publication profile](contextual-collection-deltas.md): the eight
@@ -31,7 +36,7 @@ with recursively admitted children. Recursive nominal definitions, growing
 lists, references, signals, windows, other scalars and atomic boundaries are
 not added. An unsupported concrete T is a checking error.
 
-For an admitted scalar S, `delta_of(S)` is exactly S, not a wrapper or a
+For an admitted scalar S, `delta<S>` is exactly S, not a wrapper or a
 distinct nominal type. For structural T it is a distinct canonical ordinary
 value type retaining T's full originating shape: container kind, fixed size,
 tuple positions, scalar/key/member types, module-qualified nominal origin,
@@ -47,13 +52,13 @@ runtime shape registry or source-visible type test.
 
 ## Generic checking and matching
 
-In a generic declaration, keep `delta_of(T)` symbolic until T is bound.
+In a generic declaration, keep `delta<T>` symbolic until T is bound.
 Its use imposes the existing generic requirement that T be admitted by every
 place where it occurs. Formation is checked after substitution. No new
 recursive `requires` predicate or dynamic shape discovery is introduced.
 An unresolved T cannot reach an instantiated ordinary value or graph.
 
-Matching `delta_of(T)` against a structural delta type binds T to that
+Matching `delta<T>` against a structural delta type binds T to that
 type's exact originating shape. Matching against an admitted scalar S binds
 T to S. Matching two symbolic delta applications preserves equality of their
 originating shapes. All repeated occurrences and other constraints must
@@ -64,7 +69,7 @@ from a key's spelling.
 Consequently replay can infer T from an ordinary typed list even when empty:
 
 ```hgl
-operator replay<T>(const values: list<TimedValue<delta_of(T)>>) -> T
+operator replay<T>(const values: list<TimedValue<delta<T>>>) -> T
 operator record<T>(ts: T, const key: str)
 ```
 
@@ -89,7 +94,7 @@ value or fill an omitted child from held endpoint state.
 
 For structural T, `delta_value(ts)` remains a read-only observation bounded
 to the current evaluation. It requires the existing validity/modification
-proofs and retains the exact derived type `delta_of(T)`. An evaluation-local
+proofs and retains the exact derived type `delta<T>`. An evaluation-local
 immutable `let`, including an explicitly typed one, may preserve that
 observation under the existing contextual local rules. An annotation alone
 does not create writable access, an owning copy or permission to escape.
@@ -121,7 +126,7 @@ outside this profile.
 ## Construction order and failure
 
 In an ordinary delta-value context, `delta<S>(...)` constructs an independent
-value of exact type `delta_of(S)`. The explicit S determines its derived
+value of exact type `delta<S>`. The explicit S determines its derived
 type; an expected type must agree. Existing contextual publication uses and
 constructor spellings continue to work. No scalar constructor form is added:
 an ordinary scalar already inhabits its reduced delta type.
@@ -173,7 +178,7 @@ no claim that a later publication using it is admitted.
 ## Replay and recording
 
 Use the ordinary generic TimedValue with a delta-typed payload:
-`list<TimedValue<delta_of(T)>>`. Every entry is present ordinary data; silence
+`list<TimedValue<delta<T>>>`. Every entry is present ordinary data; silence
 is omission of a timed entry, not a special delta value. Eval keeps its dense
 horizon separately. The existing generator rules govern replay's traversal
 and time handling; yield applies the stored delta to the exact T output,

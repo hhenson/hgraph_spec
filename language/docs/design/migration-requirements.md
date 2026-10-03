@@ -67,7 +67,7 @@ complete value snapshots does not satisfy this requirement.
 
 `delta<S>(...)` is the distinct sparse-update constructor. It is not an
 accessor. The [ordinary delta type contract](ordinary-delta-types.md) supplies
-`delta_of(T)` as its storable source type for admitted shapes.
+`delta<T>` as its storable source type for admitted shapes.
 
 ### MIG-008: output and type resolution
 

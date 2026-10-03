@@ -164,7 +164,7 @@ Omitted delta fields mean no change even when the corresponding complete-value
 field is required. Defaults never run for a delta. An optional field's `null`
 declaration is not the representation of an omitted delta field.
 `delta<S>(...)` is constructor syntax; the ordinary type spelling is
-[`delta_of(S)`](ordinary-delta-types.md). In its admitted finite profile,
+[`delta<S>`](ordinary-delta-types.md). In its admitted finite profile,
 ordinary construction independently retains the delta and permits ordinary
 bindings, parameters, value-function results, fields, list elements and global
 entries. Borrowed observations, state/cache admission and publication retain

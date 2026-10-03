@@ -4,12 +4,28 @@ These expected observations exercise
 [ordinary delta types](../language/docs/design/ordinary-delta-types.md).
 Type formation and retention do not imply admission of a publication event.
 
+## DELTA-SYNTAX — type marker and constructor
+
+In an ordinary value context, the annotation names the delta type and the
+parenthesized form constructs a value of that type:
+
+```hgl
+let update: delta<map<i64, i64>> = delta<map<i64, i64>>(upsert: [1: 10])
+let scalar: delta<i64> = 7
+```
+
+The same marker is admitted in ordinary fields, generic arguments and
+value-function parameter/result types. These examples add no scalar
+constructor form. `delta_value(endpoint)` remains the guarded temporal
+accessor; the shared type/constructor spelling does not make it an alias
+for that accessor.
+
 ## DELTA-TYPE — canonical identity
 
-`delta_of(i64)` is i64 and `delta_of(str)` is str. The same reduction holds
+`delta<i64>` is i64 and `delta<str>` is str. The same reduction holds
 for all eight admitted scalar types. No runtime wrapper is observed.
 
-`delta_of(list<i64, 2>)` and `delta_of(list<i64, 3>)` are different types,
+`delta<list<i64, 2>>` and `delta<list<i64, 3>>` are different types,
 even for data containing only index zero. Two nominal structs with identical
 fields have different delta types. Fully applied nominal argument lists,
 tuple positions, child types and container kinds remain part of identity.
@@ -17,20 +33,20 @@ An ordinary held map cannot initialize its delta type and a delta cannot
 initialize that held map type. No sparse-layout compatibility substitutes
 for exact shape identity.
 
-Applying delta_of to an excluded concrete temporal shape fails checking.
+Forming `delta<T>` for an excluded concrete temporal shape fails checking.
 Using a structural delta type as a new temporal endpoint payload is not
 admitted here. A zero-size fixed shape may have a formed delta type without
 acquiring any admitted nonempty publication.
 
 ## DELTA-INFER — symbolic formation and matching
 
-A typed empty `list<TimedValue<delta_of(map<i64, i64>)>>` passed to generic
+A typed empty `list<TimedValue<delta<map<i64, i64>>>>` passed to generic
 replay fixes T to `map<i64, i64>`, despite having no payload from which to
 infer anything. Scalar timed i64 data fixes T to i64. Matching actual
-`delta_of(Quote<i64>)` binds that complete nominal specialization, not an
+`delta<Quote<i64>>` binds that complete nominal specialization, not an
 anonymous set of matching fields. Repeated incompatible bindings fail.
 
-A generic body may retain symbolic delta_of(T) and its formation obligation.
+A generic body may retain symbolic `delta<T>` and its formation obligation.
 Instantiation must resolve T to an admitted type. An untyped empty list
 does not determine T; no key spelling or runtime value supplies missing
 type information. Typed global entry bindings use the resulting exact type

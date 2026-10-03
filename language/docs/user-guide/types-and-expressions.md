@@ -770,9 +770,9 @@ delta<Book>(
 Here `best` receives a sparse nested delta. `configuration` is atomic and must
 therefore receive a complete `BookConfig` snapshot.
 
-`delta<T>(...)` is constructor syntax, not a source type annotation.
-[Ordinary publication-delta types](../design/ordinary-delta-types.md) use
-`delta_of(T)` for annotations, ordinary fields, parameters, results and
+`delta<T>` is the type marker and `delta<T>(...)` its constructor syntax.
+[Ordinary publication-delta types](../design/ordinary-delta-types.md) admit
+the marker in annotations, ordinary fields, parameters, results and
 container elements in the admitted finite shape profile. Scalar deltas reduce
 to the scalar type; structural deltas preserve their full originating shape
 and differ from held T values. The constructor retains independent data in

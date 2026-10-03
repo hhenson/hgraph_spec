@@ -115,7 +115,7 @@ and in-run changes to an entry’s bound type are outside this profile.
 Stored values are ordinary typed values with an admitted owned value
 representation. Temporal endpoints, references to endpoints, injectable
 capabilities and borrowed hook views cannot be stored. The separate
-[ordinary delta type contract](../ordinary-delta-types.md) admits delta_of(T)
+[ordinary delta type contract](../ordinary-delta-types.md) admits `delta<T>`
 for its finite profile and requires independent retention. The store does
 not infer this type from a node role or make nullable locals storable merely
 because a key can be chosen for them.
@@ -268,7 +268,7 @@ For the eight scalar types its exact parameter type is ordinary
 `list<TimedValue<T>>`, specified by the ordinary scalar data contract. There
 is no absent element in that list; no special replay-data type is introduced.
 For the admitted structural profile, the ordinary delta type extension uses
-`list<TimedValue<delta_of(T)>>`; scalar reduction preserves the same data type.
+`list<TimedValue<delta<T>>>`; scalar reduction preserves the same data type.
 Replay's output type is the corresponding temporal target parameter type.
 Const data access does not itself schedule or publish; replay must implement
 its cursor, alarm and output behavior.
@@ -288,7 +288,7 @@ construct an ordinary typed recording value and use a corresponding typed
 get/set context. Its recording exists from recorder start even if no tick
 arrives (OP-11, EVAL-4). Captured deltas are independently owned (VAL-17,
 EVAL-3). Ordinary construction and retained list push use the explicit type
-`list<TimedValue<delta_of(T)>>` for the admitted delta-type profile. The store
+`list<TimedValue<delta<T>>>` for the admitted delta-type profile. The store
 adds no publication admission or delta inspection operation.
 
 Eval owns the recorder's key, replay configuration and any initial values
@@ -325,17 +325,17 @@ were resolved, are listed here; the keyed store supplies none implicitly:
    current local refinement rules do not grant it implicitly. Ordinary timed
    replay avoids this dependency by omitting absent slots from ordinary data.
 2. **Ordinary structural delta storage.** Supplied for the finite profile by
-   [ordinary delta types](../ordinary-delta-types.md), using source delta_of(T)
+   [ordinary delta types](../ordinary-delta-types.md), using source `delta<T>`
    without equating sparse publication data with held snapshots. Excluded
    publication semantics remain separate from data formation and retention.
 3. **Owned recording values.** The [ordinary-list extension](../ordinary-list-values.md)
    supplies typed empty construction, length, indexed extraction and retained
-   end growth. TimedValue with a delta_of(T) payload supplies both the admitted
+   end growth. TimedValue with a `delta<T>` payload supplies both the admitted
    scalar and structural recording entries.
    Ordinary owning retention includes nested data; a borrowed endpoint view
    is not a retained capture. No recording-specific append or begin primitive
    substitutes for these general value operations.
-4. **Generic structural source checking.** Supplied by delta_of(T) formation
+4. **Generic structural source checking.** Supplied by `delta<T>` formation
    and exact originating-shape matching. These relate the ordinary timed
    list to temporal T and the recording type. No injectable silently supplies
    this type relationship or infers it from payload contents.
