@@ -1058,16 +1058,26 @@ duplicate `(implementation, arguments)` pairs are type diagnostics.
 Concrete binding and implementation availability are separate axes. A generic
 may be:
 
-- **concrete-required** because the body needs a concrete C++ value type,
-  storage layout, or operation;
+- **concrete-required** because the body needs a concrete value type,
+  storage layout, or operation before graph execution;
 - a **retained marker** used only in the candidate signature and resolver type
   relationships; or
 - **retained and reified**, meaning the resolved wiring-time type or value must
   be made available for the implementation body to inspect.
 
-A retained generic used only in a signature participates in matching but does
-not supply a body-visible value. Reading it requires an explicit reification
-contract; runtime schema inspection is not an implicit substitute.
+A retained slot may supply compile-time type relationships used by the body,
+including local, state, cache and publication-delta types. When call matching
+binds such a slot, substitute its concrete binding throughout the selected
+body and storage declarations, and check the resulting specialization before
+graph execution. Unresolved required bindings and unsupported substituted
+operations or storage shapes are checking errors. Each distinct binding keeps
+its own type identity and storage layout; execution must not discover them
+from payloads or runtime schemas.
+
+This substitution does not make a retained type or `const` parameter available
+as a body-visible value. Reading that parameter as a value still requires an
+explicit reification contract. A retained marker used only for matching need
+not acquire a body-visible representation.
 
 For example, a list reduction may require a concrete element type for its
 accumulator while remaining indifferent to fixed list size:
