@@ -57,6 +57,8 @@ Its use imposes the existing generic requirement that T be admitted by every
 place where it occurs. Formation is checked after substitution. No new
 recursive `requires` predicate or dynamic shape discovery is introduced.
 An unresolved T cannot reach an instantiated ordinary value or graph.
+These formation requirements also govern [generic struct shape arguments](generic-struct-shape-arguments.md),
+including requirements forwarded through enclosing generic applications.
 
 Matching `delta<T>` against a structural delta type binds T to that
 type's exact originating shape. Matching against an admitted scalar S binds

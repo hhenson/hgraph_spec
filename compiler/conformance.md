@@ -12,6 +12,9 @@ This does not add generator machinery to the runtime contract.
 
 ## Cases
 
+- [Generic struct shape arguments](cases_struct_shape_arguments.md):
+  delta formation, forwarded requirements and ordinary-value restrictions.
+
 - [Retained candidate specialization](cases_retained_specialization.md):
   concrete body/storage substitution without generic value reification.
 

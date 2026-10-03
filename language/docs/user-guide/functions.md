@@ -246,7 +246,9 @@ constructors. In the earlier window example, `T` is the rolling-window element
 type and both size parameters are part of the concrete window type.
 
 When a function parameter appears as an argument of a generic struct, that
-occurrence narrows it to the struct's canonical-value domain. For example,
+occurrence inherits the struct parameter's requirements: ordinary value uses
+require a canonical value type, while `delta<T>` uses require an admitted
+temporal shape. For example,
 `fn unwrap<T>(box: Box<T>) -> T` accepts fully applied `Box` specializations
 and binds `T` from the specialization metadata; it does not accept a runtime
 `Box<any>`. Generic struct syntax, construction inference, and inheritance are
