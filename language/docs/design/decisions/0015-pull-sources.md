@@ -130,74 +130,33 @@ generator source:
 
 #### Operand evaluation, resolution and retention
 
-Clarification, 2026-10-03. The time operand must have type `datetime` or
-`duration`, and the payload must be admitted by the source's output context.
-These checking requirements apply before the yield can execute.
+1. Check t as `duration` or `datetime` and v against the output context.
+   Evaluate t once, then v once. A time-expression failure prevents v;
+   a payload failure prevents target validation. Existing phase and capability
+   restrictions apply.
+2. After both operands succeed, reject a negative duration. Otherwise resolve
+   a duration by checked addition to the current evaluation time; a datetime
+   is already absolute. Arithmetic inside t belongs to step 1. Zero duration
+   and negative scalar payloads are allowed, subject to step 3.
+3. Require the target to be strictly greater than the preceding yield target
+   in this invocation. Equal or earlier targets raise a node error. The first
+   yield has no predecessor. Skipped past targets count; resumption preserves
+   the preceding target, while a fresh invocation starts without one.
+4. After validation: a past absolute target skips publication and continues;
+   a due target publishes and continues; a future target independently retains
+   v, schedules the target and suspends. Skipping needs no parked copy.
+5. On resumption, publish the retained payload and continue after the yield.
+   Do not reevaluate operands or resolve the target again. Later source
+   changes cannot change the retained payload. Engine bounds govern execution.
+6. Operand, admission, arithmetic, ordering and retention failures propagate
+   as node errors. Do not schedule, suspend, publish or continue that yield
+   after failure. Preserve earlier completed effects and publications; no
+   rollback is implied. This adds no effects, injectables or checkpoint rules.
 
-For each reached `yield t: v`, evaluate the time expression t exactly once,
-then the payload expression v exactly once. A time-expression failure prevents
-payload evaluation. Failure in either expression prevents scheduling,
-suspension and publication for that yield; earlier completed effects remain.
-Only expressions already permitted in the generator's phase and capability
-context are admitted. This sequencing adds no new effects or injectables.
-
-After both expressions succeed, validate and resolve the target. A negative
-duration raises a node error before addition, scheduling, suspension or
-publication, and the body does not continue past that yield. This applies on
-the initial evaluation and after any resumption, even if adding the duration
-would produce a representable time. Zero is allowed. The restriction concerns
-the time operand, not a negative scalar payload. A payload-expression failure
-therefore precedes negative-duration admission; completed operand effects remain.
-
-A datetime is already absolute; a nonnegative duration is added to the current
-evaluation time of this body execution. That addition uses checked time arithmetic (VAL-15 in
-[Scalar types](../../../../runtime/scalar_types.md)): an unrepresentable
-result fails without wrapping, scheduling or publication. Since resolution
-follows operand evaluation, both operand effects have already occurred.
-Arithmetic written inside t is instead part of evaluating the time expression;
-its failure prevents v from being evaluated.
-
-After resolving the target, compare it with this invocation's previous
-successfully resolved yield target. It must be strictly greater. Equal or
-smaller targets raise a node error before publication, scheduling, suspension
-or continuation. Both operands have already executed; their effects remain.
-The check includes targets skipped as past and persists across resumptions.
-A fresh invocation has no previous target. Record an admitted target before
-applying the past/due/future rule; a skipped absolute entry therefore still
-constrains the next yield.
-
-Apply the past/due/future rule only after successful operand evaluation,
-target resolution and strict-order validation. A past absolute datetime skips publication, not the payload
-expression: even a skipped yield can fail in either operand. No parked
-payload copy is required for a skipped target. This absolute-time skip rule
-does not admit negative relative durations and does not relax the admission
-rules for an explicit scheduler request; the skipped target is never scheduled.
-
-A due target publishes the evaluated payload. A second yield at that time
-fails the strict-order check, including a zero-duration yield immediately
-after resuming a future yield. Earlier completed effects and publications
-are not rolled back.
-
-For a future target, independently retain the evaluated payload under its
-ordinary ownership contract before scheduling and suspension. Later changes
-to its source cannot change the parked payload. If retention fails, do not
-schedule, suspend or publish for this yield; earlier effects remain. At the
-scheduled evaluation publish that retained payload and resume after the
-yield. Do not reevaluate either expression or resolve the target again.
-Existing engine bounds still govern whether that scheduled evaluation runs.
-This requires ownership independence, not a particular copy or allocation.
-
-These failures follow the existing node error contract; none produces a
-successful no-publication result in place of the error. This clarification
-does not specify a new checkpoint contract or general expression order.
-The [compiler operand cases](../../../../compiler/cases_generator_operands.md) and
-[source example](../../../examples/generator-yield-operands.hgl) distinguish
-effects, publication and resumption.
-
-The immutable [operand audit](https://github.com/hhenson/hgraph_spec_audit/blob/551228aa549c8d9e6a93a33d10b3e3dcf110990d/runtime/validation/generator_operands/README.md)
-keeps observations and divergences separate from these HGL rules. It does
-not establish retention-failure or unrepresentable-time behavior; those
-requirements follow the ordinary ownership and checked arithmetic contracts.
+See [compiler cases](../../../../compiler/cases_generator_operands.md) and
+[examples](../../../examples/generator-yield-operands.hgl).
+Audit evidence: [negative durations](https://github.com/hhenson/hgraph_spec_audit/blob/9967125fe6fad385e2d120e40049348402e0c686/runtime/validation/generator_negative/README.md)
+and [target ordering](https://github.com/hhenson/hgraph_spec_audit/blob/9967125fe6fad385e2d120e40049348402e0c686/runtime/validation/generator_ordering/README.md).
 
 ```hgl
 fn constant(const value: i64, const delay: duration = 0s) -> i64 {

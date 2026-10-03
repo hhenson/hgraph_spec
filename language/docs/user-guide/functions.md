@@ -1000,25 +1000,17 @@ fn constant(const value: i64, const delay: duration = 0s) -> i64 {
 
 ### Generator sources
 
-The same source can be written with `yield`, also agreed in ADR 0015.
-`yield t: v` evaluates t and then v, each exactly once. After both succeed,
-a negative `duration` raises a node error before target arithmetic, scheduling
-or publication; execution does not continue past that yield. A nonnegative
-`duration` is added to the body's current evaluation time using checked time
-arithmetic; a `datetime` is already absolute. An absolute time already past
-is skipped; both operand expressions still ran. Zero duration is allowed,
-and the duration restriction does not prohibit negative scalar payloads.
-Every resolved target must be strictly greater than the previous yield's
-target, including skipped absolute entries and yields after resumption.
-Equal or decreasing targets raise a node error. A time equal to the current
-evaluation time publishes at once if it passes that check. Otherwise the body suspends until `t` and
-resumes after the `yield`; when the body ends, or a bare `return` runs, the
-source is finished. A future payload is independently retained before
-scheduling and suspension; resumption does not reevaluate either operand.
-Operand, target-resolution and retention failures propagate as node errors
-without scheduling or publishing that yield; earlier effects stand. See
-[yield operand order](../design/decisions/0015-pull-sources.md#operand-evaluation-resolution-and-retention)
-for the distinction between arithmetic inside t and relative-target resolution.
+`yield t: v` evaluates t, then v, once each. A duration must be nonnegative
+and is relative to the current evaluation time; a datetime is absolute.
+Every target must strictly exceed the preceding yield target, including
+skipped entries and across resumptions. Violations raise a node error.
+
+After validation, a past absolute target skips; a due target publishes;
+a future target retains v and suspends until its time. Resumption publishes
+that retained value without reevaluating either operand. End of body or bare
+`return` finishes the source. See [yield rules](../design/decisions/0015-pull-sources.md#operand-evaluation-resolution-and-retention)
+for failure order and ownership.
+
 A generator has no temporal parameters and owns its
 output and scheduling, so it declares no `state`, injects no `out`,
 `scheduler` or `alarm`, has no `when`, `start` or `stop` block, and never
