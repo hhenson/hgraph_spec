@@ -17,17 +17,22 @@ const fn mark_then_fail(value: i64) -> i64 {
     inject logger
     info(logger, str(value))
     let empty: list<i64> = []
+    // The log has already happened; indexing this empty list raises a bounds error.
     return empty[0]
 }
 
 fn construct_pair(trigger: i64) -> atomic<Pair> {
     when {
+        // Each call runs once: log "2", then "1", in the order written here.
+        // Publish one Pair with left = 1 and right = 2; names select the fields.
         return Pair(right: mark(2), left: mark(1))
     }
 }
 
 fn fail_pair(trigger: i64) -> atomic<Pair> {
     when {
+        // Log "2", then fail bounds. The earlier log remains observable.
+        // mark(1) never runs, and this constructor produces no Pair to publish.
         return Pair(right: mark_then_fail(2), left: mark(1))
     }
 }
