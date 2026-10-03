@@ -1002,10 +1002,13 @@ fn constant(const value: i64, const delay: duration = 0s) -> i64 {
 
 The same source can be written with `yield`, also agreed in ADR 0015.
 `yield t: v` evaluates t and then v, each exactly once. After both succeed,
-a `duration` is added to the body's current evaluation time using checked
-time arithmetic; a `datetime` is already absolute. A resolved time already
-past is skipped, including a representable target from a negative duration;
-both operand expressions still ran. A time equal to the current evaluation
+a negative `duration` raises a node error before target arithmetic, scheduling
+or publication; execution does not continue past that yield. A nonnegative
+`duration` is added to the body's current evaluation time using checked time
+arithmetic; a `datetime` is already absolute. An absolute time already past
+is skipped; both operand expressions still ran. Zero duration is allowed,
+and the duration restriction does not prohibit negative scalar payloads.
+A time equal to the current evaluation
 time publishes at once and the body carries on; a second
 value at one time is an error. Otherwise the body suspends until `t` and
 resumes after the `yield`; when the body ends, or a bare `return` runs, the

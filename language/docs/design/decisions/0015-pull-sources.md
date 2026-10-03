@@ -112,9 +112,9 @@ generator source:
   absolute. This makes a periodic source a `yield` inside a loop. It differs
   from a timed sequence element in a test,
   whose duration key is an offset from the run's start.
-- A resolved target earlier than the current evaluation time is skipped and
-  the body continues. This includes a representable past target obtained
-  from a negative duration. A target equal to the current evaluation time
+- A negative duration is an error; it never becomes a skipped past target.
+  An absolute datetime earlier than the current evaluation time is skipped
+  and the body continues. A target equal to the current evaluation time
   publishes `v` immediately and the body continues. A second publication at
   one time is an error.
 - A later target parks `v`, schedules the node for that target, and suspends the body.
@@ -137,9 +137,16 @@ suspension and publication for that yield; earlier completed effects remain.
 Only expressions already permitted in the generator's phase and capability
 context are admitted. This sequencing adds no new effects or injectables.
 
-After both expressions succeed, resolve the target: a datetime is already
-absolute; a duration is added to the current evaluation time of this body
-execution. That addition uses checked time arithmetic (VAL-15 in
+After both expressions succeed, validate and resolve the target. A negative
+duration raises a node error before addition, scheduling, suspension or
+publication, and the body does not continue past that yield. This applies on
+the initial evaluation and after any resumption, even if adding the duration
+would produce a representable time. Zero is allowed. The restriction concerns
+the time operand, not a negative scalar payload. A payload-expression failure
+therefore precedes negative-duration admission; completed operand effects remain.
+
+A datetime is already absolute; a nonnegative duration is added to the current
+evaluation time of this body execution. That addition uses checked time arithmetic (VAL-15 in
 [Scalar types](../../../../runtime/scalar_types.md)): an unrepresentable
 result fails without wrapping, scheduling or publication. Since resolution
 follows operand evaluation, both operand effects have already occurred.
@@ -147,12 +154,11 @@ Arithmetic written inside t is instead part of evaluating the time expression;
 its failure prevents v from being evaluated.
 
 Apply the past/due/future rule only after successful operand evaluation and
-target resolution. A past target skips publication, not the payload
+target resolution. A past absolute datetime skips publication, not the payload
 expression: even a skipped yield can fail in either operand. No parked
-payload copy is required for a skipped target. A negative duration that
-resolves to a representable past target follows this same skip rule. This is
-the HGL rule for relative past targets, independent of the admission rules
-for an explicit scheduler request; the skipped target is never scheduled.
+payload copy is required for a skipped target. This absolute-time skip rule
+does not admit negative relative durations and does not relax the admission
+rules for an explicit scheduler request; the skipped target is never scheduled.
 
 A due target publishes the evaluated payload. If this would be a second
 publication at the same time, report the duplicate-time error after both
@@ -236,8 +242,8 @@ and, like `out`, `clock` and `scheduler`, stays contextual.
 An implementation could represent a generator by its resume position, live
 locals and a pending publication. At a future yield it saves that state and
 schedules resumption; at a due yield it publishes and continues in source
-order. It must preserve skipped past times, duplicate-time errors, loops,
-conditionals and termination. Native coroutines and explicit state machines
+order. It must preserve skipped past absolute times, negative-duration and
+duplicate-time errors, loops, conditionals and termination. Native coroutines and explicit state machines
 are possible realizations, not language requirements.
 
 ## Open questions

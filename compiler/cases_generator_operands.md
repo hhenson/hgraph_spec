@@ -35,15 +35,30 @@ eventual publication.
 
 A yield whose time operand returns the absolute instant s-d logs `time1`
 then `value1` and immediately continues to `after1`, without publishing or
-scheduling that entry. The same applies to a duration -d whose resolved
-target is s-d. A following `yield 0s: 2` publishes 2 at s; the skipped entry
+scheduling that entry. A following `yield 0s: 2` publishes 2 at s; the skipped entry
 has not consumed a publication at that time. No parked retained payload is
 required for the skipped entry.
 
 This also applies at the initial run evaluation to an absolute pre-epoch
-instant, or a representable negative relative duration. Generator skipping
-occurs before any scheduling request, so it does not relax the scheduler's
-separate refusal of past requests.
+instant. Absolute-time skipping occurs before any scheduling request, so it
+does not relax the scheduler's separate refusal of past requests.
+
+## YIELD-NEGATIVE — reject relative durations below zero
+
+A time operand returning -d logs `time1`, then its payload logs `value1`.
+After those expressions succeed, the yield raises a node error. It performs
+no target addition, scheduling, suspension or publication, and does not reach
+`after1` or a following yield. This holds initially and after any future
+resumption, including values that would produce a representable past target.
+The same duration admission error precedes any implicit target underflow.
+Earlier completed effects and publications are not rolled back.
+
+If the time expression fails, the payload does not run. If the payload fails,
+its failure precedes negative-duration admission. Explicit arithmetic inside
+the time expression still follows the time-expression failure rule.
+`yield 0s: -1` is valid and publishes the negative payload immediately, subject
+to the existing duplicate-time rule. A positive duration still suspends normally.
+These controls distinguish invalid relative time from a valid negative value.
 
 ## YIELD-FAILURE — operand and arithmetic boundaries
 
@@ -52,7 +67,8 @@ separate refusal of past requests.
 | Time expression logs time then fails | time | Payload evaluation, scheduling, publication, successor statement. |
 | Payload expression logs payload then fails, including for a past target | time, payload | Target resolution, scheduling, publication, successor statement. |
 | Explicit datetime-plus-duration inside the time operand is unrepresentable | Earlier time-expression effects | Payload evaluation, scheduling, publication, successor statement. |
-| Implicit relative-target addition is unrepresentable | Both successful operand effects | Scheduling, publication, successor statement. |
+| Relative duration is negative | Both successful operand effects | Target addition, scheduling, suspension, publication, successor statement. |
+| Implicit addition of a nonnegative duration is unrepresentable | Both successful operand effects | Scheduling, publication, successor statement. |
 | Retaining a future payload fails | Both successful operand effects and target resolution | Scheduling, suspension, publication, successor statement. |
 
 The failure propagates as a node error. Completed earlier effects remain.

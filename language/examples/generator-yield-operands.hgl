@@ -13,10 +13,16 @@ const fn mark_payload(value: i64) -> i64 {
     return value
 }
 
-fn past_relative() -> i64 {
-    # Log time, then payload. The resolved past target publishes nothing.
-    # Both expressions execute even though this yield does not suspend.
+fn negative_relative() -> i64 {
+    # Log time, then payload once. Negative relative time then raises an error.
+    # No target is calculated, nothing is published, and the next yield is unreachable.
     yield mark_time(-1us): mark_payload(1)
+    yield 0s: 2
+}
+
+fn past_absolute() -> i64 {
+    # A past absolute time skips publication after evaluating the payload.
+    yield @1969-01-01T00:00:00Z: mark_payload(1)
     yield 0s: 2
 }
 
@@ -34,8 +40,8 @@ fn explicit_target(const at: datetime, const offset: duration) -> i64 {
 }
 
 fn relative_target(const offset: duration) -> i64 {
-    # Both logs occur before implicit current-evaluation-time + offset.
-    # If that addition is unrepresentable, fail without scheduling or publishing.
+    # Both logs occur before duration admission and implicit target arithmetic.
+    # Negative offset fails before addition; overflow of a nonnegative offset also fails.
     yield mark_time(offset): mark_payload(1)
 }
 
@@ -43,7 +49,7 @@ fn consume(tick: i64) { when { } }
 
 fn drive_past(tick: i64) -> i64 {
     consume(tick)
-    past_relative()
+    past_absolute()
 }
 
 fn drive_future(tick: i64) -> i64 {

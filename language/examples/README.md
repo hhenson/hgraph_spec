@@ -12,7 +12,7 @@ The entries below identify the implementation tests for each example.
   and empty ordinary data without empty-event application. See
   [ordinary delta types](../docs/design/ordinary-delta-types.md).
 - [`generator-yield-operands.hgl`](generator-yield-operands.hgl) makes yield
-  operand order, negative-duration skipping and future resumption explicit,
+  operand order, negative-duration failure and future resumption explicit,
   with distinct explicit and implicit checked target arithmetic examples.
   See the [yield operand rules](../docs/design/decisions/0015-pull-sources.md#operand-evaluation-resolution-and-retention).
 - [`ordinary-replay-record.hgl`](ordinary-replay-record.hgl) gives generic

@@ -19,8 +19,8 @@ export fn constant_after(const value: i64, const delay: duration = 0s) -> i64 {
 # `yield time: value` makes a runtime function a generator source. A
 # duration counts from the evaluation time the body is running; `0s` publishes
 # in the same cycle, and a body that ends is finished. Time then payload are
-# each evaluated once before resolving that target; a representable past
-# target skips publication even when the duration is negative.
+# each evaluated once before resolving that target. A negative duration
+# raises an error after both operands; only past absolute times skip publication.
 export fn constant(const value: i64) -> i64 {
     yield 0s: value
 }
