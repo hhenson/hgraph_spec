@@ -355,8 +355,8 @@ were resolved, are listed here; the keyed store supplies none implicitly:
 7. **Eval admission and bounds.** Ordinary list operations
    supply length/index representability. Dense slot-time normalization still
    needs its checking or construction boundary. Independent scalar replay
-   uses the existing generator rules, including skipped past entries and
-   duplicate-time errors; it does not validate strictly increasing times
+   uses the generator rules: each reached target must strictly increase,
+   including past entries. This ordering check occurs at the yield, not
    before start. ENG-3/ENG-16 still bound every executed instant; generic
    get/set neither checks nor changes those time rules.
 

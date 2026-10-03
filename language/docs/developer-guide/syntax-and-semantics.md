@@ -1246,8 +1246,10 @@ block while the condition holds; an omitted condition is an unbounded loop.
 It is a runtime statement and is rejected in a composition body. `yield`
 makes the function a generator source: `yield t: v` publishes `v` at `t`,
 where a `duration` is measured from the time the body is running and a
-`datetime` is absolute; the body suspends until then and resumes after the
-`yield`. A generator has no temporal parameters, no `state`, `cache`, `out`
+`datetime` is absolute. Negative durations and targets not strictly greater
+than the preceding yield target raise a node error. Ordering includes skipped
+past entries and spans resumptions; see ADR 0015 for operand order and
+past/due/future behavior. A generator has no temporal parameters, no `state`, `cache`, `out`
 or scheduler injection, and no `when`, `start` or `stop` block; its `return`
 carries no value and finishes the source, `for` is not admitted, and a
 `yield` sits at statement level (the body, a `while` block, an `if`

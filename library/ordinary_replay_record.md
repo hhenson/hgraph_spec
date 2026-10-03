@@ -61,11 +61,13 @@ The [source example](../language/examples/ordinary-replay-record.hgl) gives
 that complete execution body using ordinary length, indexing and an i64
 cursor. It does not add a replay-data injectable or a graph execution API.
 
-For increasing times within the run, each entry publishes once at its time;
-no intervening instant publishes a held value. The existing generator rules
-apply to other orderings: an entry in the past when encountered is skipped,
-an entry equal to the current time publishes immediately, and a second
-publication at the same time fails. Replay does not sort or merge entries.
+Each encountered entry's time must be strictly greater than the preceding
+entry's time. Equal or decreasing times raise a node error, even when an
+entry is past and would otherwise be skipped. The check occurs when the
+generator reaches each yield, after evaluating both operands. Replay does
+not sort or merge entries. An admitted past absolute entry is skipped; one
+due now publishes immediately; a future entry suspends until its time.
+No intervening instant publishes a held value.
 The engine's inclusive start and exclusive end bound execution (ENG-3): a
 scheduled entry at or after the end is not published. No replay-specific
 rejection of such a future entry is added. This does not require a cycle at
@@ -75,7 +77,8 @@ List length and indexed access retain their ordinary representability and
 bounds rules. The source's cursor never indexes at length: it tests before
 each read and increments only after processing an existing entry. Engine
 time representation and sentinel bounds retain ENG-16 for scheduled and
-published times. A past absolute entry is skipped before scheduling; for
+published times. A past absolute entry that passes ordering is skipped before
+scheduling; for
 example, the absolute 1969 instant in the existing pull-source example is
 skipped, not rejected as a replay input.
 

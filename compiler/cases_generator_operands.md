@@ -86,3 +86,24 @@ the first publication or earlier operand effects. The enclosing run reports
 an error, not a successful trace with a silent second entry.
 
 These cases specify source behavior independently of any implementation.
+
+## YIELD-STRICT-ORDER — all resolved targets, across resumptions
+
+Each row starts a fresh generator. Every reached yield logs its time operand,
+then its payload. Equal or decreasing targets fail after those operands and
+before publication, scheduling or the successor statement. Prior effects
+and publications remain; a failed run is not a successful dense result.
+
+| Resolved targets, in source order | Result |
+|---|---|
+| s-d, s-d | First skips; second raises an ordering error. |
+| s-d, s-2d | First skips; second raises an ordering error. |
+| s-2d, s-d, s | Two skips, then publication at s. |
+| s+2d, s+2d | First publishes on resumption; second raises an ordering error. |
+| s+2d, s+d | First publishes on resumption; second raises an ordering error. |
+| s+d, s+2d | Both publish at their times. |
+
+Past-pair cases also apply before the engine epoch. A first yield has no
+predecessor. Relative targets are compared after resolution: a zero duration
+immediately after a future yield resumes produces the same target and fails.
+A fresh generator invocation starts with no previous target.

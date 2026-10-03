@@ -1008,9 +1008,10 @@ or publication; execution does not continue past that yield. A nonnegative
 arithmetic; a `datetime` is already absolute. An absolute time already past
 is skipped; both operand expressions still ran. Zero duration is allowed,
 and the duration restriction does not prohibit negative scalar payloads.
-A time equal to the current evaluation
-time publishes at once and the body carries on; a second
-value at one time is an error. Otherwise the body suspends until `t` and
+Every resolved target must be strictly greater than the previous yield's
+target, including skipped absolute entries and yields after resumption.
+Equal or decreasing targets raise a node error. A time equal to the current
+evaluation time publishes at once if it passes that check. Otherwise the body suspends until `t` and
 resumes after the `yield`; when the body ends, or a bare `return` runs, the
 source is finished. A future payload is independently retained before
 scheduling and suspension; resumption does not reevaluate either operand.

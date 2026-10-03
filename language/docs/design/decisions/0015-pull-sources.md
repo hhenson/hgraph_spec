@@ -112,6 +112,10 @@ generator source:
   absolute. This makes a periodic source a `yield` inside a loop. It differs
   from a timed sequence element in a test,
   whose duration key is an offset from the run's start.
+- Every resolved yield time must be strictly greater than the previous
+  resolved yield time in this generator invocation. Equal or decreasing
+  times raise a node error, including skipped past absolute entries and
+  yields reached after resumption. The first yield has no predecessor.
 - A negative duration is an error; it never becomes a skipped past target.
   An absolute datetime earlier than the current evaluation time is skipped
   and the body continues. A target equal to the current evaluation time
@@ -153,17 +157,26 @@ follows operand evaluation, both operand effects have already occurred.
 Arithmetic written inside t is instead part of evaluating the time expression;
 its failure prevents v from being evaluated.
 
-Apply the past/due/future rule only after successful operand evaluation and
-target resolution. A past absolute datetime skips publication, not the payload
+After resolving the target, compare it with this invocation's previous
+successfully resolved yield target. It must be strictly greater. Equal or
+smaller targets raise a node error before publication, scheduling, suspension
+or continuation. Both operands have already executed; their effects remain.
+The check includes targets skipped as past and persists across resumptions.
+A fresh invocation has no previous target. Record an admitted target before
+applying the past/due/future rule; a skipped absolute entry therefore still
+constrains the next yield.
+
+Apply the past/due/future rule only after successful operand evaluation,
+target resolution and strict-order validation. A past absolute datetime skips publication, not the payload
 expression: even a skipped yield can fail in either operand. No parked
 payload copy is required for a skipped target. This absolute-time skip rule
 does not admit negative relative durations and does not relax the admission
 rules for an explicit scheduler request; the skipped target is never scheduled.
 
-A due target publishes the evaluated payload. If this would be a second
-publication at the same time, report the duplicate-time error after both
-operands and target resolution; do not resume past that yield. This adds no
-rollback of earlier completed effects or publications.
+A due target publishes the evaluated payload. A second yield at that time
+fails the strict-order check, including a zero-duration yield immediately
+after resuming a future yield. Earlier completed effects and publications
+are not rolled back.
 
 For a future target, independently retain the evaluated payload under its
 ordinary ownership contract before scheduling and suspension. Later changes
@@ -256,6 +269,6 @@ are possible realizations, not language requirements.
   constant collection. It needs the loop index hoisted beside the locals
   and an index-based loop in each backend; until then the checker rejects
   it and points to `while`.
-- A scripted test cannot yet expect an error, so the duplicate-time rule is
-  covered by the runtime error message alone.
+- A scripted test cannot yet assert an expected error; the compiler
+  conformance cases specify the required failures.
 - `break` and `continue` for `while`.

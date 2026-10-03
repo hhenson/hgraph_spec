@@ -26,6 +26,12 @@ fn past_absolute() -> i64 {
     yield 0s: 2
 }
 
+fn decreasing_absolute() -> i64 {
+    yield @1970-01-01T00:00:00.000003Z: 1
+    # On resumption, this target is earlier than the previous one: raise an error.
+    yield @1970-01-01T00:00:00.000002Z: 2
+}
+
 fn future_operands() -> i64 {
     # Log time, then payload in the first evaluation, before suspension.
     # Retain 1 and publish it two microseconds later without repeating logs.

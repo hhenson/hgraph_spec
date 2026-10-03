@@ -42,15 +42,19 @@ recording are empty in both runs. Neither invents absent stored elements.
 |---|---|
 | `(s, 0)`, `(s+2d, 0)` | Both, at their supplied times. |
 | `(s-d, 1)`, `(s, 2)` | Only 2 at s; past entry skipped. |
-| `(s+2d, 1)`, `(s+d, 2)` | Only 1 at s+2d; second entry is past when encountered. |
-| `(s, 1)`, `(s, 2)` | Duplicate-time publication error, not sorting, merging or a successful trace. |
+| `(s+2d, 1)`, `(s+d, 2)` | Ordering error at the second entry; no successful trace. |
+| `(s-2d, 1)`, `(s-d, 2)`, `(s, 3)` | Only 3 at s; increasing past entries skipped. |
+| `(s-d, 1)`, `(s-d, 2)` | Ordering error at the second entry, despite both times being past. |
+| `(s-d, 1)`, `(s-2d, 2)` | Ordering error at the second entry, despite both times being past. |
+| `(s, 1)`, `(s, 2)` | Ordering error at the second entry; no sorting, merging or successful trace. |
 | One entry exactly at exclusive run end | No publication. |
 | One entry after run end | No publication. |
 
 No row claims pre-start ordering validation. Earlier successful effects of
 a failed run follow the node error contract; failure is not a successful
 dense result. Engine sentinel/range rules apply to scheduled and published
-times; a past absolute entry is skipped without scheduling it.
+times; a past absolute entry is skipped only after passing ordering validation.
+The past-pair cases also apply when both timestamps precede the engine epoch.
 
 ## TIMED-TYPES — ordinary exact types
 
