@@ -33,20 +33,41 @@ export fn spread(quote: atomic<Quote>) -> f64 => quote.ask - quote.bid
 # The imported recursive struct rebuilds its edge here (ADR 0012).
 export fn next_tenor(leg: atomic<market::Leg>) -> str => leg.next.tenor
 
+# Keep atomic and recursive values inside the graph: eval's current
+# publication profile does not replay or record those shapes.
+fn make_future(symbol: str, expiry: i64) -> atomic<Future> =>
+    Future(symbol: symbol, expiry: expiry)
+fn constructed_future_symbol(symbol: str, expiry: i64) -> str =>
+    future_symbol(make_future(symbol, expiry))
+fn constructed_future_expiry(symbol: str, expiry: i64) -> i64 =>
+    future_expiry(make_future(symbol, expiry))
+
+fn quote_mid(quote: atomic<Quote>) -> f64 => (quote.bid + quote.ask) / 2.0
+fn flat_mid(price: f64) -> f64 => quote_mid(flat(price))
+fn flat_spread(price: f64) -> f64 => spread(flat(price))
+fn widened_mid(price: f64) -> f64 => quote_mid(widened(price))
+fn widened_spread(price: f64) -> f64 => spread(widened(price))
+
+fn make_leg(tenor: str, following_tenor: str) -> atomic<market::Leg> =>
+    market::Leg(tenor: tenor, next: market::Leg(tenor: following_tenor))
+fn constructed_next_tenor(tenor: str, following_tenor: str) -> str =>
+    next_tenor(make_leg(tenor, following_tenor))
+
 test a_local_child_carries_the_inherited_field {
-    assert eval(future_symbol, future: [Future(symbol: "ESZ5", expiry: 3)]) == ["ESZ5"]
-    assert eval(future_expiry, future: [Future(symbol: "ESZ5", expiry: 3)]) == [3]
+    assert eval(constructed_future_symbol, symbol: ["ESZ5"], expiry: [3]) == ["ESZ5"]
+    assert eval(constructed_future_expiry, symbol: ["ESZ5"], expiry: [3]) == [3]
 }
 
 test an_imported_struct_is_constructed_and_read_back {
-    assert eval(flat, price: [10.0]) == [Quote(bid: 10.0, ask: 10.0)]
-    assert eval(spread, quote: [market::Quote(bid: 9.5, ask: 10.5)]) == [1.0]
+    assert eval(flat_mid, price: [10.0]) == [10.0]
+    assert eval(flat_spread, price: [10.0]) == [0.0]
 }
 
 test either_spelling_names_one_type {
-    assert eval(widened, price: [10.0]) == [Quote(bid: 9.5, ask: 10.5)]
+    assert eval(widened_mid, price: [10.0]) == [10.0]
+    assert eval(widened_spread, price: [10.0]) == [1.0]
 }
 
 test an_imported_recursive_struct_keeps_its_edge {
-    assert eval(next_tenor, leg: [market::Leg(tenor: "1Y", next: market::Leg(tenor: "2Y"))]) == ["2Y"]
+    assert eval(constructed_next_tenor, tenor: ["1Y"], following_tenor: ["2Y"]) == ["2Y"]
 }
