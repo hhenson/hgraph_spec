@@ -56,6 +56,7 @@ the required rules, recorded with their trade-offs, and never a rule.
 - [Ordinary struct constructor order](cases_constructor_order.md): argument order, retention and failure.
 - [Ordinary list values](cases_ordinary_lists.md): construction, reads, growth and retention.
 - [Ordinary scalar replay and recording](cases_ordinary_replay_record.md): timed values, lifecycle and dense horizon.
+- [Generator yield operands](cases_generator_operands.md): operand order, target resolution, retention and failure.
 - [Growing lists](cases_growing_lists.md): growth, truncation, retention and resurrection.
 - [Lifecycle](cases_lifecycle.md): activation, construction failure and teardown.
 - [References](cases_references.md): sampling, dictionary withdrawal and expiry.

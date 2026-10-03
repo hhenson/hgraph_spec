@@ -17,8 +17,10 @@ export fn constant_after(const value: i64, const delay: duration = 0s) -> i64 {
 }
 
 # `yield time: value` makes a runtime function a generator source. A
-# duration counts from the time the body is running; `0s` publishes in the
-# same cycle, and a body that ends is finished.
+# duration counts from the evaluation time the body is running; `0s` publishes
+# in the same cycle, and a body that ends is finished. Time then payload are
+# each evaluated once before resolving that target; a representable past
+# target skips publication even when the duration is negative.
 export fn constant(const value: i64) -> i64 {
     yield 0s: value
 }
@@ -43,7 +45,8 @@ export fn heartbeat(const beats: i64) -> bool {
     }
 }
 
-# A datetime is absolute; a time already past is skipped.
+# A datetime is absolute; a time already past is skipped after evaluating
+# both operands. The payload expression still runs for a skipped entry.
 export fn at_time(const at: datetime) -> i64 {
     yield @1969-01-01T00:00:00Z: 0
     yield at: 1

@@ -1001,12 +1001,21 @@ fn constant(const value: i64, const delay: duration = 0s) -> i64 {
 ### Generator sources
 
 The same source can be written with `yield`, also agreed in ADR 0015.
-`yield t: v` publishes `v` at `t`: a `duration` counts from the time the
-body is running, a `datetime` is absolute. A time already past is skipped;
-a time equal to now publishes at once and the body carries on; a second
+`yield t: v` evaluates t and then v, each exactly once. After both succeed,
+a `duration` is added to the body's current evaluation time using checked
+time arithmetic; a `datetime` is already absolute. A resolved time already
+past is skipped, including a representable target from a negative duration;
+both operand expressions still ran. A time equal to the current evaluation
+time publishes at once and the body carries on; a second
 value at one time is an error. Otherwise the body suspends until `t` and
 resumes after the `yield`; when the body ends, or a bare `return` runs, the
-source is finished. A generator has no temporal parameters and owns its
+source is finished. A future payload is independently retained before
+scheduling and suspension; resumption does not reevaluate either operand.
+Operand, target-resolution and retention failures propagate as node errors
+without scheduling or publishing that yield; earlier effects stand. See
+[yield operand order](../design/decisions/0015-pull-sources.md#operand-evaluation-resolution-and-retention)
+for the distinction between arithmetic inside t and relative-target resolution.
+A generator has no temporal parameters and owns its
 output and scheduling, so it declares no `state`, injects no `out`,
 `scheduler` or `alarm`, has no `when`, `start` or `stop` block, and never
 returns a value. `while` gives it a loop; an omitted condition is unbounded.

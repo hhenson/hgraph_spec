@@ -108,19 +108,77 @@ generator source:
   a lambda), where a backend has no resume point to jump to.
 - The body starts running in the node's first evaluation, which the runtime
   requests at start. `yield t: v` with a `duration` `t` means `t` after the
-  time at which the body is running; with a `datetime` it is absolute. This
-  is hgraph's generator rule, and it is what makes a periodic source a
-  `yield` inside a loop. It differs from a timed sequence element in a test,
+  evaluation time at which the body is running; with a `datetime` it is
+  absolute. This makes a periodic source a `yield` inside a loop. It differs
+  from a timed sequence element in a test,
   whose duration key is an offset from the run's start.
-- An absolute time earlier than now is skipped and the body continues. A
-  time equal to now publishes `v` immediately and the body continues. A
-  second publication at one time is an error, as in hgraph.
-- A later time parks `v`, schedules the node for `t`, and suspends the body.
+- A resolved target earlier than the current evaluation time is skipped and
+  the body continues. This includes a representable past target obtained
+  from a negative duration. A target equal to the current evaluation time
+  publishes `v` immediately and the body continues. A second publication at
+  one time is an error.
+- A later target parks `v`, schedules the node for that target, and suspends the body.
   When the node evaluates, it publishes `v` and resumes the body after the
   `yield`. A body that ends is finished: the node never evaluates again.
 - Locals live across suspensions as node-local storage and are not
   recorded. After a restore the body restarts from its first statement,
   which is what hgraph's generator does.
+
+#### Operand evaluation, resolution and retention
+
+Clarification, 2026-10-03. The time operand must have type `datetime` or
+`duration`, and the payload must be admitted by the source's output context.
+These checking requirements apply before the yield can execute.
+
+For each reached `yield t: v`, evaluate the time expression t exactly once,
+then the payload expression v exactly once. A time-expression failure prevents
+payload evaluation. Failure in either expression prevents scheduling,
+suspension and publication for that yield; earlier completed effects remain.
+Only expressions already permitted in the generator's phase and capability
+context are admitted. This sequencing adds no new effects or injectables.
+
+After both expressions succeed, resolve the target: a datetime is already
+absolute; a duration is added to the current evaluation time of this body
+execution. That addition uses checked time arithmetic (VAL-15 in
+[Scalar types](../../../../runtime/scalar_types.md)): an unrepresentable
+result fails without wrapping, scheduling or publication. Since resolution
+follows operand evaluation, both operand effects have already occurred.
+Arithmetic written inside t is instead part of evaluating the time expression;
+its failure prevents v from being evaluated.
+
+Apply the past/due/future rule only after successful operand evaluation and
+target resolution. A past target skips publication, not the payload
+expression: even a skipped yield can fail in either operand. No parked
+payload copy is required for a skipped target. A negative duration that
+resolves to a representable past target follows this same skip rule. This is
+the HGL rule for relative past targets, independent of the admission rules
+for an explicit scheduler request; the skipped target is never scheduled.
+
+A due target publishes the evaluated payload. If this would be a second
+publication at the same time, report the duplicate-time error after both
+operands and target resolution; do not resume past that yield. This adds no
+rollback of earlier completed effects or publications.
+
+For a future target, independently retain the evaluated payload under its
+ordinary ownership contract before scheduling and suspension. Later changes
+to its source cannot change the parked payload. If retention fails, do not
+schedule, suspend or publish for this yield; earlier effects remain. At the
+scheduled evaluation publish that retained payload and resume after the
+yield. Do not reevaluate either expression or resolve the target again.
+Existing engine bounds still govern whether that scheduled evaluation runs.
+This requires ownership independence, not a particular copy or allocation.
+
+These failures follow the existing node error contract; none produces a
+successful no-publication result in place of the error. This clarification
+does not specify a new checkpoint contract or general expression order.
+The [operand cases](../../../../runtime/cases_generator_operands.md) and
+[source example](../../../examples/generator-yield-operands.hgl) distinguish
+effects, publication and resumption.
+
+The immutable [operand audit](https://github.com/hhenson/hgraph_spec_audit/blob/551228aa549c8d9e6a93a33d10b3e3dcf110990d/runtime/validation/generator_operands/README.md)
+keeps observations and divergences separate from these HGL rules. It does
+not establish retention-failure or unrepresentable-time behavior; those
+requirements follow the ordinary ownership and checked arithmetic contracts.
 
 ```hgl
 fn constant(const value: i64, const delay: duration = 0s) -> i64 {

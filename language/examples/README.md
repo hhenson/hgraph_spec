@@ -7,6 +7,10 @@ supported `test` blocks and compiles generated fixtures. Native test support
 varies by platform; this source-only repository has no CMake/CTest project.
 The entries below identify the implementation tests for each example.
 
+- [`generator-yield-operands.hgl`](generator-yield-operands.hgl) makes yield
+  operand order, negative-duration skipping and future resumption explicit,
+  with distinct explicit and implicit checked target arithmetic examples.
+  See the [yield operand rules](../docs/design/decisions/0015-pull-sources.md#operand-evaluation-resolution-and-retention).
 - [`ordinary-replay-record.hgl`](ordinary-replay-record.hgl) gives generic
   scalar replay and record bodies using an ordinary `TimedValue<T>` struct,
   generator traversal, typed global state and retaining list push. Its tests

@@ -1,0 +1,57 @@
+module examples.generator_yield_operands
+
+# Logging makes operand order observable using existing value-helper effects.
+const fn mark_time(value: duration) -> duration {
+    inject logger
+    info(logger, "time")
+    return value
+}
+
+const fn mark_payload(value: i64) -> i64 {
+    inject logger
+    info(logger, "payload")
+    return value
+}
+
+fn past_relative() -> i64 {
+    # Log time, then payload. The resolved past target publishes nothing.
+    # Both expressions execute even though this yield does not suspend.
+    yield mark_time(-1us): mark_payload(1)
+    yield 0s: 2
+}
+
+fn future_operands() -> i64 {
+    # Log time, then payload in the first evaluation, before suspension.
+    # Retain 1 and publish it two microseconds later without repeating logs.
+    yield mark_time(2us): mark_payload(1)
+    # This duration starts at resumption, not at the original run start.
+    yield 1us: 2
+}
+
+fn explicit_target(const at: datetime, const offset: duration) -> i64 {
+    # If this explicit addition is unrepresentable, payload does not run.
+    yield at + offset: mark_payload(1)
+}
+
+fn relative_target(const offset: duration) -> i64 {
+    # Both logs occur before implicit current-evaluation-time + offset.
+    # If that addition is unrepresentable, fail without scheduling or publishing.
+    yield mark_time(offset): mark_payload(1)
+}
+
+fn consume(tick: i64) { when { } }
+
+fn drive_past(tick: i64) -> i64 {
+    consume(tick)
+    past_relative()
+}
+
+fn drive_future(tick: i64) -> i64 {
+    consume(tick)
+    future_operands()
+}
+
+test yield_operands {
+    assert eval(drive_past, tick: [1, 1]) == [2, _]
+    assert eval(drive_future, tick: [1, 1, 1, 1, 1]) == [_, _, 1, 2, _]
+}
