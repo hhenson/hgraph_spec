@@ -16,6 +16,13 @@ export fn smooth(
     rolling_mean(midpoint(tob), window)
 }
 
+fn top_of_book(bid: f64, ask: f64) -> atomic<tuple<f64, f64>> {
+    when { return (bid, ask) }
+}
+
+fn midpoint_from_prices(bid: f64, ask: f64) -> f64 => midpoint(top_of_book(bid, ask))
+
 test midpoint_ticks {
-    assert eval(midpoint, tob: [(1.0, 2.0), _, (2.0, 3.0)]) == [1.5, _, 2.5]
+    # Construct the atomic value inside the graph; eval uses scalar boundaries.
+    assert eval(midpoint_from_prices, bid: [1.0, _, 2.0], ask: [2.0, _, 3.0]) == [1.5, _, 2.5]
 }
