@@ -432,10 +432,17 @@ The generic origin remains valid without any request but contributes no
 candidate. This is declaration-time materialization, not explicit generic
 application at an operator call.
 
-Retention does not imply that a resolved generic value is available to the
-body. A retained generic referenced by the body needs a defined read-only
-reification contract. Generic reification and residual constraints remain
-unresolved; a signature alone does not authorize runtime schema inspection.
+Call matching may bind a retained slot needed by the body's types or storage.
+Substitute that concrete binding throughout the selected body and storage,
+and check the specialization before graph execution. Unresolved required
+bindings and unsupported substituted operations or storage are errors; distinct
+bindings preserve distinct type identities and layouts. This is compile-time
+specialization, with no runtime schema discovery.
+
+Substitution does not expose the generic parameter as a body-visible value.
+Reading a retained type or `const` parameter as a value still needs a defined
+read-only reification contract. Generic reification and residual constraints
+remain unresolved.
 
 The same rules apply to local and imported operator contracts. Importing a
 contract preserves its nominal identity, requirements and properties. An
