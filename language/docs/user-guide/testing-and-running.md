@@ -293,8 +293,10 @@ is not initialized merely by binding it. For the eight scalar types,
 the replay list and recording: a present publication is an ordinary
 `TimedValue<T>` with datetime and scalar fields. Eval omits silent input
 positions from that list and retains their dense horizon separately.
-The test's eval arguments stay the same. Structural delta storage and
-general nullable ordinary sequences remain separate contracts.
+The test's eval arguments stay the same. The
+[ordinary delta type extension](../design/ordinary-delta-types.md) supplies
+`TimedValue<delta_of(T)>` for the structural publication profile; general
+nullable ordinary sequences remain separate.
 
 ## First-pass limits
 

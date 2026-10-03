@@ -4,8 +4,11 @@ Status: proposed library data contract, 2026-10-03.
 
 Replay and record use ordinary values. This profile admits `bool`, `i64`,
 `f64`, `str`, `date`, `time`, `datetime` and `duration`; each has an ordinary
-scalar publication delta of its own type. Structural deltas, signals,
-references and windows require separate storage contracts.
+scalar publication delta of its own type. The
+[ordinary delta type extension](../language/docs/design/ordinary-delta-types.md)
+generalizes this contract to its admitted structural shapes using
+`list<TimedValue<delta_of(T)>>`; scalar reduction preserves the signatures
+below. Signals, references and windows remain outside that profile.
 
 ## Data and callable contracts
 
@@ -40,8 +43,8 @@ ticks. Neither `_` nor `null` is an element of this ordinary data contract.
 An empty timed list publishes nothing; it carries no dense horizon.
 
 `delta_value(ts)` extracts the scalar publication to record. `delta<T>(...)`
-remains contextual delta construction; `delta_of(T)` remains specification
-notation and cannot be used as the recording's source element type.
+remains contextual delta construction; `delta_of(T)` is the ordinary type
+expression supplied by the delta type extension and reduces to T here.
 
 ## Replay execution and time boundaries
 
@@ -123,7 +126,8 @@ the separate eval admission extension.
 Eval configures these normal operators without exposing configuration work
 to its caller. They remain independently callable library operators. This
 mapping settles the scalar ordinary storage dependency without introducing
-nullable ordinary values or structural delta storage.
+nullable ordinary values. Structural delta storage uses the separate
+ordinary delta type extension.
 
 [Cases](../runtime/cases_ordinary_replay_record.md) state expected observations.
 [Timed-value evidence](https://github.com/hhenson/hgraph_spec_audit/blob/78e44d6876dd4cbb7c805bca5f03c949fbcd4198/runtime/validation/eval_timed_values/README.md)

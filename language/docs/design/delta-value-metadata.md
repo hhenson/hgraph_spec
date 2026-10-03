@@ -24,12 +24,11 @@ call rules.
 
 The result is derived from the endpoint's **temporal shape**, not from the
 stored representation. In generic checking, retain that
-derived relationship symbolically. Writing `delta_of(T)` in this specification
-names that relationship only: it is not an HGL function, type constructor,
-source type, annotation, or new first-class storable delta value. It is
-distinct from the `delta_value(endpoint)` accessor and `delta<S>(...)`
-constructor. A runtime return/output context must
-check the derived delta against the same temporal output shape.
+derived relationship symbolically. The [ordinary delta type extension](ordinary-delta-types.md)
+admits `delta_of(T)` as a source type expression for its finite publication
+profile. It is distinct from the `delta_value(endpoint)` accessor and
+`delta<S>(...)` constructor. A runtime return/output context must check
+the derived delta against the same temporal output shape.
 
 For this scalar publication profile, T is one of
 `bool`, `i64`, `f64`, `str`, `date`, `time`, `datetime`, or `duration`.
@@ -110,8 +109,10 @@ with `delta_value(ts)` and retain an owned delta with its timestamp. Its scalar
 delta is an ordinary T. The reusable store in
 [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) does not supply
 recording construction. The [ordinary scalar data contract](../../../library/ordinary_replay_record.md)
-now supplies `list<TimedValue<T>>` for these eight scalar types; structural
-deltas still require a separate ordinary storable representation.
+supplies `list<TimedValue<T>>` for these eight scalar types. The
+[ordinary delta type extension](ordinary-delta-types.md) generalizes it to
+`list<TimedValue<delta_of(T)>>` for the admitted structural profile, with
+scalar reduction preserving the existing types.
 
 ## Consequences
 

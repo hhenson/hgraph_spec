@@ -22,8 +22,9 @@ operators and owns the ordinary input data and recording for that run.
 Replay receives its input sequence as an ordinary const argument. Record
 receives a const string key and uses the run-wide `global_state` store;
 eval retrieves the recording after graph stop. For eight scalar types these
-source contracts use the [ordinary scalar data contract](../../../library/ordinary_replay_record.md);
-structural storage dependencies remain listed in
+source contracts use the [ordinary scalar data contract](../../../library/ordinary_replay_record.md).
+The [ordinary delta type extension](ordinary-delta-types.md) generalizes that
+data path to the admitted structural profile. Remaining dependencies are in
 [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md#unresolved-source-contracts).
 Replay and record remain normal operators with their own callable contracts. They may be
 declared in the standard library and used independently. This arrangement
@@ -152,10 +153,11 @@ These cases follow the rules above:
 ## Deferred extensions
 
 Beyond the scalar [delta-value contract](delta-value-metadata.md), this
-foundation does not decide structural delta result types, first-class delta
-storage, set/map/list harness literals, a generic apply-delta operation,
-explicit child invalidation or invalid-child membership encoding, reference
-fixtures, or the bridge API used by the operators. TS-5 still requires
+foundation's structural publication shapes and harness literals use the
+[collection contract](contextual-collection-deltas.md), with ordinary storage
+and derived type matching supplied by [ordinary delta types](ordinary-delta-types.md).
+A general apply-delta operation, explicit child invalidation, invalid-child
+membership encoding and reference fixtures remain separate. TS-5 still requires
 child-validity and membership information beyond published-value deltas when
 reconstructing full collection state. These require separate specification
 extensions.
@@ -164,5 +166,5 @@ The proposed [run-wide keyed-state foundation](decisions/0016-eval-scalar-buffer
 configures replay with ordinary const data and record with a const key for
 reusable shared storage. The [ordinary scalar data contract](../../../library/ordinary_replay_record.md)
 completes this data representation and gives source bodies for the eight
-scalar types. It does not complete structural delta storage or general
-nullable ordinary sequences.
+scalar types. The ordinary delta extension supplies the structural storage
+profile without introducing general nullable ordinary sequences.

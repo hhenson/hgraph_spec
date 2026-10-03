@@ -12,8 +12,9 @@ remains part of canonical type identity. Access authority is separate:
 This contract admits typed empty construction, length, indexed reads and
 end growth. It does not define nullable elements, structural delta storage,
 replay element mappings or recording-specific operations. Every element is a
-complete ordinary T; neither harness `_` nor contextual delta payloads become
-storable elements through these operations.
+complete ordinary T. Harness `_` is not an ordinary element. Structural
+deltas obtain their ordinary element type through the separate
+[delta type contract](ordinary-delta-types.md), not through list operations.
 
 ## Typed empty construction
 

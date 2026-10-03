@@ -7,6 +7,10 @@ supported `test` blocks and compiles generated fixtures. Native test support
 varies by platform; this source-only repository has no CMake/CTest project.
 The entries below identify the implementation tests for each example.
 
+- [`ordinary-delta-types.hgl`](ordinary-delta-types.hgl) gives generic
+  replay/record with typed structural delta storage, retained map updates,
+  and empty ordinary data without empty-event application. See
+  [ordinary delta types](../docs/design/ordinary-delta-types.md).
 - [`generator-yield-operands.hgl`](generator-yield-operands.hgl) makes yield
   operand order, negative-duration skipping and future resumption explicit,
   with distinct explicit and implicit checked target arithmetic examples.

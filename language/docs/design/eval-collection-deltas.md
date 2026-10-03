@@ -3,8 +3,9 @@
 Status: proposed publication profile, 2026-09-30. This extends the fresh dense
 eval profile using [contextual collection publication deltas](contextual-collection-deltas.md).
 It does not decide empty-event application or introduce full-state replay.
-The ordinary source value contracts needed to implement replay and record
-remain open in [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md#unresolved-source-contracts).
+The [ordinary delta type extension](ordinary-delta-types.md) supplies the
+storable data and generic source relationships for this profile. Remaining
+boundaries are listed in [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md#unresolved-source-contracts).
 
 ## Publication shape admission
 
@@ -16,7 +17,8 @@ the profile; matching a scalar leaf representation is insufficient.
 Unsupported concrete eval shapes are checking errors. This is an eval
 profile boundary, not a new source constraint predicate or a capability that
 infers a generic implementation's storage type. Generic replay/record source
-checking must await the ordinary value relationships identified in ADR 0016.
+checking uses the explicit delta_of(T) relationship and its ordinary type
+formation/matching rules.
 
 The eval caller supplies only the target and typed delta sequences. Eval
 constructs replay sources configured with ordinary const data, the target
@@ -38,8 +40,9 @@ parameter shape. For example,
 `delta<map<i64, i64>>(upsert: [1: 11])` supplies that sparse update, not a
 complete map or other keys from earlier slots. `delta_value(v)` reads the
 current publication from a live endpoint. The [nullable indexing rules](nullable-replay-indexing.md)
-require presence before a nullable element's payload can be used; they do
-not define an ordinary container type for structural deltas.
+require presence before a nullable element's payload can be used. Ordinary
+replay data instead contains present `TimedValue<delta_of(T)>` entries,
+with the dense horizon retained separately; no nullable element is needed.
 
 A recorder retains an independent owned copy of each output delta and its
 evaluation time. Later source changes, member removal, another eval and graph
@@ -47,9 +50,9 @@ teardown cannot change an earlier capture. No borrowed child view, member
 range or endpoint reference escapes. Immutable physical sharing is allowed
 only when these independence guarantees hold. Neither generic store access
 nor ordinary input access schedules, publishes, applies a delta, deduplicates
-or inserts silent cells. Full source bodies await ordinary sequence,
-recording-construction and ownership operations; no role-specific capability
-stands in for those contracts.
+or inserts silent cells. [Generic source bodies](../../examples/ordinary-delta-types.hgl)
+use ordinary typed list construction, delta retention and push; no
+role-specific capability stands in for those contracts.
 
 ## Dense literals, validation and comparison
 
@@ -71,8 +74,9 @@ with a message beginning `eval: input delta outside publication profile`,
 identifying its parameter and zero-based position. It is not a silent slot. This admission check
 does not change the separate tolerant collection-mutation APIs.
 
-No first-class source delta type is introduced for the returned sequence.
-Harness equality compares exact shape and each position's presence, then its
+The returned dense harness sequence retains its own contextual presence
+contract; ordinary delta types do not create a general nullable sequence
+type. Harness equality compares exact shape and each position's presence, then its
 contextual delta. Set/key/index entry order is immaterial. Named/positional
 children compare by field/index, recursively. Scalar leaves use their existing
 comparison rules. An omitted child differs from a present equal scalar

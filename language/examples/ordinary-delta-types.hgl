@@ -1,0 +1,88 @@
+module examples.ordinary_delta_types
+
+export struct TimedValue<T> {
+    time: datetime
+    value: T
+}
+
+# Formation of delta_of(T) constrains T to its admitted finite shape domain.
+# No runtime type inspection or additional requires predicate is needed.
+operator replay<T>(const values: list<TimedValue<delta_of(T)>>) -> T
+impl fn replay<T>(const values: list<TimedValue<delta_of(T)>>) -> T {
+    var index: i64 = 0
+    while index < len(values) {
+        yield values[index].time: values[index].value
+        index += 1
+    }
+}
+
+operator record<T>(ts: T, const key: str)
+impl fn record<T>(ts: T, const key: str) {
+    inject global_state, clock
+    start {
+        let initial: list<TimedValue<delta_of(T)>> = []
+        set(global_state, key, initial)
+    }
+    when {
+        var recording: list<TimedValue<delta_of(T)>> = get(global_state, key)
+        # Constructor and push retain data, not a view into ts.
+        push(recording, TimedValue<delta_of(T)>(
+            time: clock.evaluation_time,
+            value: delta_value(ts)
+        ))
+    }
+}
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+
+const fn map_values() -> list<TimedValue<delta_of(map<i64, i64>)>> {
+    var values: list<TimedValue<delta_of(map<i64, i64>)>> = []
+    var update: delta_of(map<i64, i64>) = delta<map<i64, i64>>(upsert: [1: 10, 2: 20])
+    push(values, TimedValue<delta_of(map<i64, i64>)>(
+        time: @1970-01-01T00:00:00.000001Z,
+        value: update
+    ))
+    # Replace the owned delta; the earlier timed entry still owns both updates.
+    update = delta<map<i64, i64>>(upsert: [1: 11])
+    push(values, TimedValue<delta_of(map<i64, i64>)>(
+        time: @1970-01-01T00:00:00.000003Z,
+        value: update
+    ))
+    return values
+}
+
+fn consume(tick: i64) { when { } }
+
+fn replay_map(tick: i64) -> map<i64, i64> {
+    consume(tick)
+    # Infer T from the exact originating shape of the stored delta type.
+    pass_through(replay(map_values()))
+}
+
+fn capture_map(value: map<i64, i64>) {
+    record(value, "map-recording")
+}
+
+const fn store_empty_data() -> i64 {
+    let empty: delta_of(map<i64, i64>) = delta<map<i64, i64>>()
+    var values: list<delta_of(map<i64, i64>)> = []
+    push(values, empty)
+    # One stored value. This does not apply an empty event to an endpoint.
+    return len(values)
+}
+
+test ordinary_deltas {
+    assert eval(replay_map, tick: [1, 1, 1, 1]) == [
+        delta<map<i64, i64>>(upsert: [1: 10, 2: 20]),
+        _,
+        delta<map<i64, i64>>(upsert: [1: 11]),
+        _
+    ]
+    assert store_empty_data() == 1
+    eval(capture_map, value: [
+        delta<map<i64, i64>>(upsert: [1: 10, 2: 20]),
+        delta<map<i64, i64>>(remove: [2])
+    ])
+}

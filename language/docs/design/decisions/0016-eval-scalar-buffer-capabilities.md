@@ -8,8 +8,9 @@ independent of that node's inputs, result, name or role. It does not introduce
 replay-specific or recording-specific injectables. The
 [eval composition contract](../eval-operator-composition.md) remains in force;
 the [ordinary scalar data contract](../../../../library/ordinary_replay_record.md)
-supplies complete replay and record bodies for eight scalar types. Structural
-storage and the remaining source contracts listed below are separate.
+supplies replay and record bodies for eight scalar types, generalized to the
+admitted structural profile by [ordinary delta types](../ordinary-delta-types.md).
+The remaining source boundaries are listed below.
 
 ## Run ownership and access
 
@@ -107,10 +108,11 @@ and in-run changes to an entry’s bound type are outside this profile.
 
 Stored values are ordinary typed values with an admitted owned value
 representation. Temporal endpoints, references to endpoints, injectable
-capabilities and borrowed hook views cannot be stored. A contextual
-`delta_of(T)` relationship is not by itself an ordinary storable type. This
-extension does not make nullable locals or structural delta expressions
-storable merely because a key can be chosen for them.
+capabilities and borrowed hook views cannot be stored. The separate
+[ordinary delta type contract](../ordinary-delta-types.md) admits delta_of(T)
+for its finite profile and requires independent retention. The store does
+not infer this type from a node role or make nullable locals storable merely
+because a key can be chosen for them.
 
 Borrowed store access is bounded to the current hook. The capability cannot
 be retained in state/cache, returned from the hook, captured in a closure or
@@ -259,6 +261,8 @@ argument. It does not require a global-state key or a storage injectable.
 For the eight scalar types its exact parameter type is ordinary
 `list<TimedValue<T>>`, specified by the ordinary scalar data contract. There
 is no absent element in that list; no special replay-data type is introduced.
+For the admitted structural profile, the ordinary delta type extension uses
+`list<TimedValue<delta_of(T)>>`; scalar reduction preserves the same data type.
 Replay's output type is the corresponding temporal target parameter type.
 Const data access does not itself schedule or publish; replay must implement
 its cursor, alarm and output behavior.
@@ -277,9 +281,9 @@ The admitted scalar and collection publication profiles remain specified by
 construct an ordinary typed recording value and use a corresponding typed
 get/set context. Its recording exists from recorder start even if no tick
 arrives (OP-11, EVAL-4). Captured deltas are independently owned (VAL-17,
-EVAL-3). The ordinary scalar data contract supplies construction and retained
-list push for the eight scalar recording types. Structural recording storage
-remains a separate source contract.
+EVAL-3). Ordinary construction and retained list push use the explicit type
+`list<TimedValue<delta_of(T)>>` for the admitted delta-type profile. The store
+adds no publication admission or delta inspection operation.
 
 Eval owns the recorder's key, replay configuration and any initial values
 needed by its graph. It retrieves the recording with its expected ordinary
@@ -299,8 +303,9 @@ the latter fail.
 
 ## Unresolved source contracts
 
-These dependencies remain outside the complete eight-scalar replay/record
-data profile. The keyed store supplies none of them implicitly:
+The ordinary list, ownership and delta type contracts supply the bounded
+replay/record data profile. Remaining boundaries, and where dependencies
+were resolved, are listed here; the keyed store supplies none implicitly:
 
 1. **Present/absent sequence elements.** Ordinary `list<value_type>` values,
    homogeneous list literals and const value parameters already exist. What
@@ -309,23 +314,23 @@ data profile. The keyed store supplies none of them implicitly:
    element type. Eval's harness `_` and local refinement rules do not provide
    that ordinary type or constructor. Admission of nullable element reads
    during wiring or const evaluation also remains to be specified; the
-   current local refinement rules do not grant it implicitly. Scalar timed
+   current local refinement rules do not grant it implicitly. Ordinary timed
    replay avoids this dependency by omitting absent slots from ordinary data.
-2. **Ordinary structural delta storage.** Represent recursive sparse deltas
-   as ordinary container elements without equating them with held snapshots.
-   `delta_of(T)` remains a specification-only relationship, not an annotation.
+2. **Ordinary structural delta storage.** Supplied for the finite profile by
+   [ordinary delta types](../ordinary-delta-types.md), using source delta_of(T)
+   without equating sparse publication data with held snapshots. Excluded
+   publication semantics remain separate from data formation and retention.
 3. **Owned recording values.** The [ordinary-list extension](../ordinary-list-values.md)
    supplies typed empty construction, length, indexed extraction and retained
-   end growth. The ordinary scalar data contract supplies timestamp/scalar
-   entries; timestamp/structural-delta entry representation remains open.
+   end growth. TimedValue with a delta_of(T) payload supplies both the admitted
+   scalar and structural recording entries.
    Ordinary owning retention includes nested data; a borrowed endpoint view
    is not a retained capture. No recording-specific append or begin primitive
    substitutes for these general value operations.
-4. **Generic structural source checking.** The scalar relationship is exact
-   T in `list<TimedValue<T>>`, a temporal T result/input and the ordinary
-   recording type. A structural input still needs its publication delta's
-   distinct ordinary type. No injectable silently supplies a missing shape
-   constraint or inference rule.
+4. **Generic structural source checking.** Supplied by delta_of(T) formation
+   and exact originating-shape matching. These relate the ordinary timed
+   list to temporal T and the recording type. No injectable silently supplies
+   this type relationship or infers it from payload contents.
 5. **Aggregate operations.** The value-mutability contract defines binding
    authority, borrowed entry access, conflicting lifetimes and independent owning
    retention. The ordinary-list extension supplies a focused construction/read/growth

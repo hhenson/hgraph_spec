@@ -428,6 +428,7 @@ generic inference rules remain open.
 
 ```ebnf
 type            = scalar_type
+                | delta_type
                 | tuple_type
                 | list_type
                 | set_type
@@ -438,11 +439,13 @@ type            = scalar_type
                 | named_type
                 | "atomic", "<", value_type, ">";
 value_type      = scalar_type
+                | delta_type
                 | value_tuple_type
                 | value_list_type
                 | set_type
                 | value_map_type
                 | named_type;
+delta_type      = "delta_of", "(", type, ")";
 named_type      = ( identifier | qualified_name ), [ generic_arguments ];
 generic_arguments
                 = "<", generic_argument,
@@ -473,6 +476,15 @@ value_map_type  = "map", "<", value_type, ",", value_type, ">";
 Types carry no mutability qualifier. Prefixing an input or time-series type
 with `mut` is a syntax error. Ordinary value access is controlled by `let`
 and `var`, as specified in [value mutability](../design/value-mutability.md).
+
+`delta_of(T)` is contextual type syntax for an ordinary publication-delta
+value; it is not a value-level call or new reserved word. Its argument is a
+type, and it is admitted only for the finite shapes in the
+[ordinary delta type contract](../design/ordinary-delta-types.md). Scalars
+reduce to their own type; structural deltas retain the exact originating
+shape, including nominal arguments and fixed sizes. Matching delta_of(T)
+binds T from that identity, never from stored payloads. Ordinary storage does
+not admit a new temporal endpoint shape or new inspection/mutation operation.
 
 A generic argument is initially parsed without deciding whether an identifier
 names a type or a wiring-time value. Name resolution interprets each position
@@ -1981,17 +1993,15 @@ if no seed or successful set supplied one. Set preserves the bound type.
 Stored values are ordinary typed values, never endpoints or capabilities.
 Replay is configured with ordinary const data and record with a const string
 key. No node's temporal shape silently determines a stored value type.
-Complete HGL replay/record bodies await the ordinary sequence, structural
-delta storage, recording construction and aggregate access contracts listed
-there. The [value-mutability contract](../design/value-mutability.md) supplies
-lexical aggregate borrowing and independent owning retention, without adding
-ordinary list operations or structural delta storage. The separate
+The [value-mutability contract](../design/value-mutability.md) supplies
+lexical aggregate borrowing and independent owning retention. The
 [ordinary-list contract](../design/ordinary-list-values.md) supplies typed
-empty construction, length, indexed reads and retained end growth. Nullable
-elements, structural delta storage and generic replay relationships remain
-unresolved. The
-[collection eval profile](../design/eval-collection-deltas.md)
-defines publication behavior, not a substitute source container facility.
+empty construction, length, indexed reads and retained end growth. The
+[ordinary delta type contract](../design/ordinary-delta-types.md) supplies
+`list<TimedValue<delta_of(T)>>` and the generic source relationship for
+admitted scalar/structural shapes. Nullable ordinary elements remain separate.
+The [collection eval profile](../design/eval-collection-deltas.md) retains
+its publication admission; storing delta data does not bypass it.
 
 `start` runs once after replay-aware state initialization. `stop` runs once at
 teardown. State storage and injected capabilities are runtime-owned and are

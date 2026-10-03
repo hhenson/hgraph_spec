@@ -20,8 +20,9 @@ Every child S or struct field must recursively have one of these shapes.
 Recursive nominal definitions, growing lists, references, signals, windows,
 other scalar types and atomic wrappers are outside this profile.
 
-`delta_of(T)` is specification notation for T's publication-delta shape,
-never an HGL function, source type or type constructor. For a scalar it is
+`delta_of(T)` names T's publication-delta shape. The
+[ordinary delta type extension](ordinary-delta-types.md) admits this spelling
+as an ordinary source type expression. For a scalar it is
 that scalar. For a set it is disjoint added/removed members. For a fixed
 structure it is sparse child deltas by field or position. For a map it is
 removed keys and sparse child deltas by key. It is not T's complete held
@@ -44,11 +45,12 @@ fn pass_through<T>(value: T) -> T {
 
 A contextual delta may appear in a matching runtime return or own-output
 assignment, a contextual immutable `let`, a nested delta constructor, or an
-explicitly admitted harness/capability delta position. There is no structural
-delta type annotation for ordinary parameters, results, state, cache, fields
-or scalar collection elements. An implementation may borrow an input delta
-within evaluation, but applying it to an owned output must not retain a
-borrow into that input. Scalar specializations retain ordinary scalar rules.
+explicitly admitted harness/capability delta position. Ordinary type
+annotations, owned construction and storage use the separate delta type
+extension; state/cache admission limits remain unchanged. A borrowed input
+delta remains evaluation-local, and applying or independently retaining it
+must not retain a borrow into that input. Scalar specializations retain
+ordinary scalar rules.
 
 ## Constructors and sparse entries
 
@@ -71,7 +73,7 @@ contain no entries. Nominal structs use their actual field names.
 The delta argument grammar extends the ordinary named-argument grammar:
 
 ```ebnf
-delta_arguments = delta_argument, { ",", delta_argument }, [ "," ];
+delta_arguments = [ delta_argument, { ",", delta_argument }, [ "," ] ];
 delta_argument  = identifier, ":", ( expression | sparse_entries );
 sparse_entries  = "[", [ sparse_entry, { ",", sparse_entry }, [ "," ] ], "]";
 sparse_entry    = const_expression, ":", expression;
@@ -90,7 +92,10 @@ an ordinary scalar expression; a structural child takes a matching contextual
 delta expression. Unknown arguments/fields, duplicate arguments/fields,
 duplicate member/index/key entries, out-of-range indices, set added/removed
 overlap, and map upsert/remove overlap are checking errors. Entry order is
-not an ordered sequence of mutations. Existing optional-field clearing is
+not an ordered sequence of mutations. Payload expressions and their retention
+follow the [written-order construction rule](ordinary-delta-types.md#construction-order-and-failure).
+Empty argument/entry data may be formed in an ordinary delta-value context;
+this does not admit an empty publication. Existing optional-field clearing is
 not redefined: explicit `null` and invalidation are outside this publication
 profile, and omission continues to mean no change.
 
@@ -101,7 +106,7 @@ change, a map removal, or at least one recursively valid child publication.
 No included structural child is an empty publication. A child scalar
 publication is present even if its value equals its previous value.
 
-`return d`, where d has contextual shape `delta_of(T)`, applies d to the
+`return d`, where d has exact derived type `delta_of(T)`, applies d to the
 runtime node's own T output and terminates evaluation. `out = d` applies the
 same update and continues. These operations never return an input port or
 replace the node with identity wiring. Complete-value returns remain a

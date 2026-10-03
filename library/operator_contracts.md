@@ -165,8 +165,10 @@ passes replay its sequence as ordinary const data. Record has the ordinary
 contract `record<T>(ts: T, const key: str)` and requests reusable run-wide
 `global_state`. The [ordinary scalar data contract](ordinary_replay_record.md)
 supplies `TimedValue<T>`, `replay<T>(const values: list<TimedValue<T>>) -> T`,
-and scalar record bodies using ordinary list construction and push. Structural
-delta storage remains separate; no specialized storage capability supplies it.
+and scalar record bodies using ordinary list construction and push. The
+[ordinary delta type extension](../language/docs/design/ordinary-delta-types.md)
+generalizes the same data path to admitted structural publication deltas.
+No specialized storage capability supplies it.
 
 
 
