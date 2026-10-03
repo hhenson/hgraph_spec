@@ -879,11 +879,13 @@ Contextual temporalization occurs after this source-level relationship is
 established. A plain generic is consequently neither a time-series-only
 variable nor a runtime dynamically typed value.
 
-On a struct declaration, each type parameter is restricted to the canonical
-`value_type` domain. `atomic` and `rolling` cannot be supplied as generic
-struct arguments; temporal policy belongs in the field declaration, such as
-`value: atomic<T>`. Constant parameters retain their declared wiring-time
-value type and form part of specialization identity:
+On a struct declaration, type arguments must satisfy all their occurrences.
+An ordinary value position requires `value_type`; an occurrence under
+`delta<T>` requires an admitted temporal shape. Requirements propagate through
+forwarded generic arguments and intersect across uses; see
+[generic struct shape arguments](../design/generic-struct-shape-arguments.md).
+Constant parameters retain their declared wiring-time value type and form
+part of specialization identity:
 
 ```hgl
 struct Vector<T, const size: i64> {
@@ -894,9 +896,8 @@ struct Vector<T, const size: i64> {
 An applied generic struct is invariant and nominal by both origin and complete
 argument list. `Vector<f64, 3>` and `Vector<f64, 4>` differ, as do `Box<Base>`
 and `Box<Derived>`. A bare generic origin and a partial application are not
-types. The checked IR nevertheless retains HGL source-type arguments rather
-than only their native scalar projections, leaving room to relax the
-canonical-only restriction in a later language version.
+types. Specialization retains complete source-type arguments rather than
+only their ordinary payload projections.
 
 Constructor inference matches supplied named fields and an optional expected
 result against the generic field schemas, unifies all bindings, and rejects
@@ -1691,9 +1692,9 @@ A fully applied generic struct first substitutes and validates every type and
 constant argument, then follows the same rule. The nominal specialization
 identity contains the module-qualified origin and complete invariant argument
 list, while its fields contain the substituted canonical schemas. Recursive
-temporalization starts only after specialization, so `SnapshotBox<Quote>` can
-place `atomic<Quote>` at its declared field boundary without admitting
-`atomic<Quote>` as a generic argument.
+temporalization starts only after specialization. `SnapshotBox<Quote>` can
+place `atomic<Quote>` at its declared field boundary; shape arguments under
+`delta<T>` instead produce ordinary delta-valued fields.
 
 An abstract struct contributes hierarchy metadata and a fixed base-field TSB,
 but no constructible scalar instance. Scalar and atomic uses of the abstract

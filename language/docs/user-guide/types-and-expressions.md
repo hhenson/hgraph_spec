@@ -617,9 +617,9 @@ same meaning here as on a generic function.
 > constant expressions beyond equality and closed-set membership are still
 > deferred.
 
-In the initial design, a struct's type arguments are canonical value types,
-not temporal policies. Put `atomic` at the field where temporal expansion is
-controlled:
+A struct argument must satisfy its uses. An ordinary value field requires a
+canonical value type; a `delta<T>` field requires an admitted temporal shape.
+Put `atomic` at a field boundary when that field itself is a snapshot endpoint:
 
 ```hgl
 struct LiveBox<T> {
@@ -631,10 +631,10 @@ struct SnapshotBox<T> {
 }
 ```
 
-`LiveBox<atomic<Quote>>` and `LiveBox<rolling<f64, 20>>` are rejected. Each specialization therefore has a single value shape and a defined
-temporal expansion. Generic functions remain broader: their
-plain type parameters may still bind complete HGL source shapes, including
-`atomic` and `rolling`.
+`LiveBox<atomic<Quote>>` and `LiveBox<rolling<f64, 20>>` are rejected because
+its field uses T directly. A struct storing `delta<T>` may instead take an
+admitted temporal shape; forwarding T through another generic struct preserves
+that requirement. All uses must agree. See [shape arguments](../design/generic-struct-shape-arguments.md).
 
 Generic abstract families and final concrete specializations compose directly:
 
