@@ -264,11 +264,11 @@ fn pass_through<T>(value: T) -> T {
 
 Replay receives its finite input sequence directly as an ordinary const
 argument. It does not require a global-state key or a storage injectable.
-For the eight scalar types its exact parameter type is ordinary
-`list<TimedValue<T>>`, specified by the ordinary scalar data contract. There
-is no absent element in that list; no special replay-data type is introduced.
-For the admitted structural profile, the ordinary delta type extension uses
-`list<TimedValue<delta<T>>>`; scalar reduction preserves the same data type.
+Its exact parameter type is ordinary `list<TimedValue<T>>`, where T is the
+originating temporal shape and the value field has type `delta<T>`.
+The ordinary data contract admits the eight scalar types and the finite
+structural publication profile. There is no absent element in that list;
+no special replay-data type is introduced. Scalar delta fields reduce to T.
 Replay's output type is the corresponding temporal target parameter type.
 Const data access does not itself schedule or publish; replay must implement
 its cursor, alarm and output behavior.
@@ -288,7 +288,7 @@ construct an ordinary typed recording value and use a corresponding typed
 get/set context. Its recording exists from recorder start even if no tick
 arrives (OP-11, EVAL-4). Captured deltas are independently owned (VAL-17,
 EVAL-3). Ordinary construction and retained list push use the explicit type
-`list<TimedValue<delta<T>>>` for the admitted delta-type profile. The store
+`list<TimedValue<T>>` for the admitted delta-type profile. The store
 adds no publication admission or delta inspection operation.
 
 Eval owns the recorder's key, replay configuration and any initial values

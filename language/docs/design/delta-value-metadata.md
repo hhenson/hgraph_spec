@@ -108,11 +108,10 @@ For the same reason a record implementation must obtain the publication
 with `delta_value(ts)` and retain an owned delta with its timestamp. Its scalar
 delta is an ordinary T. The reusable store in
 [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) does not supply
-recording construction. The [ordinary scalar data contract](../../../library/ordinary_replay_record.md)
-supplies `list<TimedValue<T>>` for these eight scalar types. The
-[ordinary delta type extension](ordinary-delta-types.md) generalizes it to
-`list<TimedValue<delta<T>>>` for the admitted structural profile, with
-scalar reduction preserving the existing types.
+recording construction. The [ordinary data contract](../../../library/ordinary_replay_record.md)
+supplies `list<TimedValue<T>>`, whose value field has type `delta<T>`.
+This field reduces to T for the eight scalar types and carries the sparse
+delta for shapes admitted by the [ordinary delta type extension](ordinary-delta-types.md).
 
 ## Consequences
 

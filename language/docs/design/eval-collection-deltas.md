@@ -41,7 +41,8 @@ parameter shape. For example,
 complete map or other keys from earlier slots. `delta_value(v)` reads the
 current publication from a live endpoint. The [nullable indexing rules](nullable-replay-indexing.md)
 require presence before a nullable element's payload can be used. Ordinary
-replay data instead contains present `TimedValue<delta<T>>` entries,
+replay data instead contains present `TimedValue<T>` entries whose value
+field is `delta<T>`,
 with the dense horizon retained separately; no nullable element is needed.
 
 A recorder retains an independent owned copy of each output delta and its

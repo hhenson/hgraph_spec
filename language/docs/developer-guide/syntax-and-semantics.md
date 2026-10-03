@@ -2009,7 +2009,7 @@ lexical aggregate borrowing and independent owning retention. The
 [ordinary-list contract](../design/ordinary-list-values.md) supplies typed
 empty construction, length, indexed reads and retained end growth. The
 [ordinary delta type contract](../design/ordinary-delta-types.md) supplies
-`list<TimedValue<delta<T>>>` and the generic source relationship for
+`list<TimedValue<T>>` and the generic source relationship for
 admitted scalar/structural shapes. Nullable ordinary elements remain separate.
 The [collection eval profile](../design/eval-collection-deltas.md) retains
 its publication admission; storing delta data does not bypass it.

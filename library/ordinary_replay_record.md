@@ -1,14 +1,13 @@
-# Ordinary scalar replay and recording
+# Ordinary replay and recording
 
 Status: proposed library data contract, 2026-10-03.
 
-Replay and record use ordinary values. This profile admits `bool`, `i64`,
-`f64`, `str`, `date`, `time`, `datetime` and `duration`; each has an ordinary
-scalar publication delta of its own type. The
+Replay and record use ordinary values for the finite publication profile in the
 [ordinary delta type extension](../language/docs/design/ordinary-delta-types.md)
-generalizes this contract to its admitted structural shapes using
-`list<TimedValue<delta<T>>>`; scalar reduction preserves the signatures
-below. Signals, references and windows remain outside that profile.
+and its collection contract. This includes the eight scalar leaves and the
+admitted structural shapes. Both use `list<TimedValue<T>>`, where T is the
+temporal shape and the value field carries its publication delta. Signals,
+references, windows and the other excluded shapes remain outside that profile.
 
 ## Data and callable contracts
 
@@ -17,39 +16,47 @@ The library declares an ordinary generic nominal struct:
 ```hgl
 export struct TimedValue<T> {
     time: datetime
-    value: T
+    value: delta<T>
 }
 
 operator replay<T>(const values: list<TimedValue<T>>) -> T
-requires T in {bool, i64, f64, str, date, time, datetime, duration}
 
 operator record<T>(ts: T, const key: str)
-requires T in {bool, i64, f64, str, date, time, datetime, duration}
 ```
 
 `TimedValue<T>` is an ordinary complete value with two required fields, not
 a runtime category or a temporal struct delta. Its ordinary construction,
 retention and nominal identity rules apply. Replay's const parameter is an
 unbounded ordinary list, not a temporal list endpoint. Its element type fixes
-the scalar result T, including for an empty list. Record's temporal input
+the temporal result T, including for an empty list. Record's temporal input
 fixes T and its ordinary recording type `list<TimedValue<T>>`. These are exact
 type relationships; no new inference, conversion or generic-call syntax is
 needed. A fixed-size ordinary list is not implicitly converted to this type.
 
-Every entry describes one present scalar publication at an absolute time.
-Omitting an entry expresses silence. False, zero and empty text are present
-values, and equal payloads at distinct publication times remain distinct
-ticks. Neither `_` nor `null` is an element of this ordinary data contract.
-An empty timed list publishes nothing; it carries no dense horizon.
+T names the originating temporal shape, not an already-derived payload type.
+For example, the value field of `TimedValue<map<i64, i64>>` has exact ordinary
+type `delta<map<i64, i64>>`, while that of `TimedValue<i64>` is i64 by scalar
+reduction. This replaces the former payload-type parameter convention; there
+is no compatibility alias or second TimedValue definition. The field's
+`delta<T>` formation requirement restricts T to the admitted profile.
 
-`delta_value(ts)` extracts the scalar publication to record. `delta<T>(...)`
-remains contextual delta construction; `delta<T>` is the ordinary type
-expression supplied by the delta type extension and reduces to T here.
+Every entry holds publication-delta data and an absolute time. Applying its
+data still requires the publication profile; forming or storing empty delta
+data does not admit an empty event or denote silence. Omitting an entry
+expresses silence. Scalar false, zero and empty text remain present values,
+and equal scalar publications at distinct times remain distinct ticks.
+Neither `_` nor `null` is an ordinary list element. An empty timed list
+publishes nothing; it carries no dense horizon.
+
+`delta_value(ts)` extracts the publication to record. `delta<T>(...)` is
+delta construction; `delta<T>` is the ordinary field type, reducing to T
+only for the admitted scalar leaves. A complete held structural T value
+cannot replace that delta field.
 
 ## Replay execution and time boundaries
 
 The ordinary data can drive the existing generator-source contract: traverse
-the list in order, yielding each entry's absolute time and scalar payload.
+the list in order, yielding each entry's absolute time and delta payload.
 The [source example](../language/examples/ordinary-replay-record.hgl) gives
 that complete execution body using ordinary length, indexing and an i64
 cursor. It does not add a replay-data injectable or a graph execution API.
@@ -86,8 +93,9 @@ On each admitted input publication, construct
 it onto an exclusive writable borrow of the typed list. The single-input
 default handler establishes valid and modified for that delta read. The
 timestamp is evaluation time, not wall time. Push independently retains the
-entry; later endpoint updates cannot change any earlier capture. Equal
-payloads are appended on each tick. An unmodified input appends nothing.
+entry; later endpoint updates cannot change any earlier capture. Every
+admitted tick is appended, including equal scalar publications. An unmodified
+input appends nothing.
 
 Each borrow ends with its hook. Record needs no stop write or flush: completed
 pushes already changed the ordinary entry. After all graph stop hooks, the

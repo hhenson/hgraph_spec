@@ -40,7 +40,7 @@ acquiring any admitted nonempty publication.
 
 ## DELTA-INFER — symbolic formation and matching
 
-A typed empty `list<TimedValue<delta<map<i64, i64>>>>` passed to generic
+A typed empty `list<TimedValue<map<i64, i64>>>` passed to generic
 replay fixes T to `map<i64, i64>`, despite having no payload from which to
 infer anything. Scalar timed i64 data fixes T to i64. Matching actual
 `delta<Quote<i64>>` binds that complete nominal specialization, not an
@@ -53,6 +53,17 @@ type information. Typed global entry bindings use the resulting exact type
 before start, without runtime type-name lookup or type tests.
 
 ## DELTA-OWN — copy, store and replacement
+
+Timed entries below use `TimedValue<T>` for the original temporal shape T;
+their value field has type `delta<T>`. Thus a timed map publication uses
+`TimedValue<map<i64, i64>>`, not a TimedValue parameterized by a structural
+delta type. `TimedValue<i64>` still contains an ordinary i64 payload.
+
+A complete held map cannot initialize that timed map's value field. A delta
+of a different originating shape also fails checking. TimedValue applications
+with different fixed sizes or nominal shape arguments remain distinct types.
+Passing a structural delta type as T fails its `delta<T>` formation requirement;
+the former payload-type parameter convention is not a compatibility path.
 
 For each of these ordinary delta shapes, retain a first value A into a timed
 entry, a list and an exact typed global entry. Obtain an independent owned

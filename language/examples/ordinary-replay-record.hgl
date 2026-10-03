@@ -2,7 +2,8 @@ module examples.ordinary_replay_record
 
 export struct TimedValue<T> {
     time: datetime
-    value: T
+    # T is the temporal shape; an admitted scalar's delta reduces to T.
+    value: delta<T>
 }
 
 operator replay<T>(const values: list<TimedValue<T>>) -> T
@@ -33,6 +34,9 @@ impl fn record<T>(ts: T, const key: str) {
         ))
     }
 }
+
+# These examples call the i64 candidates of the generic implementation templates.
+instantiate replay<i64>, record<i64>
 
 const fn sample_values() -> list<TimedValue<i64>> {
     var values: list<TimedValue<i64>> = []

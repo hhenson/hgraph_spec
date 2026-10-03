@@ -66,12 +66,26 @@ agree; incompatible or unresolved bindings fail checking. This is matching
 of the specified type relationship, not inference from payload contents or
 from a key's spelling.
 
-Consequently replay can infer T from an ordinary typed list even when empty:
+TimedValue uses the originating temporal shape as its parameter and derives
+the ordinary payload type in its field:
 
 ```hgl
-operator replay<T>(const values: list<TimedValue<delta<T>>>) -> T
+export struct TimedValue<T> {
+    time: datetime
+    value: delta<T>
+}
+
+operator replay<T>(const values: list<TimedValue<T>>) -> T
 operator record<T>(ts: T, const key: str)
 ```
+
+Matching replay's list fixes T directly from the TimedValue argument, even
+when the list is empty. When an ordinary TimedValue constructor infers T from
+its supplied value field, the `delta<T>` relationship above still applies.
+The nominal type is TimedValue applied to the originating shape: a map sample
+is `TimedValue<map<i64, i64>>`, with a `delta<map<i64, i64>>` payload.
+This changes the former payload-type parameter convention without adding a
+compatibility alias. A structural delta type is not itself an admitted T.
 
 Record's T is fixed by its temporal input; its body supplies the explicit
 ordinary recording type. This extends the scalar signatures rather than
@@ -177,9 +191,9 @@ no claim that a later publication using it is admitted.
 
 ## Replay and recording
 
-Use the ordinary generic TimedValue with a delta-typed payload:
-`list<TimedValue<delta<T>>>`. Every entry is present ordinary data; silence
-is omission of a timed entry, not a special delta value. Eval keeps its dense
+Use `list<TimedValue<T>>`, whose value field is `delta<T>`.
+Every entry is present ordinary data; silence is omission of a timed entry,
+not a special delta value. Eval keeps its dense
 horizon separately. The existing generator rules govern replay's traversal
 and time handling; yield applies the stored delta to the exact T output,
 subject to the publication contract above.
@@ -204,7 +218,8 @@ state expected type, ownership and failure observations.
 
 The immutable [owned-delta audit](https://github.com/hhenson/hgraph_spec_audit/blob/cf431ec659442a0a30d30be4bde443b3d8a8d320/runtime/validation/owned_deltas/README.md)
 supports independent sparse-data retention through ordinary containers.
-Source grammar, exact originating-shape identity and matching remain HGL
-decisions. The audit preserves aliasing divergences and distinguishes valid
-semantic copies from copying that changes a removal's meaning. It does not
+Source grammar, TimedValue's shape-parameter meaning, exact originating-shape
+identity and matching remain HGL decisions. The audit preserves aliasing
+divergences and distinguishes valid semantic copies from copying that changes
+a removal's meaning. It does not
 establish constructor effect order or arbitrary retention/allocation failures.

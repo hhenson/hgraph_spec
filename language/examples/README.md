@@ -16,7 +16,8 @@ The entries below identify the implementation tests for each example.
   with distinct explicit and implicit checked target arithmetic examples.
   See the [yield operand rules](../docs/design/decisions/0015-pull-sources.md#operand-evaluation-resolution-and-retention).
 - [`ordinary-replay-record.hgl`](ordinary-replay-record.hgl) gives generic
-  scalar replay and record bodies using an ordinary `TimedValue<T>` struct,
+  scalar replay and record bodies using an ordinary `TimedValue<T>` struct
+  whose value field has type `delta<T>`,
   generator traversal, typed global state and retaining list push. Its tests
   express repeated zero publications and empty/all-silent dense results under
   the [library data contract](../../library/ordinary_replay_record.md).

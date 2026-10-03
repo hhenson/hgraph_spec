@@ -295,11 +295,13 @@ hooks access those entries without name lookup or type dispatch. An entry
 is not initialized merely by binding it. For the eight scalar types,
 [ordinary timed values](../../../library/ordinary_replay_record.md) supply
 the replay list and recording: a present publication is an ordinary
-`TimedValue<T>` with datetime and scalar fields. Eval omits silent input
+`TimedValue<T>` with a datetime field and a `delta<T>` value field, which
+reduces to the scalar T. Eval omits silent input
 positions from that list and retains their dense horizon separately.
 The test's eval arguments stay the same. The
 [ordinary delta type extension](../design/ordinary-delta-types.md) supplies
-`TimedValue<delta<T>>` for the structural publication profile; general
+the same `TimedValue<T>` spelling for the structural publication profile,
+where T is the original shape and its value field holds the sparse delta; general
 nullable ordinary sequences remain separate.
 
 ## First-pass limits
