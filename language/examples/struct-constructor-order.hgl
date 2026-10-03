@@ -1,0 +1,31 @@
+module examples.struct_constructor_order
+
+struct Pair {
+    left: i64
+    right: i64
+}
+
+const fn mark(value: i64) -> i64 {
+    inject logger
+    info(logger, str(value))
+    return value
+}
+
+const fn mark_then_fail(value: i64) -> i64 {
+    inject logger
+    info(logger, str(value))
+    let empty: list<i64> = []
+    return empty[0]
+}
+
+fn construct_pair(trigger: i64) -> atomic<Pair> {
+    when {
+        return Pair(right: mark(2), left: mark(1))
+    }
+}
+
+fn fail_pair(trigger: i64) -> atomic<Pair> {
+    when {
+        return Pair(right: mark_then_fail(2), left: mark(1))
+    }
+}

@@ -67,7 +67,9 @@ recursively. For `struct Envelope { inner: Box }`, constructing
 `Envelope(inner: source)` then changing source cannot change the retained
 child. Copies preserve canonical types, not the access permissions of the
 source binding. Physical sharing or copy elision is allowed only when these
-observations remain unchanged (VAL-17).
+observations remain unchanged (VAL-17). Ordinary struct constructors
+[evaluate and retain each supplied argument in written order](struct-constructor-order.md)
+before proceeding to the next argument.
 
 A result explicitly specified as borrowed is different: binding aggregate
 get preserves its borrow provenance and lifetime. An ordinary initializer

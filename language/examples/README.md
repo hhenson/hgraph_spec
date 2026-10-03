@@ -7,6 +7,10 @@ supported `test` blocks and compiles generated fixtures. Native test support
 varies by platform; this source-only repository has no CMake/CTest project.
 The entries below identify the implementation tests for each example.
 
+- [`struct-constructor-order.hgl`](struct-constructor-order.hgl) exposes
+  ordinary constructor argument order through value-helper log messages,
+  with successful field association and failure before a later argument.
+  See the [constructor-order contract](../docs/design/struct-constructor-order.md).
 - [`ordinary-list-values.hgl`](ordinary-list-values.hgl) specifies typed empty
   lists, length, indexed reads, end growth and independent nested retention
   under the [ordinary-list contract](../docs/design/ordinary-list-values.md).

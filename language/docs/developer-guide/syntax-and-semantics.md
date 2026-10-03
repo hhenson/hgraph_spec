@@ -1530,8 +1530,13 @@ Duplicate names, unknown names, positional arguments after named arguments,
 and missing required arguments are source diagnostics.
 
 A call whose callee resolves to a struct type is a complete-value constructor
-and accepts named arguments only. Required fields must be supplied, ordinary
-defaults fill omitted fields, and a field declared with `= null` may remain
+and accepts named arguments only. For ordinary struct values, check the complete
+constructor before execution; evaluate and independently retain supplied
+arguments exactly once in written source order, then assemble by named field
+identity. Failed evaluation or retention stops later arguments and produces no
+completed value; earlier effects remain. See
+[ordinary struct constructor order](../design/struct-constructor-order.md).
+Required fields must be supplied, ordinary defaults fill omitted fields, and a field declared with `= null` may remain
 unset. In struct construction, `null` is accepted only when the expected field is
 optional. The separate [nullable sequence indexing contract](../design/nullable-replay-indexing.md)
 uses `null` for an absent slot of an admitted sequence and permits presence
