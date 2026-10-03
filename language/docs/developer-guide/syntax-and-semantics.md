@@ -97,10 +97,15 @@ civil_datetime zoned_datetime zoned_time timezone
 ```
 
 `_` on its own is the placeholder token, not an identifier. Every word in
-that list is reserved everywhere, including the ones such as
-`state`, `start`, `stop`, and `when` that are only meaningful at a particular
-position in a runtime function body. One exception: `const` is admitted as
-the name of an operator, a function, an instantiation and an imported name
+that list is reserved except for the name positions specified below. This
+includes `state`, `start`, `stop`, and `when`, even though each is meaningful
+only at a particular position in a runtime function body. `time` is also admitted as a struct field
+name, inherited field-default name, named-argument label, and member name after
+`.`. Thus `TimedValue(time: t, value: v)` and `entry.time` are valid. This
+exception does not admit `time` as a local, parameter, function, or generic
+name; in type position it remains the scalar type.
+
+`const` is admitted as the name of an operator, a function, an instantiation and an imported name
 (hgraph PR [#1671](https://github.com/hhenson/hgraph/pull/1671)), so the
 library spells hgraph's `const` by its own name
 ([MIG-009](../design/migration-requirements.md#mig-009-source-names-versus-native-identities));
@@ -184,9 +189,10 @@ struct_decl     = [ "export" ], [ "abstract" ], "struct", identifier,
                   [ struct_member, { NL, struct_member }, [ NL ] ], "}";
 struct_parent   = named_type;
 struct_member   = struct_field | inherited_default;
-struct_field    = identifier, ":", type, [ "=", const_expression ];
+member_name     = identifier | "time";
+struct_field    = member_name, ":", type, [ "=", const_expression ];
 inherited_default
-                = identifier, "=", const_expression;
+                = member_name, "=", const_expression;
 operator_decl   = "operator", identifier, [ generic_parameters ],
                   function_signature, [ requires_clause ], { operator_properties };
 operator_properties
@@ -1218,7 +1224,7 @@ yield_statement = "yield", expression, ":", expression;
 mutation_statement
                = place, assignment_operator, expression;
 place          = identifier,
-                 { "[", expression, "]" | ".", identifier };
+                 { "[", expression, "]" | ".", member_name };
 assignment_operator
                = "=" | "+=" | "-=" | "*=" | "/=";
 ```
@@ -1342,7 +1348,7 @@ unary_expr     = ( "-" | "!" ), unary_expr | postfix_expr;
 postfix_expr   = primary_expr,
                  { "(", [ argument, { ",", argument }, [ "," ] ], ")"
                  | "[", expression, "]"
-                 | ".", identifier };
+                 | ".", member_name };
 primary_expr   = literal | placeholder | identifier | qualified_name
                | "(", expression, ")" | tuple_literal | sequence_literal
                | generic_constructor | delta_expression
@@ -1355,12 +1361,12 @@ delta_expression
                = "delta", "<", type, ">", "(",
                  [ delta_arguments ], ")";
 delta_arguments = delta_argument, { ",", delta_argument }, [ "," ];
-delta_argument  = identifier, ":", ( expression | sparse_entries );
+delta_argument  = member_name, ":", ( expression | sparse_entries );
 sparse_entries  = "[", [ sparse_entry, { ",", sparse_entry }, [ "," ] ], "]";
 sparse_entry    = const_expression, ":", expression;
 struct_arguments
                = named_argument, { ",", named_argument }, [ "," ];
-named_argument = identifier, ":", expression;
+named_argument = member_name, ":", expression;
 if_expression  = "if", expression, block,
                  [ "else", ( block | if_expression ) ];
 ```
@@ -1523,7 +1529,7 @@ analytics::rolling_mean(value, period: window)
 ```
 
 ```ebnf
-argument         = [ identifier, ":" ], expression;
+argument         = [ member_name, ":" ], expression;
 sequence_literal = "[", [ sequence_element,
                    { ",", sequence_element }, [ "," ] ], "]";
 sequence_element = expression
