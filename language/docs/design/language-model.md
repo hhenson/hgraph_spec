@@ -103,6 +103,11 @@ type qualifier. Inputs and const configuration remain read-only. Persistent
 node data is declared with `state`; fixed caller-supplied wiring policy is
 declared with a `const` parameter.
 
+[Ordinary list values](ordinary-list-values.md) use contextual `[]` for typed
+empty construction, `len(values)`, `values[index]`, and
+`push(values, item)` for growth through writable unbounded-list access.
+These value operations preserve the binding and retention rules above.
+
 An `fn` may use a concise expression body or a brace-delimited block with a
 tail expression. An outputless function omits its return arrow. An `operator`
 ends with its signature, never has a body, and is automatically public.

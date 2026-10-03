@@ -465,7 +465,8 @@ ref_type        = "ref", "<", type, ">";
 signal_type     = "signal";
 value_tuple_type = "tuple", "<", value_type,
                    { ",", value_type }, ">";
-value_list_type = "list", "<", value_type, ">";
+value_list_type = "list", "<", value_type,
+                  [ ",", size_expression ], ">";
 value_map_type  = "map", "<", value_type, ",", value_type, ">";
 ```
 
@@ -1517,7 +1518,13 @@ of one element type, and a tuple literal a constant tuple; a single
 parenthesized expression is grouping, so a one-element tuple needs the
 trailing comma and `()` is a diagnostic. Timed elements and the `_`
 placeholder are valid only in the harness sequences of the evaluation
-section below.
+section below. An empty ordinary list literal needs an expected concrete
+list type: `var values: list<i64> = []` creates an empty unbounded list,
+while `list<i64, 0>` admits only the fixed empty value. A positive fixed size
+or missing element type rejects `[]`. See
+[ordinary list values](../design/ordinary-list-values.md) for length, indexed
+reads, writable `push`, retention and failure rules. Fixed-size value-list
+annotations also describe existing enum enumeration results.
 
 Duplicate names, unknown names, positional arguments after named arguments,
 and missing required arguments are source diagnostics.
@@ -1973,7 +1980,11 @@ Complete HGL replay/record bodies await the ordinary sequence, structural
 delta storage, recording construction and aggregate access contracts listed
 there. The [value-mutability contract](../design/value-mutability.md) supplies
 lexical aggregate borrowing and independent owning retention, without adding
-ordinary list operations or structural delta storage. The
+ordinary list operations or structural delta storage. The separate
+[ordinary-list contract](../design/ordinary-list-values.md) supplies typed
+empty construction, length, indexed reads and retained end growth. Nullable
+elements, structural delta storage and generic replay relationships remain
+unresolved. The
 [collection eval profile](../design/eval-collection-deltas.md)
 defines publication behavior, not a substitute source container facility.
 

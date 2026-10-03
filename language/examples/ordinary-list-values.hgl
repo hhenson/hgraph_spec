@@ -1,0 +1,84 @@
+module examples.ordinary_list_values
+
+struct Sample {
+    amount: i64
+}
+
+const fn grow_values() -> bool {
+    var values: list<i64> = []
+    push(values, 10)
+    push(values, 20)
+    push(values, values[0])
+    return len(values) == 3 && values[0] == 10 && values[1] == 20 && values[2] == 10
+}
+
+const fn retain_nested_value() -> bool {
+    var source: Sample = Sample(amount: 4)
+    var values: list<Sample> = []
+    push(values, source)
+    source.amount = 9
+    return values[0].amount == 4 && source.amount == 9
+}
+
+const fn retain_list_value() -> bool {
+    var source: list<i64> = []
+    push(source, 1)
+    var values: list<list<i64>> = []
+    push(values, source)
+    push(source, 2)
+    return len(values[0]) == 1 && len(source) == 2
+}
+
+const fn retain_self_source_child() -> bool {
+    var child: list<i64> = []
+    push(child, 1)
+    var outer: list<list<i64>> = []
+    push(outer, child)
+    push(outer, outer[0])
+    push(outer[0], 2)
+    return len(outer) == 2 && len(outer[0]) == 2 && outer[0][1] == 2 && len(outer[1]) == 1 && outer[1][0] == 1
+}
+
+const fn copy_readonly_list() -> bool {
+    let source: list<i64> = []
+    var independent = source
+    push(independent, 7)
+    return len(source) == 0 && len(independent) == 1 && independent[0] == 7
+}
+
+const fn copy_indexed_element() -> bool {
+    var values: list<Sample> = []
+    push(values, Sample(amount: 4))
+    var independent = values[0]
+    independent.amount = 9
+    return values[0].amount == 4 && independent.amount == 9
+}
+
+const fn fixed_empty_length() -> i64 {
+    let values: list<i64, 0> = []
+    return len(values)
+}
+
+fn append_amount(amount: i64, const key: str) {
+    inject global_state
+    start {
+        let initial: list<i64> = []
+        set(global_state, key, initial)
+    }
+    when {
+        var values: list<i64> = get(global_state, key)
+        push(values, amount)
+        let first: i64 = values[0]
+        push(values, first)
+    }
+}
+
+test ordinary_list_values {
+    assert grow_values()
+    assert retain_nested_value()
+    assert retain_list_value()
+    assert retain_self_source_child()
+    assert copy_readonly_list()
+    assert copy_indexed_element()
+    assert fixed_empty_length() == 0
+}

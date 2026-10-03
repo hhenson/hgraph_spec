@@ -53,6 +53,7 @@ the required rules, recorded with their trade-offs, and never a rule.
 - [Atomic](cases_atomic.md): first tick, idle cycles, equal publications and repeated reads.
 - [Collections](cases_collections.md): validity, membership, deltas and per-level time.
 - [Windows](cases_windows.md): tick and duration windows, eviction, the minimum.
+- [Ordinary list values](cases_ordinary_lists.md): construction, reads, growth and retention.
 - [Growing lists](cases_growing_lists.md): growth, truncation, retention and resurrection.
 - [Lifecycle](cases_lifecycle.md): activation, construction failure and teardown.
 - [References](cases_references.md): sampling, dictionary withdrawal and expiry.

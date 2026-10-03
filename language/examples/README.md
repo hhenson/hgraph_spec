@@ -7,6 +7,10 @@ supported `test` blocks and compiles generated fixtures. Native test support
 varies by platform; this source-only repository has no CMake/CTest project.
 The entries below identify the implementation tests for each example.
 
+- [`ordinary-list-values.hgl`](ordinary-list-values.hgl) specifies typed empty
+  lists, length, indexed reads, end growth and independent nested retention
+  under the [ordinary-list contract](../docs/design/ordinary-list-values.md).
+  Its direct value-function assertions express expected language behavior.
 - [`mutable-values.hgl`](mutable-values.hgl) specifies writable ordinary
   `var` contents, recursive read-only `let` access, and independent owning
   copies and construction. Its `test` uses value functions and does not

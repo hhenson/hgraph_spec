@@ -11,7 +11,9 @@ type in either binding. Temporalization, generic type matching and the
 This contract defines ownership, assignment and lexical aggregate borrowing.
 It adds no list construction, growth or other collection API, nullable element
 type, or first-class structural delta type. Each operation still needs its
-ordinary value contract.
+ordinary value contract. The separate
+[ordinary-list extension](ordinary-list-values.md) defines typed empty
+construction, length, indexed reads and retained end growth under these rules.
 
 ## Bindings and projections
 
@@ -192,6 +194,7 @@ fn increment_counter(value: i64, const key: str) {
 }
 ```
 
-Ordinary list operations, typed empty construction, structural delta storage
-and complete replay/record bodies remain separate contracts. This extension
+The ordinary-list extension supplies typed empty construction, length, indexed
+reads and end growth. Structural delta storage, nullable elements and complete
+replay/record bodies remain separate contracts. This extension
 does not reclassify historical recordings as node cache.
