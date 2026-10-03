@@ -99,8 +99,10 @@ and earlier successful effects are not rolled back.
 
 This describes one recorder's lifecycle without competing writes to its
 entry. It neither reserves keys nor imposes a store-wide single-writer rule.
-Same-type key collisions, protection from other writers and eval key
-selection remain a separate policy. Checkpoint/restart and accumulation
+Eval protects its generated keys through pre-start
+[fresh-key selection](../language/docs/design/eval-recorder-keys.md).
+Independent record callers still use their supplied keys under ordinary
+global-state semantics. Checkpoint/restart and accumulation
 across separate runs are outside this profile; generator restart behavior
 does not establish recording recovery.
 

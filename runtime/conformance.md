@@ -58,6 +58,7 @@ the required rules, recorded with their trade-offs, and never a rule.
 - [Ordinary scalar replay and recording](cases_ordinary_replay_record.md): timed values, lifecycle and dense horizon.
 - [Generator yield operands](cases_generator_operands.md): operand order, target resolution, retention and failure.
 - [Ordinary delta types](cases_ordinary_delta_types.md): shape identity, generic matching, storage, construction and publication boundaries.
+- [Eval recorder keys](cases_eval_recorder_keys.md): pre-start key selection and source-state isolation.
 - [Growing lists](cases_growing_lists.md): growth, truncation, retention and resurrection.
 - [Lifecycle](cases_lifecycle.md): activation, construction failure and teardown.
 - [References](cases_references.md): sampling, dictionary withdrawal and expiry.

@@ -103,6 +103,10 @@ positionally or by name. To evaluate an operator, wrap it in a `fn`.
 Eval configures these operators and owns the run's typed input and capture
 buffers; the test does not call or configure replay and record separately.
 They remain normal operators that may also have independent library APIs.
+Eval chooses recorder keys before start that differ from every resolved
+source, seed and other internal key in the run, including known nested graph
+requirements. Source-selected keys keep their ordinary sharing semantics;
+see [recorder-key ownership](../design/eval-recorder-keys.md).
 The recorder retains copies of output deltas, so later ticks cannot change
 an earlier result. The [operator-composition contract](../design/eval-operator-composition.md)
 describes this boundary.

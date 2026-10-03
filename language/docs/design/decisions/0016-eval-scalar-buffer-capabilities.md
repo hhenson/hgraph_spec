@@ -289,7 +289,9 @@ Eval owns the recorder's key, replay configuration and any initial values
 needed by its graph. It retrieves the recording with its expected ordinary
 value type after stop. Its callers do not select keys or configure operators.
 Eval chooses distinct recording keys when it constructs distinct recordings
-within one run; that is eval's responsibility, not a store writer restriction.
+within one run, fresh against all resolved source, seed and other internal
+keys under [eval recorder-key ownership](../eval-recorder-keys.md). This is
+eval's construction responsibility, not a store writer restriction.
 An independent caller of record may supply its own key under that operator's
 contract. A missing recording remains an error, not successful silence.
 
@@ -337,12 +339,12 @@ were resolved, are listed here; the keyed store supplies none implicitly:
    contract. Other aggregate operations and any explicit general copying
    operation still require their value contracts. A borrowed aggregate is not
    an independently owned retained recording.
-6. **Eval key selection.** Distinct recorder keys alone do not prevent target
-   code from choosing the same const string key with the same bound type.
-   Incompatible types fail binding, but eval's same-type collision policy
-   with user-chosen entries remains to be specified. This foundation does
-   not reserve a hidden namespace or promise collision-free access through
-   node roles; same-type replacement retains its ordinary meaning.
+6. **Eval key selection.** Supplied by
+   [eval recorder-key ownership](../eval-recorder-keys.md): before start,
+   choose each eval-owned recording key fresh against the closed resolved
+   source/seed/internal key set, including known nested requirements. No
+   hidden namespace or node-role check is added; source-selected same-key
+   access and ordinary replacement retain their meanings.
 7. **Eval admission and bounds.** Ordinary list operations
    supply length/index representability. Dense slot-time normalization still
    needs its checking or construction boundary. Independent scalar replay

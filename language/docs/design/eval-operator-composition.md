@@ -30,6 +30,10 @@ Replay and record remain normal operators with their own callable contracts. The
 declared in the standard library and used independently. This arrangement
 places no visibility restriction on them and does not require the eval
 caller to select recording keys, seed storage, or configure a recorder.
+Before start, eval selects its recorder keys under
+[recorder-key ownership](eval-recorder-keys.md), avoiding all closed resolved
+source, seed and other internal keys for that run. This does not change
+ordinary caller-selected global-state key semantics.
 
 This composition introduces no ordinary HGL type for a harness sequence.
 For the eight scalar types, eval converts present harness positions to
