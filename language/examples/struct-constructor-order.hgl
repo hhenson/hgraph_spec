@@ -5,6 +5,8 @@ struct Pair {
     right: i64
 }
 
+// Log only to make argument evaluation order observable in this example.
+// This is an ordinary helper, not a built-in or the eval record operator.
 const fn mark(value: i64) -> i64 {
     inject logger
     info(logger, str(value))

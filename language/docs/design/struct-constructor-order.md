@@ -5,7 +5,10 @@ Status: proposed ordinary-value construction extension, 2026-10-03.
 A complete ordinary struct constructor accepts named arguments. Names select
 fields; their written order selects argument evaluation order. Field
 declaration order remains schema metadata and does not reorder the supplied
-expressions. This rule concerns ordinary struct values, including values
+expressions. This matters when an argument has an observable effect or fails:
+changing the order could change which effects occur before the failure.
+
+This rule concerns ordinary struct values, including values
 constructed inside a node hook. It does not define arbitrary function-call
 order, temporal struct composition or contextual delta construction.
 
@@ -52,10 +55,11 @@ struct Pair {
 }
 ```
 
-`Pair(right: mark(2), left: mark(1))` calls mark with 2 before calling it
-with 1. If each call records its argument and returns it, the recorded order
-is 2, 1, and the completed value has left equal to 1 and right equal to 2.
-Each call occurs once. Declaring left first does not change that trace.
+`Pair(right: 2, left: 1)` has left equal to 1 and right equal to 2. Names
+determine where values go. The expression supplied for right is evaluated
+first, followed by the expression supplied for left, because that is the order
+written in the call. Declaring left first does not change evaluation order.
+
 Nested ordinary struct constructors apply the same rule recursively: an
 inner constructor completes its own evaluation and retention before its
 containing argument is retained and the next outer argument begins.
@@ -80,4 +84,5 @@ No partial struct may escape as the constructor's result.
 [Constructor-order cases](../../../runtime/cases_constructor_order.md) give
 expected success, failure and checking observations. The
 [source example](../../examples/struct-constructor-order.hgl) uses an ordinary
-value helper with logging to expose the order without changing field identity.
+value helper that logs and returns its argument, solely to make evaluation
+order observable in the example. Logging is not part of struct construction.
