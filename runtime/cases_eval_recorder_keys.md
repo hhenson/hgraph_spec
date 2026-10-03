@@ -25,7 +25,8 @@ requirement to execute that get successfully while the entry is absent.
 
 ## EVAL-KEY-SEED — seeded values are preserved
 
-A run owner supplies k with an ordinary typed value before construction.
+A run owner supplies k with an ordinary typed value before eval finalizes
+its seed configuration and selects internal recorder keys.
 Whether or not the target otherwise uses k, eval's recorder key differs.
 With no source writes to k, its supplied value survives recorder start,
 publication and stop. An empty or all-silent eval still initializes its own
@@ -34,6 +35,24 @@ empty recording and leaves the seed untouched.
 This does not waive ordinary seed/type compatibility when the target itself
 requires k with a different type. Such a source conflict still fails under
 the existing checking/construction rules; eval does not rename user keys.
+
+## EVAL-KEY-SEED-CLOSED — finalization precedes selection
+
+Finalize the owner-supplied seeds, then select recorder key r. Before root
+start, attempt to add a further seed at r with the exact recording type.
+This fails as an eval configuration error before any start hook runs; the
+late value is not installed, and recorder-key selection is not silently
+repeated. Repeat with a different late key: it is the same closed-phase error,
+not a check that only recognizes collisions with r.
+
+Replacing a previously supplied seed after finalization also fails, even
+with the same key and type. Changing the original value owner after successful
+configuration cannot change the independently retained seed. These cases do
+not add rollback of earlier successful configuration effects.
+
+A separately configured eval may use different seeds. Outside eval, the
+general run-owner seeding window in ADR 0016 remains before graph start;
+ordinary start/evaluation/stop writes to prepared source entries remain legal.
 
 ## EVAL-KEY-NESTED — the closed inventory includes later use
 

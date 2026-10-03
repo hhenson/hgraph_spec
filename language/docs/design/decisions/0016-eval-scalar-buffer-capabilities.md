@@ -22,6 +22,12 @@ have completed. The store lives through that read; an independently owned
 result may outlive the run. This is a lifecycle contract, not a new HGL
 syntax for constructing or running graphs.
 
+Eval narrows this general pre-start window: its owner-supplied seeds must be
+finalized before eval selects internal recorder keys. Later seed additions or
+replacements for that eval are configuration errors before start, under
+[eval recorder-key ownership](../eval-recorder-keys.md). This does not change
+the seeding window for other run owners or ordinary node-hook writes.
+
 A runtime function requests `inject global_state`. Access is available in
 start, evaluation and stop, borrowed for the current hook under INJ-3. The
 request adds no signature parameter. Provision one shared store for the run
@@ -341,7 +347,8 @@ were resolved, are listed here; the keyed store supplies none implicitly:
    an independently owned retained recording.
 6. **Eval key selection.** Supplied by
    [eval recorder-key ownership](../eval-recorder-keys.md): before start,
-   choose each eval-owned recording key fresh against the closed resolved
+   finalize eval's owner-supplied seed configuration, then choose each
+   eval-owned recording key fresh against the closed resolved
    source/seed/internal key set, including known nested requirements. No
    hidden namespace or node-role check is added; source-selected same-key
    access and ordinary replacement retain their meanings.

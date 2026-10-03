@@ -13,9 +13,22 @@ remain unchanged.
 
 ## Closed-key preparation
 
-During the existing graph-construction and typed-entry preparation phase,
-resolve the source and supplied configuration keys before selecting eval's
-recorder keys. The exclusion set contains:
+During graph construction, eval first completes the supplied run configuration:
+resolve the source requirements and const keys, and finalize all owner-supplied
+seeds, including their keys, exact types and ordinary values. This closes eval's
+seed-configuration phase before any internal recorder key is selected. The
+prepared run uses those finalized seeds under ordinary ownership rules; later
+changes to their original owners cannot change the prepared values.
+
+After finalization, an attempt to add or replace an owner seed for that eval is
+a configuration error before any node starts, even when its key is already
+known or its type matches. It cannot overwrite a selected recorder entry or
+silently trigger reselection. An owner needing different seeds configures a
+new eval run. This is an eval construction boundary, not a new source API or a
+change to general global-state seeding outside eval. Start/evaluation/stop
+writes still follow the ordinary prepared-entry rules.
+
+After this closure, select eval's recorder keys. The exclusion set contains:
 
 - every resolved source key requirement for the run, whether used by get,
   set, or an independently called recorder, and regardless of bound type;
@@ -61,8 +74,9 @@ Source writes to other entries cannot replace or append to this recording
 merely by choosing a string that a generator would otherwise have selected.
 
 Existing construction, initialization, evaluation and stop failure contracts
-remain in force. Fresh-key preparation completes before start; it adds no
-rollback, transaction, in-run rename or fallback successful result. The
+remain in force. Seed finalization and fresh-key preparation complete before
+start; they add no rollback, transaction, in-run rename or fallback successful
+result. The
 existing missing-recording error is not converted to silence.
 
 [Cases](../../../runtime/cases_eval_recorder_keys.md) state the expected
@@ -70,4 +84,6 @@ construction and isolation observations. The immutable
 [collision audit](https://github.com/hhenson/hgraph_spec_audit/blob/f6e01c1e38f3aa2273d2e0ff94429fd00d9e4bc5/runtime/validation/recorder_keys/README.md)
 shows why same-type binding alone cannot establish recorder ownership.
 Fresh-key selection is this HGL rule, not a claim of an existing measured
-collision-free allocator.
+collision-free allocator. Closing eval's configuration before selection is
+the phase requirement that makes its exclusion set complete; the audit does
+not measure that preparation protocol.
