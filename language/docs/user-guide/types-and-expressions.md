@@ -753,10 +753,10 @@ delta<Box<f64>>(value: 1.5)
 ```
 
 An omitted delta field means no change, and field defaults are never applied
-while constructing a delta. Explicit `null` clears an optional field; it is
-not the same as omission. Clearing a required field is a type error. A generic
-delta target must be fully applied; delta construction does not infer an
-omitted type argument.
+while constructing a delta. Optional-field clearing is distinct from omission;
+its encoding remains open, and explicit `null` is excluded from the finite
+publication-delta profile. A generic delta target must be fully applied;
+delta construction does not infer an omitted type argument.
 
 Deltas recurse through structural fields and stop at atomic boundaries:
 

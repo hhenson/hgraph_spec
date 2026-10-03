@@ -161,12 +161,15 @@ delta<Quote>(bid: 100.5)
 ```
 
 Omitted delta fields mean no change even when the corresponding complete-value
-field is required. Defaults never run for a delta. `null` declares or clears an
-optional field; it is not the representation of an omitted delta field.
-`delta<S>` is intentionally not a normal parameter, result, state, or stored
-field type because temporal schemas already define their own delta shapes.
-Runtime code returns it or assigns it to injected `out`; there is no separate
-output keyword.
+field is required. Defaults never run for a delta. An optional field's `null`
+declaration is not the representation of an omitted delta field.
+`delta<S>(...)` is constructor syntax; the ordinary type spelling is
+[`delta_of(S)`](ordinary-delta-types.md). In its admitted finite profile,
+ordinary construction independently retains the delta and permits ordinary
+bindings, parameters, value-function results, fields, list elements and global
+entries. Borrowed observations, state/cache admission and publication retain
+their separate constraints. Runtime code publishes a matching delta by returning
+it or assigning it to injected `out`; there is no separate output keyword.
 
 An omitted delta field means no change; clearing an optional field is a
 distinct operation. An implementation must preserve that distinction. The
@@ -348,9 +351,10 @@ owned through `var` admit field assignment; `let` and input access are
 recursively read-only. These permissions do not change the nominal type.
 Complete construction uses named arguments, enforces required fields, applies
 ordinary defaults, and permits fields declared with `= null` to remain unset.
-The contextual `delta<S>(...)` form instead permits every field to be omitted,
-applies no defaults, and distinguishes omission from explicitly clearing an
-optional field with `null`. The generic reflection interface is `fields`,
+The `delta<S>(...)` form instead permits every field to be omitted and applies
+no defaults. Optional-field clearing remains separate and its encoding open;
+explicit `null` is excluded from the finite publication-delta profile.
+The generic reflection interface is `fields`,
 `has_fields`, and `field_type`; structural constraints do not erase nominal
 identity.
 
@@ -838,8 +842,10 @@ do not participate. TSW intentionally uses a separate rule: `all_valid` checks
 the window minimum while `valid` becomes true on the first value. In runtime evaluation, `last_modified(value)` returns the
 endpoint's native `last_modified_time` as `datetime`. Canonical
 [delta_value(value)](delta-value-metadata.md) returns the ordinary scalar
-delta in the admitted valid-and-modified runtime scalar profile. Structural
-contextual delta shape/application remain separate open contracts.
+delta in the admitted valid-and-modified runtime scalar profile. The
+[collection publication contract](contextual-collection-deltas.md) extends this
+relationship to its finite structural profile, and
+[ordinary delta types](ordinary-delta-types.md) supply owned construction and storage.
 `delta<S>(...)` is the constructor, not an alternative accessor.
 
 ## Collection traversal

@@ -1589,18 +1589,26 @@ then evaluates the struct's `requires` clause. Every parameter must resolve;
 an inference error.
 
 For a fully applied nominal struct `S`, `delta<S>(...)` accepts named
-fields only and produces a contextual update value rather than an ordinary
-source type. The proposed [collection delta extension](../design/contextual-collection-deltas.md)
+fields only and constructs its sparse delta. The
+[collection delta extension](../design/contextual-collection-deltas.md)
 also admits shape-specific set, fixed-list, tuple and map constructors. Its
 sparse entry lists are contextual constructor arguments only; they do not
 extend ordinary sequence literals. Every
 field may be omitted independently of the complete constructor's requirements
-or defaults. Omission means no change and does not apply a default. Explicit
-`null` means clear an optional field and is distinct from omission; it is an
-error for a required field. Delta constructors may appear only where runtime
-output, a harness or replay sequence, or a temporary `let` binding supplies an
-expected delta shape. They are not admitted as function parameter, function
-result, state, collection-element, or struct-field types.
+or defaults. Omission means no change and does not apply a default. Optional
+field clearing remains a separate open operation; explicit `null` and
+invalidation are excluded from the finite publication profile.
+
+Runtime output, harness/replay, nested constructor and contextual immutable
+`let` positions retain their admitted delta contexts. In an ordinary
+`delta_of(S)` value context, `delta<S>(...)` constructs an independently owned
+value under the [ordinary delta type contract](../design/ordinary-delta-types.md).
+That type is admitted in ordinary bindings, parameters, value-function results,
+struct fields, list elements and prepared global entries for the finite profile.
+`delta<S>` itself is not type syntax. Owned construction and retention preserve
+the existing written-order and failure rules; a borrowed delta observation
+does not become owning merely through an annotation. State/cache admission
+and publication constraints remain separate.
 
 ## Canonical temporalization
 
