@@ -288,10 +288,13 @@ The proposed [run-wide keyed-state foundation](../design/decisions/0016-eval-sca
 configures replay with ordinary const data and record with a const string
 key. The reusable store binds const keys and exact value types before start;
 hooks access those entries without name lookup or type dispatch. An entry
-is not initialized merely by binding it. Ordinary sequence and
-recording-construction source contracts remain open. This direction does
-not change arguments to the test's eval call or claim complete executable
-HGL replay/record bodies.
+is not initialized merely by binding it. For the eight scalar types,
+[ordinary timed values](../../../library/ordinary_replay_record.md) supply
+the replay list and recording: a present publication is an ordinary
+`TimedValue<T>` with datetime and scalar fields. Eval omits silent input
+positions from that list and retains their dense horizon separately.
+The test's eval arguments stay the same. Structural delta storage and
+general nullable ordinary sequences remain separate contracts.
 
 ## First-pass limits
 

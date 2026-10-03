@@ -7,6 +7,11 @@ supported `test` blocks and compiles generated fixtures. Native test support
 varies by platform; this source-only repository has no CMake/CTest project.
 The entries below identify the implementation tests for each example.
 
+- [`ordinary-replay-record.hgl`](ordinary-replay-record.hgl) gives generic
+  scalar replay and record bodies using an ordinary `TimedValue<T>` struct,
+  generator traversal, typed global state and retaining list push. Its tests
+  express repeated zero publications and empty/all-silent dense results under
+  the [library data contract](../../library/ordinary_replay_record.md).
 - [`struct-constructor-order.hgl`](struct-constructor-order.hgl) exposes
   ordinary constructor argument order through value-helper log messages,
   with successful field association and failure before a later argument.

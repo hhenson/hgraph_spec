@@ -1,0 +1,68 @@
+module examples.ordinary_replay_record
+
+export struct TimedValue<T> {
+    time: datetime
+    value: T
+}
+
+operator replay<T>(const values: list<TimedValue<T>>) -> T
+requires T in {bool, i64, f64, str, date, time, datetime, duration}
+
+impl fn replay<T>(const values: list<TimedValue<T>>) -> T {
+    var index: i64 = 0
+    while index < len(values) {
+        yield values[index].time: values[index].value
+        index += 1
+    }
+}
+
+operator record<T>(ts: T, const key: str)
+requires T in {bool, i64, f64, str, date, time, datetime, duration}
+
+impl fn record<T>(ts: T, const key: str) {
+    inject global_state, clock
+    start {
+        let initial: list<TimedValue<T>> = []
+        set(global_state, key, initial)
+    }
+    when {
+        var recording: list<TimedValue<T>> = get(global_state, key)
+        push(recording, TimedValue<T>(
+            time: clock.evaluation_time,
+            value: delta_value(ts)
+        ))
+    }
+}
+
+const fn sample_values() -> list<TimedValue<i64>> {
+    var values: list<TimedValue<i64>> = []
+    push(values, TimedValue<i64>(time: @1970-01-01T00:00:00.000001Z, value: 0))
+    push(values, TimedValue<i64>(time: @1970-01-01T00:00:00.000003Z, value: 0))
+    return values
+}
+
+fn consume(tick: i64) { when { } }
+
+# A temporal argument supplies the existing harness run context.
+fn replay_samples(tick: i64) -> i64 {
+    consume(tick)
+    replay(sample_values())
+}
+
+# Independent callers choose their own const key. The run owner reads the
+# ordinary typed entry after stop; this adds no source run-owner API.
+fn capture_samples(ts: i64) {
+    record(ts, "samples")
+}
+
+fn pass_through_i64(ts: i64) -> i64 {
+    when { return delta_value(ts) }
+}
+
+test ordinary_scalar_replay {
+    assert eval(replay_samples, tick: [1, 1, 1, 1]) == [0, _, 0, _]
+    assert eval(pass_through_i64, ts: [_, 0, _, 0, _, _]) == [_, 0, _, 0, _, _]
+    assert eval(pass_through_i64, ts: [_, _, _]) == [_, _, _]
+    assert eval(pass_through_i64, ts: []) == []
+    eval(capture_samples, ts: [0, _, 0])
+}

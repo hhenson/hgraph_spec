@@ -21,8 +21,9 @@ The test author calls `eval(target, ...)`; eval constructs and configures the
 operators and owns the ordinary input data and recording for that run.
 Replay receives its input sequence as an ordinary const argument. Record
 receives a const string key and uses the run-wide `global_state` store;
-eval retrieves the recording after graph stop. These source contracts have
-the value-container dependencies listed in
+eval retrieves the recording after graph stop. For eight scalar types these
+source contracts use the [ordinary scalar data contract](../../../library/ordinary_replay_record.md);
+structural storage dependencies remain listed in
 [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md#unresolved-source-contracts).
 Replay and record remain normal operators with their own callable contracts. They may be
 declared in the standard library and used independently. This arrangement
@@ -30,6 +31,11 @@ places no visibility restriction on them and does not require the eval
 caller to select recording keys, seed storage, or configure a recorder.
 
 This composition introduces no ordinary HGL type for a harness sequence.
+For the eight scalar types, eval converts present harness positions to
+ordinary `TimedValue<T>` entries and retains the dense horizon separately.
+The replay list contains no absent elements. Its slot-derived entry times
+are increasing; independent callers of replay retain the existing generator
+timing behavior rather than acquiring a new ordering validator.
 
 Eval calls the target as declared. A composition function may wire an existing
 input through. A test that claims to exercise delta application by a compute
@@ -156,7 +162,7 @@ extensions.
 
 The proposed [run-wide keyed-state foundation](decisions/0016-eval-scalar-buffer-capabilities.md)
 configures replay with ordinary const data and record with a const key for
-reusable shared storage. It does not complete the ordinary sequence,
-contextual-delta storage or recording-construction language. The eval
-behavior above does not imply executable HGL operator bodies before those
-source contracts are settled.
+reusable shared storage. The [ordinary scalar data contract](../../../library/ordinary_replay_record.md)
+completes this data representation and gives source bodies for the eight
+scalar types. It does not complete structural delta storage or general
+nullable ordinary sequences.

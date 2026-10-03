@@ -7,8 +7,9 @@ injectable. It supplies ordinary keyed value storage to any requesting node,
 independent of that node's inputs, result, name or role. It does not introduce
 replay-specific or recording-specific injectables. The
 [eval composition contract](../eval-operator-composition.md) remains in force;
-complete HGL replay and record bodies require the source contracts listed
-below.
+the [ordinary scalar data contract](../../../../library/ordinary_replay_record.md)
+supplies complete replay and record bodies for eight scalar types. Structural
+storage and the remaining source contracts listed below are separate.
 
 ## Run ownership and access
 
@@ -255,8 +256,9 @@ fn pass_through<T>(value: T) -> T {
 
 Replay receives its finite input sequence directly as an ordinary const
 argument. It does not require a global-state key or a storage injectable.
-Its exact parameter type depends on the ordinary sequence contracts still
-open below; no special replay-data type is introduced to bypass them.
+For the eight scalar types its exact parameter type is ordinary
+`list<TimedValue<T>>`, specified by the ordinary scalar data contract. There
+is no absent element in that list; no special replay-data type is introduced.
 Replay's output type is the corresponding temporal target parameter type.
 Const data access does not itself schedule or publish; replay must implement
 its cursor, alarm and output behavior.
@@ -275,8 +277,9 @@ The admitted scalar and collection publication profiles remain specified by
 construct an ordinary typed recording value and use a corresponding typed
 get/set context. Its recording exists from recorder start even if no tick
 arrives (OP-11, EVAL-4). Captured deltas are independently owned (VAL-17,
-EVAL-3). The precise ordinary container operations needed to implement this
-remain separate source contracts.
+EVAL-3). The ordinary scalar data contract supplies construction and retained
+list push for the eight scalar recording types. Structural recording storage
+remains a separate source contract.
 
 Eval owns the recorder's key, replay configuration and any initial values
 needed by its graph. It retrieves the recording with its expected ordinary
@@ -287,14 +290,17 @@ An independent caller of record may supply its own key under that operator's
 contract. A missing recording remains an error, not successful silence.
 
 Dense input horizons, repeated equal publications and empty/all-silent
-results keep the rules of eval composition. In-range absent sequence elements
-are distinct from missing store entries: the former yield `null` under the
-[nullable indexing rules](../nullable-replay-indexing.md); the latter fail.
+results keep the rules of eval composition. Scalar replay does not need an
+ordinary nullable sequence: eval keeps absent slots in its harness metadata
+and supplies only present timed entries. Where separately admitted, in-range
+absent sequence elements are distinct from missing store entries: the former
+yield `null` under the [nullable indexing rules](../nullable-replay-indexing.md);
+the latter fail.
 
 ## Unresolved source contracts
 
-These dependencies must be specified before claiming complete executable HGL
-replay/record bodies. The keyed store supplies none of them implicitly:
+These dependencies remain outside the complete eight-scalar replay/record
+data profile. The keyed store supplies none of them implicitly:
 
 1. **Present/absent sequence elements.** Ordinary `list<value_type>` values,
    homogeneous list literals and const value parameters already exist. What
@@ -303,20 +309,23 @@ replay/record bodies. The keyed store supplies none of them implicitly:
    element type. Eval's harness `_` and local refinement rules do not provide
    that ordinary type or constructor. Admission of nullable element reads
    during wiring or const evaluation also remains to be specified; the
-   current local refinement rules do not grant it implicitly.
+   current local refinement rules do not grant it implicitly. Scalar timed
+   replay avoids this dependency by omitting absent slots from ordinary data.
 2. **Ordinary structural delta storage.** Represent recursive sparse deltas
    as ordinary container elements without equating them with held snapshots.
    `delta_of(T)` remains a specification-only relationship, not an annotation.
 3. **Owned recording values.** The [ordinary-list extension](../ordinary-list-values.md)
    supplies typed empty construction, length, indexed extraction and retained
-   end growth. Timestamp/delta entry representation and admission remain open.
+   end growth. The ordinary scalar data contract supplies timestamp/scalar
+   entries; timestamp/structural-delta entry representation remains open.
    Ordinary owning retention includes nested data; a borrowed endpoint view
    is not a retained capture. No recording-specific append or begin primitive
    substitutes for these general value operations.
-4. **Generic source checking.** Express the relationship between replay's
-   const sequence element type and temporal result, and between a record
-   input and its ordinary recording value. No injectable silently supplies
-   a missing shape constraint or inference rule.
+4. **Generic structural source checking.** The scalar relationship is exact
+   T in `list<TimedValue<T>>`, a temporal T result/input and the ordinary
+   recording type. A structural input still needs its publication delta's
+   distinct ordinary type. No injectable silently supplies a missing shape
+   constraint or inference rule.
 5. **Aggregate operations.** The value-mutability contract defines binding
    authority, borrowed entry access, conflicting lifetimes and independent owning
    retention. The ordinary-list extension supplies a focused construction/read/growth
@@ -329,11 +338,13 @@ replay/record bodies. The keyed store supplies none of them implicitly:
    with user-chosen entries remains to be specified. This foundation does
    not reserve a hidden namespace or promise collision-free access through
    node roles; same-type replacement retains its ordinary meaning.
-7. **Replay admission and bounds.** Ordinary const-sequence admission must
-   place finite length/index representability and dense slot-time validation
-   at a defined checking or construction boundary. ENG-3/ENG-16 still bound
-   every executed instant; generic get/set neither checks nor changes those
-   time rules.
+7. **Eval admission and bounds.** Ordinary list operations
+   supply length/index representability. Dense slot-time normalization still
+   needs its checking or construction boundary. Independent scalar replay
+   uses the existing generator rules, including skipped past entries and
+   duplicate-time errors; it does not validate strictly increasing times
+   before start. ENG-3/ENG-16 still bound every executed instant; generic
+   get/set neither checks nor changes those time rules.
 
 Persistence, checkpoint/restart, shared state across separate runs and traits
 remain outside this foundation. It settles a reusable store and eval's

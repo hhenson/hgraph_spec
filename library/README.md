@@ -22,3 +22,5 @@ call selects it.
 - [operator_contracts.md](operator_contracts.md): admission and nil, set
   operators, formatting and sinks, text, numbers, partitioned dictionaries,
   recording (OP-1 to OP-12).
+- [ordinary_replay_record.md](ordinary_replay_record.md): ordinary timed
+  scalar data, replay, recording lifecycle and dense eval adaptation.

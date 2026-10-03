@@ -163,9 +163,10 @@ cells; it does not publish those cells as ticks.
 The proposed [eval configuration foundation](../language/docs/design/decisions/0016-eval-scalar-buffer-capabilities.md)
 passes replay its sequence as ordinary const data. Record has the ordinary
 contract `record<T>(ts: T, const key: str)` and requests reusable run-wide
-`global_state`. Complete source implementations depend on the ordinary
-sequence, delta storage, recording-construction and aggregate access
-contracts identified there; no specialized storage capability supplies them.
+`global_state`. The [ordinary scalar data contract](ordinary_replay_record.md)
+supplies `TimedValue<T>`, `replay<T>(const values: list<TimedValue<T>>) -> T`,
+and scalar record bodies using ordinary list construction and push. Structural
+delta storage remains separate; no specialized storage capability supplies it.
 
 
 

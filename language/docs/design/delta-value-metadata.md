@@ -109,8 +109,9 @@ For the same reason a record implementation must obtain the publication
 with `delta_value(ts)` and retain an owned delta with its timestamp. Its scalar
 delta is an ordinary T. The reusable store in
 [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) does not supply
-recording construction or make structural deltas ordinary storable values;
-those source contracts remain open.
+recording construction. The [ordinary scalar data contract](../../../library/ordinary_replay_record.md)
+now supplies `list<TimedValue<T>>` for these eight scalar types; structural
+deltas still require a separate ordinary storable representation.
 
 ## Consequences
 
