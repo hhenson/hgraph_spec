@@ -27,6 +27,12 @@ export struct Leg {
 
 export fn mid(quote: atomic<Quote>) -> f64 => (quote.bid + quote.ask) / 2.0
 
+# Eval's replay/record boundary admits scalars, not atomic shapes. Construct
+# the atomic quote inside the graph and observe the scalar result.
+fn quote_from_prices(bid: f64, ask: f64) -> atomic<Quote> =>
+    Quote(bid: bid, ask: ask)
+fn mid_from_prices(bid: f64, ask: f64) -> f64 => mid(quote_from_prices(bid, ask))
+
 test mid_is_the_average {
-    assert eval(mid, quote: [Quote(bid: 1.0, ask: 3.0)]) == [2.0]
+    assert eval(mid_from_prices, bid: [1.0], ask: [3.0]) == [2.0]
 }
