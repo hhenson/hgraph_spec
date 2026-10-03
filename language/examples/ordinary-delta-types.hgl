@@ -33,6 +33,10 @@ impl fn record<T>(ts: T, const key: str) {
     }
 }
 
+# Generic implementation templates contribute candidates only when requested.
+# Both compositions below use this exact map shape.
+instantiate replay<map<i64, i64>>, record<map<i64, i64>>
+
 fn pass_through<T>(value: T) -> T {
     when { return delta_value(value) }
 }
@@ -74,6 +78,9 @@ const fn store_empty_data() -> i64 {
 }
 
 test ordinary_deltas {
+    # Replay publishes the two retained sparse deltas at their supplied times.
+    # The second changes only key 1; key 2 is absent from that publication.
+    # The four-slot input horizon preserves both silent result positions.
     assert eval(replay_map, tick: [1, 1, 1, 1]) == [
         delta<map<i64, i64>>(upsert: [1: 10, 2: 20]),
         _,
@@ -81,6 +88,8 @@ test ordinary_deltas {
         _
     ]
     assert store_empty_data() == 1
+    # An outputless capture initializes its recording and retains both deltas,
+    # including the nonempty removal; successful eval returns no output trace.
     eval(capture_map, value: [
         delta<map<i64, i64>>(upsert: [1: 10, 2: 20]),
         delta<map<i64, i64>>(remove: [2])
