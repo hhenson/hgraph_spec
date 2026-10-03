@@ -307,20 +307,22 @@ replay/record bodies. The keyed store supplies none of them implicitly:
 2. **Ordinary structural delta storage.** Represent recursive sparse deltas
    as ordinary container elements without equating them with held snapshots.
    `delta_of(T)` remains a specification-only relationship, not an annotation.
-3. **Owned recording values.** Specify ordinary empty construction,
-   timestamp/delta entry representation, growth or functional replacement,
-   and extraction. This includes ownership of nested data; a borrowed
-   endpoint view is not a retained capture. No recording-specific append or
-   begin primitive substitutes for these general value operations.
+3. **Owned recording values.** The [ordinary-list extension](../ordinary-list-values.md)
+   supplies typed empty construction, length, indexed extraction and retained
+   end growth. Timestamp/delta entry representation and admission remain open.
+   Ordinary owning retention includes nested data; a borrowed endpoint view
+   is not a retained capture. No recording-specific append or begin primitive
+   substitutes for these general value operations.
 4. **Generic source checking.** Express the relationship between replay's
    const sequence element type and temporal result, and between a record
    input and its ordinary recording value. No injectable silently supplies
    a missing shape constraint or inference rule.
 5. **Aggregate operations.** The value-mutability contract defines binding
    authority, borrowed entry access, conflicting lifetimes and independent owning
-   retention. General list operations, source construction and any explicit
-   general copying operation still require their value contracts. A borrowed
-   aggregate is not an independently owned retained recording.
+   retention. The ordinary-list extension supplies a focused construction/read/growth
+   contract. Other aggregate operations and any explicit general copying
+   operation still require their value contracts. A borrowed aggregate is not
+   an independently owned retained recording.
 6. **Eval key selection.** Distinct recorder keys alone do not prevent target
    code from choosing the same const string key with the same bound type.
    Incompatible types fail binding, but eval's same-type collision policy

@@ -11,7 +11,9 @@ type in either binding. Temporalization, generic type matching and the
 This contract defines ownership, assignment and lexical aggregate borrowing.
 It adds no list construction, growth or other collection API, nullable element
 type, or first-class structural delta type. Each operation still needs its
-ordinary value contract.
+ordinary value contract. The separate
+[ordinary-list extension](ordinary-list-values.md) defines typed empty
+construction, length, indexed reads and retained end growth under these rules.
 
 ## Bindings and projections
 
@@ -65,7 +67,9 @@ recursively. For `struct Envelope { inner: Box }`, constructing
 `Envelope(inner: source)` then changing source cannot change the retained
 child. Copies preserve canonical types, not the access permissions of the
 source binding. Physical sharing or copy elision is allowed only when these
-observations remain unchanged (VAL-17).
+observations remain unchanged (VAL-17). Ordinary struct constructors
+[evaluate and retain each supplied argument in written order](struct-constructor-order.md)
+before proceeding to the next argument.
 
 A result explicitly specified as borrowed is different: binding aggregate
 get preserves its borrow provenance and lifetime. An ordinary initializer
@@ -192,6 +196,7 @@ fn increment_counter(value: i64, const key: str) {
 }
 ```
 
-Ordinary list operations, typed empty construction, structural delta storage
-and complete replay/record bodies remain separate contracts. This extension
+The ordinary-list extension supplies typed empty construction, length, indexed
+reads and end growth. Structural delta storage, nullable elements and complete
+replay/record bodies remain separate contracts. This extension
 does not reclassify historical recordings as node cache.

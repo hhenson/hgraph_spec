@@ -341,6 +341,32 @@ accepts only a three-element list. The resolved size is part of the type
 identity, and an unbounded list is the only one whose elements can be added
 and removed after wiring.
 
+## Ordinary list values
+
+For an ordinary value, create an empty list with an explicit element type and
+append through a writable binding:
+
+```hgl
+var amounts: list<i64> = []
+push(amounts, 10)
+push(amounts, 20)
+let first = amounts[0]
+let count = len(amounts)
+```
+
+Here first is 10 and count is 2. Indices are zero-based `i64` values; a negative
+or out-of-range index fails. An owning `let` list is recursively read-only.
+An owning `var` copied from it may grow its own independent value. Appended
+children are retained independently, including nested data. An exclusive
+writable global-entry borrow can grow its entry through the same push call.
+
+Only an unbounded ordinary list may grow. A fixed `list<i64, 0>` accepts the
+empty literal but rejects push. `var amounts = []` lacks an element type and
+is rejected. These ordinary operations do not publish temporal list changes.
+See [ordinary list values](../design/ordinary-list-values.md) for the precise
+ownership, phase and error rules and
+[the source example](../../examples/ordinary-list-values.hgl).
+
 ## Structured values
 
 

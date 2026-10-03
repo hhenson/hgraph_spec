@@ -85,7 +85,10 @@ representation. Consumers receive read-only observations, not that authority.
 The [HGL value-mutability contract](../language/docs/design/value-mutability.md)
 uses `let` for read-only access and `var` for writable access, and specifies
 lexical global-entry borrowing. It adds no source mutation operation for a
-container kind that has no admitted operation.
+container kind that has no admitted operation. The separate
+[ordinary-list contract](../language/docs/design/ordinary-list-values.md)
+admits typed empty construction, length, indexed reads and independently
+retained end growth; [its cases](cases_ordinary_lists.md) cover those rules.
 
 ### Structs
 
