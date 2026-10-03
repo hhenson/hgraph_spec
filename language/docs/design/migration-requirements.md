@@ -66,7 +66,8 @@ including removals, need a separate contextual contract; replacing them with
 complete value snapshots does not satisfy this requirement.
 
 `delta<S>(...)` is the distinct sparse-update constructor. It is not an
-accessor and does not introduce a first-class storable delta type.
+accessor. The [ordinary delta type contract](ordinary-delta-types.md) supplies
+`delta<T>` as its storable source type for admitted shapes.
 
 ### MIG-008: output and type resolution
 

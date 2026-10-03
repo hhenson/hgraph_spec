@@ -134,10 +134,12 @@ separator of a `for` statement, the membership relation in a `requires`
 clause, and an ordinary identifier elsewhere. `out` and the names of other
 injectables are contextual names resolved only by an `inject` declaration.
 `struct` is both a declaration keyword and the corresponding constraint
-category. `delta` is contextual: followed by `<` it introduces a structured
-delta constructor; `delta_value(value)` is the temporal metadata accessor.
+category. `delta` is contextual: `delta<T>` is the ordinary publication-delta
+type marker in a type position, and `delta<T>(...)` is its constructor in an
+expression. `delta_value(value)` is the temporal metadata accessor.
 There is no `delta(value)` metadata intrinsic.
-It is not a general type constructor. `fields`, `has_fields`, `field_type`,
+Delta type formation retains its finite admitted shape domain.
+`fields`, `has_fields`, `field_type`,
 and the pack-reflection functions `len`, `keys`, `types`, and `type_at` are
 compile-time intrinsics inside a `requires` clause.
 `native` is contextual at the start of a declaration, so it remains available
@@ -428,6 +430,7 @@ generic inference rules remain open.
 
 ```ebnf
 type            = scalar_type
+                | delta_type
                 | tuple_type
                 | list_type
                 | set_type
@@ -438,11 +441,13 @@ type            = scalar_type
                 | named_type
                 | "atomic", "<", value_type, ">";
 value_type      = scalar_type
+                | delta_type
                 | value_tuple_type
                 | value_list_type
                 | set_type
                 | value_map_type
                 | named_type;
+delta_type      = "delta", "<", type, ">";
 named_type      = ( identifier | qualified_name ), [ generic_arguments ];
 generic_arguments
                 = "<", generic_argument,
@@ -473,6 +478,15 @@ value_map_type  = "map", "<", value_type, ",", value_type, ">";
 Types carry no mutability qualifier. Prefixing an input or time-series type
 with `mut` is a syntax error. Ordinary value access is controlled by `let`
 and `var`, as specified in [value mutability](../design/value-mutability.md).
+
+`delta<T>` is contextual type syntax for an ordinary publication-delta
+value; it is not a value-level call or new reserved word. Its argument is a
+type, and it is admitted only for the finite shapes in the
+[ordinary delta type contract](../design/ordinary-delta-types.md). Scalars
+reduce to their own type; structural deltas retain the exact originating
+shape, including nominal arguments and fixed sizes. Matching `delta<T>`
+binds T from that identity, never from stored payloads. Ordinary storage does
+not admit a new temporal endpoint shape or new inspection/mutation operation.
 
 A generic argument is initially parsed without deciding whether an identifier
 names a type or a wiring-time value. Name resolution interprets each position
@@ -1232,8 +1246,10 @@ block while the condition holds; an omitted condition is an unbounded loop.
 It is a runtime statement and is rejected in a composition body. `yield`
 makes the function a generator source: `yield t: v` publishes `v` at `t`,
 where a `duration` is measured from the time the body is running and a
-`datetime` is absolute; the body suspends until then and resumes after the
-`yield`. A generator has no temporal parameters, no `state`, `cache`, `out`
+`datetime` is absolute. Negative durations and targets not strictly greater
+than the preceding yield target raise a node error. Ordering includes skipped
+past entries and spans resumptions; see ADR 0015 for operand order and
+past/due/future behavior. A generator has no temporal parameters, no `state`, `cache`, `out`
 or scheduler injection, and no `when`, `start` or `stop` block; its `return`
 carries no value and finishes the source, `for` is not admitted, and a
 `yield` sits at statement level (the body, a `while` block, an `if`
@@ -1577,18 +1593,27 @@ then evaluates the struct's `requires` clause. Every parameter must resolve;
 an inference error.
 
 For a fully applied nominal struct `S`, `delta<S>(...)` accepts named
-fields only and produces a contextual update value rather than an ordinary
-source type. The proposed [collection delta extension](../design/contextual-collection-deltas.md)
+fields only and constructs its sparse delta. The
+[collection delta extension](../design/contextual-collection-deltas.md)
 also admits shape-specific set, fixed-list, tuple and map constructors. Its
 sparse entry lists are contextual constructor arguments only; they do not
 extend ordinary sequence literals. Every
 field may be omitted independently of the complete constructor's requirements
-or defaults. Omission means no change and does not apply a default. Explicit
-`null` means clear an optional field and is distinct from omission; it is an
-error for a required field. Delta constructors may appear only where runtime
-output, a harness or replay sequence, or a temporary `let` binding supplies an
-expected delta shape. They are not admitted as function parameter, function
-result, state, collection-element, or struct-field types.
+or defaults. Omission means no change and does not apply a default. Optional
+field clearing remains a separate open operation; explicit `null` and
+invalidation are excluded from the finite publication profile.
+
+Runtime output, harness/replay, nested constructor and contextual immutable
+`let` positions retain their admitted delta contexts. In an ordinary
+`delta<S>` value context, `delta<S>(...)` constructs an independently owned
+value under the [ordinary delta type contract](../design/ordinary-delta-types.md).
+That type is admitted in ordinary bindings, parameters, value-function results,
+struct fields, list elements and prepared global entries for the finite profile.
+`delta<S>` names that type; `delta<S>(...)` constructs its value. Owned
+construction and retention preserve
+the existing written-order and failure rules; a borrowed delta observation
+does not become owning merely through an annotation. State/cache admission
+and publication constraints remain separate.
 
 ## Canonical temporalization
 
@@ -1981,17 +2006,15 @@ if no seed or successful set supplied one. Set preserves the bound type.
 Stored values are ordinary typed values, never endpoints or capabilities.
 Replay is configured with ordinary const data and record with a const string
 key. No node's temporal shape silently determines a stored value type.
-Complete HGL replay/record bodies await the ordinary sequence, structural
-delta storage, recording construction and aggregate access contracts listed
-there. The [value-mutability contract](../design/value-mutability.md) supplies
-lexical aggregate borrowing and independent owning retention, without adding
-ordinary list operations or structural delta storage. The separate
+The [value-mutability contract](../design/value-mutability.md) supplies
+lexical aggregate borrowing and independent owning retention. The
 [ordinary-list contract](../design/ordinary-list-values.md) supplies typed
-empty construction, length, indexed reads and retained end growth. Nullable
-elements, structural delta storage and generic replay relationships remain
-unresolved. The
-[collection eval profile](../design/eval-collection-deltas.md)
-defines publication behavior, not a substitute source container facility.
+empty construction, length, indexed reads and retained end growth. The
+[ordinary delta type contract](../design/ordinary-delta-types.md) supplies
+`list<TimedValue<T>>` and the generic source relationship for
+admitted scalar/structural shapes. Nullable ordinary elements remain separate.
+The [collection eval profile](../design/eval-collection-deltas.md) retains
+its publication admission; storing delta data does not bypass it.
 
 `start` runs once after replay-aware state initialization. `stop` runs once at
 teardown. State storage and injected capabilities are runtime-owned and are

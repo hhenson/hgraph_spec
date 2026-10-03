@@ -9,8 +9,10 @@ not injectable operations. Neither advances a cursor or uses a timestamp.
 
 The rules below preserve the presence behavior needed by eval. They do not
 supply a general source sequence type, its construction, a nullable type
-annotation, or a first-class structural delta container. Those dependencies
-remain open in [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md#unresolved-source-contracts).
+annotation or a nullable structural delta container. Nullable sequence
+formation remains open in [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md#unresolved-source-contracts).
+The [ordinary delta type extension](ordinary-delta-types.md) separately
+supplies non-nullable owned publication data.
 In the examples, `result` denotes an already admitted ordinary sequence;
 the bracket notation in the table describes its slots using harness notation.
 It is not a new ordinary value constructor.
@@ -20,7 +22,7 @@ It is not a new ordinary value constructor.
 An in-range read yields its present payload or the existing absence literal
 `null`. It never returns a held value or default scalar. A scalar payload has
 its ordinary scalar type; a structural publication payload retains the
-contextual `delta_of(T)` relationship where separately admitted.
+contextual `delta<T>` relationship where separately admitted.
 
 | Sequence slots | Expression | Result |
 |---|---|---|
@@ -120,5 +122,6 @@ separate meaning. Harness `_` remains the external no-publication slot
 spelling; this contract does not add `null` as a harness-slot alias.
 
 Presence refinement makes a payload usable only in a context already
-admitting its type and ownership. It does not make a structural delta an
-ordinary storable value or complete the source parameter type for replay.
+admitting its type and ownership. Ordinary delta storage uses its own
+type/retention contract; presence refinement does not provide an owning
+copy or permit a nullable local to escape.

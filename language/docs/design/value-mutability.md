@@ -10,7 +10,9 @@ type in either binding. Temporalization, generic type matching and the
 
 This contract defines ownership, assignment and lexical aggregate borrowing.
 It adds no list construction, growth or other collection API, nullable element
-type, or first-class structural delta type. Each operation still needs its
+type, or first-class structural delta type. The separate
+[delta type extension](ordinary-delta-types.md) admits ordinary publication
+deltas under these same ownership rules. Each operation still needs its
 ordinary value contract. The separate
 [ordinary-list extension](ordinary-list-values.md) defines typed empty
 construction, length, indexed reads and retained end growth under these rules.

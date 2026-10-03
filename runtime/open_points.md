@@ -39,7 +39,7 @@ them.
 | 11 | Failure handling order | Engine 1 | Specify stop-then-report only and defer the alternative, or keep both as configuration |
 | 12 | Pausing a cycle, for mesh | Engine 2 | An optional facility with rules, or a mesh design without it |
 | 13 | When is an owned bundle valid | TS 1 | Output stays valid after its last field invalidates; a non-peered input does not |
-| 14 | The delta of a whole value | TS 7 | `delta_value(x)` has a specified scalar result; structural contextual result types and output application remain open |
+| 14 | The delta of a whole value | TS 7 | Scalar and bounded structural publication deltas are specified, with ordinary `delta<T>` storage; excluded publication/state transitions remain separate |
 | 15 | Writing the output in start | Injectables 1 | Nothing needs it; the rule to change is INJ-8 |
 | 16 | `lag` on HGL's clock | Injectables 2 | A language extension; lands in hgraph first |
 | 17 | Integer overflow, division, NaN | Scalar 1 | hgraph's arithmetic table is the reference until HGL settles it |

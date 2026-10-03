@@ -24,16 +24,15 @@ call rules.
 
 The result is derived from the endpoint's **temporal shape**, not from the
 stored representation. In generic checking, retain that
-derived relationship symbolically. Writing `delta_of(T)` in this specification
-names that relationship only: it is not an HGL function, type constructor,
-source type, annotation, or new first-class storable delta value. It is
-distinct from the `delta_value(endpoint)` accessor and `delta<S>(...)`
-constructor. A runtime return/output context must
-check the derived delta against the same temporal output shape.
+derived relationship symbolically. The [ordinary delta type extension](ordinary-delta-types.md)
+admits `delta<T>` as a source type expression for its finite publication
+profile. It is distinct from the `delta_value(endpoint)` accessor and
+`delta<S>(...)` constructor. A runtime return/output context must check
+the derived delta against the same temporal output shape.
 
 For this scalar publication profile, T is one of
 `bool`, `i64`, `f64`, `str`, `date`, `time`, `datetime`, or `duration`.
-`delta_of(T)` is the ordinary scalar T because a TS's delta is the scalar
+`delta<T>` is the ordinary scalar T because a TS's delta is the scalar
 published in this cycle. The call reads that delta explicitly; it does not
 read the held value as a substitute when there was no publication. Ordinary
 scalar ownership/copy rules apply, and a retained scalar is independent of
@@ -44,7 +43,7 @@ of T. The signature and generic body below retain that relationship, but
 structural instantiations require the separate contextual-delta/application
 contract. This record admits only the eight scalar instantiations above.
 It does not admit collections by erasing them to a scalar or assuming
-`delta_of(T)` equals T. Existing struct delta constructors retain their own
+`delta<T>` equals T. Existing struct delta constructors retain their own
 specified contexts independently of this metadata extension.
 
 ## Phase and presence
@@ -109,8 +108,10 @@ For the same reason a record implementation must obtain the publication
 with `delta_value(ts)` and retain an owned delta with its timestamp. Its scalar
 delta is an ordinary T. The reusable store in
 [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) does not supply
-recording construction or make structural deltas ordinary storable values;
-those source contracts remain open.
+recording construction. The [ordinary data contract](../../../library/ordinary_replay_record.md)
+supplies `list<TimedValue<T>>`, whose value field has type `delta<T>`.
+This field reduces to T for the eight scalar types and carries the sparse
+delta for shapes admitted by the [ordinary delta type extension](ordinary-delta-types.md).
 
 ## Consequences
 

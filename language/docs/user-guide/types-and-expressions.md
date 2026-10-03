@@ -753,10 +753,10 @@ delta<Box<f64>>(value: 1.5)
 ```
 
 An omitted delta field means no change, and field defaults are never applied
-while constructing a delta. Explicit `null` clears an optional field; it is
-not the same as omission. Clearing a required field is a type error. A generic
-delta target must be fully applied; delta construction does not infer an
-omitted type argument.
+while constructing a delta. Optional-field clearing is distinct from omission;
+its encoding remains open, and explicit `null` is excluded from the finite
+publication-delta profile. A generic delta target must be fully applied;
+delta construction does not infer an omitted type argument.
 
 Deltas recurse through structural fields and stop at atomic boundaries:
 
@@ -770,11 +770,15 @@ delta<Book>(
 Here `best` receives a sparse nested delta. `configuration` is atomic and must
 therefore receive a complete `BookConfig` snapshot.
 
-`delta<T>` is a contextual update value rather than an ordinary source type.
-It may appear in runtime output, harness and replay sequences, and temporary
-`let` bindings, but not as a struct field or ordinary function parameter or
-result. Every temporal value already has an associated delta, so admitting a
-normal `delta<delta<T>>` type would describe the wrong abstraction.
+`delta<T>` is the type marker and `delta<T>(...)` its constructor syntax.
+[Ordinary publication-delta types](../design/ordinary-delta-types.md) admit
+the marker in annotations, ordinary fields, parameters, results and
+container elements in the admitted finite shape profile. Scalar deltas reduce
+to the scalar type; structural deltas preserve their full originating shape
+and differ from held T values. The constructor retains independent data in
+an ordinary context, while output application keeps its own publication
+constraints. This storage extension does not admit atomic boundaries merely
+because other contextual output constructors can use them.
 
 A runtime function writes a delta with the ordinary output forms:
 

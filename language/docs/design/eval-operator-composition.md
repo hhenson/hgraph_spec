@@ -21,15 +21,27 @@ The test author calls `eval(target, ...)`; eval constructs and configures the
 operators and owns the ordinary input data and recording for that run.
 Replay receives its input sequence as an ordinary const argument. Record
 receives a const string key and uses the run-wide `global_state` store;
-eval retrieves the recording after graph stop. These source contracts have
-the value-container dependencies listed in
+eval retrieves the recording after graph stop. For eight scalar types these
+source contracts use the [ordinary scalar data contract](../../../library/ordinary_replay_record.md).
+The [ordinary delta type extension](ordinary-delta-types.md) generalizes that
+data path to the admitted structural profile. Remaining dependencies are in
 [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md#unresolved-source-contracts).
 Replay and record remain normal operators with their own callable contracts. They may be
 declared in the standard library and used independently. This arrangement
 places no visibility restriction on them and does not require the eval
 caller to select recording keys, seed storage, or configure a recorder.
+Before start, eval finalizes its owner-supplied seed configuration, then
+selects its recorder keys under
+[recorder-key ownership](eval-recorder-keys.md), avoiding all closed resolved
+source, seed and other internal keys for that run. This does not change
+ordinary caller-selected global-state key semantics.
 
 This composition introduces no ordinary HGL type for a harness sequence.
+For the eight scalar types, eval converts present harness positions to
+ordinary `TimedValue<T>` entries and retains the dense horizon separately.
+The replay list contains no absent elements. Its slot-derived entry times
+are increasing; independent callers of replay retain the existing generator
+timing behavior rather than acquiring a new ordering validator.
 
 Eval calls the target as declared. A composition function may wire an existing
 input through. A test that claims to exercise delta application by a compute
@@ -146,17 +158,18 @@ These cases follow the rules above:
 ## Deferred extensions
 
 Beyond the scalar [delta-value contract](delta-value-metadata.md), this
-foundation does not decide structural delta result types, first-class delta
-storage, set/map/list harness literals, a generic apply-delta operation,
-explicit child invalidation or invalid-child membership encoding, reference
-fixtures, or the bridge API used by the operators. TS-5 still requires
+foundation's structural publication shapes and harness literals use the
+[collection contract](contextual-collection-deltas.md), with ordinary storage
+and derived type matching supplied by [ordinary delta types](ordinary-delta-types.md).
+A general apply-delta operation, explicit child invalidation, invalid-child
+membership encoding and reference fixtures remain separate. TS-5 still requires
 child-validity and membership information beyond published-value deltas when
 reconstructing full collection state. These require separate specification
 extensions.
 
 The proposed [run-wide keyed-state foundation](decisions/0016-eval-scalar-buffer-capabilities.md)
 configures replay with ordinary const data and record with a const key for
-reusable shared storage. It does not complete the ordinary sequence,
-contextual-delta storage or recording-construction language. The eval
-behavior above does not imply executable HGL operator bodies before those
-source contracts are settled.
+reusable shared storage. The [ordinary scalar data contract](../../../library/ordinary_replay_record.md)
+completes this data representation and gives source bodies for the eight
+scalar types. The ordinary delta extension supplies the structural storage
+profile without introducing general nullable ordinary sequences.

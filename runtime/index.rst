@@ -35,6 +35,9 @@ The runtime begins where wiring ends: at the builder boundary.
    cases_engine
    cases_injectables
    cases_scalar
+   cases_ordinary_replay_record
+   cases_ordinary_delta_types
+   cases_eval_recorder_keys
    wiring <../wiring/wiring.md>
    wiring cases <../wiring/cases_wiring.md>
    library operator contracts <../library/operator_contracts.md>

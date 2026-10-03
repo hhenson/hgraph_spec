@@ -108,19 +108,55 @@ generator source:
   a lambda), where a backend has no resume point to jump to.
 - The body starts running in the node's first evaluation, which the runtime
   requests at start. `yield t: v` with a `duration` `t` means `t` after the
-  time at which the body is running; with a `datetime` it is absolute. This
-  is hgraph's generator rule, and it is what makes a periodic source a
-  `yield` inside a loop. It differs from a timed sequence element in a test,
+  evaluation time at which the body is running; with a `datetime` it is
+  absolute. This makes a periodic source a `yield` inside a loop. It differs
+  from a timed sequence element in a test,
   whose duration key is an offset from the run's start.
-- An absolute time earlier than now is skipped and the body continues. A
-  time equal to now publishes `v` immediately and the body continues. A
-  second publication at one time is an error, as in hgraph.
-- A later time parks `v`, schedules the node for `t`, and suspends the body.
+- Every resolved yield time must be strictly greater than the previous
+  resolved yield time in this generator invocation. Equal or decreasing
+  times raise a node error, including skipped past absolute entries and
+  yields reached after resumption. The first yield has no predecessor.
+- A negative duration is an error; it never becomes a skipped past target.
+  An absolute datetime earlier than the current evaluation time is skipped
+  and the body continues. A target equal to the current evaluation time
+  publishes `v` immediately and the body continues. A second publication at
+  one time is an error.
+- A later target parks `v`, schedules the node for that target, and suspends the body.
   When the node evaluates, it publishes `v` and resumes the body after the
   `yield`. A body that ends is finished: the node never evaluates again.
 - Locals live across suspensions as node-local storage and are not
   recorded. After a restore the body restarts from its first statement,
   which is what hgraph's generator does.
+
+#### Operand evaluation, resolution and retention
+
+1. Check t as `duration` or `datetime` and v against the output context.
+   Evaluate t once, then v once. A time-expression failure prevents v;
+   a payload failure prevents target validation. Existing phase and capability
+   restrictions apply.
+2. After both operands succeed, reject a negative duration. Otherwise resolve
+   a duration by checked addition to the current evaluation time; a datetime
+   is already absolute. Arithmetic inside t belongs to step 1. Zero duration
+   and negative scalar payloads are allowed, subject to step 3.
+3. Require the target to be strictly greater than the preceding yield target
+   in this invocation. Equal or earlier targets raise a node error. The first
+   yield has no predecessor. Skipped past targets count; resumption preserves
+   the preceding target, while a fresh invocation starts without one.
+4. After validation: a past absolute target skips publication and continues;
+   a due target publishes and continues; a future target independently retains
+   v, schedules the target and suspends. Skipping needs no parked copy.
+5. On resumption, publish the retained payload and continue after the yield.
+   Do not reevaluate operands or resolve the target again. Later source
+   changes cannot change the retained payload. Engine bounds govern execution.
+6. Operand, admission, arithmetic, ordering and retention failures propagate
+   as node errors. Do not schedule, suspend, publish or continue that yield
+   after failure. Preserve earlier completed effects and publications; no
+   rollback is implied. This adds no effects, injectables or checkpoint rules.
+
+See [compiler cases](../../../../compiler/cases_generator_operands.md) and
+[examples](../../../examples/generator-yield-operands.hgl).
+Audit evidence: [negative durations](https://github.com/hhenson/hgraph_spec_audit/blob/9967125fe6fad385e2d120e40049348402e0c686/runtime/validation/generator_negative/README.md)
+and [target ordering](https://github.com/hhenson/hgraph_spec_audit/blob/9967125fe6fad385e2d120e40049348402e0c686/runtime/validation/generator_ordering/README.md).
 
 ```hgl
 fn constant(const value: i64, const delay: duration = 0s) -> i64 {
@@ -178,8 +214,8 @@ and, like `out`, `clock` and `scheduler`, stays contextual.
 An implementation could represent a generator by its resume position, live
 locals and a pending publication. At a future yield it saves that state and
 schedules resumption; at a due yield it publishes and continues in source
-order. It must preserve skipped past times, duplicate-time errors, loops,
-conditionals and termination. Native coroutines and explicit state machines
+order. It must preserve skipped past absolute times, negative-duration and
+duplicate-time errors, loops, conditionals and termination. Native coroutines and explicit state machines
 are possible realizations, not language requirements.
 
 ## Open questions
@@ -192,6 +228,6 @@ are possible realizations, not language requirements.
   constant collection. It needs the loop index hoisted beside the locals
   and an index-based loop in each backend; until then the checker rejects
   it and points to `while`.
-- A scripted test cannot yet expect an error, so the duplicate-time rule is
-  covered by the runtime error message alone.
+- A scripted test cannot yet assert an expected error; the compiler
+  conformance cases specify the required failures.
 - `break` and `continue` for `while`.

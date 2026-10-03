@@ -103,6 +103,10 @@ positionally or by name. To evaluate an operator, wrap it in a `fn`.
 Eval configures these operators and owns the run's typed input and capture
 buffers; the test does not call or configure replay and record separately.
 They remain normal operators that may also have independent library APIs.
+Eval chooses recorder keys before start that differ from every resolved
+source, seed and other internal key in the run, including known nested graph
+requirements. Source-selected keys keep their ordinary sharing semantics;
+see [recorder-key ownership](../design/eval-recorder-keys.md).
 The recorder retains copies of output deltas, so later ticks cannot change
 an earlier result. The [operator-composition contract](../design/eval-operator-composition.md)
 describes this boundary.
@@ -288,10 +292,17 @@ The proposed [run-wide keyed-state foundation](../design/decisions/0016-eval-sca
 configures replay with ordinary const data and record with a const string
 key. The reusable store binds const keys and exact value types before start;
 hooks access those entries without name lookup or type dispatch. An entry
-is not initialized merely by binding it. Ordinary sequence and
-recording-construction source contracts remain open. This direction does
-not change arguments to the test's eval call or claim complete executable
-HGL replay/record bodies.
+is not initialized merely by binding it. For the eight scalar types,
+[ordinary timed values](../../../library/ordinary_replay_record.md) supply
+the replay list and recording: a present publication is an ordinary
+`TimedValue<T>` with a datetime field and a `delta<T>` value field, which
+reduces to the scalar T. Eval omits silent input
+positions from that list and retains their dense horizon separately.
+The test's eval arguments stay the same. The
+[ordinary delta type extension](../design/ordinary-delta-types.md) supplies
+the same `TimedValue<T>` spelling for the structural publication profile,
+where T is the original shape and its value field holds the sparse delta; general
+nullable ordinary sequences remain separate.
 
 ## First-pass limits
 
