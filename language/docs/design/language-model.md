@@ -264,7 +264,7 @@ Struct type arguments satisfy every occurrence's requirements. Ordinary value
 positions require canonical `value_type`; occurrences under `delta<T>` admit
 its supported temporal shapes. Forwarding through another generic application
 propagates that parameter's requirements. The [shape-argument rules](generic-struct-shape-arguments.md)
-define the intersection; exact source arguments remain part of nominal identity.
+define the intersection; exact canonical source arguments remain part of nominal identity.
 Thus `Box<atomic<Quote>>` remains invalid for `value: T`, while a field
 `value: delta<T>` stores ordinary delta data for an admitted T.
 

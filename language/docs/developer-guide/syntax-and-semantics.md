@@ -896,7 +896,7 @@ struct Vector<T, const size: i64> {
 An applied generic struct is invariant and nominal by both origin and complete
 argument list. `Vector<f64, 3>` and `Vector<f64, 4>` differ, as do `Box<Base>`
 and `Box<Derived>`. A bare generic origin and a partial application are not
-types. Specialization retains complete source-type arguments rather than
+types. Specialization retains complete canonical source-type arguments rather than
 only their ordinary payload projections.
 
 Constructor inference matches supplied named fields and an optional expected

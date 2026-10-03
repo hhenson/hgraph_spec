@@ -16,5 +16,5 @@ Use Publication, Batch and Mixed from that contract.
 
 The outside-value_type rows apply only when the delta publication profile
 admits such a temporal shape; this rule adds no publication shapes itself.
-Complete source arguments determine invariant nominal identity, even if two
+Complete canonical source arguments determine invariant nominal identity, even if two
 admitted shapes derive the same ordinary payload type.

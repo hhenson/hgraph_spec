@@ -12,8 +12,7 @@ A struct type argument must satisfy every occurrence of its parameter:
 
 Check these obligations symbolically and after substitution. An unresolved,
 conflicting or unsupported application is a checking error; it does not create
-a partial specialization. An unused parameter gains no temporal-shape permission
-from this rule. No new constraint predicate, grammar or runtime type test is added.
+a partial specialization. An unused parameter retains the `value_type` domain. No new constraint predicate, grammar or runtime type test is added.
 
 ```hgl
 struct Publication<T> { value: delta<T> }
@@ -30,8 +29,9 @@ relax that restriction. Concrete shape admission remains the
 [ordinary delta contract](ordinary-delta-types.md), not a property of a
 particular struct name.
 
-Specializations retain their complete invariant source arguments, including
-nominal arguments, fixed sizes and temporal boundaries. Equal derived payload
+Specializations retain their complete invariant canonical source arguments, including
+nominal arguments, fixed sizes and admitted temporal boundaries after
+canonicalization. Equal derived payload
 types do not merge distinct source arguments. Fields contain the resulting
 ordinary values; allowing a temporal shape as an argument does not store an
 endpoint. Constructor inference still requires a unique complete substitution
