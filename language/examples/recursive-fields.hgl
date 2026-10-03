@@ -25,18 +25,30 @@ export fn tail(list: atomic<Node>) -> atomic<Node> => list.next
 # The value at the root of a tree's left subtree.
 export fn left_value(tree: atomic<Tree<i64>>) -> i64 => tree.left.value
 
+# Eval replays and records scalar observations here. Recursive values remain
+# inside the graph, including the whole-depth equality checks.
+fn pair(first: i64, second: i64) -> atomic<Node> =>
+    Node(value: first, next: Node(value: second))
+fn triple(first: i64, second: i64, third: i64) -> atomic<Node> =>
+    Node(value: first, next: Node(value: second, next: Node(value: third)))
+fn prepended_matches(value: i64) -> bool =>
+    prepend(value, pair(2, 3)) == triple(value, 2, 3)
+fn tail_matches(last: i64) -> bool =>
+    tail(triple(1, 2, 3)) == pair(2, last)
+
+fn make_tree(value: i64) -> atomic<Tree<i64>> =>
+    Tree<i64>(value: 1, left: Tree<i64>(value: value), right: Tree<i64>(value: 3))
+fn constructed_left_value(value: i64) -> i64 => left_value(make_tree(value))
+
 test prepend_builds_a_longer_list {
-    assert eval(prepend, value: [1], rest: [Node(value: 2, next: Node(value: 3))]) ==
-        [Node(value: 1, next: Node(value: 2, next: Node(value: 3)))]
+    assert eval(prepended_matches, value: [1]) == [true]
 }
 
 test lists_compare_through_their_whole_depth {
-    assert eval(tail, list: [Node(value: 1, next: Node(value: 2, next: Node(value: 3)))]) ==
-        [Node(value: 2, next: Node(value: 3))]
-    assert eval(tail, list: [Node(value: 1, next: Node(value: 2, next: Node(value: 3)))]) !=
-        [Node(value: 2, next: Node(value: 4))]
+    assert eval(tail_matches, last: [3]) == [true]
+    assert eval(tail_matches, last: [4]) == [false]
 }
 
 test a_generic_tree {
-    assert eval(left_value, tree: [Tree<i64>(value: 1, left: Tree<i64>(value: 2), right: Tree<i64>(value: 3))]) == [2]
+    assert eval(constructed_left_value, value: [2]) == [2]
 }
