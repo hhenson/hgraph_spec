@@ -171,7 +171,7 @@ This requires ownership independence, not a particular copy or allocation.
 These failures follow the existing node error contract; none produces a
 successful no-publication result in place of the error. This clarification
 does not specify a new checkpoint contract or general expression order.
-The [operand cases](../../../../runtime/cases_generator_operands.md) and
+The [compiler operand cases](../../../../compiler/cases_generator_operands.md) and
 [source example](../../../examples/generator-yield-operands.hgl) distinguish
 effects, publication and resumption.
 

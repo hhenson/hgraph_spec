@@ -48,6 +48,11 @@ has them all.
 [Design options](design_options.md) are neither: they are ways of meeting
 the required rules, recorded with their trade-offs, and never a rule.
 
+HGL source-language generator behavior is covered by
+[compiler conformance](../compiler/conformance.md). Generators lower to runtime
+nodes and scheduling; their operand evaluation rules do not require a runtime-only
+implementation to provide a source-language generator facility.
+
 ## Cases
 
 - [Atomic](cases_atomic.md): first tick, idle cycles, equal publications and repeated reads.
@@ -56,7 +61,6 @@ the required rules, recorded with their trade-offs, and never a rule.
 - [Ordinary struct constructor order](cases_constructor_order.md): argument order, retention and failure.
 - [Ordinary list values](cases_ordinary_lists.md): construction, reads, growth and retention.
 - [Ordinary scalar replay and recording](cases_ordinary_replay_record.md): timed values, lifecycle and dense horizon.
-- [Generator yield operands](cases_generator_operands.md): operand order, target resolution, retention and failure.
 - [Ordinary delta types](cases_ordinary_delta_types.md): shape identity, generic matching, storage, construction and publication boundaries.
 - [Eval recorder keys](cases_eval_recorder_keys.md): pre-start key selection and source-state isolation.
 - [Growing lists](cases_growing_lists.md): growth, truncation, retention and resurrection.

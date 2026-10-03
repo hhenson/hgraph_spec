@@ -1,5 +1,8 @@
 # Generator yield operand cases
 
+These are [HGL compiler conformance](conformance.md) cases for generator
+lowering, not additional required rules for a runtime-only implementation.
+
 These expected observations clarify
 [yield operand evaluation](../language/docs/design/decisions/0015-pull-sources.md#operand-evaluation-resolution-and-retention).
 Let s be the current body evaluation time and d the minimum engine step.
