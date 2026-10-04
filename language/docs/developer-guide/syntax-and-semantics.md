@@ -1080,6 +1080,9 @@ graph execution. Unresolved required bindings and unsupported substituted
 operations or storage shapes are checking errors. Each distinct binding keeps
 its own type identity and storage layout; execution must not discover them
 from payloads or runtime schemas.
+For dependency candidates, the consuming compiler reads the provider
+[specialization artifact](../design/modules.md#cross-module-retained-specialization);
+a signature alone does not supply a body or storage implementation.
 
 This substitution does not make a retained type or `const` parameter available
 as a body-visible value. Reading that parameter as a value still requires an
@@ -1544,9 +1547,9 @@ placeholder      = "_";
 A qualified callee begins with an alias introduced by `use module.path as
 alias` and uses `::` between namespace and declaration names. Dots remain the
 syntax of canonical module paths in `module` and `use` declarations; they are
-not expression member access. A named argument is an identifier directly
-followed by `:`, and a timed sequence element is a temporal literal directly
-followed by `:`. A sequence literal is a constant `list` value
+not expression member access. A named argument starts with a `member_name`
+(an identifier or `time`) directly followed by `:`. A timed sequence element
+is a temporal literal directly followed by `:`. A sequence literal is a constant `list` value
 of one element type, and a tuple literal a constant tuple; a single
 parenthesized expression is grouping, so a one-element tuple needs the
 trailing comma and `()` is a diagnostic. Timed elements and the `_`
