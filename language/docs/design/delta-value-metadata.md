@@ -33,7 +33,10 @@ profile. It is distinct from the `delta_value(endpoint)` accessor and
 the derived delta against the same temporal output shape.
 
 For this scalar publication profile, T is one of
-`bool`, `i64`, `f64`, `str`, `date`, `time`, `datetime`, or `duration`.
+`bool`, `i64`, `f64`, `str`, `date`, `time`, `datetime`, `duration`,
+`civil_datetime`, `timezone`, or `zoned_datetime`.
+The [temporal publication extension](temporal-scalar-publications.md) preserves
+the three additional types' existing identities and construction rules.
 `delta<T>` is the ordinary scalar T because a TS's delta is the scalar
 published in this cycle. The call reads that delta explicitly; it does not
 read the held value as a substitute when there was no publication. Ordinary
@@ -43,7 +46,7 @@ subsequent input changes (VAL-17, TS-22).
 A structural T requires its recursive sparse delta, not a complete snapshot
 of T. The signature and generic body below retain that relationship, but
 structural instantiations require the separate contextual-delta/application
-contract. This record admits only the eight scalar instantiations above.
+contract. This record admits only the eleven scalar instantiations above.
 It does not admit collections by erasing them to a scalar or assuming
 `delta<T>` equals T. Existing struct delta constructors retain their own
 specified contexts independently of this metadata extension.
@@ -112,7 +115,7 @@ delta is an ordinary T. The reusable store in
 [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) does not supply
 recording construction. The [ordinary data contract](../../../library/ordinary_replay_record.md)
 supplies `list<TimedValue<T>>`, whose value field has type `delta<T>`.
-This field reduces to T for the eight scalar types and carries the sparse
+This field reduces to T for the eleven scalar types and carries the sparse
 delta for shapes admitted by the [ordinary delta type extension](ordinary-delta-types.md).
 
 ## Consequences

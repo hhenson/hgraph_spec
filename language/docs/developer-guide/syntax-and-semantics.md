@@ -704,7 +704,8 @@ duration_unit    = "d" | "h" | "m" | "s" | "ms" | "us";
 1h + 30m                               # the same value, folded at compile time
 ```
 
-Every literal is validated and normalized when it is lexed:
+Syntax and calendar fields are validated when lexed. Provider-dependent checks
+occur when the value is constructed:
 
 - a date must exist in the calendar, so `@2026-02-29` is a diagnostic;
 - a time must be earlier than `24:00:00`; `24:00:00` and the leap-second form
@@ -727,8 +728,13 @@ Every literal is validated and normalized when it is lexed:
   digits, `.`, `_`, `-`, `+`, and `/`; no empty, leading, trailing, or
   repeated `/`; no `.` or `..` components; at most 255 bytes); whether the
   zone exists and whether a zoned literal's offset agrees with its zone are
-  checked by the run's time-zone provider under hgraph's strict decoding rule,
-  so a literal's meaning never depends on the compiler's TZDB;
+  checked by the run's time-zone provider under strict decoding. Provider-backed
+  literal validation requires exact, case-sensitive membership in the configured
+  provider's TZDB catalog. Accepted links retain their exact name identity;
+  names absent from that catalog are rejected, with no synthetic unknown-zone
+  fallback. Syntactic validity alone does not establish membership, and a
+  literal's meaning never depends on the compiler's TZDB. Eval input
+  materialization follows the [pre-start rule](../design/temporal-scalar-publications.md);
 - `T` and `Z` are upper case, every field present has exactly the digit
   count shown, omitted seconds and offset minutes are zero, and the fraction
   has one to six digits;
@@ -1797,7 +1803,7 @@ intentional exception: its `all_valid` checks minimum-window readiness, while
 `valid` becomes true on the first value.
 
 The canonical [delta_value(endpoint)](../design/delta-value-metadata.md)
-metadata call has the ordinary scalar result type for the admitted eight
+metadata call has the ordinary scalar result type for the admitted eleven
 scalar endpoints in a valid and modified runtime context. The particular
 endpoint must be proven valid and modified; an any-input-modified condition
 alone does not establish this for every input. The proposed
