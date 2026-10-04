@@ -704,7 +704,8 @@ duration_unit    = "d" | "h" | "m" | "s" | "ms" | "us";
 1h + 30m                               # the same value, folded at compile time
 ```
 
-Every literal is validated and normalized when it is lexed:
+Syntax and calendar fields are validated when lexed. Provider-dependent checks
+occur when the value is constructed:
 
 - a date must exist in the calendar, so `@2026-02-29` is a diagnostic;
 - a time must be earlier than `24:00:00`; `24:00:00` and the leap-second form
