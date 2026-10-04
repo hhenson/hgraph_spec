@@ -1073,6 +1073,9 @@ graph execution. Unresolved required bindings and unsupported substituted
 operations or storage shapes are checking errors. Each distinct binding keeps
 its own type identity and storage layout; execution must not discover them
 from payloads or runtime schemas.
+For dependency candidates, the consuming compiler reads the provider
+[specialization artifact](../design/modules.md#cross-module-retained-specialization);
+a signature alone does not supply a body or storage implementation.
 
 This substitution does not make a retained type or `const` parameter available
 as a body-visible value. Reading that parameter as a value still requires an
