@@ -1,0 +1,5 @@
+module cases.contextual_bindings.conditional_repeated_result
+fn sample(condition: bool, value: i64) -> i64 { var local: i64
+ if condition {local = 1
+ local = 2} else {local = value}
+ return local }

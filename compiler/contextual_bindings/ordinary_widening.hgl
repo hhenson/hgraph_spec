@@ -1,0 +1,5 @@
+module cases.contextual_bindings.ordinary_widening
+fn sample(value: f64) -> f64 { when {var local: f64 = 1
+ local = 2
+ return value + local} }
+test ordinary_widening { assert eval(sample, value: [1.0, 2.0]) == [3.0, 4.0] }

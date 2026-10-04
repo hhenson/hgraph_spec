@@ -12,6 +12,9 @@ This does not add generator machinery to the runtime contract.
 
 ## Cases
 
+- [Contextual local bindings](cases_contextual_local_bindings.md): fixed scalar
+  or connection category, mutability and checking errors.
+
 - [Temporal scalar publications](cases_temporal_scalar_publications.md):
   civil and named-zone values, exact identity and retained publications.
 

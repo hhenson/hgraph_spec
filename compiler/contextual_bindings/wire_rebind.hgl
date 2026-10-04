@@ -1,0 +1,6 @@
+module cases.contextual_bindings.wire_rebind
+fn sample(first: i64, second: i64) -> i64 { var selected = first
+ let original = selected
+ selected = second
+ return original + selected + 2 }
+test wire_rebind { assert eval(sample, first: [1, 2], second: [10, 20]) == [13, 24] }

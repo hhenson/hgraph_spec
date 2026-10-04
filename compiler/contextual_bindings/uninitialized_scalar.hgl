@@ -1,0 +1,6 @@
+module cases.contextual_bindings.uninitialized_scalar
+fn sample(value: i64) -> i64 { var local: i64
+ local = 1
+ local = 3
+ return value + local }
+test uninitialized_scalar { assert eval(sample, value: [1, 2]) == [4, 5] }

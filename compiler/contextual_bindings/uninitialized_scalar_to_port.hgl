@@ -1,0 +1,5 @@
+module cases.contextual_bindings.uninitialized_scalar_to_port
+fn sample(value: i64) -> i64 { var local: i64
+ local = 1
+ local = value
+ return local }

@@ -1,0 +1,5 @@
+module cases.contextual_bindings.graph_scalar_local
+fn sample(value: i64) -> i64 { var local = 1
+ local = 3
+ return value + local }
+test graph_scalar_local { assert eval(sample, value: [1, 2]) == [4, 5] }

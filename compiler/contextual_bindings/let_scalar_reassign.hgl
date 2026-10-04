@@ -1,0 +1,4 @@
+module cases.contextual_bindings.let_scalar_reassign
+fn sample(value: i64) -> i64 { let local = 1
+ local = 2
+ return value + local }

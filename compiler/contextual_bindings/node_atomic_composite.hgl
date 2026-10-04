@@ -1,0 +1,3 @@
+module cases.contextual_bindings.node_atomic_composite
+fn sample(value: i64) -> i64 { when { let local: atomic<tuple<i64, i64>> = (1, 2)
+ return value + local[0] } }

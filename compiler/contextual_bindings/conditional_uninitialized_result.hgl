@@ -1,0 +1,4 @@
+module cases.contextual_bindings.conditional_uninitialized_result
+fn sample(condition: bool, value: i64) -> i64 { var local: i64
+ if condition {local = value} else {local = 3}
+ return local }

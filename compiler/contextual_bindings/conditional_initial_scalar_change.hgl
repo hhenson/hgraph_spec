@@ -1,0 +1,4 @@
+module cases.contextual_bindings.conditional_initial_scalar_change
+fn sample(condition: bool, value: i64) -> i64 { var local = 1
+ if condition {local = value} else {local = value}
+ return local }

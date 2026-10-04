@@ -1,0 +1,4 @@
+module cases.contextual_bindings.conditional_initial_port_change
+fn sample(condition: bool, value: i64) -> i64 { var local = value
+ if condition {local = 1} else {local = 2}
+ return local }

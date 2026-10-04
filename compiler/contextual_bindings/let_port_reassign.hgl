@@ -1,0 +1,4 @@
+module cases.contextual_bindings.let_port_reassign
+fn sample(first: i64, second: i64) -> i64 { let local = first
+ local = second
+ return local }
