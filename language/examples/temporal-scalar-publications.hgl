@@ -1,0 +1,39 @@
+module examples.temporal_scalar_publications
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+
+fn forward_civil(value: civil_datetime) -> civil_datetime => pass_through(value)
+fn forward_zone(value: timezone) -> timezone => pass_through(value)
+fn forward_zoned(value: zoned_datetime) -> zoned_datetime => pass_through(value)
+
+# Run in a configured time-zone context; named-zone literals use its provider.
+test temporal_publications {
+    let civil_a: civil_datetime = @2026-01-15T12:30:00.123456
+    let civil_b: civil_datetime = @2026-01-15T12:30:00.123457
+    assert eval(forward_civil, value: [civil_a, civil_a, _, civil_b]) == [
+        civil_a, civil_a, _, civil_b
+    ]
+    # Zone aliases retain their exact spelling and remain distinct values.
+    let zone_a: timezone = @[US/Eastern]
+    let zone_b: timezone = @[America/New_York]
+    assert zone_a != zone_b
+    assert eval(forward_zone, value: [zone_a, zone_a, _, zone_b]) == [
+        zone_a, zone_a, _, zone_b
+    ]
+    # These have the same instant, but different zones and resolved offsets.
+    let zoned_a: zoned_datetime = @2026-01-15T12:30+00:00[Etc/UTC]
+    let zoned_b: zoned_datetime = @2026-01-15T13:30+01:00[Europe/Paris]
+    assert zoned_a != zoned_b
+    assert eval(forward_zoned, value: [zoned_a, zoned_a, _, zoned_b]) == [
+        zoned_a, zoned_a, _, zoned_b
+    ]
+    # Exact wrappers also fix the shapes when no slot supplies a value.
+    assert eval(forward_civil, value: [_, _]) == [_, _]
+    assert eval(forward_zone, value: [_, _]) == [_, _]
+    assert eval(forward_zoned, value: [_, _]) == [_, _]
+    assert eval(forward_civil, value: []) == []
+    assert eval(forward_zone, value: []) == []
+    assert eval(forward_zoned, value: []) == []
+}

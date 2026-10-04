@@ -12,6 +12,9 @@ This does not add generator machinery to the runtime contract.
 
 ## Cases
 
+- [Temporal scalar publications](cases_temporal_scalar_publications.md):
+  civil and named-zone values, exact identity and retained publications.
+
 - [Atomic scalar equivalence](cases_atomic_scalar_equivalence.md):
   canonical identity for non-composite types and preservation of composite boundaries.
 

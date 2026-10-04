@@ -132,8 +132,9 @@ Each form requires the expected concrete ordinary type. The first borrows
 read-only access. The second borrows exclusive writable access to the existing
 entry, without making an owning local copy. Both are available in start,
 evaluation and stop hooks. An uninitialized entry still makes get fail.
-Primitive reads of `bool`, `i64`, `f64`, `str`, `date`, `time`, `datetime` and
-`duration` retain their owned-copy behavior: `var n: i64 = get(...)` is an
+Primitive reads of `bool`, `i64`, `f64`, `str`, `date`, `time`, `datetime`,
+`duration`, `civil_datetime`, `timezone` and `zoned_datetime` retain their
+owned-copy behavior: `var n: i64 = get(...)` is an
 ordinary local, and assigning n does not update the stored integer.
 
 A borrow lasts to the end of its declaring lexical block, never beyond the

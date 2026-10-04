@@ -7,7 +7,7 @@ export struct TimedValue<T> {
 }
 
 operator replay<T>(const values: list<TimedValue<T>>) -> T
-requires T in {bool, i64, f64, str, date, time, datetime, duration}
+requires T in {bool, i64, f64, str, date, time, datetime, duration, civil_datetime, timezone, zoned_datetime}
 
 impl fn replay<T>(const values: list<TimedValue<T>>) -> T {
     var index: i64 = 0
@@ -18,7 +18,7 @@ impl fn replay<T>(const values: list<TimedValue<T>>) -> T {
 }
 
 operator record<T>(ts: T, const key: str)
-requires T in {bool, i64, f64, str, date, time, datetime, duration}
+requires T in {bool, i64, f64, str, date, time, datetime, duration, civil_datetime, timezone, zoned_datetime}
 
 impl fn record<T>(ts: T, const key: str) {
     inject global_state, clock

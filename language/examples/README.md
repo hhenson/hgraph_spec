@@ -7,6 +7,8 @@ supported `test` blocks and compiles generated fixtures. Native test support
 varies by platform; this source-only repository has no CMake/CTest project.
 The entries below identify the implementation tests for each example.
 
+- [`temporal-scalar-publications.hgl`](temporal-scalar-publications.hgl) forwards
+  civil and named-zone scalar publications without changing their identities.
 - [`atomic-delta-publications.hgl`](atomic-delta-publications.hgl) shows
   complete atomic replacement, defaults and present empty-list snapshots.
 - [`ordinary-delta-types.hgl`](ordinary-delta-types.hgl) gives generic
