@@ -246,7 +246,9 @@ constructors. In the earlier window example, `T` is the rolling-window element
 type and both size parameters are part of the concrete window type.
 
 When a function parameter appears as an argument of a generic struct, that
-occurrence narrows it to the struct's canonical-value domain. For example,
+occurrence inherits the struct parameter's requirements: ordinary value uses
+require a canonical value type, while `delta<T>` uses require an admitted
+temporal shape. For example,
 `fn unwrap<T>(box: Box<T>) -> T` accepts fully applied `Box` specializations
 and binds `T` from the specialization metadata; it does not accept a runtime
 `Box<any>`. Generic struct syntax, construction inference, and inheritance are
@@ -472,9 +474,12 @@ The two candidates have concrete accumulator types but still match any fixed
 list size. The retained `size` participates in matching the input type; this form does
 not make its numeric value available inside the function body.
 
-A retained `_` argument can participate in matching, but the function body
-cannot currently read its value. Bind a concrete value when the implementation
-needs to use it in a calculation.
+A retained `_` argument can also occur in the body's type annotations and
+storage types. Once call matching binds it, the compiler substitutes that
+binding and checks the concrete body and storage before execution. Missing
+required bindings or unsupported concrete shapes are errors. This does not
+let the body read the parameter as a value; bind a concrete argument when the
+implementation needs that value in a calculation.
 
 Each concrete argument binds the corresponding implementation generic in
 declaration order; `_` retains it. Each request is checked against the

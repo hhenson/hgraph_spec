@@ -153,7 +153,7 @@ These cases follow the rules above:
 | all silent | `[_, _, _]` | `[_, _, _]` | No compute publication; OP-11 recording is empty; EVAL-5 retains input horizon. |
 | empty | `[]` | `[]` | No publication and zero input horizon; no scheduled work in this fixture. |
 | leading and trailing silence | `[_, 7, _, _]` | `[_, 7, _, _]` | Only one publication; input horizon includes both trailing silent cells. |
-| retained capture | publish A, then B through a scalar/atomic output | first recorded value stays A | VAL-17 requires independence from later output writes; the first capture is independent of the second publication. |
+| retained capture | publish A, then B through an admitted scalar output | first recorded value stays A | VAL-17 requires independence from later output writes; the first capture is independent of the second publication. |
 
 ## Deferred extensions
 

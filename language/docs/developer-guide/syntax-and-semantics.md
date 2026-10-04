@@ -97,10 +97,15 @@ civil_datetime zoned_datetime zoned_time timezone
 ```
 
 `_` on its own is the placeholder token, not an identifier. Every word in
-that list is reserved everywhere, including the ones such as
-`state`, `start`, `stop`, and `when` that are only meaningful at a particular
-position in a runtime function body. One exception: `const` is admitted as
-the name of an operator, a function, an instantiation and an imported name
+that list is reserved except for the name positions specified below. This
+includes `state`, `start`, `stop`, and `when`, even though each is meaningful
+only at a particular position in a runtime function body. `time` is also admitted as a struct field
+name, inherited field-default name, named-argument label, and member name after
+`.`. Thus `TimedValue(time: t, value: v)` and `entry.time` are valid. This
+exception does not admit `time` as a local, parameter, function, or generic
+name; in type position it remains the scalar type.
+
+`const` is admitted as the name of an operator, a function, an instantiation and an imported name
 (hgraph PR [#1671](https://github.com/hhenson/hgraph/pull/1671)), so the
 library spells hgraph's `const` by its own name
 ([MIG-009](../design/migration-requirements.md#mig-009-source-names-versus-native-identities));
@@ -184,9 +189,10 @@ struct_decl     = [ "export" ], [ "abstract" ], "struct", identifier,
                   [ struct_member, { NL, struct_member }, [ NL ] ], "}";
 struct_parent   = named_type;
 struct_member   = struct_field | inherited_default;
-struct_field    = identifier, ":", type, [ "=", const_expression ];
+member_name     = identifier | "time";
+struct_field    = member_name, ":", type, [ "=", const_expression ];
 inherited_default
-                = identifier, "=", const_expression;
+                = member_name, "=", const_expression;
 operator_decl   = "operator", identifier, [ generic_parameters ],
                   function_signature, [ requires_clause ], { operator_properties };
 operator_properties
@@ -873,11 +879,13 @@ Contextual temporalization occurs after this source-level relationship is
 established. A plain generic is consequently neither a time-series-only
 variable nor a runtime dynamically typed value.
 
-On a struct declaration, each type parameter is restricted to the canonical
-`value_type` domain. `atomic` and `rolling` cannot be supplied as generic
-struct arguments; temporal policy belongs in the field declaration, such as
-`value: atomic<T>`. Constant parameters retain their declared wiring-time
-value type and form part of specialization identity:
+On a struct declaration, type arguments must satisfy all their occurrences.
+An ordinary value position requires `value_type`; an occurrence under
+`delta<T>` requires an admitted temporal shape. Requirements propagate through
+forwarded generic arguments and intersect across uses; see
+[generic struct shape arguments](../design/generic-struct-shape-arguments.md).
+Constant parameters retain their declared wiring-time value type and form
+part of specialization identity:
 
 ```hgl
 struct Vector<T, const size: i64> {
@@ -888,9 +896,8 @@ struct Vector<T, const size: i64> {
 An applied generic struct is invariant and nominal by both origin and complete
 argument list. `Vector<f64, 3>` and `Vector<f64, 4>` differ, as do `Box<Base>`
 and `Box<Derived>`. A bare generic origin and a partial application are not
-types. The checked IR nevertheless retains HGL source-type arguments rather
-than only their native scalar projections, leaving room to relax the
-canonical-only restriction in a later language version.
+types. Specialization retains complete canonical source-type arguments rather than
+only their ordinary payload projections.
 
 Constructor inference matches supplied named fields and an optional expected
 result against the generic field schemas, unifies all bindings, and rejects
@@ -1058,16 +1065,29 @@ duplicate `(implementation, arguments)` pairs are type diagnostics.
 Concrete binding and implementation availability are separate axes. A generic
 may be:
 
-- **concrete-required** because the body needs a concrete C++ value type,
-  storage layout, or operation;
+- **concrete-required** because the body needs a concrete value type,
+  storage layout, or operation before graph execution;
 - a **retained marker** used only in the candidate signature and resolver type
   relationships; or
 - **retained and reified**, meaning the resolved wiring-time type or value must
   be made available for the implementation body to inspect.
 
-A retained generic used only in a signature participates in matching but does
-not supply a body-visible value. Reading it requires an explicit reification
-contract; runtime schema inspection is not an implicit substitute.
+A retained slot may supply compile-time type relationships used by the body,
+including local, state, cache and publication-delta types. When call matching
+binds such a slot, substitute its concrete binding throughout the selected
+body and storage declarations, and check the resulting specialization before
+graph execution. Unresolved required bindings and unsupported substituted
+operations or storage shapes are checking errors. Each distinct binding keeps
+its own type identity and storage layout; execution must not discover them
+from payloads or runtime schemas.
+For dependency candidates, the consuming compiler reads the provider
+[specialization artifact](../design/modules.md#cross-module-retained-specialization);
+a signature alone does not supply a body or storage implementation.
+
+This substitution does not make a retained type or `const` parameter available
+as a body-visible value. Reading that parameter as a value still requires an
+explicit reification contract. A retained marker used only for matching need
+not acquire a body-visible representation.
 
 For example, a list reduction may require a concrete element type for its
 accumulator while remaining indifferent to fixed list size:
@@ -1208,7 +1228,7 @@ yield_statement = "yield", expression, ":", expression;
 mutation_statement
                = place, assignment_operator, expression;
 place          = identifier,
-                 { "[", expression, "]" | ".", identifier };
+                 { "[", expression, "]" | ".", member_name };
 assignment_operator
                = "=" | "+=" | "-=" | "*=" | "/=";
 ```
@@ -1332,7 +1352,7 @@ unary_expr     = ( "-" | "!" ), unary_expr | postfix_expr;
 postfix_expr   = primary_expr,
                  { "(", [ argument, { ",", argument }, [ "," ] ], ")"
                  | "[", expression, "]"
-                 | ".", identifier };
+                 | ".", member_name };
 primary_expr   = literal | placeholder | identifier | qualified_name
                | "(", expression, ")" | tuple_literal | sequence_literal
                | generic_constructor | delta_expression
@@ -1345,12 +1365,12 @@ delta_expression
                = "delta", "<", type, ">", "(",
                  [ delta_arguments ], ")";
 delta_arguments = delta_argument, { ",", delta_argument }, [ "," ];
-delta_argument  = identifier, ":", ( expression | sparse_entries );
+delta_argument  = member_name, ":", ( expression | sparse_entries );
 sparse_entries  = "[", [ sparse_entry, { ",", sparse_entry }, [ "," ] ], "]";
 sparse_entry    = const_expression, ":", expression;
 struct_arguments
                = named_argument, { ",", named_argument }, [ "," ];
-named_argument = identifier, ":", expression;
+named_argument = member_name, ":", expression;
 if_expression  = "if", expression, block,
                  [ "else", ( block | if_expression ) ];
 ```
@@ -1513,7 +1533,7 @@ analytics::rolling_mean(value, period: window)
 ```
 
 ```ebnf
-argument         = [ identifier, ":" ], expression;
+argument         = [ member_name, ":" ], expression;
 sequence_literal = "[", [ sequence_element,
                    { ",", sequence_element }, [ "," ] ], "]";
 sequence_element = expression
@@ -1527,9 +1547,9 @@ placeholder      = "_";
 A qualified callee begins with an alias introduced by `use module.path as
 alias` and uses `::` between namespace and declaration names. Dots remain the
 syntax of canonical module paths in `module` and `use` declarations; they are
-not expression member access. A named argument is an identifier directly
-followed by `:`, and a timed sequence element is a temporal literal directly
-followed by `:`. A sequence literal is a constant `list` value
+not expression member access. A named argument starts with a `member_name`
+(an identifier or `time`) directly followed by `:`. A timed sequence element
+is a temporal literal directly followed by `:`. A sequence literal is a constant `list` value
 of one element type, and a tuple literal a constant tuple; a single
 parenthesized expression is grouping, so a one-element tuple needs the
 trailing comma and `()` is a diagnostic. Timed elements and the `_`
@@ -1675,9 +1695,9 @@ A fully applied generic struct first substitutes and validates every type and
 constant argument, then follows the same rule. The nominal specialization
 identity contains the module-qualified origin and complete invariant argument
 list, while its fields contain the substituted canonical schemas. Recursive
-temporalization starts only after specialization, so `SnapshotBox<Quote>` can
-place `atomic<Quote>` at its declared field boundary without admitting
-`atomic<Quote>` as a generic argument.
+temporalization starts only after specialization. `SnapshotBox<Quote>` can
+place `atomic<Quote>` at its declared field boundary; shape arguments under
+`delta<T>` instead produce ordinary delta-valued fields.
 
 An abstract struct contributes hierarchy metadata and a fixed base-field TSB,
 but no constructible scalar instance. Scalar and atomic uses of the abstract

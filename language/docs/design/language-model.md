@@ -33,8 +33,8 @@ The bespoke behavior is semantic:
 - nominal `struct` declarations define one canonical scalar value and one
   recursively temporalized bundle shape; abstract structs define data families
   and every concrete struct is implicitly final;
-- generic structs form invariant nominal specialization families over canonical
-  value types and wiring-time constant arguments;
+- generic structs form invariant nominal specialization families whose type
+  arguments satisfy their occurrence requirements, with wiring-time constants;
 - `delta<S>(...)` constructs a sparse update without weakening complete-value
   field requirements;
 - bodyless nominal `operator` declarations define generic callable contracts;
@@ -260,13 +260,13 @@ inference, and any unresolved or conflicting parameter is an error. Explicit
 generic arguments on function and operator calls remain a separate open
 question.
 
-Struct type parameters initially accept canonical value types only. An
-`atomic` boundary belongs in the declaration (`value: atomic<T>`), not in an
-application such as `Box<atomic<Quote>>`, and `rolling` is likewise rejected as
-a struct argument. Generic function parameters continue to range over complete
-source shapes. Checked IR retains the HGL source form of every struct argument
-despite the initial restriction, allowing a later version to widen the domain
-without replacing the substitution model.
+Struct type arguments satisfy every occurrence's requirements. Ordinary value
+positions require canonical `value_type`; occurrences under `delta<T>` admit
+its supported temporal shapes. Forwarding through another generic application
+propagates that parameter's requirements. The [shape-argument rules](generic-struct-shape-arguments.md)
+define the intersection; exact canonical source arguments remain part of nominal identity.
+Thus `Box<atomic<Quote>>` remains invalid for `value: T`, while a field
+`value: delta<T>` stores ordinary delta data for an admitted T.
 
 Generic abstract parents may be fully applied with fixed arguments or child
 parameters. Each concrete application remains final, and closed polymorphic
@@ -432,10 +432,20 @@ The generic origin remains valid without any request but contributes no
 candidate. This is declaration-time materialization, not explicit generic
 application at an operator call.
 
-Retention does not imply that a resolved generic value is available to the
-body. A retained generic referenced by the body needs a defined read-only
-reification contract. Generic reification and residual constraints remain
-unresolved; a signature alone does not authorize runtime schema inspection.
+Call matching may bind a retained slot needed by the body's types or storage.
+Substitute that concrete binding throughout the selected body and storage,
+and check the specialization before graph execution. Unresolved required
+bindings and unsupported substituted operations or storage are errors; distinct
+bindings preserve distinct type identities and layouts. This is compile-time
+specialization, with no runtime schema discovery.
+The consuming compiler owns this work; dependency candidates carry the
+[specialization artifacts](modules.md#cross-module-retained-specialization)
+needed to check and lower their bodies.
+
+Substitution does not expose the generic parameter as a body-visible value.
+Reading a retained type or `const` parameter as a value still needs a defined
+read-only reification contract. Generic reification and residual constraints
+remain unresolved.
 
 The same rules apply to local and imported operator contracts. Importing a
 contract preserves its nominal identity, requirements and properties. An
