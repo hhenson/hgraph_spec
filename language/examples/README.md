@@ -7,6 +7,8 @@ supported `test` blocks and compiles generated fixtures. Native test support
 varies by platform; this source-only repository has no CMake/CTest project.
 The entries below identify the implementation tests for each example.
 
+- [`atomic-delta-publications.hgl`](atomic-delta-publications.hgl) shows
+  complete atomic replacement, defaults and present empty-list snapshots.
 - [`ordinary-delta-types.hgl`](ordinary-delta-types.hgl) gives generic
   replay/record with typed structural delta storage, retained map updates,
   and empty ordinary data without empty-event application. See

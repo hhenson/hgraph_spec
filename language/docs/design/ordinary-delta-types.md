@@ -33,11 +33,14 @@ T must have a finite shape admitted by the
 scalar leaves; bool/i64 sets; fixed lists with nonnegative constant sizes;
 positional tuples; fully applied concrete nominal structs; and i64-key maps,
 with recursively admitted children. Recursive nominal definitions, growing
-lists, references, signals, windows, other scalars and atomic boundaries are
-not added. An unsupported concrete T is a checking error.
+lists, references, signals, windows and other scalars are not added.
+The [finite atomic extension](atomic-delta-publications.md) also admits
+`atomic<V>` and such children: its delta is complete ordinary V.
+An unsupported concrete T is a checking error.
 
 For an admitted scalar S, `delta<S>` is exactly S, not a wrapper or a
-distinct nominal type. For structural T it is a distinct canonical ordinary
+distinct nominal type. For admitted `atomic<V>`, it is exactly V.
+For structural T it is a distinct canonical ordinary
 value type retaining T's full originating shape: container kind, fixed size,
 tuple positions, scalar/key/member types, module-qualified nominal origin,
 all nominal arguments and recursive children. Equal field layouts do not
@@ -66,7 +69,9 @@ T to S. Matching two symbolic delta applications preserves equality of their
 originating shapes. All repeated occurrences and other constraints must
 agree; incompatible or unresolved bindings fail checking. This is matching
 of the specified type relationship, not inference from payload contents or
-from a key's spelling.
+from a key's spelling. Composite ordinary payload V alone does not invert
+`delta<T>` to an atomic shape; T must already be fixed by another type-bearing
+context under the [atomic matching rule](atomic-delta-publications.md#matching-eval-and-recording).
 
 TimedValue uses the originating temporal shape as its parameter and derives
 the ordinary payload type in its field:
@@ -114,7 +119,9 @@ proofs and retains the exact derived type `delta<T>`. An evaluation-local
 immutable `let`, including an explicitly typed one, may preserve that
 observation under the existing contextual local rules. An annotation alone
 does not create writable access, an owning copy or permission to escape.
-Scalar specializations retain their ordinary owned scalar result.
+Scalar specializations retain their ordinary owned scalar result. Atomic
+specializations follow ordinary V access and independent retention as specified
+by the [atomic contract](atomic-delta-publications.md).
 
 An admitted owning retention boundary may consume a structural observation
 by independently retaining its data. Constructor arguments, ordinary list
@@ -144,8 +151,8 @@ outside this profile.
 In an ordinary delta-value context, `delta<S>(...)` constructs an independent
 value of exact type `delta<S>`. The explicit S determines its derived
 type; an expected type must agree. Existing contextual publication uses and
-constructor spellings continue to work. No scalar constructor form is added:
-an ordinary scalar already inhabits its reduced delta type.
+constructor spellings continue to work. No scalar or atomic constructor form is added: an ordinary complete value
+already inhabits its reduced delta type.
 
 Before evaluating payload expressions, check the whole constructor: resolve
 S, validate argument/field names, resolve constant members/keys/indices, check
@@ -180,9 +187,10 @@ data shape and exact types, not an unspecified endpoint's current state.
 
 Applying an owned delta through a matching runtime return, own-output
 assignment or generator yield retains the existing publication profile.
-T must match the delta's originating shape. State-dependent canonical
-membership/removal requirements, recursively nonempty publication admission
-and fresh eval trace validation still apply at their existing boundaries.
+The payload must have exact type `delta<T>`. Structural originating-shape matching,
+state-dependent membership/removal requirements, nonempty sparse publication
+admission and fresh eval trace validation still apply at their existing
+boundaries. Atomic children use complete V, including admitted empty lists.
 Copying or storing a delta neither satisfies nor bypasses those requirements.
 
 This extension does not choose empty-event application, invalidation,
@@ -203,8 +211,9 @@ subject to the publication contract above.
 Record initializes the exact typed list in start, then retains each admitted
 input publication and `clock.evaluation_time` through ordinary construction
 and push. The run owner obtains an independently owned result after stop.
-No special replay or recording capability, implicit whole-value snapshot,
-runtime type test or recursive delta introspection is required.
+No special replay or recording capability, runtime type test or recursive
+delta introspection is required. Atomic publications explicitly carry whole
+values; structural publications remain sparse.
 
 The generic compute remains unchanged:
 

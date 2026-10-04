@@ -25,6 +25,9 @@ The initial scalar vocabulary is:
 
 In an ordinary parameter or result position, a scalar type is an atomic
 time-series leaf. In a `const` parameter position, it is a wiring-time scalar.
+For non-composite types, `atomic<i64>` is simply `i64`, `atomic<bool>` is
+`bool`, and likewise for strings, temporal scalars and enums. Use `atomic`
+to make a composite value publish as one complete value.
 
 ```hgl
 fn scale(value: f64, const factor: f64) -> f64 =>
@@ -777,8 +780,9 @@ container elements in the admitted finite shape profile. Scalar deltas reduce
 to the scalar type; structural deltas preserve their full originating shape
 and differ from held T values. The constructor retains independent data in
 an ordinary context, while output application keeps its own publication
-constraints. This storage extension does not admit atomic boundaries merely
-because other contextual output constructors can use them.
+constraints. The [finite atomic profile](../design/atomic-delta-publications.md)
+also admits `delta<atomic<V>>` as complete V, including empty list snapshots;
+it keeps sparse outer updates distinct from full atomic replacement.
 
 A runtime function writes a delta with the ordinary output forms:
 
@@ -944,8 +948,9 @@ fn midpoint(
 Both extracted components observe the atomic tuple's tick. Without `atomic`,
 the tuple's children may tick independently.
 
-Wrapping a scalar leaf, such as `atomic<f64>`, is redundant. The frontend may
-accept it for symmetry and normalize it to `f64`; that choice is not yet fixed.
+For every non-composite value type S, `atomic<S>` is accepted wherever the
+grammar admits `atomic` and normalizes to S. Thus `atomic<f64>` and `f64`
+are the same type. See [atomic scalar equivalence](../design/atomic-scalar-equivalence.md).
 
 ## Constant values
 

@@ -10,7 +10,9 @@ boundaries are listed in [ADR 0016](decisions/0016-eval-scalar-buffer-capabiliti
 ## Publication shape admission
 
 Admit the recursive scalar, set, fixed-list, positional/named-bundle and
-integer-key-map shapes defined by the contextual collection contract.
+integer-key-map shapes defined by the contextual collection contract, plus
+[finite atomic shapes](atomic-delta-publications.md) at the top level or as
+children. Atomic publications are complete values, not sparse patches.
 Exact concrete input/output shapes must be known before graph construction.
 Nominal identity, child types, tuple positions and fixed sizes are part of
 the profile; matching a scalar leaf representation is insufficient.
@@ -70,7 +72,8 @@ must be a canonical nonempty publication under the collection contract:
 set additions are absent members, removals are present members, map removals
 are present keys, and a newly added map child receives a delta making it
 valid. Apply this validation recursively, preserving unchanged child state
-between positions. An out-of-profile input is a graph-construction error
+between positions. At an admitted atomic boundary validate a complete V and
+replace that child's whole state; an empty ordinary list is valid present data. An out-of-profile input is a graph-construction error
 with a message beginning `eval: input delta outside publication profile`,
 identifying its parameter and zero-based position. It is not a silent slot. This admission check
 does not change the separate tolerant collection-mutation APIs.
@@ -122,6 +125,7 @@ a conforming result for that event. This extension leaves the semantic choice
 for applying an empty publication to a later contract rather than treating
 payload emptiness as general proof that no tick occurred.
 
-Growing structures, windows, signals, atomic boundaries, timed-input syntax,
+Growing temporal structures, windows, signals, atomic payloads outside the
+finite atomic profile, timed-input syntax,
 persistence and checkpoint/restart retain their separate contracts. No raw
 reference literal or generic REF fixture is introduced.

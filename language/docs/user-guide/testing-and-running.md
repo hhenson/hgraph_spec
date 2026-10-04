@@ -320,4 +320,6 @@ uses `delta<T>(...)` literals for sets, fixed lists, bundles and integer-key map
 including recursive child updates. The target still uses `delta_value(value)`;
 eval owns replay and recording. Its ordinary nonempty publication admission
 excludes empty events, invalidation and REF designation pending separate
-contracts. `_` continues to mean no publication.
+contracts. The [finite atomic profile](../design/atomic-delta-publications.md)
+uses complete ordinary values, including present empty lists, at admitted atomic
+boundaries. `_` continues to mean no publication.

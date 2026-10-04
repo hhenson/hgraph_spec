@@ -35,8 +35,9 @@ impl fn record<T>(ts: T, const key: str) {
 }
 
 # Generic implementation templates contribute candidates only when requested.
-# Both compositions below use this exact map shape.
+# Request the concrete map and atomic-list shapes used below.
 instantiate replay<map<i64, i64>>, record<map<i64, i64>>
+instantiate replay<atomic<list<i64>>>, record<atomic<list<i64>>>
 
 fn pass_through<T>(value: T) -> T {
     when { return delta_value(value) }
@@ -70,6 +71,26 @@ fn capture_map(value: map<i64, i64>) {
     record(value, "map-recording")
 }
 
+const fn atomic_values() -> list<TimedValue<atomic<list<i64>>>> {
+    let empty: list<i64> = []
+    # Explicit T fixes the atomic boundary; the field contains ordinary list data.
+    return [TimedValue<atomic<list<i64>>>(
+        time: @1970-01-01T00:00:00.000001Z,
+        value: empty
+    )]
+}
+
+fn replay_atomic(tick: i64) -> atomic<list<i64>> {
+    consume(tick)
+    # The existing replay body publishes a complete empty list, then silence.
+    pass_through(replay(atomic_values()))
+}
+
+fn capture_atomic(value: atomic<list<i64>>) {
+    # The existing recorder retains complete ordinary list snapshots.
+    record(value, "atomic-recording")
+}
+
 const fn store_empty_data() -> i64 {
     let empty: delta<map<i64, i64>> = delta<map<i64, i64>>()
     var values: list<delta<map<i64, i64>>> = []
@@ -95,4 +116,10 @@ test ordinary_deltas {
         delta<map<i64, i64>>(upsert: [1: 10, 2: 20]),
         delta<map<i64, i64>>(remove: [2])
     ])
+}
+
+test atomic_replay_record {
+    let empty: list<i64> = []
+    assert eval(replay_atomic, tick: [1, 1]) == [empty, _]
+    eval(capture_atomic, value: [empty, _, empty])
 }

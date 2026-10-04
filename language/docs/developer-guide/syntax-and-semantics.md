@@ -491,7 +491,10 @@ type, and it is admitted only for the finite shapes in the
 [ordinary delta type contract](../design/ordinary-delta-types.md). Scalars
 reduce to their own type; structural deltas retain the exact originating
 shape, including nominal arguments and fixed sizes. Matching `delta<T>`
-binds T from that identity, never from stored payloads. Ordinary storage does
+binds T from that identity, never from stored payloads. For admitted
+`atomic<V>`, the delta type is complete V; a composite V alone cannot infer
+that atomic source shape. See [atomic publications](../design/atomic-delta-publications.md).
+Ordinary storage does
 not admit a new temporal endpoint shape or new inspection/mutation operation.
 
 A generic argument is initially parsed without deciding whether an identifier
@@ -1636,6 +1639,11 @@ does not become owning merely through an annotation. State/cache admission
 and publication constraints remain separate.
 
 ## Canonical temporalization
+
+For every non-composite value type S, `atomic<S>` normalizes to S before
+type equality, matching and generic specialization. This applies recursively
+where `atomic` is admitted by the grammar; composite atomic boundaries remain.
+See [atomic scalar equivalence](../design/atomic-scalar-equivalence.md).
 
 The frontend first resolves a canonical value type, then expands it in temporal
 context:
