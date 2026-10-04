@@ -12,6 +12,9 @@ This does not add generator machinery to the runtime contract.
 
 ## Cases
 
+- [Atomic scalar equivalence](cases_atomic_scalar_equivalence.md):
+  canonical identity for non-composite types and preservation of composite boundaries.
+
 - [Generic struct shape arguments](cases_struct_shape_arguments.md):
   delta formation, forwarded requirements and ordinary-value restrictions.
 

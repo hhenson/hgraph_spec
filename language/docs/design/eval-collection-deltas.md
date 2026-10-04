@@ -122,6 +122,6 @@ a conforming result for that event. This extension leaves the semantic choice
 for applying an empty publication to a later contract rather than treating
 payload emptiness as general proof that no tick occurred.
 
-Growing structures, windows, signals, atomic boundaries, timed-input syntax,
+Growing structures, windows, signals, composite atomic boundaries, timed-input syntax,
 persistence and checkpoint/restart retain their separate contracts. No raw
 reference literal or generic REF fixture is introduced.

@@ -33,7 +33,7 @@ T must have a finite shape admitted by the
 scalar leaves; bool/i64 sets; fixed lists with nonnegative constant sizes;
 positional tuples; fully applied concrete nominal structs; and i64-key maps,
 with recursively admitted children. Recursive nominal definitions, growing
-lists, references, signals, windows, other scalars and atomic boundaries are
+lists, references, signals, windows, other scalars and composite atomic boundaries are
 not added. An unsupported concrete T is a checking error.
 
 For an admitted scalar S, `delta<S>` is exactly S, not a wrapper or a

@@ -532,6 +532,10 @@ Temporalization proceeds recursively:
 - records become structural bundles;
 - `atomic<T>` becomes one endpoint carrying the complete canonical `T` value.
 
+For every non-composite value type S, `atomic<S>` is the same canonical type
+as S. Normalize it before matching and specialization; composite boundaries
+remain significant. See [atomic scalar equivalence](atomic-scalar-equivalence.md).
+
 This distinguishes:
 
 ```hgl

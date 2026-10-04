@@ -1637,6 +1637,11 @@ and publication constraints remain separate.
 
 ## Canonical temporalization
 
+For every non-composite value type S, `atomic<S>` normalizes to S before
+type equality, matching and generic specialization. This applies recursively
+where `atomic` is admitted by the grammar; composite atomic boundaries remain.
+See [atomic scalar equivalence](../design/atomic-scalar-equivalence.md).
+
 The frontend first resolves a canonical value type, then expands it in temporal
 context:
 
