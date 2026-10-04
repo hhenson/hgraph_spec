@@ -438,6 +438,9 @@ and check the specialization before graph execution. Unresolved required
 bindings and unsupported substituted operations or storage are errors; distinct
 bindings preserve distinct type identities and layouts. This is compile-time
 specialization, with no runtime schema discovery.
+The consuming compiler owns this work; dependency candidates carry the
+[specialization artifacts](modules.md#cross-module-retained-specialization)
+needed to check and lower their bodies.
 
 Substitution does not expose the generic parameter as a body-visible value.
 Reading a retained type or `const` parameter as a value still needs a defined
