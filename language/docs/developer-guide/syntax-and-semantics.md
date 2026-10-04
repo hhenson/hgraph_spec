@@ -727,8 +727,12 @@ Every literal is validated and normalized when it is lexed:
   digits, `.`, `_`, `-`, `+`, and `/`; no empty, leading, trailing, or
   repeated `/`; no `.` or `..` components; at most 255 bytes); whether the
   zone exists and whether a zoned literal's offset agrees with its zone are
-  checked by the run's time-zone provider under hgraph's strict decoding rule,
-  so a literal's meaning never depends on the compiler's TZDB. Eval input
+  checked by the run's time-zone provider under strict decoding. Provider-backed
+  literal validation requires exact, case-sensitive membership in the configured
+  provider's TZDB catalog. Accepted links retain their exact name identity;
+  names absent from that catalog are rejected, with no synthetic unknown-zone
+  fallback. Syntactic validity alone does not establish membership, and a
+  literal's meaning never depends on the compiler's TZDB. Eval input
   materialization follows the [pre-start rule](../design/temporal-scalar-publications.md);
 - `T` and `Z` are upper case, every field present has exactly the digit
   count shown, omitted seconds and offset minutes are zero, and the fraction
