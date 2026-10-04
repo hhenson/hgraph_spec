@@ -74,7 +74,7 @@ The delta argument grammar extends the ordinary named-argument grammar:
 
 ```ebnf
 delta_arguments = [ delta_argument, { ",", delta_argument }, [ "," ] ];
-delta_argument  = identifier, ":", ( expression | sparse_entries );
+delta_argument  = member_name, ":", ( expression | sparse_entries );
 sparse_entries  = "[", [ sparse_entry, { ",", sparse_entry }, [ "," ] ], "]";
 sparse_entry    = const_expression, ":", expression;
 ```
