@@ -26,6 +26,8 @@ A native package that supports the language supplies a descriptor containing:
   provider module, implementation kind, and generic signature;
 - canonical types, schema declarations, generic struct-family parameters and
   constraints, and abstract-family relationships;
+- specialization artifact references for requested candidates whose retained
+  parameters affect body or storage types;
 - target-specific native dependencies and binding metadata;
 - explicit module initialization, registry installation, deinitialization, and
   registration-removal entry points;
@@ -176,6 +178,30 @@ signature, requirements and properties through registration.
 Every candidate and call retains the canonical operator identity, rather than
 reconstructing it from a short name. A target binding may map that identity to
 a native symbol; the mapping does not create another operator.
+
+## Cross-module retained specialization
+
+The compiler building the consuming target owns substitution, checking and
+lowering of a selected source candidate, including one supplied by a precompiled
+provider. If retained parameters affect body or storage types, the provider
+must package a versioned specialization artifact referenced by its descriptor.
+The artifact carries body and storage IR plus the private declaration and
+binding closure needed to check and lower it. It preserves provider lexical
+bindings and canonical identities; private helpers gain no import visibility.
+
+An artifact permits only the candidate pattern requested by `instantiate`.
+It neither exposes the unrestricted template nor adds candidates to resolution.
+`hgl check` reads it as compiler input without executing provider code; native
+builds lower the same checked specialization. A missing or incompatible artifact,
+an unresolved required binding, or an invalid substituted body is a checking
+error, not a reason to remove a candidate or retry overload selection.
+
+The target manifest records the provider, candidate, complete canonical bindings
+and artifact fingerprint for each specialization. Distinct bindings preserve
+their own types and storage layouts. Descriptor, artifact and linked provider
+must agree before wiring. A signature-only retained marker needs no body
+artifact; a provider without one can expose only candidates that do not require
+such specialization.
 
 ## Candidate universe and provider discovery
 
