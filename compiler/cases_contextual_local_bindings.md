@@ -17,14 +17,11 @@ positive language examples. Results below are requirements, not observations.
 | [`wire_rebind`](contextual_bindings/wire_rebind.hgl) | Accept; run its test. |
 | [`node_scalar_local`](contextual_bindings/node_scalar_local.hgl) | Accept; run its test. |
 | [`graph_scalar_local`](contextual_bindings/graph_scalar_local.hgl) | Accept; run its test. |
-
 | [`conditional_initial_scalar_change`](contextual_bindings/conditional_initial_scalar_change.hgl) | Reject during checking. |
 | [`conditional_initial_port_change`](contextual_bindings/conditional_initial_port_change.hgl) | Reject during checking. |
 | [`conditional_uninitialized_result`](contextual_bindings/conditional_uninitialized_result.hgl) | Accept. |
 | [`ordinary_widening`](contextual_bindings/ordinary_widening.hgl) | Accept. |
-
 | [`graph_compound`](contextual_bindings/graph_compound.hgl) | Accept; compound result remains temporal. |
-
 | [`uninitialized_scalar`](contextual_bindings/uninitialized_scalar.hgl) | Accept. |
 | [`uninitialized_scalar_to_port`](contextual_bindings/uninitialized_scalar_to_port.hgl) | Reject during checking. |
 | [`conditional_unused_scalar_write`](contextual_bindings/conditional_unused_scalar_write.hgl) | Reject during checking. |
