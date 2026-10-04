@@ -330,8 +330,8 @@ were resolved, are listed here; the keyed store supplies none implicitly:
    publication semantics remain separate from data formation and retention.
 3. **Owned recording values.** The [ordinary-list extension](../ordinary-list-values.md)
    supplies typed empty construction, length, indexed extraction and retained
-   end growth. TimedValue with a `delta<T>` payload supplies both the admitted
-   scalar and structural recording entries.
+   end growth. TimedValue with a `delta<T>` payload supplies the admitted
+   scalar, structural and [finite atomic](../atomic-delta-publications.md) recording entries.
    Ordinary owning retention includes nested data; a borrowed endpoint view
    is not a retained capture. No recording-specific append or begin primitive
    substitutes for these general value operations.

@@ -26,3 +26,5 @@ call selects it.
   scalar data, replay, recording lifecycle and dense eval adaptation.
 - [Ordinary delta types](../language/docs/design/ordinary-delta-types.md)
   extend the timed data relationship to the admitted structural profile.
+- [Atomic publications](../language/docs/design/atomic-delta-publications.md)
+  add complete finite snapshots to the same replay and record operators.

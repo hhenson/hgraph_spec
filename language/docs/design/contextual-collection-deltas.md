@@ -18,7 +18,10 @@ finite temporal shapes T:
 
 Every child S or struct field must recursively have one of these shapes.
 Recursive nominal definitions, growing lists, references, signals, windows,
-other scalar types and composite atomic wrappers are outside this profile.
+other scalar types are outside this profile. The
+[finite atomic extension](atomic-delta-publications.md) additionally admits
+atomic children with complete ordinary payloads, including empty lists;
+outer sparse publications retain this contract's nonempty requirements.
 
 `delta<T>` names T's publication-delta shape. The
 [ordinary delta type extension](ordinary-delta-types.md) admits this spelling

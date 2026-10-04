@@ -1,0 +1,32 @@
+module examples.atomic_delta_publications
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+
+fn forward_list(value: atomic<list<i64>>) -> atomic<list<i64>> => pass_through(value)
+
+struct Quote {
+    bid: i64
+    ask: i64 = 20
+}
+
+fn forward_quote(value: atomic<Quote>) -> atomic<Quote> => pass_through(value)
+
+const fn full_list() -> list<i64> { return [1, 2] }
+const fn empty_list() -> list<i64> { return [] }
+
+test atomic_snapshots {
+    # An empty snapshot publishes. The underscore is the only silent slot.
+    # Equal empty snapshots at different times remain distinct ticks.
+    assert eval(forward_list, value: [full_list(), empty_list(), _, empty_list()]) == [
+        full_list(), empty_list(), _, empty_list()
+    ]
+    # Ordinary construction fills ask=20; it does not keep the earlier ask=99.
+    assert eval(forward_quote, value: [Quote(bid: 1, ask: 99), Quote(bid: 2)]) == [
+        Quote(bid: 1, ask: 99), Quote(bid: 2, ask: 20)
+    ]
+    # The wrapper fixes the atomic shape without inferring it from a payload.
+    assert eval(forward_list, value: [_, _]) == [_, _]
+    assert eval(forward_list, value: []) == []
+}

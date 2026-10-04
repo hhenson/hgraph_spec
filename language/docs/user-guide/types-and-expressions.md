@@ -780,8 +780,9 @@ container elements in the admitted finite shape profile. Scalar deltas reduce
 to the scalar type; structural deltas preserve their full originating shape
 and differ from held T values. The constructor retains independent data in
 an ordinary context, while output application keeps its own publication
-constraints. This storage extension does not admit composite atomic boundaries merely
-because other contextual output constructors can use them.
+constraints. The [finite atomic profile](../design/atomic-delta-publications.md)
+also admits `delta<atomic<V>>` as complete V, including empty list snapshots;
+it keeps sparse outer updates distinct from full atomic replacement.
 
 A runtime function writes a delta with the ordinary output forms:
 
