@@ -1,7 +1,8 @@
 # Atomic set and map publications
 
 Extend the finite atomic payload grammar with ordinary `set<K>` and
-`map<K, V>`. K uses the [scalar-key contract](scalar-collection-keys.md),
+`map<K, V>`. K uses the [scalar-key contract](scalar-collection-keys.md) and its
+[finite composite-key extension](composite-collection-keys.md),
 including its non-NaN f64 boundary; V recursively uses the admitted finite
 ordinary payload grammar, including these sets/maps. Existing struct-field rules remain, including
 [optional atomic fields](optional-atomic-publications.md). Recursive nominal

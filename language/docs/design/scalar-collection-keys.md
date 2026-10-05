@@ -4,8 +4,8 @@ Extend the existing nonempty publication profile to `set<K>` and `map<K, S>`,
 where K is any admitted built-in scalar or declared enum and S is any admitted
 publication shape. For `f64`, this extension covers non-NaN values, including
 both infinities. NaN membership and key application remain an explicit open
-boundary; this record does not choose a NaN equality policy. Composite and
-native opaque keys remain outside this extension.
+boundary; this record does not choose a NaN equality policy. The separate [finite composite-key extension](composite-collection-keys.md)
+admits tuples and concrete structs; native opaque keys remain outside this extension.
 
 Keys and members retain their exact ordinary type and identity. Equality and
 hash determine membership; ordering is unnecessary. Equal values must have
