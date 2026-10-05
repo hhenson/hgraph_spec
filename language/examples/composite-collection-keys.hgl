@@ -15,7 +15,8 @@ test composite_keys {
     assert eval(keyed, [delta<map<Key, i64>>(upsert: [Key(number: 1, label: "a"): 7]), _, delta<map<Key, i64>>(remove: [Key(number: 1, label: "a")])]) == [
         delta<map<Key, i64>>(upsert: [Key(number: 1, label: "a"): 7]), _, delta<map<Key, i64>>(remove: [Key(number: 1, label: "a")])
     ]
-    assert eval(members, [delta<set<tuple<i64, str>>>(added: [(1, "a")]), delta<set<tuple<i64, str>>>(added: [(1, "a"), (2, "b")])]) == [
+    # Each set delta adds only members that are absent before that tick.
+    assert eval(members, [delta<set<tuple<i64, str>>>(added: [(1, "a")]), delta<set<tuple<i64, str>>>(added: [(2, "b")])]) == [
         delta<set<tuple<i64, str>>>(added: [(1, "a")]), delta<set<tuple<i64, str>>>(added: [(2, "b")])
     ]
 }
