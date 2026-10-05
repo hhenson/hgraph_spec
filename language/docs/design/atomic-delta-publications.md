@@ -9,8 +9,9 @@ unbounded ordinary lists, positional tuples, and fully applied concrete nominal
 structs whose fields are required, defaulted or optional under the
 [optional-field publication contract](optional-atomic-publications.md). Values and nominal
 expansion are finite, except for the nominal edges admitted by the
-[finite recursive-value contract](recursive-atomic-publications.md). Abstract families,
-other scalars, native types, endpoint shapes and
+[finite recursive-value contract](recursive-atomic-publications.md). The separate
+[atomic family contract](abstract-atomic-publications.md) admits complete nonrecursive
+family values. Other scalars, native types, endpoint shapes and
 structural delta objects are outside this extension. An unbounded ordinary
 list is a finite snapshot, not a growing temporal list. The separate
 [ordinary set/map extension](atomic-set-map-publications.md) adds finite

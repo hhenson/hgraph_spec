@@ -1,0 +1,22 @@
+module examples.abstract_atomic_publications
+
+abstract struct Event { label: str }
+struct First: Event { items: list<i64> }
+struct Second: Event { items: list<i64> }
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn forward(value: atomic<Event>) -> atomic<Event> => pass_through(value)
+
+test complete_family_publications {
+    let first: Event = First(label: "same", items: [1])
+    let second: Event = Second(label: "same", items: [1])
+    # The same fields do not erase which concrete member was published.
+    assert eval(forward, [first, first, _, second, first]) == [
+        First(label: "same", items: [1]), First(label: "same", items: [1]), _,
+        Second(label: "same", items: [1]), First(label: "same", items: [1])
+    ]
+    assert eval(forward, []) == []
+    assert eval(forward, [_, _]) == [_, _]
+}
