@@ -8,7 +8,8 @@ ordinary value formed recursively from the [admitted scalar leaves](temporal-sca
 unbounded ordinary lists, positional tuples, and fully applied concrete nominal
 structs whose fields are required, defaulted or optional under the
 [optional-field publication contract](optional-atomic-publications.md). Values and nominal
-expansion are finite. Recursive definitions, abstract families,
+expansion are finite, except for the nominal edges admitted by the
+[finite recursive-value contract](recursive-atomic-publications.md). Abstract families,
 other scalars, native types, endpoint shapes and
 structural delta objects are outside this extension. An unbounded ordinary
 list is a finite snapshot, not a growing temporal list. The separate

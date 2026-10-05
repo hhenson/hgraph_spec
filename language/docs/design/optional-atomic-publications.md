@@ -5,7 +5,9 @@ payload grammar. The existing declaration `field: V = null` permits the field
 to be unset; it does not change V into a new nullable source type. Present V
 recursively follows the finite ordinary payload grammar. Required fields,
 non-null defaults, exact nominal identity and constructor checking retain
-their existing rules. Recursive definitions and abstract families are separate.
+their existing rules. Recursive definitions use the separate
+[finite recursive-value contract](recursive-atomic-publications.md); abstract
+families remain separate.
 
 Complete construction preserves each field's presence. Omitting an optional
 field whose effective default is null leaves it unset; explicitly supplying

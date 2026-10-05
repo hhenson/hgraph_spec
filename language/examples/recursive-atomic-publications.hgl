@@ -1,0 +1,35 @@
+module examples.recursive_atomic_publications
+
+struct Chain {
+    value: i64
+    next: atomic<Chain> = null
+}
+
+struct Left {
+    value: i64
+    other: atomic<Right> = null
+}
+struct Right {
+    value: i64
+    other: atomic<Left> = null
+}
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn forward_chain(value: atomic<Chain>) -> atomic<Chain> => pass_through(value)
+fn forward_left(value: atomic<Left>) -> atomic<Left> => pass_through(value)
+
+test recursive_atomic_publications {
+    let deep: Chain = Chain(value: 1, next: Chain(value: 2, next: Chain(value: 3)))
+    let leaf: Chain = Chain(value: 9)
+    assert eval(forward_chain, [deep, deep, _, leaf]) == [
+        deep, deep, _, Chain(value: 9, next: null)
+    ]
+    let alternating: Left = Left(value: 1, other: Right(value: 2, other: Left(value: 3)))
+    assert eval(forward_left, [alternating, _, Left(value: 9)]) == [
+        alternating, _, Left(value: 9, other: null)
+    ]
+    assert eval(forward_chain, []) == []
+    assert eval(forward_chain, [_, _]) == [_, _]
+}
