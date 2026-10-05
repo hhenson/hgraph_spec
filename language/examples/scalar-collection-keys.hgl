@@ -30,3 +30,13 @@ test scalar_collection_keys {
         delta<map<Mode, i64>>(remove: [Mode::first])
     ]
 }
+
+# The local owns the validated zone once; each later use reads that value.
+fn zone_members(value: set<timezone>) -> set<timezone> => pass_through(value)
+test prepared_key_alias {
+    let zone: timezone = @[UTC]
+    let retained: timezone = zone
+    assert eval(zone_members, [delta<set<timezone>>(added: [zone]), _, delta<set<timezone>>(removed: [retained])]) == [
+        delta<set<timezone>>(added: [retained]), _, delta<set<timezone>>(removed: [zone])
+    ]
+}

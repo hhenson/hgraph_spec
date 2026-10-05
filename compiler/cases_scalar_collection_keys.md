@@ -19,3 +19,6 @@ with the same generic delta pass-through as existing collections.
 | Composite or opaque native key/member | Outside this scalar extension, even if a runtime representation happens to be hashable. |
 | Runtime-dependent key/member constructor expression | Reject under the retained constant-entry grammar. |
 | Empty patch, invalidation or invalid-child membership event | Retain the existing excluded boundary. |
+| Immutable ordinary key alias initialized by a constant/cold recipe | Reuse its retained value once prepared; do not rerun its initializer. |
+| Alias chain | Preserve exact K and the originally retained key value. |
+| Temporal or mutable alias as sparse key | Reject; this admission remains constant-only. |
