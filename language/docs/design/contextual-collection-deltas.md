@@ -16,10 +16,11 @@ finite temporal shapes T:
 - fixed `list<S, N>`, with a constant nonnegative size N;
 - growing `list<S>` under the [net growing-list contract](growing-list-publications.md);
 - positional `tuple<S0, ...>` and fully applied concrete nominal structs;
-- `map<K, S>` for those same scalar keys.
+- `map<K, S>` for those same scalar keys;
+- exact rolling shapes under the [arrival delta contract](rolling-publications.md).
 
 Every child S or struct field must recursively have one of these shapes.
-Recursive nominal definitions, references, signals, windows,
+Recursive nominal definitions, references, signals,
 other scalar types are outside this profile. The
 [finite atomic extension](atomic-delta-publications.md) additionally admits
 atomic children with complete ordinary payloads, including empty lists;
