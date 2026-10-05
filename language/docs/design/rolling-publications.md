@@ -47,9 +47,8 @@ After a long gap, a new arrival can evict all older values and make a positive
 minimum unready again while the window remains valid. Readiness does not
 suppress that arrival's delta or output publication.
 
-This clarifies the earlier sticky wording in runtime TS-31 to match the
-language's retained-span definition. Removed-value observation remains a
-separate runtime contract and is not part of the arrival delta.
+Removed-value observation remains a separate runtime contract and is not
+part of the arrival delta.
 
 ## Eval, replay and recording
 
