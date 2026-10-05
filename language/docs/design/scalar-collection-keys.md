@@ -22,6 +22,12 @@ exact K. Set `added`/`removed` and map `remove` lists likewise contain exact K
 constants. Fixed list/tuple indices remain in-range constant i64 values.
 This adds neither dynamic keys nor a general ordinary map/set literal.
 
+An immutable ordinary `let` initialized from an admitted key constant or cold
+recipe may name that retained key in a later sparse constructor. Read the
+prepared value; do not replay its initializer. Alias chains preserve exact K
+and ordinary value retention. This rule does not admit temporal bindings,
+mutable bindings or arbitrary node-runtime expressions as sparse keys.
+
 A provider-dependent constant remains a cold input recipe under the existing
 temporal materialization contract. Construct and validate it once in written
 order before any target starts, using the required run context. Retain its
