@@ -14,4 +14,4 @@ through the unchanged generic delta pass-through and ordinary replay/record.
 | Supply an integer or another enum F to an E input, including identical names/numbers | Reject exact-type mismatch; do not convert or erase enum identity. |
 | `delta_value` without exact endpoint validity/modification proof | Reject under the existing scalar guard rules. |
 | Unknown number/name supplied through E's checked constructor | Retain existing phase-specific conversion failure; do not create an unnamed member or silence. |
-| Use E as a set element or map key under the current collection profile | Reject this unsupported profile shape; this extension admits E as a publication leaf only. |
+| Use E as a set element or map key | Use the separate scalar-key extension; enum leaf admission alone does not define collection constructors. |

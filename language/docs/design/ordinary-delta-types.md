@@ -30,8 +30,8 @@ named arguments and sparse entries.
 
 T must have a finite shape admitted by the
 [collection publication profile](contextual-collection-deltas.md): the admitted
-scalar leaves; bool/i64 sets; fixed lists with nonnegative constant sizes;
-positional tuples; fully applied concrete nominal structs; and i64-key maps,
+scalar leaves; sets with admitted scalar members; fixed lists with nonnegative constant sizes;
+positional tuples; fully applied concrete nominal structs; and maps with admitted scalar keys,
 with recursively admitted children. Recursive nominal definitions, growing
 lists, references, signals, windows and other scalars are not added.
 The [finite atomic extension](atomic-delta-publications.md) also admits

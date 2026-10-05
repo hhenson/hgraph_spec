@@ -20,7 +20,8 @@ new enum construction form. Declared members, including the existing signed
 enum remains outside this extension. Existing construction failure phases
 apply before publication.
 
-This adds scalar leaves, not new collection key or set element types. Sparse
+This adds scalar leaves; the separate [scalar-key extension](scalar-collection-keys.md)
+admits enum collection keys and set members. Sparse
 publication, finite atomic shape, provider, presence and guard rules otherwise
 retain their existing meaning. References remain outside the publication
 profile.

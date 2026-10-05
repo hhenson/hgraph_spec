@@ -1,0 +1,32 @@
+module examples.scalar_collection_keys
+
+enum Mode { first = -7, second = 11 }
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn forward_names(value: set<str>) -> set<str> => pass_through(value)
+fn forward_modes(value: map<Mode, i64>) -> map<Mode, i64> => pass_through(value)
+
+test scalar_collection_keys {
+    assert eval(forward_names, value: [
+        delta<set<str>>(added: ["alpha", "beta"]),
+        _,
+        delta<set<str>>(removed: ["alpha"])
+    ]) == [
+        delta<set<str>>(added: ["beta", "alpha"]),
+        _,
+        delta<set<str>>(removed: ["alpha"])
+    ]
+    assert eval(forward_modes, value: [
+        delta<map<Mode, i64>>(upsert: [Mode::first: 10, Mode::second: 20]),
+        delta<map<Mode, i64>>(upsert: [Mode::first: 10]),
+        _,
+        delta<map<Mode, i64>>(remove: [Mode::first])
+    ]) == [
+        delta<map<Mode, i64>>(upsert: [Mode::second: 20, Mode::first: 10]),
+        delta<map<Mode, i64>>(upsert: [Mode::first: 10]),
+        _,
+        delta<map<Mode, i64>>(remove: [Mode::first])
+    ]
+}
