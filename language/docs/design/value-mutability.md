@@ -16,6 +16,8 @@ deltas under these same ownership rules. Each operation still needs its
 ordinary value contract. The separate
 [ordinary-list extension](ordinary-list-values.md) defines typed empty
 construction, length, indexed reads and retained end growth under these rules.
+The [ordinary set/map construction extension](atomic-set-map-publications.md)
+adds complete typed constructors with independent retained children.
 
 [Contextual local bindings](contextual-local-bindings.md) fixes each local’s
 ordinary-value or connection category as well as its canonical type. Mutability

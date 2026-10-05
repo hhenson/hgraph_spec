@@ -8,9 +8,11 @@ ordinary value formed recursively from the [admitted scalar leaves](temporal-sca
 unbounded ordinary lists, positional tuples, and fully applied concrete nominal
 structs whose fields are required or have non-null defaults. Values and nominal
 expansion are finite. Optional fields, recursive definitions, abstract families,
-sets/maps as atomic payloads, other scalars, native types, endpoint shapes and
+other scalars, native types, endpoint shapes and
 structural delta objects are outside this extension. An unbounded ordinary
-list is a finite snapshot, not a growing temporal list.
+list is a finite snapshot, not a growing temporal list. The separate
+[ordinary set/map extension](atomic-set-map-publications.md) adds finite
+set/map payloads and their exact typed constructors.
 
 For non-composite S, `atomic<S>` normalizes to S under
 [atomic scalar equivalence](atomic-scalar-equivalence.md). This profile does

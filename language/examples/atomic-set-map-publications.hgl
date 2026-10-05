@@ -1,0 +1,27 @@
+module examples.atomic_set_map_publications
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn forward_set(value: atomic<set<str>>) -> atomic<set<str>> => pass_through(value)
+fn forward_map(value: atomic<map<str, list<i64>>>) -> atomic<map<str, list<i64>>> => pass_through(value)
+
+const fn ordinary_map(key: str, value: i64) -> map<str, list<i64>> {
+    return map<str, list<i64>>(items: [key: [value]])
+}
+
+test atomic_set_map_publications {
+    let full = set<str>(items: ["alpha", "beta"])
+    let empty = set<str>(items: [])
+    assert eval(forward_set, value: [full, empty, _, empty]) == [
+        set<str>(items: ["beta", "alpha"]), empty, _, empty
+    ]
+    let both = map<str, list<i64>>(items: ["alpha": [1, 2], "beta": [3]])
+    let replaced = ordinary_map("alpha", 4)
+    let empty_map = map<str, list<i64>>(items: [])
+    assert eval(forward_map, value: [both, replaced, empty_map, _, empty_map]) == [
+        both, replaced, empty_map, _, empty_map
+    ]
+    assert eval(forward_map, value: [_, _]) == [_, _]
+    assert eval(forward_map, value: []) == []
+}
