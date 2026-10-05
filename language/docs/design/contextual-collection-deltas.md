@@ -14,11 +14,12 @@ finite temporal shapes T:
 - declared enum leaves under the [enum publication contract](enum-publications.md);
 - `set<K>` for the [admitted scalar keys](scalar-collection-keys.md);
 - fixed `list<S, N>`, with a constant nonnegative size N;
+- growing `list<S>` under the [net growing-list contract](growing-list-publications.md);
 - positional `tuple<S0, ...>` and fully applied concrete nominal structs;
 - `map<K, S>` for those same scalar keys.
 
 Every child S or struct field must recursively have one of these shapes.
-Recursive nominal definitions, growing lists, references, signals, windows,
+Recursive nominal definitions, references, signals, windows,
 other scalar types are outside this profile. The
 [finite atomic extension](atomic-delta-publications.md) additionally admits
 atomic children with complete ordinary payloads, including empty lists;
