@@ -7,7 +7,9 @@ fn forward_set(value: atomic<set<str>>) -> atomic<set<str>> => pass_through(valu
 fn forward_map(value: atomic<map<str, list<i64>>>) -> atomic<map<str, list<i64>>> => pass_through(value)
 
 const fn ordinary_map(key: str, value: i64) -> map<str, list<i64>> {
-    return map<str, list<i64>>(items: [key: [value]])
+    var values: list<i64> = []
+    push(values, value)
+    return map<str, list<i64>>(items: [key: values])
 }
 
 test atomic_set_map_publications {
