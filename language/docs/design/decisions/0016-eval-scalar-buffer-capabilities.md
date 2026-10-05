@@ -8,7 +8,7 @@ independent of that node's inputs, result, name or role. It does not introduce
 replay-specific or recording-specific injectables. The
 [eval composition contract](../eval-operator-composition.md) remains in force;
 the [ordinary scalar data contract](../../../../library/ordinary_replay_record.md)
-supplies replay and record bodies for eleven scalar types, generalized to the
+supplies replay and record bodies for twelve scalar types, generalized to the
 admitted structural profile by [ordinary delta types](../ordinary-delta-types.md).
 The remaining source boundaries are listed below.
 
@@ -123,7 +123,7 @@ because a key can be chosen for them.
 Borrowed store access is bounded to the current hook. The capability cannot
 be retained in state/cache, returned from the hook, captured in a closure or
 stored in an entry. Reads of `bool`, `i64`, `f64`, `str`, `date`, `time`,
-`datetime`, `duration`, `civil_datetime`, `timezone` and `zoned_datetime`
+`datetime`, `duration`, `civil_datetime`, `timezone`, `zoned_datetime` and `zoned_time`
 produce ordinary owned scalar values under their
 existing copy rules. A later set at the same key cannot change such a value.
 
@@ -267,7 +267,7 @@ Replay receives its finite input sequence directly as an ordinary const
 argument. It does not require a global-state key or a storage injectable.
 Its exact parameter type is ordinary `list<TimedValue<T>>`, where T is the
 originating temporal shape and the value field has type `delta<T>`.
-The ordinary data contract admits the eleven scalar types and the finite
+The ordinary data contract admits the twelve scalar types and the finite
 structural publication profile. There is no absent element in that list;
 no special replay-data type is introduced. Scalar delta fields reduce to T.
 Replay's output type is the corresponding temporal target parameter type.

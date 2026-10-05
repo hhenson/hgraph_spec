@@ -137,7 +137,7 @@ read-only access. The second borrows exclusive writable access to the existing
 entry, without making an owning local copy. Both are available in start,
 evaluation and stop hooks. An uninitialized entry still makes get fail.
 Primitive reads of `bool`, `i64`, `f64`, `str`, `date`, `time`, `datetime`,
-`duration`, `civil_datetime`, `timezone` and `zoned_datetime` retain their
+`duration`, `civil_datetime`, `timezone`, `zoned_datetime` and `zoned_time` retain their
 owned-copy behavior: `var n: i64 = get(...)` is an
 ordinary local, and assigning n does not update the stored integer.
 

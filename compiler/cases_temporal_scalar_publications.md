@@ -1,6 +1,6 @@
 # Temporal scalar publication cases
 
-These check the [three added scalar leaves](../language/docs/design/temporal-scalar-publications.md)
+These check the [four added scalar leaves](../language/docs/design/temporal-scalar-publications.md)
 through the unchanged generic delta pass-through and ordinary replay/record.
 
 For the provider-name cases, use a catalog containing `UTC`, `Etc/UTC`,
@@ -24,4 +24,8 @@ For the provider-name cases, use a catalog containing `UTC`, `Etc/UTC`,
 | Input construction or strict decoding fails | Abort before target start; do not defer the failure until replay. |
 | Replay an already constructed valid zoned scalar | Preserve its exact value without provider re-resolution. |
 | Read delta without particular-input validity/modification proof | Reject under the existing guard rules. |
-| Use zoned_time as an eval/publication leaf | Reject this unsupported profile shape; general source type syntax is unchanged. |
+| Zoned-time input `[@09:30:00.123456[US/Eastern], @09:30:00.123456[US/Eastern], _, @09:30:00.123456[America/New_York]]` | Preserve all four slots, microseconds and both exact names; aliases compare unequal. |
+| Zoned times differing only by one microsecond | Compare unequal and retain each exact wall-clock value. |
+| Capture or replay a zoned time | Carry only wall-clock time and zone; do not invent a date, instant or offset, or resolve a date-dependent offset. |
+| Zoned-time literal with an absent or wrong-case zone name | Reject during the existing provider-backed input materialization, before target start. |
+| `zoned_time` in a structural delta or finite atomic snapshot | Admit under the existing recursive leaf rule; preserve sparse versus complete publication behavior. |
