@@ -1,0 +1,22 @@
+module examples.optional_atomic_publications
+
+struct Quote {
+    bid: i64
+    venue: str = null
+}
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn forward(value: atomic<Quote>) -> atomic<Quote> => pass_through(value)
+
+test optional_atomic_publications {
+    # Unset venue is different from a present empty string and from a silent cycle.
+    let unset: Quote = Quote(bid: 1)
+    let present: Quote = Quote(bid: 1, venue: "")
+    assert eval(forward, [unset, present, unset, _, unset]) == [
+        Quote(bid: 1, venue: null), present, unset, _, unset
+    ]
+    assert eval(forward, []) == []
+    assert eval(forward, [_, _]) == [_, _]
+}

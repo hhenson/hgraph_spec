@@ -3,9 +3,9 @@
 Extend the finite atomic payload grammar with ordinary `set<K>` and
 `map<K, V>`. K uses the [scalar-key contract](scalar-collection-keys.md),
 including its non-NaN f64 boundary; V recursively uses the admitted finite
-ordinary payload grammar, including these sets/maps. Existing required/default
-struct-field rules remain. Optional fields, recursive nominal definitions and
-references are not added.
+ordinary payload grammar, including these sets/maps. Existing struct-field rules remain, including
+[optional atomic fields](optional-atomic-publications.md). Recursive nominal
+definitions and references are not added.
 
 ## Ordinary construction
 
