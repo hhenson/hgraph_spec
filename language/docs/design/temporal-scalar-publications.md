@@ -1,9 +1,9 @@
 # Temporal scalar publications
 
 Add `civil_datetime`, `timezone`, `zoned_datetime` and `zoned_time` to the finite scalar
-publication profile. Its twelve leaves are `bool`, `i64`, `f64`, `str`, `date`,
-`time`, `datetime`, `duration`, and these four types. Enums and
-other scalar families remain outside this publication profile.
+publication profile. Its twelve built-in leaves are `bool`, `i64`, `f64`, `str`, `date`,
+`time`, `datetime`, `duration`, and these four types. The [enum extension](enum-publications.md) additionally
+admits declared enums; other scalar families remain outside this profile.
 
 For each admitted S, `delta<S>` is S and `atomic<S>` normalizes to S. The same
 leaf admission applies recursively to structural deltas and finite atomic

@@ -292,7 +292,7 @@ The proposed [run-wide keyed-state foundation](../design/decisions/0016-eval-sca
 configures replay with ordinary const data and record with a const string
 key. The reusable store binds const keys and exact value types before start;
 hooks access those entries without name lookup or type dispatch. An entry
-is not initialized merely by binding it. For the twelve scalar types,
+is not initialized merely by binding it. For the admitted scalar types,
 [ordinary timed values](../../../library/ordinary_replay_record.md) supply
 the replay list and recording: a present publication is an ordinary
 `TimedValue<T>` with a datetime field and a `delta<T>` value field, which

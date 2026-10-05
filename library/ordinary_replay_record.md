@@ -4,7 +4,7 @@ Status: proposed library data contract, 2026-10-03.
 
 Replay and record use ordinary values for the finite publication profile in the
 [ordinary delta type extension](../language/docs/design/ordinary-delta-types.md)
-and its collection contract. This includes the twelve scalar leaves and the
+and its collection contract. This includes the admitted scalar leaves and the
 admitted structural shapes, plus the [finite atomic profile](../language/docs/design/atomic-delta-publications.md).
 Both use `list<TimedValue<T>>`, where T is the
 temporal shape and the value field carries its publication delta. Signals,

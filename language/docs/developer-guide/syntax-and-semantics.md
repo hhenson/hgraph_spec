@@ -1809,8 +1809,8 @@ intentional exception: its `all_valid` checks minimum-window readiness, while
 `valid` becomes true on the first value.
 
 The canonical [delta_value(endpoint)](../design/delta-value-metadata.md)
-metadata call has the ordinary scalar result type for the admitted twelve
-scalar endpoints in a valid and modified runtime context. The particular
+metadata call has the ordinary scalar result type for the admitted scalar
+endpoints in a valid and modified runtime context. The particular
 endpoint must be proven valid and modified; an any-input-modified condition
 alone does not establish this for every input. The proposed
 [collection delta extension](../design/contextual-collection-deltas.md)

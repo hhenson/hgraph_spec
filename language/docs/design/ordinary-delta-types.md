@@ -29,7 +29,7 @@ ordinary scalar values, while structural constructors keep their admitted
 named arguments and sparse entries.
 
 T must have a finite shape admitted by the
-[collection publication profile](contextual-collection-deltas.md): the twelve
+[collection publication profile](contextual-collection-deltas.md): the admitted
 scalar leaves; bool/i64 sets; fixed lists with nonnegative constant sizes;
 positional tuples; fully applied concrete nominal structs; and i64-key maps,
 with recursively admitted children. Recursive nominal definitions, growing

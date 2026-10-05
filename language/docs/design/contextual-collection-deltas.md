@@ -9,8 +9,9 @@ open boundary; this extension does not decide it.
 Extend the [delta-value contract](delta-value-metadata.md) to the following
 finite temporal shapes T:
 
-- the twelve scalar leaves `bool`, `i64`, `f64`, `str`, `date`, `time`,
+- the twelve built-in scalar leaves `bool`, `i64`, `f64`, `str`, `date`, `time`,
   `datetime`, `duration`, `civil_datetime`, `timezone`, `zoned_datetime`, and `zoned_time`;
+- declared enum leaves under the [enum publication contract](enum-publications.md);
 - `set<bool>` and `set<i64>`;
 - fixed `list<S, N>`, with a constant nonnegative size N;
 - positional `tuple<S0, ...>` and fully applied concrete nominal structs;

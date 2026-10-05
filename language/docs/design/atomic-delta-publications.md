@@ -4,7 +4,7 @@
 
 Admit `atomic<V>` at the top level and as a child of the existing
 [collection publication profile](contextual-collection-deltas.md). V is an
-ordinary value formed recursively from the [twelve scalar leaves](temporal-scalar-publications.md), fixed or
+ordinary value formed recursively from the [admitted scalar leaves](temporal-scalar-publications.md), fixed or
 unbounded ordinary lists, positional tuples, and fully applied concrete nominal
 structs whose fields are required or have non-null defaults. Values and nominal
 expansion are finite. Optional fields, recursive definitions, abstract families,
