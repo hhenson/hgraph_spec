@@ -1,0 +1,117 @@
+[
+  {
+    "id": "conditional_initial_port_change",
+    "file": "conditional_initial_port_change.hgl",
+    "check": "reject",
+    "diagnostic_contains": "type:"
+  },
+  {
+    "id": "conditional_initial_scalar_change",
+    "file": "conditional_initial_scalar_change.hgl",
+    "check": "reject",
+    "diagnostic_contains": "type:"
+  },
+  {
+    "id": "conditional_repeated_result",
+    "file": "conditional_repeated_result.hgl",
+    "check": "accept"
+  },
+  {
+    "id": "conditional_uninitialized_result",
+    "file": "conditional_uninitialized_result.hgl",
+    "check": "accept"
+  },
+  {
+    "id": "conditional_unused_scalar_write",
+    "file": "conditional_unused_scalar_write.hgl",
+    "check": "reject",
+    "diagnostic_contains": "type:"
+  },
+  {
+    "id": "graph_compound",
+    "file": "graph_compound.hgl",
+    "check": "accept",
+    "test": true
+  },
+  {
+    "id": "graph_scalar_local",
+    "file": "graph_scalar_local.hgl",
+    "check": "accept",
+    "test": true
+  },
+  {
+    "id": "let_port_reassign",
+    "file": "let_port_reassign.hgl",
+    "check": "reject"
+  },
+  {
+    "id": "let_scalar_reassign",
+    "file": "let_scalar_reassign.hgl",
+    "check": "reject"
+  },
+  {
+    "id": "node_atomic_composite",
+    "file": "node_atomic_composite.hgl",
+    "check": "reject",
+    "diagnostic_contains": "type:"
+  },
+  {
+    "id": "node_scalar_local",
+    "file": "node_scalar_local.hgl",
+    "check": "accept",
+    "test": true,
+    "dump_ir": true
+  },
+  {
+    "id": "ordinary_widening",
+    "file": "ordinary_widening.hgl",
+    "check": "accept",
+    "test": true
+  },
+  {
+    "id": "port_to_scalar",
+    "file": "port_to_scalar.hgl",
+    "check": "reject",
+    "diagnostic_contains": "type:"
+  },
+  {
+    "id": "port_type_change",
+    "file": "port_type_change.hgl",
+    "check": "reject"
+  },
+  {
+    "id": "scalar_to_port",
+    "file": "scalar_to_port.hgl",
+    "check": "reject",
+    "diagnostic_contains": "type:"
+  },
+  {
+    "id": "scalar_type_change",
+    "file": "scalar_type_change.hgl",
+    "check": "reject"
+  },
+  {
+    "id": "uninitialized_scalar",
+    "file": "uninitialized_scalar.hgl",
+    "check": "accept",
+    "test": true
+  },
+  {
+    "id": "uninitialized_scalar_to_port",
+    "file": "uninitialized_scalar_to_port.hgl",
+    "check": "reject",
+    "diagnostic_contains": "type:"
+  },
+  {
+    "id": "unused_category_change",
+    "file": "unused_category_change.hgl",
+    "check": "reject",
+    "diagnostic_contains": "type:"
+  },
+  {
+    "id": "wire_rebind",
+    "file": "wire_rebind.hgl",
+    "check": "accept",
+    "test": true
+  }
+]

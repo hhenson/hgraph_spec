@@ -976,7 +976,10 @@ fn moving_average(
 `let` introduces a recursively read-only lexical binding. `var` introduces
 a writable lexical binding: an ordinary owned value may be replaced and its
 contents changed through admitted operations. Both bindings have the same
-value type. Input access remains read-only; composition wire rebinding does
+value type. The initializer fixes whether a graph local is an ordinary value
+or a time-series connection; reassignment cannot switch categories, even
+with the same scalar leaf type. An annotation does not create a stream.
+Input access remains read-only; composition wire rebinding does
 not modify a producer's value:
 
 ```hgl
@@ -987,7 +990,8 @@ total += value * scale
 
 Both are local to the block in which they are declared. In a composition
 function they hold wiring-time values or port handles; reassigning a `var`
-changes the local handle, not a time-series value. In a runtime function they
+replaces an ordinary value or changes a connection handle within its fixed
+category. It does not change a producer’s time-series value. In a runtime function they
 hold evaluation-local scalar values and are recreated whenever the containing
 block executes. Use `state`, not `var`, for a value that must survive into a
 later evaluation.
@@ -1014,6 +1018,9 @@ is fixed by its annotation or, when unannotated, by its initializer. The normal
 `i64`-to-`f64` widening is allowed when the fixed type is `f64`; assigning an
 `f64` to an `i64` variable, including through `/=`, is a type error. Function
 parameters and `for` bindings remain immutable.
+
+See [contextual local bindings](../design/contextual-local-bindings.md) for
+examples and the rules for annotations, atomic boundaries and branch results.
 
 ## Calls and operators
 

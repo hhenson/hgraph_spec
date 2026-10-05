@@ -1299,8 +1299,12 @@ rules as an explicit read followed by assignment.
 
 `let` and `var` are lexical declarations. `let` requires an initializer. A
 `var` may omit it only when it has an explicit type. In a `CompositionFn`, an
-initializer may produce a scalar or a port handle; assigning a `var` only
-changes that local handle. In a `RuntimeFn`, locals hold canonical scalar values
+initializer may produce an ordinary scalar value or a time-series connection.
+Its category and canonical type are fixed at initialization: `var` replacement
+must preserve both, and `let` cannot be reassigned. Local assignment does not
+implicitly lift scalars into connections. See the
+[contextual binding rules](../design/contextual-local-bindings.md).
+In a `RuntimeFn`, locals hold canonical scalar values
 local to the executing block, except for explicitly specified borrowed entry
 access. Owning runtime `var` storage is recreated on every block execution
 and is never added to the function's recordable state. Retention across

@@ -1,0 +1,29 @@
+module examples.contextual_local_bindings
+
+fn increment(value: i64) -> i64 {
+    when {
+        # These are ordinary evaluation-local values, not connections.
+        var current: i64 = delta_value(value)
+        current += 1
+        let result = current
+        return result
+    }
+}
+
+fn choose_second(first: i64, second: i64) -> i64 {
+    # Scalars remain scalar during graph construction.
+    var offset = 1
+    offset = 2
+    let adjustment = offset
+    # Both initializers below name connections. Rebinding selected does not
+    # change original or mutate either producer.
+    var selected = first
+    let original = selected
+    selected = second
+    return original + selected + adjustment
+}
+
+test contextual_locals {
+    assert eval(increment, value: [1, 2]) == [2, 3]
+    assert eval(choose_second, first: [1, 2], second: [10, 20]) == [13, 24]
+}

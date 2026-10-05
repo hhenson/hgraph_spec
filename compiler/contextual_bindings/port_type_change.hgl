@@ -1,0 +1,4 @@
+module cases.contextual_bindings.port_type_change
+fn sample(value: i64, other: str) -> i64 { var local = value
+ local = other
+ return value }

@@ -1,0 +1,7 @@
+module cases.contextual_bindings.graph_compound
+fn sample(value: i64) -> i64 {
+    var local = value
+    local += 2
+    return local
+}
+test graph_compound { assert eval(sample, value: [1, 2]) == [3, 4] }

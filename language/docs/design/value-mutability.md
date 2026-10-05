@@ -17,6 +17,10 @@ ordinary value contract. The separate
 [ordinary-list extension](ordinary-list-values.md) defines typed empty
 construction, length, indexed reads and retained end growth under these rules.
 
+[Contextual local bindings](contextual-local-bindings.md) fixes each local’s
+ordinary-value or connection category as well as its canonical type. Mutability
+does not permit changing either.
+
 ## Bindings and projections
 
 | Ordinary access | Replace the value? | Mutate its contents? |
