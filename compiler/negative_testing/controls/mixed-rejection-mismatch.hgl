@@ -1,0 +1,8 @@
+module conformance.negative_testing.mixed_rejection_mismatch
+
+# expect-error(type, "rolling.size_bounds")
+fn invalid_window(value: rolling<f64, 5m, 3>) { when { } }
+
+fn identity(value: i64) -> i64 => value
+
+test runtime_sentinel { assert eval(identity, value: [7]) == [7] }

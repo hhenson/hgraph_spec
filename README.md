@@ -5,7 +5,7 @@ reasoned traces and accepted decisions. No Python, C++ or Rust code lives here.
 
 - [Language model](language/docs/design/language-model.md)
 - [Execution-error assertions](language/docs/design/execution-error-assertions.md)
-  and [compile-rejection fixtures](language/docs/design/compile-rejection-fixtures.md)
+  and [source-rejection tests](language/docs/design/compile-rejection-fixtures.md)
   with their [error catalogue](language/docs/design/error-catalogue.md)
 - [Source documentation](language/docs/design/documentation.md)
 - [Language guide](language/docs/user-guide/language-tour.md)

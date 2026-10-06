@@ -29,7 +29,7 @@ does not change which graphs capture errors as output data.
 
 These are all diagnostic category names. Categories group problems; codes
 identify particular failures. Only listed source codes may be expected in
-a rejection fixture. Recognizing a category does not make every failure in
+a source-rejection case. Recognizing a category does not make every failure in
 that category available to coded expectations.
 
 | Category | Meaning |
