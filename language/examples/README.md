@@ -9,6 +9,11 @@ The entries below identify the implementation tests for each example.
 [Source-rejection examples](reject/README.md) use ordinary `hgl test`;
 annotations isolate expected source errors alongside executable tests.
 
+- [`eval-profile-errors.hgl`](eval-profile-errors.hgl) checks coded input-trace
+  rejection before graph start, fresh-run membership and canonical positive
+  controls. [`reject/delta-errors.hgl`](reject/delta-errors.hgl) isolates delta
+  formation, exact-type and constructor source failures with surviving controls.
+  These are normative fixtures; their presence is not an execution-validation claim.
 - [`execution-errors.hgl`](execution-errors.hgl) checks the two catalogued
   yield failures, test continuation and nested expected-error assertions.
 - [`contextual-local-bindings.hgl`](contextual-local-bindings.hgl) distinguishes
