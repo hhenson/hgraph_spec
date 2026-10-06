@@ -28,7 +28,7 @@ fn forward_quote(value: Quote) -> Quote => pass_through(value)
 
 const fn require_delta_shape<T>(value: T) -> i64 {
     let storage: list<delta<T>> = []
-    return 0
+    return len(storage)
 }
 
 # Each rejected test is an isolated source case; none of its statements runs.
@@ -270,6 +270,21 @@ test nested_atomic_list_element_payload {
 test rolling_list_element_payload {
     # expect-error(type, "delta.type_mismatch")
     let value: delta<rolling<list<i64>, 2>> = [false]
+}
+
+test atomic_constructor_element_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let record = AtomicDeltaField(value: [false])
+}
+
+test generic_constructor_element_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let record = Publication<atomic<list<i64>>>(value: [false])
+}
+
+test atomic_tuple_nested_element_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<tuple<list<i64>, i64>>> = ([false], 1)
 }
 
 test atomic_fixed_payload {
