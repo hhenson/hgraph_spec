@@ -1,0 +1,20 @@
+module examples.enum_publications
+
+enum Mode {
+    first = -7,
+    second = 11,
+    third = 9223372036854775807
+}
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn forward_mode(value: Mode) -> Mode => pass_through(value)
+
+test enum_publications {
+    assert eval(forward_mode, value: [Mode::first, Mode::first, _, Mode::second, Mode::third]) == [
+        Mode::first, Mode::first, _, Mode::second, Mode::third
+    ]
+    assert eval(forward_mode, value: [_, _]) == [_, _]
+    assert eval(forward_mode, value: []) == []
+}

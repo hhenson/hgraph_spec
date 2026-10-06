@@ -16,6 +16,8 @@ deltas under these same ownership rules. Each operation still needs its
 ordinary value contract. The separate
 [ordinary-list extension](ordinary-list-values.md) defines typed empty
 construction, length, indexed reads and retained end growth under these rules.
+The [ordinary set/map construction extension](atomic-set-map-publications.md)
+adds complete typed constructors with independent retained children.
 
 [Contextual local bindings](contextual-local-bindings.md) fixes each local’s
 ordinary-value or connection category as well as its canonical type. Mutability
@@ -137,7 +139,7 @@ read-only access. The second borrows exclusive writable access to the existing
 entry, without making an owning local copy. Both are available in start,
 evaluation and stop hooks. An uninitialized entry still makes get fail.
 Primitive reads of `bool`, `i64`, `f64`, `str`, `date`, `time`, `datetime`,
-`duration`, `civil_datetime`, `timezone` and `zoned_datetime` retain their
+`duration`, `civil_datetime`, `timezone`, `zoned_datetime` and `zoned_time` retain their
 owned-copy behavior: `var n: i64 = get(...)` is an
 ordinary local, and assigning n does not update the stored integer.
 

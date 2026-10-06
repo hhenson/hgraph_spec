@@ -820,7 +820,9 @@ time-zone provider and therefore never folds at compile time.
 | `duration / i64`, `duration / f64` | `duration` | as above |
 | `duration / duration` | `f64` | ratio |
 | `<`, `<=`, `>`, `>=`, `==`, `!=` between two `date`, `time`, `datetime`, `duration`, or `civil_datetime` values of one type | `bool` | chronological order; civil order for `civil_datetime` |
-| `==`, `!=` between two `zoned_datetime`, `zoned_time`, or `timezone` values | `bool` | structural: instant, zone, and offset must all agree; `same_instant` compares timelines |
+| `==`, `!=` between two `zoned_datetime` values | `bool` | structural: instant, zone, and offset must all agree; `same_instant` compares timelines |
+| `==`, `!=` between two `zoned_time` values | `bool` | wall-clock time and exact zone name must both agree; no date or offset is present |
+| `==`, `!=` between two `timezone` values | `bool` | exact zone names must agree; links are not canonicalized |
 
 Everything else is a `type` diagnostic, in particular `datetime + datetime`,
 `time + duration` and `time - time` (crossing midnight needs a date),
@@ -1807,8 +1809,8 @@ intentional exception: its `all_valid` checks minimum-window readiness, while
 `valid` becomes true on the first value.
 
 The canonical [delta_value(endpoint)](../design/delta-value-metadata.md)
-metadata call has the ordinary scalar result type for the admitted eleven
-scalar endpoints in a valid and modified runtime context. The particular
+metadata call has the ordinary scalar result type for the admitted scalar
+endpoints in a valid and modified runtime context. The particular
 endpoint must be proven valid and modified; an any-input-modified condition
 alone does not establish this for every input. The proposed
 [collection delta extension](../design/contextual-collection-deltas.md)

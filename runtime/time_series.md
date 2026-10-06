@@ -274,9 +274,11 @@ yet *all valid*.
   the window's removed value, and only then. Eviction happens on arrival and
   at no other time: a duration window whose values are ageing does not tick
   or shrink until something arrives.
-- A window is **valid** from its first value and **all valid** once it holds
-  its minimum; it does not become less than all valid again by eviction,
-  since eviction only follows arrival.
+- A window is **valid** from its first value. **All valid** tests the
+  currently retained window: minimum count for tick windows, or oldest-to-newest
+  arrival span for duration windows. A new arrival after a gap can evict older
+  values and make a positive duration minimum unready again; validity remains.
+  A zero duration minimum is ready from the first value.
 - Reading the window gives its values oldest first, and their times.
 
 Clearing a window, and evicting on a timer rather than on arrival, are not
@@ -515,8 +517,10 @@ Rules
   value, a duration window drops the values older than its span from the
   arriving value's time. What a cycle evicted is readable in that cycle only,
   as the removed value.
-- **TS-31** A window is valid from its first value and all valid once it
-  holds its minimum number of values or span; it stays all valid thereafter.
+- **TS-31** A window is valid from its first value. All-valid tests its current
+  retained count or oldest-to-newest arrival span against the minimum; it is
+  not sticky. Arrival after a gap can make a positive duration minimum unready
+  again. Zero duration minimum is ready from the first value.
 - **TS-32** A growing list's delta is the net of the cycle: positions
   removed from the end and positions modified, including those that joined.
   Applying it truncates to the lowest removed position and then applies the

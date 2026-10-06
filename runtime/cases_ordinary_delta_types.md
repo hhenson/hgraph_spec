@@ -23,7 +23,7 @@ for that accessor.
 ## DELTA-TYPE — canonical identity
 
 `delta<i64>` is i64 and `delta<str>` is str. The same reduction holds
-for all eleven admitted scalar types. No runtime wrapper is observed.
+for all admitted scalar types. No runtime wrapper is observed.
 
 `delta<list<i64, 2>>` and `delta<list<i64, 3>>` are different types,
 even for data containing only index zero. Two nominal structs with identical

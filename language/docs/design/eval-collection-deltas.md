@@ -125,7 +125,9 @@ a conforming result for that event. This extension leaves the semantic choice
 for applying an empty publication to a later contract rather than treating
 payload emptiness as general proof that no tick occurred.
 
-Growing temporal structures, windows, signals, atomic payloads outside the
+Growing lists use the separate [net delta extension](growing-list-publications.md).
+Rolling windows use the separate [arrival extension](rolling-publications.md).
+Signals, atomic payloads outside the
 finite atomic profile, timed-input syntax,
 persistence and checkpoint/restart retain their separate contracts. No raw
 reference literal or generic REF fixture is introduced.

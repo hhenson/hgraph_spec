@@ -1,0 +1,22 @@
+module examples.composite_collection_keys
+
+struct Key {
+    number: i64
+    label: str
+}
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn keyed(value: map<Key, i64>) -> map<Key, i64> => pass_through(value)
+fn members(value: set<tuple<i64, str>>) -> set<tuple<i64, str>> => pass_through(value)
+
+test composite_keys {
+    # Independently constructed equal keys address the same member.
+    assert eval(keyed, [delta<map<Key, i64>>(upsert: [Key(number: 1, label: "a"): 7]), _, delta<map<Key, i64>>(remove: [Key(number: 1, label: "a")])]) == [
+        delta<map<Key, i64>>(upsert: [Key(number: 1, label: "a"): 7]), _, delta<map<Key, i64>>(remove: [Key(number: 1, label: "a")])
+    ]
+    # Each set delta adds only members that are absent before that tick.
+    assert eval(members, [delta<set<tuple<i64, str>>>(added: [(1, "a")]), delta<set<tuple<i64, str>>>(added: [(2, "b")])]) == [
+        delta<set<tuple<i64, str>>>(added: [(1, "a")]), delta<set<tuple<i64, str>>>(added: [(2, "b")])
+    ]
+}

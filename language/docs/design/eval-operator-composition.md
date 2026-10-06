@@ -23,7 +23,7 @@ Input value materialization and provider-dependent validation follow the
 [temporal scalar pre-start rule](temporal-scalar-publications.md).
 Replay receives its input sequence as an ordinary const argument. Record
 receives a const string key and uses the run-wide `global_state` store;
-eval retrieves the recording after graph stop. For eleven scalar types these
+eval retrieves the recording after graph stop. For admitted scalar types these
 source contracts use the [ordinary scalar data contract](../../../library/ordinary_replay_record.md).
 The [ordinary delta type extension](ordinary-delta-types.md) generalizes that
 data path to the admitted structural profile. Remaining dependencies are in
@@ -39,7 +39,7 @@ source, seed and other internal keys for that run. This does not change
 ordinary caller-selected global-state key semantics.
 
 This composition introduces no ordinary HGL type for a harness sequence.
-For the eleven scalar types, eval converts present harness positions to
+For the admitted scalar types, eval converts present harness positions to
 ordinary `TimedValue<T>` entries and retains the dense horizon separately.
 The replay list contains no absent elements. Its slot-derived entry times
 are increasing; independent callers of replay retain the existing generator
@@ -172,6 +172,6 @@ extensions.
 The proposed [run-wide keyed-state foundation](decisions/0016-eval-scalar-buffer-capabilities.md)
 configures replay with ordinary const data and record with a const key for
 reusable shared storage. The [ordinary scalar data contract](../../../library/ordinary_replay_record.md)
-completes this data representation and gives source bodies for the eleven
+completes this data representation and gives source bodies for the admitted
 scalar types. The ordinary delta extension supplies the structural storage
 profile without introducing general nullable ordinary sequences.

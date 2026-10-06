@@ -29,11 +29,13 @@ ordinary scalar values, while structural constructors keep their admitted
 named arguments and sparse entries.
 
 T must have a finite shape admitted by the
-[collection publication profile](contextual-collection-deltas.md): the eleven
-scalar leaves; bool/i64 sets; fixed lists with nonnegative constant sizes;
-positional tuples; fully applied concrete nominal structs; and i64-key maps,
-with recursively admitted children. Recursive nominal definitions, growing
-lists, references, signals, windows and other scalars are not added.
+[collection publication profile](contextual-collection-deltas.md): the admitted
+scalar leaves; sets with admitted scalar members; fixed lists with nonnegative constant sizes;
+growing lists under their [net delta contract](growing-list-publications.md);
+positional tuples; fully applied concrete nominal structs; and maps with admitted scalar keys,
+with recursively admitted children. Exact rolling shapes use their
+[arrival delta relationship](rolling-publications.md). Recursive nominal definitions,
+references, signals and other scalars are not added.
 The [finite atomic extension](atomic-delta-publications.md) also admits
 `atomic<V>` and such children: its delta is complete ordinary V.
 An unsupported concrete T is a checking error.

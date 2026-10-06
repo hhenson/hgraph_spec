@@ -1,9 +1,9 @@
 # Temporal scalar publications
 
-Add `civil_datetime`, `timezone` and `zoned_datetime` to the finite scalar
-publication profile. Its eleven leaves are `bool`, `i64`, `f64`, `str`, `date`,
-`time`, `datetime`, `duration`, and these three types. `zoned_time`, enums and
-other scalar families remain outside this publication profile.
+Add `civil_datetime`, `timezone`, `zoned_datetime` and `zoned_time` to the finite scalar
+publication profile. Its twelve built-in leaves are `bool`, `i64`, `f64`, `str`, `date`,
+`time`, `datetime`, `duration`, and these four types. The [enum extension](enum-publications.md) additionally
+admits declared enums; other scalar families remain outside this profile.
 
 For each admitted S, `delta<S>` is S and `atomic<S>` normalizes to S. The same
 leaf admission applies recursively to structural deltas and finite atomic
@@ -19,6 +19,9 @@ Preserve the [existing temporal identities](../developer-guide/syntax-and-semant
 
 - Civil values retain their wall-clock fields; they do not become UTC instants.
 - Zone values retain the exact name. Zone aliases are not canonicalized.
+- Zoned times retain their exact wall-clock time (including microseconds) and
+  exact zone name. They carry no date, instant or resolved offset. Equal wall
+  times in different zones, including alias spellings, remain distinct values.
 - Zoned datetimes retain instant, zone and resolved offset. Same-instant values
   in different zones remain different values under ordinary equality.
 

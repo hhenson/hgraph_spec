@@ -60,7 +60,7 @@ disguised as recordable state (ADR 0008 fixes that distinction).
 `pass_through<T>` applies the input's delta to an independent output of the
 same temporal shape. The accessor is `delta_value(value)`, as specified by
 the [delta-value contract](delta-value-metadata.md), including the generic
-runtime body. Its scalar result and admission are defined for the eleven
+runtime body. Its scalar result and admission are defined for the admitted
 scalar domains. Structural and collection delta types and output application,
 including removals, need a separate contextual contract; replacing them with
 complete value snapshots does not satisfy this requirement.

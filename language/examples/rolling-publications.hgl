@@ -1,0 +1,18 @@
+module examples.rolling_publications
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn forward_ticks(value: rolling<i64, 2, 2>) -> rolling<i64, 2, 2> => pass_through(value)
+fn forward_duration(value: rolling<i64, 5us, 1us>) -> rolling<i64, 5us, 1us> => pass_through(value)
+
+test rolling_publications {
+    # Minimum readiness never suppresses an arrival publication.
+    assert eval(forward_ticks, value: [10, _, 20, 30]) == [10, _, 20, 30]
+    assert eval(forward_ticks, value: [10, 10, _, 10]) == [10, 10, _, 10]
+    assert eval(forward_duration, value: [10, _, 20, _, _, _, _, _, 30]) == [
+        10, _, 20, _, _, _, _, _, 30
+    ]
+    assert eval(forward_ticks, value: [_, _]) == [_, _]
+    assert eval(forward_duration, value: []) == []
+}
