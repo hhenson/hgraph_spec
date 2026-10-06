@@ -975,7 +975,7 @@ adaptor semantics.
 Later decisions must define:
 
 - `i64` overflow, conversion, and division behavior;
-- NaN comparison;
+- NaN collection-key equality; scalar comparisons follow [NaN comparisons](nan-comparisons.md);
 - destructuring and copy-with-update syntax; recursive struct fields are
   agreed in [ADR 0012](decisions/0012-recursive-struct-fields.md);
 - runtime type tests, concrete downcasts, exhaustive abstract-family matching,
@@ -1010,8 +1010,9 @@ Observed compiler behavior does not establish a language rule.
   `NodeError`, otherwise the exception propagates. HGL has no exception
   surface of its own.
 - **Numeric edge cases.** True division of two `i64` values produces `f64`.
-  Overflow, zero divisors and NaN behavior need explicit domain contracts;
-  a backend's arithmetic is not an implicit language policy.
+  Overflow and zero divisors need explicit domain contracts; scalar NaN
+  comparisons follow [NaN comparisons](nan-comparisons.md).
+  A backend's arithmetic is not an implicit language policy.
 - **String operations.** Concatenation, comparison, indexing and Unicode
   handling require operation-specific contracts.
 - **Endpoint metadata.** Validity and modification time follow the runtime
