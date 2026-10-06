@@ -21,8 +21,8 @@ fn is_nan(value: f64) -> bool {
 ```
 
 NaN remains a present scalar publication. Replay, `delta_value`, pass-through
-and recording must retain its NaN classification and publication time; equal
-bit patterns are not required. Test the Boolean observation rather than
+and recording retain its NaN classification under their existing time rules;
+equal bit patterns are not required. Test the Boolean observation rather than
 asserting equality of NaN payloads. This adds no NaN literal, constructor,
 signalling-NaN contract, payload/sign guarantee, or collection-key equality
 policy. The [NaN key boundary](scalar-collection-keys.md) remains open.
