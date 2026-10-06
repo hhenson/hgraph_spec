@@ -97,6 +97,40 @@ test wrong_zoned_time_delta {
     let value: delta<zoned_time> = false
 }
 
+# Reduction to an ordinary type does not erase an explicit delta requirement.
+test scalar_lambda_result {
+    # expect-error(type, "delta.type_mismatch")
+    let callback = fn(value: i64) -> delta<i64> => false
+}
+
+test atomic_lambda_result {
+    # expect-error(type, "delta.type_mismatch")
+    let callback = fn(value: i64) -> delta<atomic<list<i64>>> => false
+}
+
+test rolling_lambda_result {
+    # expect-error(type, "delta.type_mismatch")
+    let callback = fn(value: i64) -> delta<rolling<i64, 2>> => false
+}
+
+test scalar_delta_replacement {
+    var value: delta<i64> = 1
+    # expect-error(type, "delta.type_mismatch")
+    value = false
+}
+
+test atomic_delta_replacement {
+    var value: delta<atomic<list<i64>>> = [1]
+    # expect-error(type, "delta.type_mismatch")
+    value = false
+}
+
+test rolling_delta_replacement {
+    var value: delta<rolling<i64, 2>> = 1
+    # expect-error(type, "delta.type_mismatch")
+    value = false
+}
+
 test enum_identity {
     # expect-error(type, "delta.type_mismatch")
     let value: delta<Mode> = OtherMode::first
