@@ -40,8 +40,8 @@ an `any` holding a set for its order fails at that point (VAL-11).
 
 ## SCALAR-EQUALITY — VAL-7, VAL-8, VAL-12
 
-- `{1, 2}` equals `{2, 1}` and hashes equally; `{a: 1, b: 2}` equals
-  `{b: 2, a: 1}`.
+- `{1, 2}` equals `{2, 1}` and hashes equally; `{"a": 1, "b": 2}` equals
+  `{"b": 2, "a": 1}`.
 - Two structs of the same type with equal fields are equal; a struct and a
   tuple with the same values are not.
 - An optional field left unset equals another unset field, and orders

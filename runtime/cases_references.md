@@ -30,21 +30,21 @@ inputs still follow and sample; passivity only suppresses their wake.
 
 ## REF-DICTIONARY — TS-14, TS-15 and TS-19
 
-A publishes `{X:1, Z:9}` at 0. B publishes `{Y:2, Z:3}` at 0, then `{Y:4}`
+A publishes `{"X":1, "Z":9}` at 0. B publishes `{"Y":2, "Z":3}` at 0, then `{"Y":4}`
 at 1. No other producer publications occur. The input selects A at 0, B at 2,
 empty at 3, and A at 4. R denotes a removal in the delta.
 
 | t | Current value | Added | Removed | Delta | Valid / modified |
 |---|---|---|---|---|---|
-| 0 | X:1, Z:9 | X,Z | — | X:1, Z:9 | true / true |
-| 1 | X:1, Z:9 | — | — | nil | true / false |
-| 2 | Y:4, Z:3 | Y | X | X:R, Y:4, Z:3 | true / true |
-| 3 | nil | — | Y,Z | Y:R, Z:R | false / true |
-| 4 | X:1, Z:9 | X,Z | — | X:1, Z:9 | true / true |
-| 5 | X:1, Z:9 | — | — | nil | true / false |
+| 0 | "X":1, "Z":9 | "X","Z" | — | "X":1, "Z":9 | true / true |
+| 1 | "X":1, "Z":9 | — | — | nil | true / false |
+| 2 | "Y":4, "Z":3 | "Y" | "X" | "X":R, "Y":4, "Z":3 | true / true |
+| 3 | nil | — | "Y","Z" | "Y":R, "Z":R | false / true |
+| 4 | "X":1, "Z":9 | "X","Z" | — | "X":1, "Z":9 | true / true |
+| 5 | "X":1, "Z":9 | — | — | nil | true / false |
 
 At 2 both new children read modified with their whole value as delta,
-including overlapping Z. This samples their input views, not their producers.
+including overlapping "Z". This samples their input views, not their producers.
 At 3 the withdrawal delta remains readable despite invalidity. The input has
 no current children; removed children remain inspectable for that cycle.
 Do not gate a withdrawal delta on `valid`.
