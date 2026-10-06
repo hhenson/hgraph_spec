@@ -257,6 +257,21 @@ test atomic_list_payload {
     let value: delta<atomic<list<i64>>> = delta<list<i64>>(items: [0: 1])
 }
 
+test atomic_list_element_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<list<i64>>> = [false]
+}
+
+test nested_atomic_list_element_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<list<list<i64>>>> = [[false]]
+}
+
+test rolling_list_element_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<rolling<list<i64>, 2>> = [false]
+}
+
 test atomic_fixed_payload {
     # expect-error(type, "delta.type_mismatch")
     let value: delta<atomic<list<i64, 2>>> = [1, 2, 3]
