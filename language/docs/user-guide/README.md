@@ -25,7 +25,8 @@ how source calls reach hgraph.
    `check`, `test`, `run`, `emit-cpp`, `hgl_add_module()`, and the REPL
    (there is no `hgl build`).
 5. [Testing and running](testing-and-running.md) covers `test` declarations,
-   `eval` with dense and timed sequences, running an entry from the command
+   `eval` with dense and timed sequences, expected execution errors,
+   compile-rejection fixtures, running an entry from the command
    line and the REPL. Configuration-file execution remains planned.
 
 Source examples are collected under [language/examples](../../examples/README.md).

@@ -1,0 +1,6 @@
+module examples.reject.yield_time_type
+
+fn invalid_time() -> i64 {
+    # expect-error(type, "yield.time_type")
+    yield 1: 1
+}

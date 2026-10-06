@@ -1,0 +1,3 @@
+module conformance.negative_testing.reject_no_expectation
+
+fn consume(value: rolling<f64, 5m, 3>) { when { } }

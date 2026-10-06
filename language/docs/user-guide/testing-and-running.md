@@ -146,6 +146,30 @@ Errors a graph publishes as data use ordinary output assertions. See the
 [complete rules](../design/execution-error-assertions.md) and
 [examples](../../examples/execution-errors.hgl).
 
+## Expected source errors
+
+Keep intentionally invalid source in a separate rejection fixture:
+
+```hgl
+module examples.bad_window
+
+# expect-error(type, "rolling.size_kind")
+fn consume(value: rolling<f64, 5m, 3>) { when { } }
+```
+
+Run `hgl test --reject fixture.hgl`. The annotation expects exactly one
+primary error on the immediately following physical line in that file.
+Every primary error must be expected, with an exact category and code;
+message text is not matched. Unknown names, wrong locations, extra errors
+and successful compilation fail the fixture. Warnings and attached notes
+are not matching errors. `build` is not an eligible rejection category.
+
+The [catalogue](../design/error-catalogue.md) enumerates all categories and
+allowed source-error codes. The category name is annotation syntax, not a
+bare identifier value in an HGL expression. See the
+[fixture rules](../design/compile-rejection-fixtures.md) and
+[isolated examples](../../examples/reject/README.md).
+
 ## Dense sequences
 
 A temporal parameter receives a *sequence*: one element per engine cycle,

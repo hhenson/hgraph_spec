@@ -1,0 +1,5 @@
+module conformance.negative_testing.runtime_assertion_failure
+
+test assertion_failure {
+    assert raises("yield.negative_duration") { assert false }
+}

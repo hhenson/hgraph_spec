@@ -1,0 +1,5 @@
+module conformance.negative_testing.runtime_empty_block
+
+test empty_block {
+    assert raises("yield.negative_duration") { }
+}

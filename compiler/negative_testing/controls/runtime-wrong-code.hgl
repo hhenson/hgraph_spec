@@ -1,0 +1,12 @@
+module conformance.negative_testing.runtime_wrong_code
+
+fn negative() -> i64 { yield -1us: 1 }
+fn consume(tick: i64) { when { } }
+fn drive_negative(tick: i64) -> i64 {
+    consume(tick)
+    negative()
+}
+
+test wrong_code {
+    assert raises("yield.non_increasing_time") { eval(drive_negative, tick: [1, 1]) }
+}

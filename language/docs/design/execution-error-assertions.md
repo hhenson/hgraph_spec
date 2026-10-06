@@ -24,7 +24,8 @@ never its message, category, native exception type, or a substring. A matching
 error passes the assertion only after ordinary graph teardown and block cleanup
 complete successfully; continue at the statement after the assertion. The
 block's normal completion, a different code or an error without a listed code
-fails the test. A failed test does not execute subsequent test statements.
+fails the test. A failed test does not execute subsequent test statements. The test runner
+reports the failed test and exits 1 when any executed test fails.
 
 Assertion failures, including failed nested `raises`, are test failures and
 cannot satisfy any enclosing `raises`. Source-checking and build failures,

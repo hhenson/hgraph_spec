@@ -1,0 +1,5 @@
+module conformance.negative_testing.reject_wrong_location
+
+# expect-error(type, "rolling.size_kind")
+
+fn consume(value: rolling<f64, 5m, 3>) { when { } }

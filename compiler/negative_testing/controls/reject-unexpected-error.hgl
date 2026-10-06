@@ -1,0 +1,5 @@
+module conformance.negative_testing.reject_unexpected_error
+
+# expect-error(type, "rolling.size_kind")
+fn first(value: rolling<f64, 5m, 3>) { when { } }
+fn second(value: rolling<f64, 3, 4>) { when { } }

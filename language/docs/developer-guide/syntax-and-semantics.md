@@ -2406,8 +2406,12 @@ built. Rendered diagnostics are ordered by source position.
 
 ## Diagnostics
 
-Suggested categories are `parse`, `name`, `type`, `shape`, `constraint`,
+Diagnostic categories are `parse`, `name`, `type`, `shape`, `constraint`,
 `function-kind`, `phase`, `injectable`, `operator`, `module`, and `build`.
+The [error catalogue](../design/error-catalogue.md) defines every category
+and enumerates the codes allowed in negative-test expectations.
+[Compile-rejection fixtures](../design/compile-rejection-fixtures.md) use
+`# expect-error(category, "code")` and `hgl test --reject fixture.hgl`.
 
 Examples:
 

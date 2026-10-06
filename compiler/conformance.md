@@ -12,6 +12,9 @@ This does not add generator machinery to the runtime contract.
 
 ## Cases
 
+- [Negative testing](negative_testing/README.md): execution-error assertions,
+  source-error expectations and bounded controls that must fail.
+
 - [Contextual local bindings](cases_contextual_local_bindings.md): fixed scalar
   or connection category, mutability and checking errors.
 

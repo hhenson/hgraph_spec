@@ -6,6 +6,8 @@ after shared-source setup. That suite discovers examples, checks them, runs
 supported `test` blocks and compiles generated fixtures. Native test support
 varies by platform; this source-only repository has no CMake/CTest project.
 The entries below identify the implementation tests for each example.
+Intentionally invalid [rejection fixtures](reject/README.md) are separate;
+exclude `reject/` from successful-example discovery.
 
 - [`execution-errors.hgl`](execution-errors.hgl) checks the two catalogued
   yield failures, test continuation and nested expected-error assertions.

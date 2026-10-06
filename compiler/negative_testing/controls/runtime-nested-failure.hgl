@@ -1,0 +1,7 @@
+module conformance.negative_testing.runtime_nested_failure
+
+test nested_failure {
+    assert raises("yield.negative_duration") {
+        assert raises("yield.negative_duration") { assert true }
+    }
+}

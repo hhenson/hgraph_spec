@@ -1,0 +1,6 @@
+module examples.reject.test_inject
+
+test invalid_capability {
+    # expect-error(phase, "test.statement_phase")
+    inject clock
+}
