@@ -1303,5 +1303,8 @@ predicate rules above are unchanged; see
 ## Open scalar edge cases
 
 Before executable code generation, the language must define `i64` overflow,
-division by zero, NaN comparison, Unicode normalization, and runtime scalar
+division by zero, Unicode normalization, and runtime scalar
 error behavior independently of C++ debug or release settings.
+For `f64`, comparisons involving NaN are false except `!=`, which is true;
+see [NaN comparisons](../design/nan-comparisons.md). NaN collection-key
+equality remains outside the admitted key profile.

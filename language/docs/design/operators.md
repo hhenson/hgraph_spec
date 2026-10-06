@@ -146,6 +146,9 @@ values, not just a mathematical analogy:
   selection are observable. Custom native/Python scalar operators inherit no
   laws merely because C++ supplies an overloaded operator.
 
+Scalar comparisons follow [NaN comparisons](nan-comparisons.md), including
+self-inequality and unordered comparisons when either operand is NaN.
+
 An implementation may attach verified, specialization-specific laws to native
 kernels. Unknown guarantees remain absent. Such metadata does not change the
 source type or its arithmetic policy.

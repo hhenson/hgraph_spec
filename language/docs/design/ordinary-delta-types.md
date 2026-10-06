@@ -158,7 +158,9 @@ already inhabits its reduced delta type.
 
 Before evaluating payload expressions, check the whole constructor: resolve
 S, validate argument/field names, resolve constant members/keys/indices, check
-duplicates, overlap, index bounds and child delta types. Existing set member
+duplicates, set/map overlap, index bounds and child delta types.
+Growing-list removed/modified overlap retains its state-dependent publication
+admission check; it is not a constructor rejection. Existing set member
 lists and map removal lists remain constant; sparse keys/indices remain
 constant. This adds no dynamic membership or key grammar and no new runtime
 effects to those constant positions.

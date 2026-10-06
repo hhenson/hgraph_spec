@@ -73,8 +73,9 @@ set additions are absent members, removals are present members, map removals
 are present keys, and a newly added map child receives a delta making it
 valid. Apply this validation recursively, preserving unchanged child state
 between positions. At an admitted atomic boundary validate a complete V and
-replace that child's whole state; an empty ordinary list is valid present data. An out-of-profile input is a graph-construction error
-with a message beginning `eval: input delta outside publication profile`,
+replace that child's whole state; an empty ordinary list is valid present data. An out-of-profile input raises the catalogued `eval.input_delta_profile`
+admission error while executing eval, after ordinary argument evaluation and
+before any graph starts, with a message beginning `eval: input delta outside publication profile`,
 identifying its parameter and zero-based position. It is not a silent slot. This admission check
 does not change the separate tolerant collection-mutation APIs.
 

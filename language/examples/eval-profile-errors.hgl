@@ -1,0 +1,239 @@
+module examples.eval_profile_errors
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn members(value: set<i64>) -> set<i64> => pass_through(value)
+fn keyed(value: map<i64, i64>) -> map<i64, i64> => pass_through(value)
+fn growing(value: list<i64>) -> list<i64> => pass_through(value)
+fn nested(value: map<i64, set<i64>>) -> map<i64, set<i64>> => pass_through(value)
+fn nested_list(value: tuple<list<i64>, i64>) -> tuple<list<i64>, i64> => pass_through(value)
+
+# If any graph execution precedes trace admission, this source fails instead.
+fn fail_when_started() -> i64 { yield -1us: 1 }
+fn consume(tick: i64) { when { } }
+fn checked_before_start(value: set<i64>) -> set<i64> {
+    consume(fail_when_started())
+    pass_through(value)
+}
+
+test set_duplicate_addition {
+    assert raises("eval.input_delta_profile") {
+        eval(members, value: [
+            delta<set<i64>>(added: [1]),
+            delta<set<i64>>(added: [1])
+        ])
+    }
+}
+
+test set_absent_removal {
+    assert raises("eval.input_delta_profile") {
+        eval(members, value: [
+            delta<set<i64>>(removed: [1])
+        ])
+    }
+}
+
+test set_repeated_removal {
+    assert raises("eval.input_delta_profile") {
+        eval(members, value: [
+            delta<set<i64>>(added: [1]),
+            delta<set<i64>>(removed: [1]),
+            delta<set<i64>>(removed: [1])
+        ])
+    }
+}
+
+test map_absent_removal {
+    assert raises("eval.input_delta_profile") {
+        eval(keyed, value: [
+            delta<map<i64, i64>>(remove: [1])
+        ])
+    }
+}
+
+test map_repeated_removal {
+    assert raises("eval.input_delta_profile") {
+        eval(keyed, value: [
+            delta<map<i64, i64>>(upsert: [1: 10]),
+            delta<map<i64, i64>>(remove: [1]),
+            delta<map<i64, i64>>(remove: [1])
+        ])
+    }
+}
+
+test growing_initial_gap {
+    assert raises("eval.input_delta_profile") {
+        eval(growing, value: [
+            delta<list<i64>>(items: [1: 10])
+        ])
+    }
+}
+
+test growing_later_gap {
+    assert raises("eval.input_delta_profile") {
+        eval(growing, value: [
+            delta<list<i64>>(items: [0: 10]),
+            delta<list<i64>>(items: [2: 20])
+        ])
+    }
+}
+
+test growing_non_tail_removal {
+    assert raises("eval.input_delta_profile") {
+        eval(growing, value: [
+            delta<list<i64>>(items: [0: 10, 1: 20]),
+            delta<list<i64>>(remove: [0])
+        ])
+    }
+}
+
+test growing_incomplete_tail_removal {
+    assert raises("eval.input_delta_profile") {
+        eval(growing, value: [
+            delta<list<i64>>(items: [0: 10, 1: 20, 2: 30]),
+            delta<list<i64>>(remove: [0, 2])
+        ])
+    }
+}
+
+test growing_out_of_range_removal {
+    assert raises("eval.input_delta_profile") {
+        eval(growing, value: [
+            delta<list<i64>>(items: [0: 10]),
+            delta<list<i64>>(remove: [1])
+        ])
+    }
+}
+
+test growing_removal_from_fresh {
+    assert raises("eval.input_delta_profile") {
+        eval(growing, value: [
+            delta<list<i64>>(remove: [0])
+        ])
+    }
+}
+
+test growing_removed_modified_overlap {
+    assert raises("eval.input_delta_profile") {
+        eval(growing, value: [
+            delta<list<i64>>(items: [0: 10, 1: 20]),
+            delta<list<i64>>(items: [1: 21], remove: [1])
+        ])
+    }
+}
+
+test nested_existing_child {
+    assert raises("eval.input_delta_profile") {
+        eval(nested, value: [
+            delta<map<i64, set<i64>>>(upsert: [7: delta<set<i64>>(added: [1])]),
+            delta<map<i64, set<i64>>>(upsert: [7: delta<set<i64>>(removed: [2])])
+        ])
+    }
+}
+
+test nested_new_child {
+    assert raises("eval.input_delta_profile") {
+        eval(nested, value: [
+            delta<map<i64, set<i64>>>(upsert: [7: delta<set<i64>>(removed: [1])])
+        ])
+    }
+}
+
+test nested_child_after_parent_removal {
+    assert raises("eval.input_delta_profile") {
+        eval(nested, value: [
+            delta<map<i64, set<i64>>>(upsert: [7: delta<set<i64>>(added: [1])]),
+            delta<map<i64, set<i64>>>(remove: [7]),
+            delta<map<i64, set<i64>>>(upsert: [7: delta<set<i64>>(removed: [1])])
+        ])
+    }
+}
+
+test nested_growing_gap {
+    assert raises("eval.input_delta_profile") {
+        eval(nested_list, value: [
+            delta<tuple<list<i64>, i64>>(items: [0: delta<list<i64>>(items: [1: 10])])
+        ])
+    }
+}
+
+test whole_trace_before_start {
+    assert raises("eval.input_delta_profile") {
+        eval(checked_before_start, value: [
+            delta<set<i64>>(added: [1]),
+            _,
+            delta<set<i64>>(added: [1])
+        ])
+    }
+}
+
+# Constructing/storing removal data succeeds; applying it checks fresh state.
+const fn removal_data() -> list<delta<set<i64>>> {
+    var values: list<delta<set<i64>>> = []
+    push(values, delta<set<i64>>(removed: [7]))
+    return values
+}
+
+test ordinary_arguments_and_fresh_runs {
+    let values = removal_data()
+    assert len(values) == 1
+    assert raises("eval.input_delta_profile") {
+        eval(members, value: values)
+    }
+    assert eval(members, value: [delta<set<i64>>(added: [7])]) == [
+        delta<set<i64>>(added: [7])
+    ]
+    # The successful preceding run does not populate this run's memberships.
+    assert raises("eval.input_delta_profile") {
+        eval(members, value: values)
+    }
+    assert eval(keyed, value: [delta<map<i64, i64>>(upsert: [1: 2])]) == [
+        delta<map<i64, i64>>(upsert: [1: 2])
+    ]
+}
+
+test canonical_removal_and_readdition {
+    assert eval(members, value: [
+        delta<set<i64>>(added: [1]),
+        delta<set<i64>>(removed: [1]),
+        delta<set<i64>>(added: [1])
+    ]) == [
+        delta<set<i64>>(added: [1]),
+        delta<set<i64>>(removed: [1]),
+        delta<set<i64>>(added: [1])
+    ]
+    assert eval(keyed, value: [
+        delta<map<i64, i64>>(upsert: [1: 10]),
+        delta<map<i64, i64>>(upsert: [1: 10]),
+        delta<map<i64, i64>>(remove: [1]),
+        delta<map<i64, i64>>(upsert: [1: 11])
+    ]) == [
+        delta<map<i64, i64>>(upsert: [1: 10]),
+        delta<map<i64, i64>>(upsert: [1: 10]),
+        delta<map<i64, i64>>(remove: [1]),
+        delta<map<i64, i64>>(upsert: [1: 11])
+    ]
+    assert eval(growing, value: [
+        delta<list<i64>>(items: [1: 20, 0: 10]),
+        delta<list<i64>>(items: [0: 11], remove: [1]),
+        delta<list<i64>>(remove: [0]),
+        delta<list<i64>>(items: [0: 12])
+    ]) == [
+        delta<list<i64>>(items: [0: 10, 1: 20]),
+        delta<list<i64>>(items: [0: 11], remove: [1]),
+        delta<list<i64>>(remove: [0]),
+        delta<list<i64>>(items: [0: 12])
+    ]
+    assert eval(nested, value: [
+        delta<map<i64, set<i64>>>(upsert: [7: delta<set<i64>>(added: [1])]),
+        delta<map<i64, set<i64>>>(upsert: [7: delta<set<i64>>(removed: [1])]),
+        delta<map<i64, set<i64>>>(remove: [7]),
+        delta<map<i64, set<i64>>>(upsert: [7: delta<set<i64>>(added: [1])])
+    ]) == [
+        delta<map<i64, set<i64>>>(upsert: [7: delta<set<i64>>(added: [1])]),
+        delta<map<i64, set<i64>>>(upsert: [7: delta<set<i64>>(removed: [1])]),
+        delta<map<i64, set<i64>>>(remove: [7]),
+        delta<map<i64, set<i64>>>(upsert: [7: delta<set<i64>>(added: [1])])
+    ]
+}

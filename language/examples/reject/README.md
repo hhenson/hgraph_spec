@@ -29,3 +29,9 @@ names. Ordinary source-checking commands still reject these annotated errors.
 - `mixed.hgl`: declaration and whole-test rejection alongside executable tests.
 - `nested-context.hgl`: inner owners leave sibling tests and helpers available.
 - `mixed-parts/`: named rejection tests and surviving helpers across explicit parts.
+
+- `delta-errors.hgl`: unsupported delta formation, reduced scalar/enum/atomic/
+  rolling payload errors, exact structural identity, nested child types,
+  constructor names/constants/types/duplicates/bounds/overlap, and valid controls.
+  State-dependent trace failures instead use `assert raises` in
+  [`eval-profile-errors.hgl`](../eval-profile-errors.hgl).

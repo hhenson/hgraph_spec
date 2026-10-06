@@ -1,0 +1,519 @@
+module examples.reject.delta_errors
+
+struct Quote { bid: i64 }
+struct OtherQuote { bid: i64 }
+struct Box<T> { value: T }
+struct Publication<T> { value: delta<T> }
+struct ScalarDeltaField { value: delta<i64> }
+struct AtomicDeltaField { value: delta<atomic<list<i64>>> }
+struct RollingDeltaField { value: delta<rolling<i64, 2>> }
+struct OptionalQuote {
+    bid: i64
+    ask: i64 = null
+}
+struct Chain {
+    value: i64
+    next: atomic<Chain> = null
+}
+abstract struct Event { label: str }
+struct Trade: Event { price: i64 }
+enum Mode { first = 1, second = 2 }
+enum OtherMode { first = 1, second = 2 }
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn forward_fixed(value: list<i64, 2>) -> list<i64, 2> => pass_through(value)
+fn forward_quote(value: Quote) -> Quote => pass_through(value)
+
+const fn require_delta_shape<T>(value: T) -> i64 {
+    let storage: list<delta<T>> = []
+    return len(storage)
+}
+
+# Each rejected test is an isolated source case; none of its statements runs.
+
+# expect-error(shape, "delta.unsupported_shape")
+const fn rejected_signal(value: delta<signal>) -> i64 => 0
+
+# expect-error(shape, "delta.unsupported_shape")
+const fn rejected_delta_as_shape(value: delta<delta<map<i64, i64>>>) -> i64 => 0
+
+# expect-error(shape, "delta.unsupported_shape")
+const fn rejected_atomic_delta_payload(value: delta<atomic<delta<map<i64, i64>>>>) -> i64 => 0
+
+# expect-error(shape, "delta.unsupported_shape")
+const fn rejected_collection_key(value: delta<map<list<i64>, i64>>) -> i64 => 0
+
+test wrong_bool_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<bool> = 1
+}
+
+test wrong_i64_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<i64> = false
+}
+
+test wrong_f64_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<f64> = false
+}
+
+test wrong_str_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<str> = false
+}
+
+test wrong_date_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<date> = false
+}
+
+test wrong_time_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<time> = false
+}
+
+test wrong_datetime_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<datetime> = false
+}
+
+test wrong_duration_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<duration> = false
+}
+
+test wrong_civil_datetime_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<civil_datetime> = false
+}
+
+test wrong_timezone_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<timezone> = false
+}
+
+test wrong_zoned_datetime_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<zoned_datetime> = false
+}
+
+test wrong_zoned_time_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<zoned_time> = false
+}
+
+# Reduction to an ordinary type does not erase an explicit delta requirement.
+test scalar_lambda_result {
+    # expect-error(type, "delta.type_mismatch")
+    let callback = fn(value: i64) -> delta<i64> => false
+}
+
+test atomic_lambda_result {
+    # expect-error(type, "delta.type_mismatch")
+    let callback = fn(value: i64) -> delta<atomic<list<i64>>> => false
+}
+
+test rolling_lambda_result {
+    # expect-error(type, "delta.type_mismatch")
+    let callback = fn(value: i64) -> delta<rolling<i64, 2>> => false
+}
+
+test scalar_delta_replacement {
+    var value: delta<i64> = 1
+    # expect-error(type, "delta.type_mismatch")
+    value = false
+}
+
+test atomic_delta_replacement {
+    var value: delta<atomic<list<i64>>> = [1]
+    # expect-error(type, "delta.type_mismatch")
+    value = false
+}
+
+test rolling_delta_replacement {
+    var value: delta<rolling<i64, 2>> = 1
+    # expect-error(type, "delta.type_mismatch")
+    value = false
+}
+
+test scalar_delta_field_replacement {
+    var record: ScalarDeltaField = ScalarDeltaField(value: 1)
+    # expect-error(type, "delta.type_mismatch")
+    record.value = false
+}
+
+test atomic_delta_field_replacement {
+    var record: AtomicDeltaField = AtomicDeltaField(value: [1])
+    # expect-error(type, "delta.type_mismatch")
+    record.value = false
+}
+
+test rolling_delta_field_replacement {
+    var record: RollingDeltaField = RollingDeltaField(value: 1)
+    # expect-error(type, "delta.type_mismatch")
+    record.value = false
+}
+
+test generic_delta_field_replacement {
+    var record: Publication<i64> = Publication<i64>(value: 1)
+    # expect-error(type, "delta.type_mismatch")
+    record.value = false
+}
+
+test unsupported_specialized_delta_shape {
+    # Empty delta data is legal to store; using its type as a shape is not.
+    let source: delta<map<i64, i64>> = delta<map<i64, i64>>()
+    # expect-error(shape, "delta.unsupported_shape")
+    let result = require_delta_shape(source)
+}
+
+test enum_identity {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<Mode> = OtherMode::first
+}
+
+test enum_integer {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<Mode> = 1
+}
+
+test fixed_size {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<list<i64, 3>> = delta<list<i64, 2>>(items: [0: 1])
+}
+
+test fixed_vs_growing {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<list<i64>> = delta<list<i64, 2>>(items: [0: 1])
+}
+
+test container_kind {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<tuple<i64, i64>> = delta<list<i64, 2>>(items: [0: 1])
+}
+
+test tuple_positions {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<tuple<str, i64>> = delta<tuple<i64, str>>(items: [0: 1])
+}
+
+test map_key_type {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<map<str, i64>> = delta<map<i64, i64>>(upsert: [1: 2])
+}
+
+test set_member_type {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<set<str>> = delta<set<i64>>(added: [1])
+}
+
+test nominal_origin {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<OtherQuote> = delta<Quote>(bid: 1)
+}
+
+test nominal_argument {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<Box<f64>> = delta<Box<i64>>(value: 1)
+}
+
+test nested_child_identity {
+    let value = delta<map<i64, Quote>>(upsert: [
+        # expect-error(type, "delta.type_mismatch")
+        1: delta<OtherQuote>(bid: 2)
+    ])
+}
+
+test nested_fixed_size {
+    # expect-error(type, "delta.type_mismatch")
+    let value = delta<tuple<list<i64, 3>, i64>>(items: [0: delta<list<i64, 2>>(items: [0: 1])])
+}
+
+test nested_scalar_type {
+    # expect-error(type, "delta.type_mismatch")
+    let value = delta<list<i64, 2>>(items: [0: "wrong"])
+}
+
+test held_to_delta {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<map<i64, i64>> = map<i64, i64>(items: [1: 2])
+}
+
+test delta_to_held {
+    # expect-error(type, "delta.type_mismatch")
+    let value: map<i64, i64> = delta<map<i64, i64>>(upsert: [1: 2])
+}
+
+test timed_field_shape {
+    # expect-error(type, "delta.type_mismatch")
+    let value = Publication<list<i64, 3>>(value: delta<list<i64, 2>>(items: [0: 1]))
+}
+
+test atomic_list_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<list<i64>>> = delta<list<i64>>(items: [0: 1])
+}
+
+test atomic_list_element_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<list<i64>>> = [false]
+}
+
+test nested_atomic_list_element_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<list<list<i64>>>> = [[false]]
+}
+
+test rolling_list_element_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<rolling<list<i64>, 2>> = [false]
+}
+
+test atomic_constructor_element_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let record = AtomicDeltaField(value: [false])
+}
+
+test generic_constructor_element_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let record = Publication<atomic<list<i64>>>(value: [false])
+}
+
+test atomic_tuple_nested_element_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<tuple<list<i64>, i64>>> = ([false], 1)
+}
+
+test atomic_fixed_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<list<i64, 2>>> = [1, 2, 3]
+}
+
+test atomic_tuple_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<tuple<i64, str>>> = ("wrong", 1)
+}
+
+test atomic_nominal_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<Quote>> = OtherQuote(bid: 1)
+}
+
+test atomic_optional_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<OptionalQuote>> = Quote(bid: 1)
+}
+
+test atomic_recursive_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<Chain>> = Quote(bid: 1)
+}
+
+test atomic_family_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<Event>> = Quote(bid: 1)
+}
+
+test atomic_set_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<set<str>>> = set<i64>(items: [1])
+}
+
+test atomic_map_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<atomic<map<str, i64>>> = map<i64, i64>(items: [1: 2])
+}
+
+test rolling_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<rolling<i64, 3, 1>> = "wrong"
+}
+
+test rolling_atomic_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value: delta<rolling<list<i64>, 3, 1>> = "wrong"
+}
+
+test rolling_child_payload {
+    # expect-error(type, "delta.type_mismatch")
+    let value = delta<tuple<rolling<i64, 3, 1>, i64>>(items: [0: "wrong"])
+}
+
+test eval_slot_identity {
+    # expect-error(type, "delta.type_mismatch")
+    eval(forward_fixed, value: [delta<list<i64, 3>>(items: [0: 1])])
+}
+
+test unknown_argument {
+    # expect-error(name, "delta.argument_name")
+    let value = delta<set<i64>>(items: [1])
+}
+
+test unknown_field {
+    # expect-error(name, "delta.argument_name")
+    let value = delta<Quote>(ask: 1)
+}
+
+test duplicate_argument {
+    let value = delta<set<i64>>(
+        added: [1],
+        # expect-error(name, "delta.duplicate_argument")
+        added: [2]
+    )
+}
+
+test duplicate_field {
+    # expect-error(name, "delta.duplicate_argument")
+    let value = delta<Quote>(bid: 1, bid: 2)
+}
+
+test wrong_member_type {
+    # expect-error(type, "delta.entry_type")
+    let value = delta<set<i64>>(added: ["wrong"])
+}
+
+test wrong_key_type {
+    # expect-error(type, "delta.entry_type")
+    let value = delta<map<i64, i64>>(upsert: ["wrong": 1])
+}
+
+test wrong_remove_key_type {
+    # expect-error(type, "delta.entry_type")
+    let value = delta<map<i64, i64>>(remove: ["wrong"])
+}
+
+test wrong_index_type {
+    # expect-error(type, "delta.entry_type")
+    let value = delta<list<i64, 2>>(items: ["wrong": 1])
+}
+
+test wrong_composite_key_identity {
+    # expect-error(type, "delta.entry_type")
+    let value = delta<map<Quote, i64>>(upsert: [OtherQuote(bid: 1): 2])
+}
+
+test duplicate_set_member {
+    # expect-error(type, "delta.duplicate_entry")
+    let value = delta<set<i64>>(added: [1, 1])
+}
+
+test duplicate_map_key {
+    let value = delta<map<i64, i64>>(upsert: [
+        1: 2,
+        # expect-error(type, "delta.duplicate_entry")
+        1: 3
+    ])
+}
+
+test duplicate_map_removal {
+    # expect-error(type, "delta.duplicate_entry")
+    let value = delta<map<i64, i64>>(remove: [1, 1])
+}
+
+test duplicate_fixed_index {
+    # expect-error(type, "delta.duplicate_entry")
+    let value = delta<list<i64, 2>>(items: [0: 1, 0: 2])
+}
+
+test duplicate_growing_removal {
+    # expect-error(type, "delta.duplicate_entry")
+    let value = delta<list<i64>>(remove: [0, 0])
+}
+
+test duplicate_composite_key {
+    # expect-error(type, "delta.duplicate_entry")
+    let value = delta<map<Quote, i64>>(upsert: [Quote(bid: 1): 2, Quote(bid: 1): 3])
+}
+
+test negative_growing_index {
+    # expect-error(type, "delta.index_bounds")
+    let value = delta<list<i64>>(items: [-1: 1])
+}
+
+test negative_removal_index {
+    # expect-error(type, "delta.index_bounds")
+    let value = delta<list<i64>>(remove: [-1])
+}
+
+test fixed_upper_bound {
+    # expect-error(type, "delta.index_bounds")
+    let value = delta<list<i64, 2>>(items: [2: 1])
+}
+
+test tuple_upper_bound {
+    # expect-error(type, "delta.index_bounds")
+    let value = delta<tuple<i64, str>>(items: [2: 1])
+}
+
+test set_overlap {
+    # expect-error(type, "delta.overlap")
+    let value = delta<set<i64>>(added: [1], removed: [1])
+}
+
+test set_reverse_overlap {
+    let value = delta<set<i64>>(
+        removed: [1],
+        # expect-error(type, "delta.overlap")
+        added: [1]
+    )
+}
+
+test map_overlap {
+    # expect-error(type, "delta.overlap")
+    let value = delta<map<i64, i64>>(upsert: [1: 2], remove: [1])
+}
+
+test map_reverse_overlap {
+    # expect-error(type, "delta.overlap")
+    let value = delta<map<i64, i64>>(remove: [1], upsert: [1: 2])
+}
+
+test nonconstant_member {
+    var position: i64 = 0
+    # expect-error(type, "delta.entry_constant")
+    let value = delta<set<i64>>(added: [position])
+}
+
+test nonconstant_key {
+    var position: i64 = 0
+    # expect-error(type, "delta.entry_constant")
+    let value = delta<map<i64, i64>>(upsert: [position: 1])
+}
+
+test nonconstant_index {
+    var position: i64 = 0
+    # expect-error(type, "delta.entry_constant")
+    let value = delta<list<i64, 2>>(items: [position: 1])
+}
+
+# Positive controls: exact deltas, reduced values and stored removal data.
+test admitted_delta_values {
+    let scalar: delta<i64> = 1
+    let mode: delta<Mode> = Mode::first
+    let atomic: delta<atomic<Quote>> = Quote(bid: 2)
+    let optional: delta<atomic<OptionalQuote>> = OptionalQuote(bid: 2)
+    let recursive: delta<atomic<Chain>> = Chain(value: 3, next: Chain(value: 4))
+    let family: delta<atomic<Event>> = Trade(label: "trade", price: 5)
+    let arrival: delta<rolling<i64, 3, 1>> = 6
+    assert scalar == 1
+    assert mode == Mode::first
+    assert atomic.bid == 2
+    assert optional.bid == 2
+    assert recursive.value == 3
+    assert family.label == "trade"
+    assert arrival == 6
+    let fixed = delta<list<i64, 2>>(items: [0: 1])
+    assert eval(forward_fixed, value: [fixed]) == [fixed]
+    let quote = delta<Quote>(bid: 2)
+    assert eval(forward_quote, value: [quote]) == [quote]
+    var stored: list<delta<set<i64>>> = []
+    push(stored, delta<set<i64>>(removed: [7]))
+    assert len(stored) == 1
+    # Formation alone need not know a growing endpoint's previous length.
+    var tails: list<delta<list<i64>>> = []
+    push(tails, delta<list<i64>>(items: [1: 9], remove: [1]))
+    assert len(tails) == 1
+}
