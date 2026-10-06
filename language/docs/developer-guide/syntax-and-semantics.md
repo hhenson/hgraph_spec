@@ -2249,9 +2249,7 @@ A timed run seeds hgraph's absolute-time replay buffers and records sparsely,
 so a timed expected sequence lists exactly the ticks the output produced, at
 their times. The run's start is hgraph's simulation origin unless a
 `datetime` key fixes it; the run ends when nothing remains scheduled. An
-explicit end bound and approximate float comparison are open. The first
-compiler pass runs dense sequences only; a timed sequence is a `test`
-diagnostic until the sparse harness lands.
+explicit end bound and approximate float comparison are open.
 
 A literal in a harness sequence takes the parameter's scalar type: an
 integer literal in an `f64` position is the corresponding `f64`, and any
