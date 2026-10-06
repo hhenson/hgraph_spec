@@ -2,6 +2,7 @@
 
 Inside a named test, `assert raises("code") { ... }` requires execution of
 the block to raise the specified [execution error](error-catalogue.md).
+This includes a catalogued eval input-admission failure before graph execution.
 The argument must be one string literal naming a listed code. Unknown codes
 and computed arguments are source errors. `raises` is contextual immediately
 after `assert`; it is neither a function nor a general exception construct.
