@@ -1,0 +1,7 @@
+module examples.reject.raises_computed_code
+
+test invalid_code_expression {
+    let code = "yield.negative_duration"
+    # expect-error(type, "test.raises_code")
+    assert raises(code) { assert true }
+}

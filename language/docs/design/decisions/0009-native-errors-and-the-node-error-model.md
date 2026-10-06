@@ -27,8 +27,9 @@ the throw are already published.
 ## Decision
 
 1. **HGL adopts hgraph's node error model as the language rule.** A runtime
-   evaluation that raises ends at the raise. HGL adds no exception surface of
-   its own: no `try`, no catch, no error value. Whether the raise becomes a
+   evaluation that raises ends at the raise. HGL adds no production exception surface of
+   its own: no `try`, no catch, no error value. Tests may use
+   [execution-error assertions](../execution-error-assertions.md). Whether the raise becomes a
    `NodeError` on an error output or propagates is decided by the graph that
    wires the node, exactly as for a hand-written C++ node. Output and state
    writes made earlier in the same evaluation stand. A body that must not
@@ -66,8 +67,9 @@ the throw are already published.
   state (`match_`, `replace`), packs with formatting (`format_`), and the
   coupled result of `divmod_`.
 - Parity with the native operator includes the exception and its message:
-  the generated catalogue tests assert both. HGL-level `test` blocks cannot
-  yet assert a raise; that harness gap is unchanged.
+  the generated catalogue tests assert both. HGL-level `test` blocks use
+  [execution-error assertions](../execution-error-assertions.md) for the
+  [catalogued codes](../error-catalogue.md); messages are not match keys.
 - The language model's open "error model for runtime nodes" decision is
   closed by this record. Integer division, overflow, NaN and string operator
   semantics remain open where they were.

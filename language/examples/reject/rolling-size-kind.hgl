@@ -1,0 +1,4 @@
+module examples.reject.rolling_size_kind
+
+# expect-error(type, "rolling.size_kind")
+fn consume(value: rolling<f64, 5m, 3>) { when { } }

@@ -117,6 +117,59 @@ value definition even if a temporal `scale` exists. Without `const(...)`,
 the temporal definition wins. See [Value functions and lifting](value-functions.md)
 for mixed scalar/temporal arguments and direct all-scalar assertions.
 
+## Expected execution errors
+
+Use a listed [execution-error code](../design/error-catalogue.md#execution-errors)
+with `assert raises` inside a named test:
+
+```hgl
+fn negative_delay() -> i64 { yield -1us: 1 }
+fn consume(tick: i64) { when { } }
+fn drive_negative(tick: i64) -> i64 {
+    consume(tick)
+    negative_delay()
+}
+
+test rejects_negative_delay {
+    assert raises("yield.negative_duration") {
+        eval(drive_negative, tick: [1, 1])
+    }
+    assert true
+}
+```
+
+The block runs once. A matching error passes after cleanup, then the test
+continues. Normal completion, another error, an assertion failure or failed
+cleanup fails the test. The code must be a string literal from the catalogue;
+messages are not matched. Graph effects completed before failure remain.
+Errors a graph publishes as data use ordinary output assertions. See the
+[complete rules](../design/execution-error-assertions.md) and
+[examples](../../examples/execution-errors.hgl).
+
+## Expected source errors
+
+Keep intentionally invalid source in a separate rejection fixture:
+
+```hgl
+module examples.bad_window
+
+# expect-error(type, "rolling.size_kind")
+fn consume(value: rolling<f64, 5m, 3>) { when { } }
+```
+
+Run `hgl test --reject fixture.hgl`. The annotation expects exactly one
+primary error on the immediately following physical line in that file.
+Every primary error must be expected, with an exact category and code;
+message text is not matched. Unknown names, wrong locations, extra errors
+and successful compilation fail the fixture. Warnings and attached notes
+are not matching errors. `build` is not an eligible rejection category.
+
+The [catalogue](../design/error-catalogue.md) enumerates all categories and
+allowed source-error codes. The category name is annotation syntax, not a
+bare identifier value in an HGL expression. See the
+[fixture rules](../design/compile-rejection-fixtures.md) and
+[isolated examples](../../examples/reject/README.md).
+
 ## Dense sequences
 
 A temporal parameter receives a *sequence*: one element per engine cycle,

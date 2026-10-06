@@ -1,0 +1,4 @@
+module examples.reject.rolling_size_bounds
+
+# expect-error(type, "rolling.size_bounds")
+fn consume(value: rolling<f64, 3, 4>) { when { } }

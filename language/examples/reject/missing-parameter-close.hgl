@@ -1,0 +1,4 @@
+module examples.reject.missing_parameter_close
+
+# expect-error(parse, "syntax.expected_token")
+fn identity(value: i64 -> i64 => value

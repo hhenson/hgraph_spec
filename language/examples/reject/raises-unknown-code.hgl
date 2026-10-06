@@ -1,0 +1,6 @@
+module examples.reject.raises_unknown_code
+
+test invalid_code {
+    # expect-error(type, "test.raises_code")
+    assert raises("yield.unknown") { assert true }
+}

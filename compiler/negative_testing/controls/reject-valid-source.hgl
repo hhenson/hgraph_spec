@@ -1,0 +1,4 @@
+module conformance.negative_testing.reject_valid_source
+
+# expect-error(type, "rolling.size_kind")
+fn identity(value: i64) -> i64 => value

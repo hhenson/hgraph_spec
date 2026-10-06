@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "path_base": "manifest_directory",
+  "cases": [
+    {
+      "file": "../../language/examples/execution-errors.hgl",
+      "mode": "test",
+      "expected_exit": 0,
+      "purpose": "Both yield codes, continuation after cleanup and successful nesting.",
+      "id": "execution-errors"
+    },
+    {
+      "file": "../../language/examples/reject/missing-parameter-close.hgl",
+      "mode": "reject",
+      "expected_exit": 0,
+      "purpose": "Exact expected source rejection: missing-parameter-close.",
+      "id": "missing-parameter-close"
+    },
+    {
+      "file": "../../language/examples/reject/raises-computed-code.hgl",
+      "mode": "reject",
+      "expected_exit": 0,
+      "purpose": "Exact expected source rejection: raises-computed-code.",
+      "id": "raises-computed-code"
+    },
+    {
+      "file": "../../language/examples/reject/raises-unknown-code.hgl",
+      "mode": "reject",
+      "expected_exit": 0,
+      "purpose": "Exact expected source rejection: raises-unknown-code.",
+      "id": "raises-unknown-code"
+    },
+    {
+      "file": "../../language/examples/reject/rolling-size-bounds.hgl",
+      "mode": "reject",
+      "expected_exit": 0,
+      "purpose": "Exact expected source rejection: rolling-size-bounds.",
+      "id": "rolling-size-bounds"
+    },
+    {
+      "file": "../../language/examples/reject/rolling-size-kind.hgl",
+      "mode": "reject",
+      "expected_exit": 0,
+      "purpose": "Exact expected source rejection: rolling-size-kind.",
+      "id": "rolling-size-kind"
+    },
+    {
+      "file": "../../language/examples/reject/test-inject.hgl",
+      "mode": "reject",
+      "expected_exit": 0,
+      "purpose": "Exact expected source rejection: test-inject.",
+      "id": "test-inject"
+    },
+    {
+      "file": "../../language/examples/reject/yield-time-type.hgl",
+      "mode": "reject",
+      "expected_exit": 0,
+      "purpose": "Exact expected source rejection: yield-time-type.",
+      "id": "yield-time-type"
+    },
+    {
+      "file": "controls/runtime-normal-return.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "Normal completion must not satisfy an expected execution error.",
+      "id": "runtime-normal-return"
+    },
+    {
+      "file": "controls/runtime-empty-block.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "An empty block completes normally and must fail.",
+      "id": "runtime-empty-block"
+    },
+    {
+      "file": "controls/runtime-wrong-code.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "An execution error with another listed code must fail.",
+      "id": "runtime-wrong-code"
+    },
+    {
+      "file": "controls/runtime-assertion-failure.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "An ordinary assertion failure cannot satisfy raises.",
+      "id": "runtime-assertion-failure"
+    },
+    {
+      "file": "controls/runtime-nested-failure.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "A failed inner raises cannot be caught by an outer raises.",
+      "id": "runtime-nested-failure"
+    },
+    {
+      "file": "controls/runtime-consumed-inner.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "A successful inner raises consumes its error; outer normal completion fails.",
+      "id": "runtime-consumed-inner"
+    },
+    {
+      "file": "controls/reject-valid-source.hgl",
+      "mode": "reject",
+      "expected_exit": 1,
+      "purpose": "An expected source error cannot match successful source checking.",
+      "id": "reject-valid-source"
+    },
+    {
+      "file": "controls/reject-wrong-code.hgl",
+      "mode": "reject",
+      "expected_exit": 1,
+      "purpose": "Another known error code cannot satisfy an expectation.",
+      "id": "reject-wrong-code"
+    },
+    {
+      "file": "controls/reject-wrong-location.hgl",
+      "mode": "reject",
+      "expected_exit": 1,
+      "purpose": "The expectation targets the blank line, not the later error.",
+      "id": "reject-wrong-location"
+    },
+    {
+      "file": "controls/reject-unexpected-error.hgl",
+      "mode": "reject",
+      "expected_exit": 1,
+      "purpose": "An extra primary error with no annotation must fail.",
+      "id": "reject-unexpected-error"
+    },
+    {
+      "file": "controls/reject-malformed-annotation.hgl",
+      "mode": "reject",
+      "expected_exit": 1,
+      "purpose": "Malformed expectation metadata must fail.",
+      "id": "reject-malformed-annotation"
+    },
+    {
+      "file": "controls/reject-unknown-category.hgl",
+      "mode": "reject",
+      "expected_exit": 1,
+      "purpose": "Unknown category names must fail metadata validation.",
+      "id": "reject-unknown-category"
+    },
+    {
+      "file": "controls/reject-unknown-code.hgl",
+      "mode": "reject",
+      "expected_exit": 1,
+      "purpose": "Unknown codes must fail metadata validation.",
+      "id": "reject-unknown-code"
+    },
+    {
+      "file": "controls/reject-category-mismatch.hgl",
+      "mode": "reject",
+      "expected_exit": 1,
+      "purpose": "A listed category/code pair must match the catalogue row.",
+      "id": "reject-category-mismatch"
+    },
+    {
+      "file": "controls/reject-build-category.hgl",
+      "mode": "reject",
+      "expected_exit": 1,
+      "purpose": "Build failures are ineligible source-rejection expectations.",
+      "id": "reject-build-category"
+    },
+    {
+      "file": "controls/reject-no-expectation.hgl",
+      "mode": "reject",
+      "expected_exit": 1,
+      "purpose": "Source failure without any expectation is not a passing fixture.",
+      "id": "reject-no-expectation"
+    },
+    {
+      "id": "comment-text",
+      "file": "../../language/examples/reject/comment-text.hgl",
+      "mode": "reject",
+      "expected_exit": 0,
+      "purpose": "Only actual standalone line comments form expectations; string and block-comment text is ignored."
+    }
+  ]
+}

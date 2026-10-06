@@ -1,0 +1,5 @@
+module conformance.negative_testing.runtime_normal_return
+
+test normal_return {
+    assert raises("yield.negative_duration") { assert true }
+}

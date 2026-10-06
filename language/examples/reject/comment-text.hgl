@@ -1,0 +1,10 @@
+module examples.reject.comment_text
+
+/*
+# expect-error(unknown, "not.metadata")
+This is block-comment text.
+*/
+const fn marker() -> str => "# expect-error(unknown, \"not.metadata\")"
+
+# expect-error(type, "rolling.size_kind")
+fn consume(value: rolling<f64, 5m, 3>) { when { } }

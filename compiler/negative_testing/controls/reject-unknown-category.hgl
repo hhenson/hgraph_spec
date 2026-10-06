@@ -1,0 +1,4 @@
+module conformance.negative_testing.reject_unknown_category
+
+# expect-error(unknown, "rolling.size_kind")
+fn consume(value: rolling<f64, 5m, 3>) { when { } }

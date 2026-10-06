@@ -2155,7 +2155,8 @@ test midpoint_waits_for_both_sides {
 test_decl        = "test", identifier, block;
 test_context     = "test", "{", { test_helper | test_decl }, "}";
 test_helper      = function_decl; (* private fn or const fn only *)
-assert_statement = "assert", expression;
+assert_statement = "assert", ( expression | raises_assertion );
+raises_assertion = "raises", "(", expression, ")", block;
 eval_expression  = "eval", "(", expression, { ",", argument }, ")";
 ```
 
@@ -2248,16 +2249,17 @@ A timed run seeds hgraph's absolute-time replay buffers and records sparsely,
 so a timed expected sequence lists exactly the ticks the output produced, at
 their times. The run's start is hgraph's simulation origin unless a
 `datetime` key fixes it; the run ends when nothing remains scheduled. An
-explicit end bound and approximate float comparison are open. The first
-compiler pass runs dense sequences only; a timed sequence is a `test`
-diagnostic until the sparse harness lands.
+explicit end bound and approximate float comparison are open.
 
 A literal in a harness sequence takes the parameter's scalar type: an
 integer literal in an `f64` position is the corresponding `f64`, and any
 other mismatch is a `type` diagnostic naming the parameter. An expected
 element is read the same way against the callee's result type.
 
-`assert` accepts any wiring-time `bool` expression. A failing assertion
+`assert` accepts any wiring-time `bool` expression. The test-only
+`assert raises("code") { ... }` form instead requires a matching execution
+error; see [execution-error assertions](../design/execution-error-assertions.md)
+and the exhaustive initial [error catalogue](../design/error-catalogue.md). A failing assertion
 reports the first differing cycle or time with the expected and observed
 elements. A harness sequence is a value only inside a `test` body: it can be
 bound with `let` and compared, but it cannot be passed to a function or
@@ -2402,8 +2404,12 @@ built. Rendered diagnostics are ordered by source position.
 
 ## Diagnostics
 
-Suggested categories are `parse`, `name`, `type`, `shape`, `constraint`,
+Diagnostic categories are `parse`, `name`, `type`, `shape`, `constraint`,
 `function-kind`, `phase`, `injectable`, `operator`, `module`, and `build`.
+The [error catalogue](../design/error-catalogue.md) defines every category
+and enumerates the codes allowed in negative-test expectations.
+[Compile-rejection fixtures](../design/compile-rejection-fixtures.md) use
+`# expect-error(category, "code")` and `hgl test --reject fixture.hgl`.
 
 Examples:
 
