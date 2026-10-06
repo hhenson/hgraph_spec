@@ -1,0 +1,3 @@
+module examples.reject.mixed_parts
+
+test from_main { assert helper(1) == 2 }

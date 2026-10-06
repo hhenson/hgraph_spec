@@ -1,0 +1,19 @@
+module examples.reject.nested_context
+
+test {
+    const fn helper(value: i64) -> i64 => value + 1
+
+    fn invalid_source() -> i64 {
+        # expect-error(type, "yield.time_type")
+        yield 1: 1
+    }
+
+    test rejected_inner {
+        # expect-error(type, "test.raises_code")
+        assert raises("unknown") { assert true }
+    }
+
+    test sibling_runs { assert helper(1) == 2 }
+}
+
+test outside_runs { assert helper(2) == 3 }

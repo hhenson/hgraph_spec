@@ -1,0 +1,6 @@
+module examples.reject.missing_declaration_name
+
+# expect-error(parse, "syntax.expected_token")
+fn (value: i64) -> i64 => value
+
+test neighbour_runs { assert true }

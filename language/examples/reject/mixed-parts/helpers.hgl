@@ -1,0 +1,5 @@
+module examples.reject.mixed_parts part helpers
+
+test {
+    const fn helper(value: i64) -> i64 => value + 1
+}

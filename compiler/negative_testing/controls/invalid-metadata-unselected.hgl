@@ -1,0 +1,8 @@
+module conformance.negative_testing.invalid_metadata_unselected
+
+test invalid_metadata {
+    # expect-error(unknown, "unknown")
+    assert true
+}
+
+test must_not_run { assert false }

@@ -1,0 +1,8 @@
+module conformance.negative_testing.unsafe_recovery
+
+# expect-error(parse, "syntax.expected_token")
+fn damaged(value: i64) -> i64 {
+    if true {
+        return value
+
+test must_not_run { assert false }

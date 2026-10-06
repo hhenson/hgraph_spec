@@ -1,0 +1,6 @@
+module conformance.negative_testing.unnamed_context_header
+
+# expect-error(type, "rolling.size_kind")
+test { fn broken(value: rolling<f64, 5m, 3>) { when { } } }
+
+test must_not_run { assert true }

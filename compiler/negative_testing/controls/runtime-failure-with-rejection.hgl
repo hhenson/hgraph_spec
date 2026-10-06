@@ -1,0 +1,6 @@
+module conformance.negative_testing.runtime_failure_with_rejection
+
+# expect-error(type, "rolling.size_kind")
+fn invalid_window(value: rolling<f64, 5m, 3>) { when { } }
+
+test runtime_failure { assert false }

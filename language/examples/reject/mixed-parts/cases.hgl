@@ -1,0 +1,11 @@
+module examples.reject.mixed_parts part cases
+
+# expect-error(type, "rolling.size_bounds")
+fn invalid_window(value: rolling<f64, 3, 4>) { when { } }
+
+test rejected_part_test {
+    # expect-error(type, "test.raises_code")
+    assert raises("unknown") { assert true }
+}
+
+test from_part { assert helper(4) == 5 }

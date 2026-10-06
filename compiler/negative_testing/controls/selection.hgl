@@ -1,0 +1,16 @@
+module conformance.negative_testing.selection
+
+# expect-error(type, "rolling.size_kind")
+fn always_checked(value: rolling<f64, 5m, 3>) { when { } }
+
+test selected_rejection {
+    # expect-error(phase, "test.statement_phase")
+    inject clock
+}
+
+test mismatched_rejection {
+    # expect-error(type, "test.raises_code")
+    assert true
+}
+
+test selected_runtime { assert true }

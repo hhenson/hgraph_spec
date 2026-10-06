@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "path_base": "manifest_directory",
   "cases": [
     {
@@ -7,175 +7,712 @@
       "mode": "test",
       "expected_exit": 0,
       "purpose": "Both yield codes, continuation after cleanup and successful nesting.",
-      "id": "execution-errors"
+      "id": "execution-errors",
+      "preflight": true,
+      "runtime_results": [
+        {
+          "name": "expected_execution_errors",
+          "outcome": "passed"
+        },
+        {
+          "name": "nested_execution_errors",
+          "outcome": "passed"
+        }
+      ]
     },
     {
       "file": "../../language/examples/reject/missing-parameter-close.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 0,
-      "purpose": "Exact expected source rejection: missing-parameter-close.",
-      "id": "missing-parameter-close"
+      "purpose": "A sole malformed declaration has an unambiguous extent through EOF despite its missing parameter close.",
+      "id": "missing-parameter-close",
+      "preflight": false,
+      "rejection_results": [
+        {
+          "file": "../../language/examples/reject/missing-parameter-close.hgl",
+          "owner_line": 4,
+          "outcome": "passed"
+        }
+      ]
     },
     {
       "file": "../../language/examples/reject/raises-computed-code.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 0,
       "purpose": "Exact expected source rejection: raises-computed-code.",
-      "id": "raises-computed-code"
+      "id": "raises-computed-code",
+      "preflight": false,
+      "rejection_results": [
+        {
+          "name": "invalid_code_expression",
+          "outcome": "passed"
+        }
+      ],
+      "not_executed": [
+        "invalid_code_expression"
+      ]
     },
     {
       "file": "../../language/examples/reject/raises-unknown-code.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 0,
       "purpose": "Exact expected source rejection: raises-unknown-code.",
-      "id": "raises-unknown-code"
+      "id": "raises-unknown-code",
+      "preflight": false,
+      "rejection_results": [
+        {
+          "name": "invalid_code",
+          "outcome": "passed"
+        }
+      ],
+      "not_executed": [
+        "invalid_code"
+      ]
     },
     {
       "file": "../../language/examples/reject/rolling-size-bounds.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 0,
       "purpose": "Exact expected source rejection: rolling-size-bounds.",
-      "id": "rolling-size-bounds"
+      "id": "rolling-size-bounds",
+      "preflight": false,
+      "rejection_results": [
+        {
+          "file": "../../language/examples/reject/rolling-size-bounds.hgl",
+          "owner_line": 4,
+          "outcome": "passed"
+        }
+      ]
     },
     {
       "file": "../../language/examples/reject/rolling-size-kind.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 0,
       "purpose": "Exact expected source rejection: rolling-size-kind.",
-      "id": "rolling-size-kind"
+      "id": "rolling-size-kind",
+      "preflight": false,
+      "rejection_results": [
+        {
+          "file": "../../language/examples/reject/rolling-size-kind.hgl",
+          "owner_line": 4,
+          "outcome": "passed"
+        }
+      ]
     },
     {
       "file": "../../language/examples/reject/test-inject.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 0,
       "purpose": "Exact expected source rejection: test-inject.",
-      "id": "test-inject"
+      "id": "test-inject",
+      "preflight": false,
+      "rejection_results": [
+        {
+          "name": "invalid_capability",
+          "outcome": "passed"
+        }
+      ],
+      "not_executed": [
+        "invalid_capability"
+      ]
     },
     {
       "file": "../../language/examples/reject/yield-time-type.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 0,
       "purpose": "Exact expected source rejection: yield-time-type.",
-      "id": "yield-time-type"
+      "id": "yield-time-type",
+      "preflight": false,
+      "rejection_results": [
+        {
+          "file": "../../language/examples/reject/yield-time-type.hgl",
+          "owner_line": 3,
+          "outcome": "passed"
+        }
+      ]
     },
     {
       "file": "controls/runtime-normal-return.hgl",
       "mode": "test",
       "expected_exit": 1,
       "purpose": "Normal completion must not satisfy an expected execution error.",
-      "id": "runtime-normal-return"
+      "id": "runtime-normal-return",
+      "preflight": true,
+      "runtime_results": [
+        {
+          "name": "normal_return",
+          "outcome": "failed"
+        }
+      ]
     },
     {
       "file": "controls/runtime-empty-block.hgl",
       "mode": "test",
       "expected_exit": 1,
       "purpose": "An empty block completes normally and must fail.",
-      "id": "runtime-empty-block"
+      "id": "runtime-empty-block",
+      "preflight": true,
+      "runtime_results": [
+        {
+          "name": "empty_block",
+          "outcome": "failed"
+        }
+      ]
     },
     {
       "file": "controls/runtime-wrong-code.hgl",
       "mode": "test",
       "expected_exit": 1,
       "purpose": "An execution error with another listed code must fail.",
-      "id": "runtime-wrong-code"
+      "id": "runtime-wrong-code",
+      "preflight": true,
+      "runtime_results": [
+        {
+          "name": "wrong_code",
+          "outcome": "failed"
+        }
+      ]
     },
     {
       "file": "controls/runtime-assertion-failure.hgl",
       "mode": "test",
       "expected_exit": 1,
       "purpose": "An ordinary assertion failure cannot satisfy raises.",
-      "id": "runtime-assertion-failure"
+      "id": "runtime-assertion-failure",
+      "preflight": true,
+      "runtime_results": [
+        {
+          "name": "assertion_failure",
+          "outcome": "failed"
+        }
+      ]
     },
     {
       "file": "controls/runtime-nested-failure.hgl",
       "mode": "test",
       "expected_exit": 1,
       "purpose": "A failed inner raises cannot be caught by an outer raises.",
-      "id": "runtime-nested-failure"
+      "id": "runtime-nested-failure",
+      "preflight": true,
+      "runtime_results": [
+        {
+          "name": "nested_failure",
+          "outcome": "failed"
+        }
+      ]
     },
     {
       "file": "controls/runtime-consumed-inner.hgl",
       "mode": "test",
       "expected_exit": 1,
       "purpose": "A successful inner raises consumes its error; outer normal completion fails.",
-      "id": "runtime-consumed-inner"
+      "id": "runtime-consumed-inner",
+      "preflight": true,
+      "runtime_results": [
+        {
+          "name": "consumed_inner",
+          "outcome": "failed"
+        }
+      ]
     },
     {
       "file": "controls/reject-valid-source.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 1,
       "purpose": "An expected source error cannot match successful source checking.",
-      "id": "reject-valid-source"
+      "id": "reject-valid-source",
+      "preflight": false,
+      "rejection_results": [
+        {
+          "file": "controls/reject-valid-source.hgl",
+          "owner_line": 4,
+          "outcome": "failed"
+        }
+      ]
     },
     {
       "file": "controls/reject-wrong-code.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 1,
       "purpose": "Another known error code cannot satisfy an expectation.",
-      "id": "reject-wrong-code"
+      "id": "reject-wrong-code",
+      "preflight": false,
+      "rejection_results": [
+        {
+          "file": "controls/reject-wrong-code.hgl",
+          "owner_line": 4,
+          "outcome": "failed"
+        }
+      ]
     },
     {
       "file": "controls/reject-wrong-location.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 1,
       "purpose": "The expectation targets the blank line, not the later error.",
-      "id": "reject-wrong-location"
+      "id": "reject-wrong-location",
+      "preflight": false
     },
     {
       "file": "controls/reject-unexpected-error.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 1,
       "purpose": "An extra primary error with no annotation must fail.",
-      "id": "reject-unexpected-error"
+      "id": "reject-unexpected-error",
+      "preflight": false
     },
     {
       "file": "controls/reject-malformed-annotation.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 1,
       "purpose": "Malformed expectation metadata must fail.",
-      "id": "reject-malformed-annotation"
+      "id": "reject-malformed-annotation",
+      "preflight": false
     },
     {
       "file": "controls/reject-unknown-category.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 1,
       "purpose": "Unknown category names must fail metadata validation.",
-      "id": "reject-unknown-category"
+      "id": "reject-unknown-category",
+      "preflight": false
     },
     {
       "file": "controls/reject-unknown-code.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 1,
       "purpose": "Unknown codes must fail metadata validation.",
-      "id": "reject-unknown-code"
+      "id": "reject-unknown-code",
+      "preflight": false
     },
     {
       "file": "controls/reject-category-mismatch.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 1,
       "purpose": "A listed category/code pair must match the catalogue row.",
-      "id": "reject-category-mismatch"
+      "id": "reject-category-mismatch",
+      "preflight": false
     },
     {
       "file": "controls/reject-build-category.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 1,
       "purpose": "Build failures are ineligible source-rejection expectations.",
-      "id": "reject-build-category"
+      "id": "reject-build-category",
+      "preflight": false
     },
     {
       "file": "controls/reject-no-expectation.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 1,
       "purpose": "Source failure without any expectation is not a passing fixture.",
-      "id": "reject-no-expectation"
+      "id": "reject-no-expectation",
+      "preflight": false
     },
     {
       "id": "comment-text",
       "file": "../../language/examples/reject/comment-text.hgl",
-      "mode": "reject",
+      "mode": "test",
       "expected_exit": 0,
-      "purpose": "Only actual standalone line comments form expectations; string and block-comment text is ignored."
+      "purpose": "Only actual standalone line comments form expectations; string and block-comment text is ignored.",
+      "preflight": false,
+      "rejection_results": [
+        {
+          "file": "../../language/examples/reject/comment-text.hgl",
+          "owner_line": 10,
+          "outcome": "passed"
+        }
+      ]
+    },
+    {
+      "id": "mixed",
+      "file": "../../language/examples/reject/mixed.hgl",
+      "mode": "test",
+      "expected_exit": 0,
+      "purpose": "Executable tests before and after declaration/test rejections run; annotated test never executes.",
+      "not_executed": [
+        "rejected_test"
+      ],
+      "preflight": false,
+      "runtime_results": [
+        {
+          "name": "before_rejections",
+          "outcome": "passed"
+        },
+        {
+          "name": "after_rejections",
+          "outcome": "passed"
+        }
+      ],
+      "rejection_results": [
+        {
+          "name": "rejected_test",
+          "outcome": "passed"
+        },
+        {
+          "file": "../../language/examples/reject/mixed.hgl",
+          "owner_line": 8,
+          "outcome": "passed"
+        }
+      ]
+    },
+    {
+      "id": "nested-context",
+      "file": "../../language/examples/reject/nested-context.hgl",
+      "mode": "test",
+      "expected_exit": 0,
+      "purpose": "Only annotated inner owners are excluded; surviving helpers remain visible inside and outside the context.",
+      "not_executed": [
+        "rejected_inner"
+      ],
+      "preflight": false,
+      "runtime_results": [
+        {
+          "name": "sibling_runs",
+          "outcome": "passed"
+        },
+        {
+          "name": "outside_runs",
+          "outcome": "passed"
+        }
+      ],
+      "rejection_results": [
+        {
+          "name": "rejected_inner",
+          "outcome": "passed"
+        },
+        {
+          "file": "../../language/examples/reject/nested-context.hgl",
+          "owner_line": 6,
+          "outcome": "passed"
+        }
+      ]
+    },
+    {
+      "id": "missing-declaration-name",
+      "file": "../../language/examples/reject/missing-declaration-name.hgl",
+      "mode": "test",
+      "expected_exit": 0,
+      "purpose": "A reliably bounded malformed declaration need not have a name.",
+      "preflight": false,
+      "runtime_results": [
+        {
+          "name": "neighbour_runs",
+          "outcome": "passed"
+        }
+      ],
+      "rejection_results": [
+        {
+          "file": "../../language/examples/reject/missing-declaration-name.hgl",
+          "owner_line": 4,
+          "outcome": "passed"
+        }
+      ]
+    },
+    {
+      "id": "invalid-import",
+      "file": "../../language/examples/reject/invalid-import.hgl",
+      "mode": "test",
+      "expected_exit": 0,
+      "purpose": "A use declaration can own an isolated syntax rejection.",
+      "preflight": false,
+      "runtime_results": [
+        {
+          "name": "neighbour_runs",
+          "outcome": "passed"
+        }
+      ],
+      "rejection_results": [
+        {
+          "file": "../../language/examples/reject/invalid-import.hgl",
+          "owner_line": 4,
+          "outcome": "passed"
+        }
+      ]
+    },
+    {
+      "id": "syntax-recovery",
+      "file": "../../language/examples/reject/syntax-recovery.hgl",
+      "mode": "test",
+      "expected_exit": 0,
+      "purpose": "A missing colon inside balanced parameters is isolated without absorbing the next test.",
+      "preflight": false,
+      "runtime_results": [
+        {
+          "name": "neighbour_runs",
+          "outcome": "passed"
+        }
+      ],
+      "rejection_results": [
+        {
+          "file": "../../language/examples/reject/syntax-recovery.hgl",
+          "owner_line": 4,
+          "outcome": "passed"
+        }
+      ]
+    },
+    {
+      "id": "mixed-rejection-mismatch",
+      "file": "controls/mixed-rejection-mismatch.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "A rejection mismatch fails its case but the admitted runtime sentinel still executes.",
+      "preflight": false,
+      "runtime_results": [
+        {
+          "name": "runtime_sentinel",
+          "outcome": "passed"
+        }
+      ],
+      "rejection_results": [
+        {
+          "file": "controls/mixed-rejection-mismatch.hgl",
+          "owner_line": 4,
+          "outcome": "failed"
+        }
+      ]
+    },
+    {
+      "id": "runtime-failure-with-rejection",
+      "file": "controls/runtime-failure-with-rejection.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "Runtime assertion failure remains distinct from the passing source rejection.",
+      "preflight": false,
+      "runtime_results": [
+        {
+          "name": "runtime_failure",
+          "outcome": "failed"
+        }
+      ],
+      "rejection_results": [
+        {
+          "file": "controls/runtime-failure-with-rejection.hgl",
+          "owner_line": 4,
+          "outcome": "passed"
+        }
+      ]
+    },
+    {
+      "id": "dependency-on-excluded",
+      "file": "controls/dependency-on-excluded.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "Residual source cannot depend on an excluded declaration; admission fails before execution.",
+      "not_executed": [
+        "must_not_run"
+      ],
+      "preflight": false
+    },
+    {
+      "id": "unsafe-recovery",
+      "file": "controls/unsafe-recovery.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "Unclosed nested bodies cannot safely donate a boundary to a neighbouring test.",
+      "not_executed": [
+        "must_not_run"
+      ],
+      "preflight": false
+    },
+    {
+      "id": "select-rejection",
+      "file": "controls/selection.hgl",
+      "mode": "test",
+      "expected_exit": 0,
+      "purpose": "Select a named rejection test; the unselected mismatched rejection is not checked.",
+      "select": [
+        "selected_rejection"
+      ],
+      "not_executed": [
+        "selected_rejection",
+        "mismatched_rejection",
+        "selected_runtime"
+      ],
+      "preflight": false,
+      "rejection_results": [
+        {
+          "name": "selected_rejection",
+          "outcome": "passed"
+        },
+        {
+          "file": "controls/selection.hgl",
+          "owner_line": 4,
+          "outcome": "passed"
+        }
+      ]
+    },
+    {
+      "id": "select-runtime",
+      "file": "controls/selection.hgl",
+      "mode": "test",
+      "expected_exit": 0,
+      "purpose": "Selected runtime test runs while unselected named rejection bodies are excluded.",
+      "select": [
+        "selected_runtime"
+      ],
+      "not_executed": [
+        "selected_rejection",
+        "mismatched_rejection"
+      ],
+      "preflight": false,
+      "runtime_results": [
+        {
+          "name": "selected_runtime",
+          "outcome": "passed"
+        }
+      ],
+      "rejection_results": [
+        {
+          "file": "controls/selection.hgl",
+          "owner_line": 4,
+          "outcome": "passed"
+        }
+      ]
+    },
+    {
+      "id": "select-mismatch",
+      "file": "controls/selection.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "Selecting a normally successful annotated test fails its expected rejection.",
+      "select": [
+        "mismatched_rejection"
+      ],
+      "not_executed": [
+        "selected_rejection",
+        "mismatched_rejection",
+        "selected_runtime"
+      ],
+      "preflight": false,
+      "rejection_results": [
+        {
+          "name": "mismatched_rejection",
+          "outcome": "failed"
+        },
+        {
+          "file": "controls/selection.hgl",
+          "owner_line": 4,
+          "outcome": "passed"
+        }
+      ]
+    },
+    {
+      "id": "unknown-selector",
+      "file": "controls/selection.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "Unknown test selectors fail admission.",
+      "select": [
+        "missing_test"
+      ],
+      "not_executed": [
+        "selected_runtime"
+      ],
+      "preflight": false
+    },
+    {
+      "id": "invalid-metadata-unselected",
+      "file": "controls/invalid-metadata-unselected.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "Selection cannot bypass invalid metadata in another named test.",
+      "select": [
+        "must_not_run"
+      ],
+      "not_executed": [
+        "must_not_run"
+      ],
+      "preflight": false
+    },
+    {
+      "id": "mixed-parts",
+      "file": "../../language/examples/reject/mixed-parts/main.hgl",
+      "mode": "test",
+      "expected_exit": 0,
+      "purpose": "Surviving helpers cross parts, while each expectation keeps its original file/line.",
+      "parts": [
+        "../../language/examples/reject/mixed-parts/helpers.hgl",
+        "../../language/examples/reject/mixed-parts/cases.hgl"
+      ],
+      "not_executed": [
+        "rejected_part_test"
+      ],
+      "preflight": false,
+      "runtime_results": [
+        {
+          "name": "from_main",
+          "outcome": "passed"
+        },
+        {
+          "name": "from_part",
+          "outcome": "passed"
+        }
+      ],
+      "rejection_results": [
+        {
+          "name": "rejected_part_test",
+          "outcome": "passed"
+        },
+        {
+          "file": "../../language/examples/reject/mixed-parts/cases.hgl",
+          "owner_line": 4,
+          "outcome": "passed"
+        }
+      ]
+    },
+    {
+      "id": "mixed-parts-selection",
+      "file": "../../language/examples/reject/mixed-parts/main.hgl",
+      "mode": "test",
+      "expected_exit": 0,
+      "purpose": "Selectors find named rejection tests in other explicit parts.",
+      "parts": [
+        "../../language/examples/reject/mixed-parts/helpers.hgl",
+        "../../language/examples/reject/mixed-parts/cases.hgl"
+      ],
+      "select": [
+        "rejected_part_test"
+      ],
+      "not_executed": [
+        "rejected_part_test",
+        "from_main",
+        "from_part"
+      ],
+      "preflight": false,
+      "rejection_results": [
+        {
+          "name": "rejected_part_test",
+          "outcome": "passed"
+        },
+        {
+          "file": "../../language/examples/reject/mixed-parts/cases.hgl",
+          "owner_line": 4,
+          "outcome": "passed"
+        }
+      ]
+    },
+    {
+      "id": "unnamed-context-header",
+      "file": "controls/unnamed-context-header.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "An annotation targeting an unnamed test-context header is invalid even when an inner helper starts on the same line.",
+      "not_executed": [
+        "must_not_run"
+      ],
+      "preflight": false
+    },
+    {
+      "id": "generic-dependency-on-excluded",
+      "file": "controls/generic-dependency-on-excluded.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "Deferred generic specialization does not permit an unresolved dependency on an excluded declaration in surviving source.",
+      "not_executed": [
+        "must_not_run"
+      ],
+      "preflight": false
     }
   ]
 }

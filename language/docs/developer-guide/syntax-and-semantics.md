@@ -2400,7 +2400,10 @@ skipped to the end of its line or the closing `}` of its block, a bad
 declaration to the next line that starts a declaration, and each bad
 construct produces one diagnostic. A reserved word in a name position is
 reported and then taken as the name so the enclosing declaration is still
-built. Rendered diagnostics are ordered by source position.
+built. Rendered diagnostics are ordered by source position. This diagnostic
+recovery alone does not establish safe rejection-case boundaries;
+[source-rejection isolation](../design/compile-rejection-fixtures.md#isolation-and-checking)
+must also hold before any test executes.
 
 ## Diagnostics
 
@@ -2408,8 +2411,10 @@ Diagnostic categories are `parse`, `name`, `type`, `shape`, `constraint`,
 `function-kind`, `phase`, `injectable`, `operator`, `module`, and `build`.
 The [error catalogue](../design/error-catalogue.md) defines every category
 and enumerates the codes allowed in negative-test expectations.
-[Compile-rejection fixtures](../design/compile-rejection-fixtures.md) use
-`# expect-error(category, "code")` and `hgl test --reject fixture.hgl`.
+[Source-rejection tests](../design/compile-rejection-fixtures.md) use
+`# expect-error(category, "code")` within ordinary `hgl test file.hgl`,
+alongside executable tests. An annotated test never executes; declaration
+owners are excluded from the executable module under the linked isolation rules.
 
 Examples:
 

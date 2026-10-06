@@ -1,0 +1,17 @@
+module examples.reject.mixed
+
+const fn identity(value: i64) -> i64 => value
+
+test before_rejections { assert identity(7) == 7 }
+
+# expect-error(type, "rolling.size_kind")
+fn invalid_window(value: rolling<f64, 5m, 3>) { when { } }
+
+test rejected_test {
+    assert false
+    # expect-error(phase, "test.statement_phase")
+    inject clock
+    assert false
+}
+
+test after_rejections { assert identity(9) == 9 }

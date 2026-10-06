@@ -1,0 +1,10 @@
+module conformance.negative_testing.dependency_on_excluded
+
+fn excluded() -> i64 {
+    # expect-error(type, "yield.time_type")
+    yield 1: 1
+}
+
+fn caller() -> i64 => excluded()
+
+test must_not_run { assert false }

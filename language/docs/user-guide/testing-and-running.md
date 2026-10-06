@@ -148,27 +148,36 @@ Errors a graph publishes as data use ordinary output assertions. See the
 
 ## Expected source errors
 
-Keep intentionally invalid source in a separate rejection fixture:
+Put `# expect-error(category, "code")` immediately before the source line that
+must fail checking. Ordinary `hgl test` handles these cases alongside runnable
+tests, including across supplied `--part` files:
 
 ```hgl
-module examples.bad_window
+module examples.mixed_tests
 
 # expect-error(type, "rolling.size_kind")
-fn consume(value: rolling<f64, 5m, 3>) { when { } }
+fn invalid(value: rolling<f64, 5m, 3>) { when { } }
+
+test invalid_test {
+    # expect-error(phase, "test.statement_phase")
+    inject clock
+    assert false
+}
+
+test still_runs { assert true }
 ```
 
-Run `hgl test --reject fixture.hgl`. The annotation expects exactly one
-primary error on the immediately following physical line in that file.
-Every primary error must be expected, with an exact category and code;
-message text is not matched. Unknown names, wrong locations, extra errors
-and successful compilation fail the fixture. Warnings and attached notes
-are not matching errors. `build` is not an eligible rejection category.
+The annotated function and the whole annotated test are isolated rejection
+cases. `invalid_test` never executes; `still_runs` does. Surviving code cannot
+use excluded declarations. Every error in a rejection case must match its
+annotations exactly by category, code, file and next physical line.
 
-The [catalogue](../design/error-catalogue.md) enumerates all categories and
-allowed source-error codes. The category name is annotation syntax, not a
-bare identifier value in an HGL expression. See the
-[fixture rules](../design/compile-rejection-fixtures.md) and
-[isolated examples](../../examples/reject/README.md).
+Test-name selectors include named rejection tests; declaration-owned rejection
+cases always run. A mismatch fails that case while other admitted tests still
+run. Invalid metadata, ambiguous recovery or errors in surviving source prevent
+execution. The [catalogue](../design/error-catalogue.md) lists all allowed names;
+[the full rules](../design/compile-rejection-fixtures.md) define isolation and
+matching. See [examples](../../examples/reject/README.md).
 
 ## Dense sequences
 
