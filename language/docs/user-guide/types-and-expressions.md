@@ -880,29 +880,29 @@ sizes are either tick counts (`i64`) or durations, and the minimum is
 optional at a use site:
 
 ```hgl
-rolling<f64, 20>          # the last 20 values
+rolling<f64, 20>          # the last 20 values, minimum 20
 rolling<f64, 20, 5>       # the last 20 values, minimum 5
-rolling<f64, 5m>          # everything in the last five minutes
+rolling<f64, 5m>          # the last five minutes, minimum span 5m
 rolling<f64, 5m, 1m>      # the last five minutes, minimum span 1m
 ```
 
 The square brackets in the descriptive form
 `rolling<T, max_size[, min_size]>` mean “optional”; they are not source
 punctuation. Omitting `min_size` means `min_size = max_size`, so the first
-form becomes valid when it contains 20 values and the third once its oldest
-and newest values are five minutes apart. Both sizes are wiring-time
+form satisfies `all_valid` when it contains 20 values and the third once its
+oldest and newest values are five minutes apart. Both sizes are wiring-time
 constants of one kind: `rolling<f64, 5m, 3>` is a type error. Tick sizes are
 positive; a duration maximum is positive and a duration minimum may be `0s`,
-meaning valid from the first value. `min_size` cannot exceed `max_size`, and
+meaning `all_valid` from the first value. `min_size` cannot exceed `max_size`, and
 the kind and resolved sizes are part of the type identity, so
 `rolling<f64, 5m>` and `rolling<f64, 300s>` are the same type while
 `rolling<f64, 20>` and `rolling<f64, 20s>` are different types.
 
 A tick window keeps the newest `max_size` values and drops the oldest when
 full. A duration window keeps every value that ticked within `max_size` of
-the current evaluation time and drops older values as time moves on; it has
-no fixed capacity, so a fast source makes a large window. In the current
-runtime, `valid(window)` becomes true on its first value; `all_valid(window)`
+a new arrival and drops older values on that arrival; it has no fixed capacity,
+so a fast source makes a large window.
+`valid(window)` becomes true on its first value; `all_valid(window)`
 is the separate minimum-window check. A handler requiring the minimum must
 use that stronger condition. The duration minimum measures the span across
 the values held, not time since graph start, so one value does not satisfy

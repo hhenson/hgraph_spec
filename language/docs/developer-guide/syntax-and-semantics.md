@@ -22,8 +22,9 @@ Source files are UTF-8. The first lexer slice uses ASCII identifiers:
 identifier := [A-Za-z_][A-Za-z0-9_]*
 ```
 
-String contents may be UTF-8. Required escapes initially include `\"`, `\\`,
-`\n`, `\r`, and `\t`.
+String literals use double quotes, including string map keys; bare names are
+identifiers. String contents may be UTF-8. Required escapes initially include
+`\"`, `\\`, `\n`, `\r`, and `\t`.
 
 `#` starts a line comment. `/*` and `*/` delimit a block comment, which may
 span lines but does not nest. `//` is the floor-division operator, not a

@@ -5,6 +5,8 @@ Check the [arrival delta and retained-window contract](../language/docs/design/r
 | Case | Required result |
 |---|---|
 | `rolling<i64,2,2>` with `[10,_,20,30]` | Same arrivals; retained windows [10], [10,20], [20,30], readiness false/true/true. |
+| `rolling<i64,2>` and `rolling<i64,2,2>` | Identical type; `valid` from first arrival and `all_valid` from second retained arrival. |
+| `rolling<i64,5us>` and `rolling<i64,5us,5us>` | Identical type; `valid` from first arrival and `all_valid` when retained arrivals span 5us. |
 | Duration Max=5us/Min=1us arrivals at t0, t0+2us, t0+8us | Same three arrivals; retained windows [10], [10,20], [30], readiness false/true/false. |
 | Duration Min=0 | Ready and valid from first arrival. |
 | Value exactly Max old on new arrival | Retain boundary value; evict only values older than Max. |
