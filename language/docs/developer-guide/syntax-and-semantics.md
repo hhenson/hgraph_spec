@@ -2155,7 +2155,8 @@ test midpoint_waits_for_both_sides {
 test_decl        = "test", identifier, block;
 test_context     = "test", "{", { test_helper | test_decl }, "}";
 test_helper      = function_decl; (* private fn or const fn only *)
-assert_statement = "assert", expression;
+assert_statement = "assert", ( expression | raises_assertion );
+raises_assertion = "raises", "(", expression, ")", block;
 eval_expression  = "eval", "(", expression, { ",", argument }, ")";
 ```
 
@@ -2257,7 +2258,10 @@ integer literal in an `f64` position is the corresponding `f64`, and any
 other mismatch is a `type` diagnostic naming the parameter. An expected
 element is read the same way against the callee's result type.
 
-`assert` accepts any wiring-time `bool` expression. A failing assertion
+`assert` accepts any wiring-time `bool` expression. The test-only
+`assert raises("code") { ... }` form instead requires a matching execution
+error; see [execution-error assertions](../design/execution-error-assertions.md)
+and the exhaustive initial [error catalogue](../design/error-catalogue.md). A failing assertion
 reports the first differing cycle or time with the expected and observed
 elements. A harness sequence is a value only inside a `test` body: it can be
 bound with `let` and compared, but it cannot be passed to a function or

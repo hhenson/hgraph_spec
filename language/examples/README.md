@@ -7,6 +7,8 @@ supported `test` blocks and compiles generated fixtures. Native test support
 varies by platform; this source-only repository has no CMake/CTest project.
 The entries below identify the implementation tests for each example.
 
+- [`execution-errors.hgl`](execution-errors.hgl) checks the two catalogued
+  yield failures, test continuation and nested expected-error assertions.
 - [`contextual-local-bindings.hgl`](contextual-local-bindings.hgl) distinguishes
   ordinary node locals, graph scalars and graph connection rebinding.
 - [`temporal-scalar-publications.hgl`](temporal-scalar-publications.hgl) forwards

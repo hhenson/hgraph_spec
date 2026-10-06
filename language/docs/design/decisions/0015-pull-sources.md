@@ -134,12 +134,13 @@ generator source:
    Evaluate t once, then v once. A time-expression failure prevents v;
    a payload failure prevents target validation. Existing phase and capability
    restrictions apply.
-2. After both operands succeed, reject a negative duration. Otherwise resolve
+2. After both operands succeed, reject a negative duration with
+   `yield.negative_duration`. Otherwise resolve
    a duration by checked addition to the current evaluation time; a datetime
    is already absolute. Arithmetic inside t belongs to step 1. Zero duration
    and negative scalar payloads are allowed, subject to step 3.
 3. Require the target to be strictly greater than the preceding yield target
-   in this invocation. Equal or earlier targets raise a node error. The first
+   in this invocation. Equal or earlier targets raise `yield.non_increasing_time`. The first
    yield has no predecessor. Skipped past targets count; resumption preserves
    the preceding target, while a fresh invocation starts without one.
 4. After validation: a past absolute target skips publication and continues;
@@ -228,6 +229,4 @@ are possible realizations, not language requirements.
   constant collection. It needs the loop index hoisted beside the locals
   and an index-based loop in each backend; until then the checker rejects
   it and points to `while`.
-- A scripted test cannot yet assert an expected error; the compiler
-  conformance cases specify the required failures.
 - `break` and `continue` for `while`.
