@@ -702,6 +702,17 @@
         "must_not_run"
       ],
       "preflight": false
+    },
+    {
+      "id": "generic-dependency-on-excluded",
+      "file": "controls/generic-dependency-on-excluded.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "Deferred generic specialization does not permit an unresolved dependency on an excluded declaration in surviving source.",
+      "not_executed": [
+        "must_not_run"
+      ],
+      "preflight": false
     }
   ]
 }

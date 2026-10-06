@@ -1,0 +1,8 @@
+module conformance.negative_testing.generic_dependency_on_excluded
+
+# expect-error(type, "rolling.size_kind")
+fn excluded(value: rolling<f64, 5m, 3>) { when { } }
+
+fn survivor<T>(value: T) -> T => excluded(value)
+
+test must_not_run { assert true }
