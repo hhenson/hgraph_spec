@@ -36,7 +36,9 @@ declaration has a reliable extent through EOF. `syntax-recovery` has balanced
 delimiters and a missing required token, followed by a test that must execute.
 `unsafe-recovery` has unclosed nested bodies before a neighbour and must fail
 admission without executing that neighbour. These are distinct boundary cases,
-not a blanket prohibition on missing delimiters.
+not a blanket prohibition on missing delimiters. The `unnamed-context-header`
+control targets an unnamed context even though a helper shares its line; the
+annotation is invalid and the following test must not execute.
 
 Execution controls cover normal completion, empty blocks, wrong codes,
 assertion failures and consumed inner errors. Source controls cover exact

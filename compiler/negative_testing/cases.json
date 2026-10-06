@@ -691,6 +691,17 @@
           "outcome": "passed"
         }
       ]
+    },
+    {
+      "id": "unnamed-context-header",
+      "file": "controls/unnamed-context-header.hgl",
+      "mode": "test",
+      "expected_exit": 1,
+      "purpose": "An annotation targeting an unnamed test-context header is invalid even when an inner helper starts on the same line.",
+      "not_executed": [
+        "must_not_run"
+      ],
+      "preflight": false
     }
   ]
 }
