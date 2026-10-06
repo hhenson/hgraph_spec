@@ -4,6 +4,9 @@ struct Quote { bid: i64 }
 struct OtherQuote { bid: i64 }
 struct Box<T> { value: T }
 struct Publication<T> { value: delta<T> }
+struct ScalarDeltaField { value: delta<i64> }
+struct AtomicDeltaField { value: delta<atomic<list<i64>>> }
+struct RollingDeltaField { value: delta<rolling<i64, 2>> }
 struct OptionalQuote {
     bid: i64
     ask: i64 = null
@@ -22,6 +25,11 @@ fn pass_through<T>(value: T) -> T {
 }
 fn forward_fixed(value: list<i64, 2>) -> list<i64, 2> => pass_through(value)
 fn forward_quote(value: Quote) -> Quote => pass_through(value)
+
+const fn require_delta_shape<T>(value: T) -> i64 {
+    let storage: list<delta<T>> = []
+    return 0
+}
 
 # Each rejected test is an isolated source case; none of its statements runs.
 
@@ -129,6 +137,37 @@ test rolling_delta_replacement {
     var value: delta<rolling<i64, 2>> = 1
     # expect-error(type, "delta.type_mismatch")
     value = false
+}
+
+test scalar_delta_field_replacement {
+    var record: ScalarDeltaField = ScalarDeltaField(value: 1)
+    # expect-error(type, "delta.type_mismatch")
+    record.value = false
+}
+
+test atomic_delta_field_replacement {
+    var record: AtomicDeltaField = AtomicDeltaField(value: [1])
+    # expect-error(type, "delta.type_mismatch")
+    record.value = false
+}
+
+test rolling_delta_field_replacement {
+    var record: RollingDeltaField = RollingDeltaField(value: 1)
+    # expect-error(type, "delta.type_mismatch")
+    record.value = false
+}
+
+test generic_delta_field_replacement {
+    var record: Publication<i64> = Publication<i64>(value: 1)
+    # expect-error(type, "delta.type_mismatch")
+    record.value = false
+}
+
+test unsupported_specialized_delta_shape {
+    # Empty delta data is legal to store; using its type as a shape is not.
+    let source: delta<map<i64, i64>> = delta<map<i64, i64>>()
+    # expect-error(shape, "delta.unsupported_shape")
+    let result = require_delta_shape(source)
 }
 
 test enum_identity {
