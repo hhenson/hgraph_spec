@@ -213,6 +213,14 @@ flowchart TD
   that publishes a reference to the part.
 
 
+- **WIR-25** Completing a session retains only the required nodes and child
+  input bindings defined by GRF-26 in
+  [Graph](../runtime/graph.md). Calling a node with an unused output does not
+  retain it. A graph body still executes during wiring, and any call that
+  fails still fails the session under WIR-4. No runtime lifecycle call is
+  made for a pruned node.
+
+
 Part 2 — Type resolution
 ------------------------
 
