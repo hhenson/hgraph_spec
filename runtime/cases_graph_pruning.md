@@ -41,30 +41,26 @@ is itself required by a root sink.
 | owner output and child sink publications | `(0, 1)` at each |
 | unused source | no instantiation; no lifecycle calls |
 
-Neither returning an output nor wiring an internal sink discards the other
-root. A child that passes an owner input straight through retains that
+The child output is connected to an outer sink through its owner; the
+internal sink supplies another path. Both are retained. A child that passes
+an owner input straight through retains that
 binding without inventing a child producer.
 
-## PRUNE-3: no roots and shared dependencies
+## PRUNE-3: no sinks and shared producers
 
 First wire only sources and computes with unexposed outputs and no sinks.
 The completed description has zero nodes, and the run has an empty node
 lifecycle trace. Then describe a source shared by two sinks. It starts,
-evaluates at 0 and stops once, and each sink records `(0, 1)` once. Roots
-do not duplicate their shared dependencies.
+evaluates at 0 and stops once, and each sink records `(0, 1)` once. Two sinks
+do not duplicate their shared producer.
 
-## PRUNE-4: dependencies independent of scheduling
+## PRUNE-4: passive and structural inputs
 
 Repeat PRUNE-1 with a retained node depending on another producer through
-each of: a passive input, a feedback input, a member of an assembled
-structural input, and an explicitly declared dependency without an input
-edge. Every such producer is instantiated, starts and stops. Evaluation
-follows the input and scheduling rules; reachability alone does not promise
-an evaluation or impose a new rank on feedback inputs.
-
-An unused dependency cycle has no lifecycle trace. A cycle that prevents a
-valid rank order among required nodes is rejected; pruning is not a means
-of accepting an invalid retained graph.
+each of: a passive input and a member of an assembled structural input.
+Both are connections to the retained consumer, so both producers are
+instantiated, start and stop. Evaluation follows the input and scheduling
+rules; being retained does not by itself promise an evaluation.
 
 ## PRUNE-5: captures and input positions
 
@@ -90,3 +86,18 @@ at the call under WIR-4; no description or run is produced. Separately,
 instantiate a completed description containing an unresolved implementation:
 GRF-9 rejects it rather than removing the node. Neither case is repaired by
 pruning.
+
+## PRUNE-7: feedback is not a pruning exception
+
+- Declare feedback, but neither bind its input nor consume its output.
+  There is no feedback sink. The unused source is absent from the builder
+  and has no lifecycle trace.
+- Bind a producer to feedback, but leave the feedback output unread.
+  There is now a sink, so that producer is retained. This is not a sinkless
+  cycle and must not be described as one.
+- Consume an initial feedback value through a path to a sink, without
+  binding a feedback input. The source is used and is retained.
+
+The case does not prescribe how a feedback sink finds its source. Any
+connections that the wiring actually makes participate in the same
+backwards walk as other connections; feedback needs no special root rule.

@@ -178,18 +178,27 @@ owner.
 
 ### Behaviour
 
-A description produced by wiring contains the graph's **required nodes**.
-Its observable roots are sinks (nodes with no time-series output) and,
-for a child graph, the producers of its exposed output. An output passed
-straight through from an owner input requires that boundary binding but no
-child producer. Required nodes include every dependency of those roots,
-recursively. Making a call during wiring does not by itself make its node
-required; a node with an unused output is not a sink merely because its
-implementation has effects.
+Wiring produces the builder's graph by **ranking and pruning**. Start at
+the sink nodes and follow input bindings backwards. Keep the nodes reached
+this way; remove the others and their edges. The remaining nodes, in rank
+order, and their edges are the graph in the builder. A root graph with no sinks
+has no nodes.
 
-Pruning belongs to describing the graph, not to instantiating it. Once a
-description exists, every node it contains is instantiated; an unresolved
-implementation is still a failure under GRF-9.
+A passive input is still a connection, even though it does not schedule its
+consumer. Selecting a member of a structural input likewise does not break
+the connection to its producer. Neither is a reason to prune that producer.
+
+A child output connects to its owner through the output binding (GRF-10).
+Its producers are therefore part of a path to a sink outside the child.
+When describing a child, keep the nodes needed by this binding as well as
+its own sinks. If the owner is pruned, its child graphs are not instantiated
+either. Passing an owner input straight through needs a binding, not an
+extra child node.
+
+Pruned nodes are absent from the builder: they are not instantiated and
+never start, evaluate or stop. Pruning is not a way to repair a failed
+wiring call (WIR-4). Every node that remains in a completed description must
+still be instantiated successfully (GRF-9).
 
 A description does one thing: it is **instantiated**.
 
@@ -237,17 +246,9 @@ flowchart TD
   empty children and live REF routes. Rebinding a captured input reaches
   existing children without recreating their state; unchanged child
   designations are preserved (TS-25).
-- **GRF-26** A description produced by wiring retains exactly the nodes
-  reachable backwards from its sinks and exposed child output. Reachability
-  follows every bound input, including passive, feedback and structural
-  inputs, and every explicitly declared node dependency, recursively; an
-  input's activation or rank policy does not remove that dependency. Shared
-  dependencies occur once. Child input bindings retain only captures needed
-  by those nodes or by a passed-through output. Nodes outside this closure
-  are absent from the description: they are not instantiated and receive no
-  start, evaluation or stop calls. A graph with no roots has an empty node
-  description. Pruning does not suppress a call's wiring failure (WIR-4) or
-  change the behaviour of any retained node.
+- **GRF-26** During ranking, remove every node that is not reachable
+  backwards from a sink node. The remaining nodes and edges form the graph
+  in the builder.
 
 
 Part 2 — The graph instance
