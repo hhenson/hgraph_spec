@@ -65,6 +65,7 @@ implementation to provide a source-language generator facility.
 - [Eval recorder keys](cases_eval_recorder_keys.md): pre-start key selection and source-state isolation.
 - [Growing lists](cases_growing_lists.md): growth, truncation, retention and resurrection.
 - [Lifecycle](cases_lifecycle.md): activation, construction failure and teardown.
+- [Graph pruning](cases_graph_pruning.md): observable roots, dependencies, captures and absent lifecycle effects.
 - [References](cases_references.md): sampling, dictionary withdrawal and expiry.
 - [Nested graphs](cases_nested.md): keyed routing, state, deadlines and failure.
 - [Sources](cases_sources.md): pull sources on either scheduler, push queues and senders.

@@ -213,6 +213,11 @@ flowchart TD
   that publishes a reference to the part.
 
 
+- **WIR-25** Ranking prunes the graph according to GRF-26 in
+  [Graph](../runtime/graph.md) before the completed builder is given to the
+  runtime.
+
+
 Part 2 — Type resolution
 ------------------------
 

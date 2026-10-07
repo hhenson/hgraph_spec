@@ -393,11 +393,20 @@ binding, and a fixed list never binds to a growing one.
 
 ### Feedback
 
-A **feedback** carries a value from a later-ranked node to an earlier one
-without a backward binding: a sink takes the value in one cycle, and a pull
-source publishes it in the next, one smallest step later at the earliest.
-The delivered value is a copy taken by the sink; the source publishes it as
-its own tick. A feedback carries values only, never references (TS-28,
+A **feedback** carries a value from one cycle into a later cycle, one
+smallest step later at the earliest. The delivered value is a copy,
+published as a new tick. A common realization uses a sink to take the value
+and a pull source to publish it later. How the sink finds that source is an
+implementation choice, not a required input binding or a pruning exception.
+
+Binding an input to feedback creates a sink. That sink, like any other,
+keeps the producers connected to it (GRF-26). Merely declaring feedback
+without binding its input creates no sink; an unused source is pruned.
+An unbound source whose initial value is consumed by a path to a sink is
+still used and is retained. Unused-variable diagnostics belong to the
+authoring language, not to a different runtime pruning rule.
+
+A feedback carries values only, never time-series references (TS-28,
 owner 2026-09-30): a reference designates an output that must already have
 been evaluated when the consumer reads through it (TS-20), and a source
 ranked before the designated output cannot promise that. A feedback of a
