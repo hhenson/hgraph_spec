@@ -2072,6 +2072,9 @@ runtime function it assigns the complete output, ticks it, and terminates the
 current evaluation. A runtime path reaching the end without a return or output
 mutation produces no output tick.
 
+[Complete structural-value publication](../design/structural-value-publication.md)
+reconciles admitted retained child validity and map membership; it is distinct
+from sparse delta application. Its empty and wholly invalid boundaries remain separate.
 For a structural result, returning a complete struct writes every field while
 returning `delta<S>(...)` writes only the named fields. An omitted delta field
 does not tick. At an atomic boundary a tick is a complete canonical value, so a

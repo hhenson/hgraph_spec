@@ -16,6 +16,8 @@ annotations isolate expected source errors alongside executable tests.
   These are normative fixtures; their presence is not an execution-validation claim.
 - [`execution-errors.hgl`](execution-errors.hgl) checks the two catalogued
   yield failures, test continuation and nested expected-error assertions.
+- [`structural-value-publication.hgl`](structural-value-publication.hgl) contrasts
+  retained complete values with explicit deltas using independent state observers.
 - [`contextual-local-bindings.hgl`](contextual-local-bindings.hgl) distinguishes
   ordinary node locals, graph scalars and graph connection rebinding.
 - [`temporal-scalar-publications.hgl`](temporal-scalar-publications.hgl) forwards
