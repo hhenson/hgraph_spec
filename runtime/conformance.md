@@ -59,6 +59,7 @@ implementation to provide a source-language generator facility.
 - [Collections](cases_collections.md): validity, membership, deltas and per-level time.
 - [Windows](cases_windows.md): tick and duration windows, eviction, the minimum.
 - [Ordinary struct constructor order](cases_constructor_order.md): argument order, retention and failure.
+- [Ordinary tuple construction](cases_tuple_construction.md): runtime values, element order, retention and failure.
 - [Ordinary list values](cases_ordinary_lists.md): construction, reads, growth and retention.
 - [Ordinary scalar replay and recording](cases_ordinary_replay_record.md): timed values, lifecycle and dense horizon.
 - [Ordinary delta types](cases_ordinary_delta_types.md): shape identity, generic matching, storage, construction and publication boundaries.

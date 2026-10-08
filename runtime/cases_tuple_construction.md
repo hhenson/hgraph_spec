@@ -22,6 +22,7 @@ construction. Source checking must reject both isolated negative fixtures:
 - [Dynamic default](../compiler/tuple_construction/reject-dynamic-default.hgl):
   a constant parameter default cannot read a runtime payload.
 
-These are ordinary source-check failures, outside passing-example discovery.
+The [fixture manifest](../compiler/tuple_construction/cases.json) lists both as
+required source-check rejections. They remain outside passing-example discovery.
 No diagnostic code is added for them. They do not use expected-error metadata
 because their diagnostic conditions have no enumerated code in the catalogue.
