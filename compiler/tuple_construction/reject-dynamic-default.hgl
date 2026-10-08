@@ -1,0 +1,6 @@
+module cases.tuple_construction.dynamic_default
+
+# Source checking must reject: a constant default cannot read a temporal input.
+fn rejected(value: i64, const pair: tuple<i64, bool> = (value, value > 0)) -> i64 {
+    when { return value }
+}

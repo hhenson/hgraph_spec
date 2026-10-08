@@ -1,0 +1,8 @@
+module cases.tuple_construction.dynamic_const_argument
+
+fn configured(const pair: tuple<i64, bool>) -> i64 {
+    yield 0s: pair[0]
+}
+
+# Source checking must reject: value is a graph connection, not a constant.
+fn rejected(value: i64) -> i64 => configured((value, value > 0))

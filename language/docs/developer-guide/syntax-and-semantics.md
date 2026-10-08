@@ -1566,7 +1566,10 @@ syntax of canonical module paths in `module` and `use` declarations; they are
 not expression member access. A named argument starts with a `member_name`
 (an identifier or `time`) directly followed by `:`. A timed sequence element
 is a temporal literal directly followed by `:`. A sequence literal is a constant `list` value
-of one element type, and a tuple literal a constant tuple; a single
+of one element type. A tuple literal constructs an ordinary tuple and may
+use runtime elements in ordinary-value contexts; it evaluates and retains
+each element once in written order under the
+[ordinary tuple construction rules](../design/ordinary-tuple-values.md). A single
 parenthesized expression is grouping, so a one-element tuple needs the
 trailing comma and `()` is a diagnostic. Timed elements and the `_`
 placeholder are valid only in the harness sequences of the evaluation

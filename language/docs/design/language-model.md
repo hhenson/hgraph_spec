@@ -108,6 +108,10 @@ empty construction, `len(values)`, `values[index]`, and
 `push(values, item)` for growth through writable unbounded-list access.
 These value operations preserve the binding and retention rules above.
 
+[Ordinary tuple construction](ordinary-tuple-values.md) admits runtime element
+expressions in ordinary-value contexts, evaluated and independently retained
+once each in written order. Constant contexts retain their requirements.
+
 An `fn` may use a concise expression body or a brace-delimited block with a
 tail expression. An outputless function omits its return arrow. An `operator`
 ends with its signature, never has a body, and is automatically public.

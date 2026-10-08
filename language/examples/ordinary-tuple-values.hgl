@@ -1,0 +1,22 @@
+module examples.ordinary_tuple_values
+
+const fn pair(value: i64) -> tuple<i64, bool> => (value, value > 0)
+
+fn runtime_pair(value: i64) -> tuple<i64, bool> {
+    when { return (value, value > 0) }
+}
+
+const fn independently_retained_children() -> bool {
+    var values: list<i64> = []
+    push(values, 7)
+    let copies = (values, values)
+    push(values, 9)
+    return len(copies[0]) == 1 && len(copies[1]) == 1 && len(values) == 2
+}
+
+test ordinary_tuple_values {
+    assert pair(7) == (7, true)
+    assert pair(-1) == (-1, false)
+    assert independently_retained_children()
+    assert eval(runtime_pair, value: [7, _, -1, 0]) == [(7, true), _, (-1, false), (0, false)]
+}
