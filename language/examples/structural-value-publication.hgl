@@ -7,8 +7,13 @@ struct Pair {
 
 fn select_value(step: i64, a: Pair, b: Pair) -> Pair {
     when modified(step) && valid(step) && valid(a) && valid(b) {
-        if step == 1 { let copy = a; return copy }
-        else { let copy = b; return copy }
+        if step == 1 {
+            let copy = a
+            return copy
+        } else {
+            let copy = b
+            return copy
+        }
     }
 }
 
@@ -41,19 +46,26 @@ test complete_value_and_delta_have_distinct_child_validity {
 fn removing_map(step: i64) -> map<i64, i64> {
     inject out
     when {
-        if step == 1 { upsert(out, 7, 10); upsert(out, 8, 20) }
-        else if step == 2 { remove(out, 8) }
+        if step == 1 {
+            upsert(out, 7, 10)
+            upsert(out, 8, 20)
+        } else if step == 2 { remove(out, 8) }
     }
 }
 fn invalidating_map(step: i64) -> map<i64, i64> {
     inject out
     when {
-        if step == 1 { upsert(out, 7, 10); upsert(out, 8, 20) }
-        else if step == 2 { invalidate(out, 8) }
+        if step == 1 {
+            upsert(out, 7, 10)
+            upsert(out, 8, 20)
+        } else if step == 2 { invalidate(out, 8) }
     }
 }
 fn copy_map(step: i64, value: map<i64, i64>) -> map<i64, i64> {
-    when modified(step) && valid(step) && valid(value) { let copy = value; return copy }
+    when modified(step) && valid(step) && valid(value) {
+        let copy = value
+        return copy
+    }
 }
 fn delta_map(value: map<i64, i64>) -> map<i64, i64> {
     when { return delta_value(value) }
