@@ -7,10 +7,12 @@ Use an independently partial source with a valid sibling, retained before readin
 | --- | --- |
 | Unset scalar arithmetic or Boolean condition | Raise `value.unset_read`; no result or chosen branch. |
 | Unset fixed list length | Raise the same code, despite its known declared size. |
-| Unset map iteration | Raise the same code before entering the loop body. |
-| Present zero, false, list and map | Read their ordinary payloads successfully. |
+| Present zero, false, true and fixed list | Read their ordinary payloads successfully. |
 | Retain a partial tuple and project/retain its unset child | Preserve absence without requiring the payload. |
 
 The [HGL tests](../language/examples/unset-required-reads.hgl) catch each failure
 and run present controls. Bounds errors, missing map keys, wholly invalid
 source admission and empty-event publication are outside these cases.
+
+Projected-child `let` retention is part of this extension. These fixtures state
+required source behavior; their presence does not claim implementation support.

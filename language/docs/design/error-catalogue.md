@@ -13,7 +13,7 @@ Only these codes are accepted by `assert raises`:
 | Code | Required failure |
 | --- | --- |
 | `eval.input_delta_profile` | While executing `eval`, a supplied input trace violates its publication profile. Validate after evaluating its ordinary arguments and before starting any graph; identify the parameter and zero-based position, retaining the `eval: input delta outside publication profile` message prefix. |
-| `value.unset_read` | An executed operation requires a scalar or collection payload from an unset retained ordinary observation. Retention and projection as observations preserve absence; they do not require that payload. See [required reads](unset-required-reads.md). |
+| `value.unset_read` | An already admitted executed operation requires a payload from an unset retained ordinary observation. Retention and projection as observations preserve absence; they do not require that payload. See [required reads](unset-required-reads.md). |
 | `yield.negative_duration` | After both yield operands succeed, its duration operand is negative. |
 | `yield.non_increasing_time` | After operand evaluation and target resolution succeed, the yield target is equal to or earlier than the preceding target in this generator invocation. Skipped past targets count. |
 
