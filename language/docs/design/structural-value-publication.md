@@ -23,6 +23,12 @@ It does not admit wholly invalid values, zero-child or empty structures, new
 invalid map membership, or decide empty-event forwarding. Existing publication,
 notification and child-invalidation rules determine observations.
 
+The empty/wholly-invalid exclusions apply at every structural depth, even when
+the parent retains a valid sibling. A captured unset child is reconciled as
+absence. A present structural aggregate with no valid descendants remains
+outside this profile; this extension specifies no normalization of it to an
+unset child.
+
 Sparse `delta<T>` application is unchanged: omitted children preserve their
 previous values and validity, and map keys disappear only through explicit
 removal entries. Ordinary value copying does not convert a held value into a
