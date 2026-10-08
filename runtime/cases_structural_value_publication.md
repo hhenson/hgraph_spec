@@ -3,6 +3,8 @@
 Expected observations for the bounded
 [complete-value publication rule](../language/docs/design/structural-value-publication.md).
 Each case retains a valid sibling; no empty or wholly invalid structure is used.
+Every invalid source map child has a key already present in the destination.
+Positional lists have fixed length; growing-list length transitions are not covered.
 
 | Case | Complete ordinary value | Explicit delta control |
 | --- | --- | --- |
