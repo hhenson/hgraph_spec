@@ -101,6 +101,9 @@ read-only lexical global-entry borrow is protected from conflicting writes
 by the rules below. It cannot be kept as a snapshot merely by retaining its
 view handle.
 
+[Required reads of unset retained observations](unset-required-reads.md) fail
+when an operation needs an absent payload; retention itself preserves absence.
+
 Retained owning copies follow VAL-17 recursively. Later changes to an
 original value or any child cannot appear through its retained copy. A new
 owning `var` may change its own copy. This independence applies to recording

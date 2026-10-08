@@ -14,6 +14,8 @@ annotations isolate expected source errors alongside executable tests.
   controls. [`reject/delta-errors.hgl`](reject/delta-errors.hgl) isolates delta
   formation, exact-type and constructor source failures with surviving controls.
   These are normative fixtures; their presence is not an execution-validation claim.
+- [`unset-required-reads.hgl`](unset-required-reads.hgl) checks coded absent-payload
+  failures, present values and retention without payload consumption.
 - [`execution-errors.hgl`](execution-errors.hgl) checks the two catalogued
   yield failures, test continuation and nested expected-error assertions.
 - [`structural-value-publication.hgl`](structural-value-publication.hgl) contrasts
