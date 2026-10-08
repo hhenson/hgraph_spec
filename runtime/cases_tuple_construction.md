@@ -15,8 +15,9 @@ These expected observations follow the
 
 The [positive example](../language/examples/ordinary-tuple-values.hgl) includes
 ordinary value-function assertions, independent aggregate retention and runtime
-construction. Its `tuple_mark` helper injects the existing logger, emits its
-argument with `info(logger, str(value))`, and returns the argument. It adds no
+construction. Its `tuple_mark` helper injects the existing logger, emits the
+supplied matching literal label with `info(logger, message)`, and returns its
+integer argument. It adds no
 log-capture API. Run these named tests separately and capture their helper
 messages externally:
 
