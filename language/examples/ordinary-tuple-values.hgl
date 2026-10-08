@@ -21,18 +21,18 @@ test ordinary_tuple_values {
     assert eval(runtime_pair, value: [7, _, -1, 0]) == [(7, true), _, (-1, false), (0, false)]
 }
 
-# The ordinary logger helper exposes order; it is not a log-capture intrinsic.
-const fn tuple_mark(value: i64) -> i64 {
+# Matching literal labels make call order observable through the logger.
+const fn tuple_mark(value: i64, const message: str) -> i64 {
     inject logger
-    info(logger, str(value))
+    info(logger, message)
     return value
 }
 
 fn ordered_tuple(trigger: i64) -> tuple<i64, i64> {
-    when { return (tuple_mark(2), tuple_mark(1)) }
+    when { return (tuple_mark(2, "2"), tuple_mark(1, "1")) }
 }
 fn nested_ordered_tuple(trigger: i64) -> tuple<tuple<i64, i64>, i64> {
-    when { return ((tuple_mark(3), tuple_mark(2)), tuple_mark(1)) }
+    when { return ((tuple_mark(3, "3"), tuple_mark(2, "2")), tuple_mark(1, "1")) }
 }
 
 test ordinary_tuple_written_order {
