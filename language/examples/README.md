@@ -42,7 +42,9 @@ annotations isolate expected source errors alongside executable tests.
   See the [constructor-order contract](../docs/design/struct-constructor-order.md).
 - [`ordinary-tuple-values.hgl`](ordinary-tuple-values.hgl) admits runtime
   elements with independent typed retention under the
-  [ordinary tuple contract](../docs/design/ordinary-tuple-values.md).
+  [ordinary tuple contract](../docs/design/ordinary-tuple-values.md). Named
+  order tests assert completed values and expose logger traces for external
+  checking under the [construction cases](../../runtime/cases_tuple_construction.md).
 - [`ordinary-list-values.hgl`](ordinary-list-values.hgl) specifies typed empty
   lists, length, indexed reads, end growth and independent nested retention
   under the [ordinary-list contract](../docs/design/ordinary-list-values.md).

@@ -15,7 +15,20 @@ These expected observations follow the
 
 The [positive example](../language/examples/ordinary-tuple-values.hgl) includes
 ordinary value-function assertions, independent aggregate retention and runtime
-construction. Source checking must reject both isolated negative fixtures:
+construction. Its `tuple_mark` helper injects the existing logger, emits its
+argument with `info(logger, str(value))`, and returns the argument. It adds no
+log-capture API. Run these named tests separately and capture their helper
+messages externally:
+
+| Executable test | Exact helper-message order | Asserted result |
+| --- | --- | --- |
+| `ordinary_tuple_written_order` | `"2"`, `"1"`, once each | `(2, 1)` |
+| `ordinary_tuple_nested_written_order` | `"3"`, `"2"`, `"1"`, once each | `((3, 2), 1)` |
+
+Source assertions check completed values; conformance also requires the stated
+captured trace, including no duplicate helper messages.
+
+Source checking must reject both isolated negative fixtures:
 
 - [Dynamic const argument](../compiler/tuple_construction/reject-dynamic-const-argument.hgl):
   wrapping temporal connections does not supply a constant parameter.
