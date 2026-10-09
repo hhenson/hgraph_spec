@@ -108,6 +108,10 @@ empty construction, `len(values)`, `values[index]`, and
 `push(values, item)` for growth through writable unbounded-list access.
 These value operations preserve the binding and retention rules above.
 
+[Ordinary tuple construction](ordinary-tuple-values.md) admits runtime element
+expressions in ordinary-value contexts, evaluated and independently retained
+once each in written order. Constant contexts retain their requirements.
+
 An `fn` may use a concise expression body or a brace-delimited block with a
 tail expression. An outputless function omits its return arrow. An `operator`
 ends with its signature, never has a body, and is automatically public.
@@ -972,6 +976,11 @@ adaptor semantics.
 
 ## Open semantic questions
 
+Harness collection deltas follow [ordinary delta types](ordinary-delta-types.md)
+and [eval collection deltas](eval-collection-deltas.md). Runtime payload tuple
+construction follows [ordinary tuple values](ordinary-tuple-values.md); it does
+not construct graph connections.
+
 Later decisions must define:
 
 - `i64` overflow, conversion, and division behavior;
@@ -987,11 +996,8 @@ Later decisions must define:
 - general anonymous capture beyond inline runtime collection predicates;
 - rolling-window iteration and a parameter spelling that accepts either
   window kind;
-- an explicit end bound and approximate comparison for `eval`, delta
-  spellings for set, map, and list harness elements, and tuple construction
-  from temporal values;
-- collection delta literals and the native encoding for explicit optional-field
-  clearing;
+- an explicit end bound and approximate comparison for `eval`;
+- the native encoding for explicit optional-field clearing;
 - remaining phase/effect and modifier rules for value-level `const fn`,
   non-scalar cache storage, native type/target mappings, lifecycle
   output access, and sinks; the agreed direction is in

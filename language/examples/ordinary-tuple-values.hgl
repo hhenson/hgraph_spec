@@ -1,0 +1,45 @@
+module examples.ordinary_tuple_values
+
+const fn pair(value: i64) -> tuple<i64, bool> => (value, value > 0)
+
+fn runtime_pair(value: i64) -> tuple<i64, bool> {
+    when { return (value, value > 0) }
+}
+
+const fn independently_retained_children() -> bool {
+    var values: list<i64> = []
+    push(values, 7)
+    let copies = (values, values)
+    push(values, 9)
+    return len(copies[0]) == 1 && len(copies[1]) == 1 && len(values) == 2
+}
+
+test ordinary_tuple_values {
+    assert pair(7) == (7, true)
+    assert pair(-1) == (-1, false)
+    assert independently_retained_children()
+    assert eval(runtime_pair, value: [7, _, -1, 0]) == [(7, true), _, (-1, false), (0, false)]
+}
+
+# Matching literal labels make call order observable through the logger.
+const fn tuple_mark(value: i64, const message: str) -> i64 {
+    inject logger
+    info(logger, message)
+    return value
+}
+
+fn ordered_tuple(trigger: i64) -> tuple<i64, i64> {
+    when { return (tuple_mark(2, "2"), tuple_mark(1, "1")) }
+}
+fn nested_ordered_tuple(trigger: i64) -> tuple<tuple<i64, i64>, i64> {
+    when { return ((tuple_mark(3, "3"), tuple_mark(2, "2")), tuple_mark(1, "1")) }
+}
+
+test ordinary_tuple_written_order {
+    # External trace check: this evaluation logs exactly "2", then "1".
+    assert eval(ordered_tuple, trigger: [1]) == [(2, 1)]
+}
+test ordinary_tuple_nested_written_order {
+    # The inner tuple completes first: exactly "3", "2", then "1".
+    assert eval(nested_ordered_tuple, trigger: [1]) == [((3, 2), 1)]
+}

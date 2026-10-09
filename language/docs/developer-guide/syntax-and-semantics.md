@@ -1566,7 +1566,10 @@ syntax of canonical module paths in `module` and `use` declarations; they are
 not expression member access. A named argument starts with a `member_name`
 (an identifier or `time`) directly followed by `:`. A timed sequence element
 is a temporal literal directly followed by `:`. A sequence literal is a constant `list` value
-of one element type, and a tuple literal a constant tuple; a single
+of one element type. A tuple literal constructs an ordinary tuple and may
+use runtime elements in ordinary-value contexts; it evaluates and retains
+each element once in written order under the
+[ordinary tuple construction rules](../design/ordinary-tuple-values.md). A single
 parenthesized expression is grouping, so a one-element tuple needs the
 trailing comma and `()` is a diagnostic. Timed elements and the `_`
 placeholder are valid only in the harness sequences of the evaluation
@@ -2069,6 +2072,9 @@ runtime function it assigns the complete output, ticks it, and terminates the
 current evaluation. A runtime path reaching the end without a return or output
 mutation produces no output tick.
 
+[Complete structural-value publication](../design/structural-value-publication.md)
+reconciles admitted retained child validity and map membership; it is distinct
+from sparse delta application. Its empty and wholly invalid boundaries remain separate.
 For a structural result, returning a complete struct writes every field while
 returning `delta<S>(...)` writes only the named fields. An omitted delta field
 does not tick. At an atomic boundary a tick is a complete canonical value, so a
@@ -2264,11 +2270,12 @@ reports the first differing cycle or time with the expected and observed
 elements. A harness sequence is a value only inside a `test` body: it can be
 bound with `let` and compared, but it cannot be passed to a function or
 placed in a temporal position, and `eval` outside a `test` body is a `phase`
-diagnostic. Outside a `test` body a sequence literal is a constant `list`
-value of one element type and a tuple literal a constant tuple; both reject
-`_`. Constructing a structural tuple from temporal values with a tuple
-literal, and delta spellings for set, map, and list elements in harness
-sequences, share the open delta-shape question below.
+diagnostic. Outside a `test` body, nonempty sequence literals remain constant
+`list` values of one element type. An [ordinary tuple literal](../design/ordinary-tuple-values.md)
+may contain runtime payload expressions in a node hook or value function;
+constant contexts still require constant elements. Neither literal admits `_`
+there, and a tuple literal does not construct graph connections. Harness
+sequence delta spellings follow the [ordinary delta contract](../design/ordinary-delta-types.md).
 
 ## Running a module
 

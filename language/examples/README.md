@@ -14,8 +14,12 @@ annotations isolate expected source errors alongside executable tests.
   controls. [`reject/delta-errors.hgl`](reject/delta-errors.hgl) isolates delta
   formation, exact-type and constructor source failures with surviving controls.
   These are normative fixtures; their presence is not an execution-validation claim.
+- [`unset-required-reads.hgl`](unset-required-reads.hgl) checks coded absent-payload
+  failures, present values and retention without payload consumption.
 - [`execution-errors.hgl`](execution-errors.hgl) checks the two catalogued
   yield failures, test continuation and nested expected-error assertions.
+- [`structural-value-publication.hgl`](structural-value-publication.hgl) contrasts
+  retained complete values with explicit deltas using independent state observers.
 - [`contextual-local-bindings.hgl`](contextual-local-bindings.hgl) distinguishes
   ordinary node locals, graph scalars and graph connection rebinding.
 - [`temporal-scalar-publications.hgl`](temporal-scalar-publications.hgl) forwards
@@ -40,6 +44,11 @@ annotations isolate expected source errors alongside executable tests.
   ordinary constructor argument order through value-helper log messages,
   with successful field association and failure before a later argument.
   See the [constructor-order contract](../docs/design/struct-constructor-order.md).
+- [`ordinary-tuple-values.hgl`](ordinary-tuple-values.hgl) admits runtime
+  elements with independent typed retention under the
+  [ordinary tuple contract](../docs/design/ordinary-tuple-values.md). Named
+  order tests assert completed values and expose logger traces for external
+  checking under the [construction cases](../../runtime/cases_tuple_construction.md).
 - [`ordinary-list-values.hgl`](ordinary-list-values.hgl) specifies typed empty
   lists, length, indexed reads, end growth and independent nested retention
   under the [ordinary-list contract](../docs/design/ordinary-list-values.md).

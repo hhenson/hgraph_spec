@@ -15,6 +15,10 @@ This does not add generator machinery to the runtime contract.
 - [Negative testing](negative_testing/README.md): execution-error assertions,
   source-error expectations and bounded controls that must fail.
 
+- [Ordinary tuple construction](../runtime/cases_tuple_construction.md): runtime
+  payload construction and isolated constant-context rejections listed in the
+  [fixture manifest](tuple_construction/cases.json).
+
 - [Contextual local bindings](cases_contextual_local_bindings.md): fixed scalar
   or connection category, mutability and checking errors.
 

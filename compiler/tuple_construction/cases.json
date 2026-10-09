@@ -1,0 +1,12 @@
+[
+  {
+    "id": "dynamic_const_argument",
+    "file": "reject-dynamic-const-argument.hgl",
+    "check": "reject"
+  },
+  {
+    "id": "dynamic_default",
+    "file": "reject-dynamic-default.hgl",
+    "check": "reject"
+  }
+]
