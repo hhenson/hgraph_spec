@@ -43,13 +43,24 @@ test complete_value_and_delta_have_distinct_child_validity {
     assert eval(delta_validity, step: [1, 2, 3], a: [full, _, _], b: [partial, partial, _]) == [true, true, true]
 }
 
-fn removing_map(step: i64) -> map<i64, i64> {
-    inject out
-    when {
+fn select_map(step: i64, a: map<i64, i64>, b: map<i64, i64>) -> map<i64, i64> {
+    when modified(step) && valid(step, a, b) {
         if step == 1 {
-            upsert(out, 7, 10)
-            upsert(out, 8, 20)
-        } else if step == 2 { remove(out, 8) }
+            let copy = a
+            return copy
+        } else {
+            let copy = b
+            return copy
+        }
+    }
+}
+fn select_map_delta(step: i64, a: map<i64, i64>, b: map<i64, i64>) -> map<i64, i64> {
+    when modified(step) && valid(step, a, b) {
+        if step == 1 {
+            if modified(a) { return delta_value(a) }
+        } else {
+            if modified(b) { return delta_value(b) }
+        }
     }
 }
 fn invalidating_map(step: i64) -> map<i64, i64> {
@@ -61,31 +72,32 @@ fn invalidating_map(step: i64) -> map<i64, i64> {
         } else if step == 2 { invalidate(out, 8) }
     }
 }
-fn copy_map(step: i64, value: map<i64, i64>) -> map<i64, i64> {
-    when modified(step) && valid(step, value) {
-        let copy = value
-        return copy
-    }
-}
-fn delta_map(value: map<i64, i64>) -> map<i64, i64> {
-    when { return delta_value(value) }
-}
 fn has_second(step: i64, watched: map<i64, i64>) -> bool {
     when modified(step) && valid(step, watched) { return contains(watched, 8) }
 }
 fn map_validity(step: i64, watched: map<i64, i64>) -> bool {
     when modified(step) && valid(step) { return all_valid(watched) }
 }
-fn copied_membership(step: i64) -> bool => has_second(step, copy_map(step, removing_map(step)))
-fn delta_membership(step: i64) -> bool => has_second(step, delta_map(removing_map(step)))
-fn copied_invalid_membership(step: i64) -> bool => has_second(step, copy_map(step, invalidating_map(step)))
-fn copied_map_validity(step: i64) -> bool => map_validity(step, copy_map(step, invalidating_map(step)))
+fn copied_membership(step: i64, a: map<i64, i64>, b: map<i64, i64>) -> bool =>
+    has_second(step, select_map(step, a, b))
+fn delta_membership(step: i64, a: map<i64, i64>, b: map<i64, i64>) -> bool =>
+    has_second(step, select_map_delta(step, a, b))
+fn copied_invalid_membership(step: i64, a: map<i64, i64>, b_step: i64) -> bool =>
+    has_second(step, select_map(step, a, invalidating_map(b_step)))
+fn copied_map_validity(step: i64, a: map<i64, i64>, b_step: i64) -> bool =>
+    map_validity(step, select_map(step, a, invalidating_map(b_step)))
+fn delta_map_validity(step: i64, a: map<i64, i64>, b_step: i64) -> bool =>
+    map_validity(step, select_map_delta(step, a, invalidating_map(b_step)))
 
-# Child invalidation is observed through the complete value; no empty delta
-# application or new invalid member is required by these cases.
 test complete_map_copy_reconciles_membership_and_child_validity {
-    assert eval(copied_membership, step: [1, 2, 3]) == [true, false, false]
-    assert eval(delta_membership, step: [1, 2, 3]) == [true, false, false]
-    assert eval(copied_invalid_membership, step: [1, 2, 3]) == [true, true, true]
-    assert eval(copied_map_validity, step: [1, 2, 3]) == [true, false, false]
+    let full = delta<map<i64, i64>>(upsert: [7: 10, 8: 20])
+    let only_first = delta<map<i64, i64>>(upsert: [7: 30])
+    # B never had key 8, so switching to B must remove it without a removal delta.
+    assert eval(copied_membership, step: [1, 2, 3], a: [full, _, _], b: [only_first, _, _]) == [true, false, false]
+    assert eval(delta_membership, step: [1, 2, 3], a: [full, _, _], b: [only_first, _, _]) == [true, true, true]
+    # B invalidates key 8 while A remains selected. At the later switch its
+    # invalidation delta has expired, but its held child validity remains unset.
+    assert eval(copied_invalid_membership, step: [1, 1, 2, 3], a: [full, _, _, _], b_step: [1, 2, 3, 4]) == [true, true, true, true]
+    assert eval(copied_map_validity, step: [1, 1, 2, 3], a: [full, _, _, _], b_step: [1, 2, 3, 4]) == [true, true, false, false]
+    assert eval(delta_map_validity, step: [1, 1, 2, 3], a: [full, _, _, _], b_step: [1, 2, 3, 4]) == [true, true, true, true]
 }
