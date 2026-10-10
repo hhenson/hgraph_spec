@@ -125,23 +125,24 @@ thought of as a struct: one value with four read-only properties.
 |---|---|---|---|
 | evaluation time | `datetime` | The time of the current cycle: the event time that caused the graph to run, and the graph's logical "now" | Once, before each cycle. Constant throughout the cycle |
 | now | `datetime` | The engine's estimate of wall-clock time. In real time, the computer's clock in UTC. In simulation, evaluation time plus the lag | Continuously |
-| lag | `duration` | The real time that has passed between the start of the current cycle and the moment it is read. Measured on the computer's clock in both modes. hgraph calls this *cycle time*. In simulation the engine samples the computer's clock only once the run has read *now* or *lag*: the first such read measures from itself, and every later cycle measures from its start | Continuously; restarts each cycle |
+| lag | `duration` | Real elapsed time since the current cycle began, except in the first observed simulation cycle: there it is measured from the run's first *now* or *lag* read. Also called *cycle time*. See ENG-14 | Continuously; restarts each cycle |
 | next cycle evaluation time | `datetime` | The earliest time a following cycle could have: evaluation time plus the smallest step | With evaluation time |
 
 Simulated *now* describes the likely lag in the system: had this event
 arrived in real time, the wall clock would by now read about the evaluation
-time plus however long the cycle has been running. It is deliberately a cheap
-estimate. It ignores cumulative effects — a backlog built up over earlier
-cycles — because an estimate that included them would still be inaccurate
+time plus elapsed real time, with the first-observation exception below.
+It is deliberately a cheap estimate. It ignores cumulative effects — a
+backlog built up over earlier cycles — because an estimate that included
+them would still be inaccurate
 and would cost a great deal to compute.
 
-It is also sampled on demand. A simulation that never reads *now* or *lag*
-never asks the computer for the time (one clock read per cycle was a
-measurable share of small-cycle graphs). The first read in a run arms
-per-cycle sampling for the rest of the run; within that first cycle the lag
-is measured from the read itself, so it starts at zero, and from the next
-cycle on it is measured from the cycle's start. Within any cycle *lag* never
-decreases and *now* is never earlier than the evaluation time.
+Simulation samples the computer's clock only on demand. Before the run's
+first *now* or *lag* read, it takes no samples, including at cycle boundaries.
+That read establishes the elapsed-time origin for its cycle; earlier time in
+that cycle is excluded. Every subsequent cycle samples at its start, even
+if neither property is read in it. Within a cycle *lag* never decreases and
+*now* is never earlier than evaluation time. Real-time mode is unchanged:
+its lag always measures from the cycle's start and its *now* reads UTC time.
 
 Evaluation time behaves like a monotonic clock: it is guaranteed to increase
 from one cycle to the next. In real time that guarantee can briefly put it
@@ -317,8 +318,11 @@ Rules
 - **ENG-13** In real time *now* is the computer's clock; evaluation time may
   briefly lead it, because ENG-2 takes precedence. In simulation *now* is
   evaluation time plus the lag, and so is never earlier than evaluation time.
-- **ENG-14** The lag is real elapsed time in both modes, measured from the
-  start of the current cycle.
+- **ENG-14** Lag measures real elapsed time from the current cycle's start,
+  except in the first observed simulation cycle, where its origin is the
+  run's first *now* or *lag* read. Simulation takes no clock samples before
+  that read; every subsequent cycle samples at its start. Real-time lag
+  always measures from the cycle's start.
 - **ENG-15** Simulation is deterministic: the same graph, inputs, initial
   global-state values, start time and end time produce the same sequence of
   cycles and the same ticks,

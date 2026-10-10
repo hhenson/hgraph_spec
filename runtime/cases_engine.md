@@ -60,7 +60,9 @@ read the clock.
 | now | not before the evaluation time; the second node's reading is not before the first's |
 | lag | not negative; the second node's reading is not less than the first's |
 
-Nothing a node does changes the clock (ENG-11).
+Nothing a node does writes the clock (ENG-11). The first *now* or *lag*
+read activates simulation sampling as specified by ENG-14; see
+[ENGINE-CLOCK-LAZY](#engine-clock-lazy--eng-13-eng-14).
 
 ## ENGINE-REAL-TIME-ORDER — ENG-2, ENG-6, ENG-8
 
@@ -82,12 +84,33 @@ and pausing are optional facilities with no cases
 here. The order of stop and report on failure (Engine point 1) is not
 observable by a graph and has no case.
 
-## Simulation clock sampled on demand
+## ENGINE-CLOCK-LAZY — ENG-13, ENG-14
 
-A simulation runs five cycles. One node reads *lag* and *now* on every cycle
-from the second onwards and asserts, on each read, that *now* is not earlier
-than the evaluation time, that a second read of *now* in the same cycle is
-not earlier than the first, and that *lag* does not decrease within the
-cycle. The run completes without an assertion firing. No property of the
-first cycle's clock is observable (nothing read it), and the engine is
-permitted to have taken no clock sample during it.
+Use a controlled real-time timer for the engine clock that records sample
+requests and advances only when the test moves it. This is a test fixture, not a new graph-facing
+clock API. Timer values below are seconds from a fixed UTC origin W, independent of
+logical evaluation time E. Hold the timer fixed while taking paired property reads.
+
+Run these simulation steps twice, once with *lag* as the first property read
+and once with *now* first:
+
+| Step | Required observation |
+|---|---|
+| First cycle: read only evaluation time and next cycle time | No timer samples |
+| Second cycle begins at timer 10; advance to 17 without reading *now* or *lag* | Still no timer samples |
+| At 17, first read followed by the other property | Lag is 0; now is E; sampling has begun |
+| Advance to 20 in the same cycle; read both | Lag is 3s; now is E + 3s |
+| Next cycle begins at 30; first property reads at 37 | A sample at cycle start; lag is 7s, now is E + 7s |
+| Next cycle begins at 40; neither property is read | A sample at cycle start |
+| Next cycle begins at 50; first property reads at 55 | Lag is 5s; now is E + 5s |
+
+A separate simulation with no *now* or *lag* reads takes no timer samples
+throughout the run. In real-time mode, a cycle beginning at timer 10 and
+first observed at 17 instead has lag 7s; *now* is W + 17s.
+Real-time scheduling may sample before any property read.
+
+An eager simulation sampler fails both the no-sample checks and the first
+lag-zero check: its origin at 10 would produce lag 7 at 17. Resetting the
+origin on every cycle's first property read fails the later lag-7 check.
+These exact values rely on the controlled timer, not on physical-clock
+sampling overhead.
