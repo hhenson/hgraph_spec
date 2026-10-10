@@ -331,6 +331,16 @@ normal hgraph binding adaptation. A reference-typed node input retains the
 opaque reference view; it does not implicitly dereference itself during
 evaluation.
 
+**REF-EQ-1 — Node identity comparison.** Within node evaluation, two readable
+operands of the same resolved `ref<T>` type admit `==` and `!=`, returning
+`bool`. Equality compares their endpoint identities and child designation
+trees under [TS-16](../../../runtime/time_series.md); `!=` is its negation.
+Neither operand is dereferenced or compared by its target's value. Existing
+readability guards still apply. This adds no reference ordering, hashing,
+heterogeneous comparison or graph-composition operator admission. See the
+[source example](../../examples/reference-identity-equality.hgl) and
+[compiler cases](../../../compiler/cases_reference_identity_equality.md).
+
 ## Selecting and forwarding a reference
 
 The routing example from the discussion illustrates the intended use. It is

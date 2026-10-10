@@ -1540,6 +1540,11 @@ Expression precedence is:
 | Boolean AND | `&&` |
 | Boolean OR | `\|\|` |
 
+Node `==`/`!=` on readable operands of the same resolved `ref<T>` type
+compares opaque designation identity under
+[REF-EQ-1](../design/type-extensions.md#node-access-and-ticks), without a
+read through either operand. This does not admit additional graph operators.
+
 Calls use positional arguments followed by named arguments:
 
 ```hgl

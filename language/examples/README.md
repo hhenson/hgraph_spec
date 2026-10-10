@@ -127,6 +127,9 @@ annotations isolate expected source errors alongside executable tests.
   through an edge. Tests: 3 `test` blocks under `hgl test`
   (`hgraph_language_test_recursive-fields`), asserted again on the generated
   C++ in `generated_recursive_tests.cpp`.
+- [`reference-identity-equality.hgl`](reference-identity-equality.hgl) compares
+  node REF designations with `==`/`!=`: aliases equate and separate endpoints
+  carrying equal scalar values remain distinct under REF-EQ-1.
 - [`reference-routing.hgl`](reference-routing.hgl) demonstrates `ref<T>`
   parameters and results in runtime functions: forwarding a reference, and
   routing one element of a `list<ref<T>, 3>` by a temporal index. Tests: none
