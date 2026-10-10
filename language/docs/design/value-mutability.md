@@ -149,6 +149,8 @@ Primitive reads of `bool`, `i64`, `f64`, `str`, `bytes`, `date`, `time`, `dateti
 `duration`, `civil_datetime`, `timezone`, `zoned_datetime` and `zoned_time` retain their
 owned-copy behavior: `var n: i64 = get(...)` is an
 ordinary local, and assigning n does not update the stored integer.
+Declared enum and [native atomic](native-atomic-values.md) reads likewise
+produce independent ordinary copies; `any` remains an aggregate borrow.
 
 A borrow lasts to the end of its declaring lexical block, never beyond the
 hook. It cannot escape in a closure, through an ordinary helper call, or as a

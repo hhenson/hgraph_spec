@@ -5,14 +5,15 @@
 Admit `atomic<V>` at the top level and as a child of the existing
 [collection publication profile](contextual-collection-deltas.md). V is an
 ordinary value formed recursively from the [admitted scalar leaves](temporal-scalar-publications.md),
-including [bytes](bytes-values.md) and [any](any-values.md), fixed or
+including [bytes](bytes-values.md), [any](any-values.md) and
+[native atomics](native-atomic-values.md), fixed or
 unbounded ordinary lists, positional tuples, and fully applied concrete nominal
 structs whose fields are required, defaulted or optional under the
 [optional-field publication contract](optional-atomic-publications.md). Values and nominal
 expansion are finite, except for the nominal edges admitted by the
 [finite recursive-value contract](recursive-atomic-publications.md). The separate
 [atomic family contract](abstract-atomic-publications.md) admits complete nonrecursive
-family values. Other scalars, native types, endpoint shapes and
+family values. Other scalars, native resource types, endpoint shapes and
 structural delta objects are outside this extension. An unbounded ordinary
 list is a finite snapshot, not a growing temporal list. The separate
 [ordinary set/map extension](atomic-set-map-publications.md) adds finite

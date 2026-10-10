@@ -35,6 +35,15 @@ fn scale(value: f64, const factor: f64) -> f64 =>
     value * factor
 ```
 
+## Native atomic values
+
+`native type Token` names opaque ordinary data supplied by a checked provider.
+Construct and observe it through the provider's `native const fn` helpers.
+Its exact nominal identity, copies and declared capabilities survive temporal
+publication; `atomic<Token>` and `delta<Token>` are Token. See
+[NVAL-1–5](../design/native-atomic-values.md) and
+[examples](../../examples/native-atomic-values.hgl).
+
 ## Any values
 
 `any(value)` retains an independent typed value; `any()` is a present empty

@@ -36,7 +36,8 @@ the derived delta against the same temporal output shape.
 For this scalar publication profile, T is one of
 `bool`, `i64`, `f64`, `str`, `bytes`, `any`, `date`, `time`, `datetime`, `duration`,
 `civil_datetime`, `timezone`, `zoned_datetime`, `zoned_time`, or a
-[declared enum](enum-publications.md). Bytes construction, ownership and
+[declared enum](enum-publications.md) or [native atomic](native-atomic-values.md).
+Bytes construction, ownership and
 publication admission follow [BYTE-1–6](bytes-values.md); boxed values follow
 [ANY-1–5](any-values.md).
 The [temporal publication extension](temporal-scalar-publications.md) preserves

@@ -1,7 +1,8 @@
 # Imported values, reference types, `signal` inputs, and enums
 
 Status: agreed source semantics. Reference access and native type mapping
-questions are identified below. This record introduces no native declaration syntax.
+questions are identified below. Native atomic declarations are defined separately
+by [NVAL-1–5](native-atomic-values.md); opaque resource-state spelling remains open.
 
 ## Enum types
 
@@ -247,8 +248,9 @@ scalar value types, like `i64`, `f64`, and `str`:
 HGL-declared structs retain their existing structural temporalization. An
 imported structured object does not acquire that behavior. Importing a type
 preserves its native value identity and supported operations; it does not
-import a time-series shape. The declaration mechanism for exposing those types
-and operations remains to be discussed.
+import a time-series shape. [NVAL-1–5](native-atomic-values.md) defines
+atomic value declarations and checked helper exposure; opaque resource-state
+declarations remain separate.
 
 ## Reference spelling and type compatibility
 
@@ -451,6 +453,6 @@ is an opaque reference.
 
 ## Scope of this agreement
 
-This record does not settle native declaration syntax, reference construction
-or mutation operations, or additional restrictions on reference placement.
-Those remain separate discussion items.
+Native atomic declaration syntax follows [NVAL-1–5](native-atomic-values.md).
+Opaque resource-state spelling, reference construction or mutation operations,
+and additional reference-placement restrictions remain separate.
