@@ -1554,6 +1554,10 @@ Expression precedence is:
 | Boolean AND | `&&` |
 | Boolean OR | `\|\|` |
 
+Direct `bool` equality and comparison follow [BOOL-1](../design/bool-scalar-capabilities.md):
+Boolean equality/hash and total order with false before true, without numeric
+conversion.
+
 Calls use positional arguments followed by named arguments:
 
 ```hgl
