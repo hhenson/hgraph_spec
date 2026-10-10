@@ -1,0 +1,30 @@
+module examples.reference_identity_equality
+
+fn relay(value: ref<i64>) -> ref<i64> {
+    when valid(value) && modified(value) { return value }
+}
+fn same(first: ref<i64>, second: ref<i64>, step: i64) -> bool {
+    when valid(step) && modified(step) && valid(first, second) {
+        return first == second
+    }
+}
+fn different(first: ref<i64>, second: ref<i64>, step: i64) -> bool {
+    when valid(step) && modified(step) && valid(first, second) {
+        return first != second
+    }
+}
+fn aliased(value: i64, step: i64) -> bool => same(relay(value), value, step)
+fn aliased_unequal(value: i64, step: i64) -> bool => different(relay(value), value, step)
+fn distinct(first: i64, second: i64, step: i64) -> bool => same(first, second, step)
+fn distinct_unequal(first: i64, second: i64, step: i64) -> bool => different(first, second, step)
+
+test {
+    test reference_equality_uses_designations_without_reading_target_values {
+        # Wiring gives both operands the same endpoint through two routes.
+        assert eval(aliased, value: [7, 8, _, 7], step: [1, 1, 1, 1]) == [true, true, true, true]
+        assert eval(aliased_unequal, value: [7, 8, _, 7], step: [1, 1, 1, 1]) == [false, false, false, false]
+        # Equal scalar contents do not equate two separately wired endpoints.
+        assert eval(distinct, first: [7, 8, _, 7], second: [7, 8, _, 7], step: [1, 1, 1, 1]) == [false, false, false, false]
+        assert eval(distinct_unequal, first: [7, 8, _, 7], second: [7, 8, _, 7], step: [1, 1, 1, 1]) == [true, true, true, true]
+    }
+}
