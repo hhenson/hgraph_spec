@@ -308,14 +308,22 @@ classDiagram
 | Item | Values | Changed by |
 |---|---|---|
 | lifecycle | instantiated, starting, started, evaluating, stopping, stopped | The graph, when its owner asks |
-| evaluation time | The time of the cycle in progress, or of the last one completed. Before the first cycle it is one step before the start time, so that the first cycle may be *at* the start time | The graph, at the start of each cycle, from what its owner supplies |
+| scheduling cursor | The time of the graph's cycle in progress, or of the last one completed. Before its first cycle it is one smallest step before the time at which its owner starts it | The graph, at the start of each cycle, from what its owner supplies |
 | schedule | For each node: the next time it needs evaluating, or *never* | Notification, a node's scheduler, schedule-on-start |
-| next scheduled time | The earliest schedule entry later than the evaluation time; *forever* if there is none | Follows the schedule |
+| next scheduled time | The earliest schedule entry later than the scheduling cursor; *forever* if there is none | Follows the schedule |
 | owner | The engine, or a node together with whatever that node uses to tell its graphs apart — a key, a branch | Fixed at instantiation |
 
 The schedule holds **one** time per node: the earliest at which it needs
 evaluating. A node that wants to be woken at several future times keeps them
 in its own scheduler (see Node), and only the earliest of them appears here.
+
+The scheduling cursor is a boundary for pending work, not the injectable
+clock's **evaluation time** ([Clock](execution_engine.md#state)). Before the
+root graph's first cycle, the cursor is one step before the run's start time
+S, while the clock reads S. A schedule entry at S is therefore eligible for
+the first cycle; it does not evaluate the node during startup. When a graph
+begins a cycle at t, its cursor becomes t. A nested graph has its own progress
+boundary but still reads the run's shared clock, not its cursor.
 
 ```mermaid
 stateDiagram-v2
@@ -337,15 +345,19 @@ stateDiagram-v2
 
 To schedule node *n* for time *t*:
 
-- If *t* is before the evaluation time, it is an error.
-- If *t* is the evaluation time, *n*'s entry becomes *t*, whatever it held,
+- If *t* is before the scheduling cursor, it is an error.
+- If *t* is the scheduling cursor, *n*'s entry becomes *t*, whatever it held,
   and *n* will be evaluated in the current cycle, provided the scan has not
   yet reached it. It always can be, when the graph was wired correctly:
-  whatever schedules *n* for now is of lower rank than *n*. Before the first
-  cycle, scheduling for the start time is how the first cycle comes to exist.
+  whatever schedules *n* for now is of lower rank than *n*.
 - Otherwise *n*'s entry becomes *t* if it has no entry, if its entry has
   already been used, or if *t* is earlier than its entry. An unused entry
   never moves later.
+
+Before the first cycle, a request for the graph's start time follows the
+last branch: it is later than the cursor and becomes pending work for the
+first cycle. The injectable clock can already read that start time without
+making this an in-progress evaluation.
 
 Evaluating a node uses its entry, whatever woke it. A later time the node
 had asked for is not lost: its scheduler still holds the request and writes
@@ -370,7 +382,7 @@ evaluation (GRF-16).
 
 ```mermaid
 flowchart TD
-    A(["owner: evaluate at t"]) --> B["evaluation time becomes t"]
+    A(["owner: evaluate at t"]) --> B["scheduling cursor becomes t"]
     B --> C["take the next node in rank order"]
     C --> D{"scheduled for t"}
     D -- "no" --> H{"more nodes"}
@@ -468,8 +480,12 @@ of what the runtime provides for a graph that changes shape as it runs.
 
 - **GRF-11** A node is evaluated in a cycle only if its schedule entry equals
   the evaluation time; at most once; in rank order.
-- **GRF-12** Scheduling a node for a time before the evaluation time is an
-  error.
+- **GRF-12** Scheduling a node for a time before the graph's scheduling
+  cursor is an error. The cursor is one smallest step before the graph's
+  start time until its first cycle, then the current or most recent cycle's
+  time. It is not the shared clock's evaluation time: before the run's first
+  cycle that clock reads the run's start time, and a request at that time is
+  eligible for the first cycle.
 - **GRF-13** Scheduling for the current time a node the scan has already
   passed is a fault in the graph. It is never silently carried to a later
   cycle.

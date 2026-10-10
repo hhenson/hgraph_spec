@@ -128,6 +128,12 @@ thought of as a struct: one value with four read-only properties.
 | lag | `duration` | Real elapsed time since the clock's current origin, defined below and in ENG-14. Also called *cycle time* | Continuously; restarts each cycle |
 | next cycle evaluation time | `datetime` | The earliest time a following cycle could have: evaluation time plus the smallest step | With evaluation time |
 
+The injectable evaluation time is not a graph's
+[scheduling cursor](graph.md#state-1). Before the root graph's first cycle,
+the clock reads the run's start time, while the cursor is one smallest step
+earlier so that a request at the start time remains eligible. A nested graph
+likewise keeps its own scheduling progress while reading this shared clock.
+
 Simulated *now* describes the likely lag in the system: had this event
 arrived in real time, the wall clock would by now read about the evaluation
 time plus elapsed real time, with the first-observation exception below.

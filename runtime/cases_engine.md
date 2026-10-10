@@ -84,6 +84,30 @@ and pausing are optional facilities with no cases
 here. The order of stop and report on failure (Engine point 1) is not
 observable by a graph and has no case.
 
+## ENGINE-CLOCK-STARTUP-CURSOR — ENG-1, ENG-11, GRF-12
+
+Simulation. A source's start hook reads the injectable clock's evaluation
+time and requests its first evaluation at that same time S, the run's
+start time. Let d be the smallest step. The cursor column describes graph
+scheduling progress, not another clock property available to the source.
+
+| Phase | Clock evaluation time | Graph scheduling cursor | Required scheduling observation |
+|---|---|---|---|
+| Startup, before the request | S | S - d | Source has not evaluated |
+| Startup, after requesting S | S | S - d | Next scheduled time is S; source still has not evaluated |
+| First cycle at S | S | S | Source evaluates once at S; its request is consumed |
+| Stop after that cycle | S | S | Clock retains S; no additional source evaluation |
+
+In a separate run that stops without a cycle, the clock still reads S and
+the source never evaluates. Clock reads during startup or stop do not move
+the graph's scheduling cursor. A nested graph started during a parent cycle
+at E initially has cursor E - d while sharing the parent clock at E.
+
+Using the startup clock value S as the strict boundary for future schedule
+entries would exclude the request at S. Returning S - d from the injectable
+clock would instead violate its startup contract. The two roles must not be
+conflated; no independent graph-facing cursor API is required.
+
 ## ENGINE-CLOCK-LAZY — ENG-13, ENG-14
 
 Use a controlled real-time timer for the engine clock that records sample
