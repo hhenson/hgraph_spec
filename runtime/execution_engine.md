@@ -125,7 +125,7 @@ thought of as a struct: one value with four read-only properties.
 |---|---|---|---|
 | evaluation time | `datetime` | The time of the current cycle: the event time that caused the graph to run, and the graph's logical "now" | Once, before each cycle. Constant throughout the cycle |
 | now | `datetime` | The engine's estimate of wall-clock time. In real time, the computer's clock in UTC. In simulation, evaluation time plus the lag | Continuously |
-| lag | `duration` | The real time that has passed between the start of the current cycle and the moment it is read. Measured on the computer's clock in both modes. hgraph calls this *cycle time* | Continuously; restarts each cycle |
+| lag | `duration` | The real time that has passed between the start of the current cycle and the moment it is read. Measured on the computer's clock in both modes. hgraph calls this *cycle time*. In simulation the engine samples the computer's clock only once the run has read *now* or *lag*: the first such read measures from itself, and every later cycle measures from its start | Continuously; restarts each cycle |
 | next cycle evaluation time | `datetime` | The earliest time a following cycle could have: evaluation time plus the smallest step | With evaluation time |
 
 Simulated *now* describes the likely lag in the system: had this event
@@ -134,6 +134,14 @@ time plus however long the cycle has been running. It is deliberately a cheap
 estimate. It ignores cumulative effects — a backlog built up over earlier
 cycles — because an estimate that included them would still be inaccurate
 and would cost a great deal to compute.
+
+It is also sampled on demand. A simulation that never reads *now* or *lag*
+never asks the computer for the time (one clock read per cycle was a
+measurable share of small-cycle graphs). The first read in a run arms
+per-cycle sampling for the rest of the run; within that first cycle the lag
+is measured from the read itself, so it starts at zero, and from the next
+cycle on it is measured from the cycle's start. Within any cycle *lag* never
+decreases and *now* is never earlier than the evaluation time.
 
 Evaluation time behaves like a monotonic clock: it is guaranteed to increase
 from one cycle to the next. In real time that guarantee can briefly put it

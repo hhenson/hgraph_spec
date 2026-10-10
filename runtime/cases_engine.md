@@ -81,3 +81,13 @@ Externally driven stepping, observers, one-shot callbacks, the runaway guard
 and pausing are optional facilities with no cases
 here. The order of stop and report on failure (Engine point 1) is not
 observable by a graph and has no case.
+
+## Simulation clock sampled on demand
+
+A simulation runs five cycles. One node reads *lag* and *now* on every cycle
+from the second onwards and asserts, on each read, that *now* is not earlier
+than the evaluation time, that a second read of *now* in the same cycle is
+not earlier than the first, and that *lag* does not decrease within the
+cycle. The run completes without an assertion firing. No property of the
+first cycle's clock is observable (nothing read it), and the engine is
+permitted to have taken no clock sample during it.
