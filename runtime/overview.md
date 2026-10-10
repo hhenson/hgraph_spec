@@ -559,9 +559,9 @@ Settled here, with a detail left for the chapter that owns it.
   reclamation, paired address spaces for a switch — is a design option.
 - **Scalar types: the list.** `any` is a value kind of the runtime. Cyclic
   buffer and queue are not: hgraph has them to implement windows, and they
-  are an implementation's concern. `zoned_time` is new in HGL and is to be
-  supported by hgraph; `bytes` exists in hgraph and HGL has not spelled it
-  yet. Both are in the runtime's scalar list.
+  are an implementation's concern. `zoned_time` and `bytes` are in the
+  runtime's scalar list. HGL bytes construction and publications follow
+  [BYTE-1–6](../language/docs/design/bytes-values.md).
 - **Scalar types: who may change a value.** Content changes require writable
   owner access or explicitly delegated mutable access. Consumer
   snapshots remain stable; scoped live owner access is different. Retained
