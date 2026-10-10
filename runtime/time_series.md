@@ -348,17 +348,16 @@ reference.
   re-bound, sampled, to the newly designated output, and from then on shows
   that output's ticks as though bound to it directly. An empty reference
   leaves the input unbound.
-- **A reference does not escape rank order.** What a reference designates is,
-  by definition, one of two things: an output of a node of **lower rank in
-  the same graph**, or an output that came in **from the parent graph** —
-  which, seen from the parent, is of lower rank than the nested node that
-  owns this graph. Either way it has already been evaluated in the cycle.
-  That is simply where references come from: a reference is made from an
-  output a node can already see, and it travels along edges, which only run
-  forward. A reference is a way of choosing *which* upstream output to read,
-  never a way of reading downstream or sideways. Graphs owned by the same
-  node are parallel: they share a parent and nothing else, and nothing in one
-  refers to anything in another.
+- **A reference does not escape rank order.** Its target is an output of a
+  lower-ranked node in the same graph, a route that entered from the parent,
+  or a designation explicitly exported through an owning child-output
+  boundary (GRF-27). For an exported route, the effective producer in the
+  consuming graph is the owning node, which completes its child evaluation
+  before the later-ranked consumer runs. Repeated exports compose through
+  owner boundaries, preserving the actual endpoint and its lifetime.
+  References choose upstream data; they cannot bypass rank or directly reach
+  unexported child endpoints or parallel graphs. Parent routes may be captured
+  through the existing live input bindings (GRF-10).
 
 ### SIGNAL
 
@@ -486,9 +485,12 @@ Rules
   or not its child is valid, and *removed* when it leaves. A child becoming
   valid or invalid neither adds nor removes its key.
 - **TS-20** A reference designates an output of a node of lower rank in the
-  same graph, or an output that entered from the parent graph. An input bound
-  through a reference is therefore bound only to an output already evaluated
-  in the cycle. Nothing refers into a parallel graph.
+  same graph, a route that entered from the parent graph, or a designation
+  exported through owning output boundaries (GRF-27). For an exported route,
+  the owning node is the effective producer at each enclosing graph level
+  and completes child evaluation before the later-ranked consumer. An input
+  bound through a reference therefore observes an output already evaluated
+  in the cycle. No direct route into a parallel graph is admitted.
 - **TS-21** Only an output's own node changes it, and only during that
   node's evaluation. From the end of that evaluation to the end of the cycle,
   what the output shows does not change.
