@@ -1,0 +1,34 @@
+module examples.bool_scalar_capabilities
+
+fn compare(left: bool, right: bool) -> atomic<tuple<bool, bool, bool, bool, bool, bool>> {
+    when { return (left == right, left != right, left < right, left <= right, left > right, left >= right) }
+}
+fn members(value: set<bool>) -> set<bool> {
+    when { return delta_value(value) }
+}
+
+test {
+    test boolean_comparisons_use_false_before_true {
+        assert false == false
+        assert true == true
+        assert false != true
+        assert false < true
+        assert true > false
+        assert !(true < false)
+        assert false <= false
+        assert true >= true
+        assert eval(compare, left: [false, true, false, true, _], right: [false, false, true, true, _]) == [
+            (true, false, false, true, false, true),
+            (false, true, false, false, true, true),
+            (false, true, true, true, false, false),
+            (true, false, false, true, false, true), _
+        ]
+    }
+    test boolean_membership_uses_exact_value_equality_and_hash {
+        let first: bool = false
+        let equal_first: bool = false
+        assert eval(members, [delta<set<bool>>(added: [first, true]), _, delta<set<bool>>(removed: [equal_first]), delta<set<bool>>(added: [equal_first])]) == [
+            delta<set<bool>>(added: [true, equal_first]), _, delta<set<bool>>(removed: [first]), delta<set<bool>>(added: [first])
+        ]
+    }
+}
