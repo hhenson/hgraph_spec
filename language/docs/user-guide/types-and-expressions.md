@@ -25,6 +25,9 @@ The initial scalar vocabulary is:
 
 In an ordinary parameter or result position, a scalar type is an atomic
 time-series leaf. In a `const` parameter position, it is a wiring-time scalar.
+`bool` compares by Boolean value and orders false before true; it supports
+equality and hash without numeric conversion. See [BOOL-1](../design/bool-scalar-capabilities.md).
+
 For non-composite types, `atomic<i64>` is simply `i64`, `atomic<bool>` is
 `bool`, and likewise for strings, temporal scalars and enums. Use `atomic`
 to make a composite value publish as one complete value.

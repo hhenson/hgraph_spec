@@ -22,6 +22,8 @@ annotations isolate expected source errors alongside executable tests.
   retained complete values with explicit deltas using independent state observers.
 - [`contextual-local-bindings.hgl`](contextual-local-bindings.hgl) distinguishes
   ordinary node locals, graph scalars and graph connection rebinding.
+- [`bool-scalar-capabilities.hgl`](bool-scalar-capabilities.hgl) checks direct
+  Boolean comparisons and exact set membership under BOOL-1.
 - [`temporal-scalar-publications.hgl`](temporal-scalar-publications.hgl) forwards
   civil and named-zone scalar publications without changing their identities.
 - [`atomic-delta-publications.hgl`](atomic-delta-publications.hgl) shows
