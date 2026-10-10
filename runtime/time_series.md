@@ -496,9 +496,13 @@ Rules
   the cycle is a copy.
 - **TS-23** A saved reference does not extend an endpoint's lifetime. From
   the first engine cycle after its dictionary key remained removed at cycle
-  end, it designates nothing and binding through it leaves the input unbound. Reusing the key
-  or its storage cannot retarget the old reference. Reclamation may be lazy;
-  expiry must be observable at that cycle boundary.
+  end, or its owning nested graph stopped, it designates nothing and binding
+  through it leaves the input unbound. The removal-cycle observation remains
+  readable under GRF-25. Reusing the key or storage, or creating a fresh
+  instance of the stopped branch, cannot retarget the old reference.
+  Reclamation may be lazy; expiry must be observable at that cycle boundary.
+  Nested graph references still use the existing boundary bindings (GRF-10)
+  and routing restrictions (TS-20); this adds no route into a parallel graph.
 - **TS-24** A valid TSB value contains every declared field, including nil
   for invalid children. Apply this at each valid nested bundle. Its schema
   does not shrink with validity; its delta contains only changed valid fields.
