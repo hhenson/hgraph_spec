@@ -183,3 +183,7 @@ is pinned there. The acceptance sequence is defined in the
 
 - [`any-values.hgl`](any-values.hgl) checks typed boxes, present empty ticks,
   runtime boxing and independent ordinary-value retention.
+- [`default-binding-scope.hgl`](default-binding-scope.hgl) checks defining
+  declarations before formal/field bindings and generic contextual defaults;
+  its two evals and direct assertions are static requirements, not target results.
+  See [default scope cases](../../compiler/cases_default_binding_scope.md).

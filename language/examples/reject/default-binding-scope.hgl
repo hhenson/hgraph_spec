@@ -1,0 +1,13 @@
+module examples.reject_default_binding_scope
+
+# Standalone negative checking input; these existing name failures are uncoded.
+const fn earlier(prior: i64, value: i64 = prior) -> i64 => value
+const fn current(value: i64 = value) -> i64 => value
+const fn later(value: i64 = next, next: i64 = 2) -> i64 => value
+fn configuration(const prior: i64, const value: i64 = prior) -> i64 {
+    when { return value }
+}
+struct InstanceDefaults {
+    prior: i64 = 7
+    value: i64 = prior
+}

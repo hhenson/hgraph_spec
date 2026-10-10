@@ -251,6 +251,9 @@ const_parameter = "const", identifier, ":", value_type,
 function_body   = ( "=>", expression ) | block;
 const_expression = expression;
 
+(* Default expression name binding follows DEF-1–4; this production alone
+   does not admit formal argument values or instance fields in defaults. *)
+
 requires_clause = "requires", constraint_expression;
 constraint_expression
                 = constraint_term,
@@ -293,7 +296,9 @@ is only the artifact-name anchor.
 A function or operator signature with no return arrow is outputless. An
 `operator` declaration may have domain-bound `properties<...>` clauses after
 its optional `requires` clause; their braces contain metadata, not a function
-body. A temporal parameter cannot have a default in the agreed slice.
+body. A temporal parameter cannot have a default in the agreed slice. Defaults
+resolve under [DEF-1–4](../design/default-binding-scope.md), before the
+declaring callable's formal bindings or struct's instance-field bindings.
 `const` marks wiring-time function parameters and wiring-time generic values;
 it is not a general local-variable qualifier. `export` applies to a named
 ordinary exact `fn` or a `struct`; other declarations reject it. `impl` marks
@@ -1192,7 +1197,9 @@ block, twice among a function's parameters, or twice among a module's
 declarations is a `name` diagnostic; an inner binding may shadow an outer
 one, including a parameter shadowing a module declaration, so
 `first_modified_index(values: list<f64>)` is legal and its body reads the
-parameter. An unknown name is `name: unknown name 'x'`.
+parameter. An unknown name is `name: unknown name 'x'`. Default expressions use the
+separate [declaration binding scope](../design/default-binding-scope.md);
+formal shadowing here describes the function body, not its defaults.
 
 ## Blocks and expressions
 
