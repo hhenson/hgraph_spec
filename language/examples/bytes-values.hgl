@@ -47,6 +47,6 @@ test bytes_range_failure {
     }
     # This call executes in the test; its failure must not reject the source.
     assert raises("value.byte_range") {
-        let invalid: bytes = bytes([256])
+        assert len(bytes([256])) == 0
     }
 }
