@@ -176,3 +176,8 @@ The backend-parity module that is built both ways lives in
 `../tests/codegen/parity.hgl`; the expression-embedded temporal conditional
 is pinned there. The acceptance sequence is defined in the
 [Developer Guide](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/testing-and-compatibility.md#documentation-examples).
+
+- [`default-binding-scope.hgl`](default-binding-scope.hgl) checks defining
+  declarations before formal/field bindings and generic contextual defaults;
+  its two evals and direct assertions are static requirements, not target results.
+  See [default scope cases](../../compiler/cases_default_binding_scope.md).
