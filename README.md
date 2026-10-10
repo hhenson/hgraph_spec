@@ -3,6 +3,7 @@
 The public HGL language and runtime specification: rules, HGL examples,
 reasoned traces and accepted decisions. No Python, C++ or Rust code lives here.
 
+- [Default expression binding scope](language/docs/design/default-binding-scope.md)
 - [Language model](language/docs/design/language-model.md)
 - [Empty sparse delta application](language/docs/design/empty-delta-validity.md) (accepted)
 - [Publication data and separately observed state](language/docs/design/publication-state-proposal.md) (proposed)

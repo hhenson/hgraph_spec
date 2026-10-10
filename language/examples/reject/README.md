@@ -35,3 +35,8 @@ names. Ordinary source-checking commands still reject these annotated errors.
   constructor names/constants/types/duplicates/bounds/overlap, and valid controls.
   State-dependent trace failures instead use `assert raises` in
   [`eval-profile-errors.hgl`](../eval-profile-errors.hgl).
+
+- [`default-binding-scope.hgl`](default-binding-scope.hgl) is a standalone
+  negative checking input for earlier/current/later parameter values and
+  instance-field references in defaults. These failures remain uncoded; it is
+  not an in-source coded-rejection fixture.
