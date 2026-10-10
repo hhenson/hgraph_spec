@@ -11,7 +11,8 @@ provider. It is ordinary data, distinct from native resource state.
   identity under ADR 0008. Reuse an existing identity; do not duplicate it
   under the HGL name. Two bindings mapped to the same identity are aliases.
   No fields, inheritance, type arguments, representation or implicit conversions are exposed. Import the type through
-  ordinary module `use`. Equal layouts or text do not equate different
+  ordinary module `use`, including selective and qualified imports under
+  [module resolution](modules.md#import-and-build-resolution). Equal layouts or text do not equate different
   canonical types.
 - **NVAL-2 — Provider contract.** Bind each declaration to its canonical scalar
   metadata before execution. The existing package descriptor records the shared

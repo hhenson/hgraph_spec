@@ -9,6 +9,8 @@ capabilities. These names and capabilities are fixture contracts, not built-ins.
 | Case | Required result |
 |---|---|
 | Export/import `native type` and exact helper signatures | Preserve canonical nominal identity and provider/capability metadata. |
+| `use pkg::{Token}` or `use pkg as native` then `native::Token` | Resolve the exported native type binding through the descriptor's public surface without provider execution. |
+| Import an unexported native type binding | Reject under existing module visibility rules; no new source-error code is assigned. |
 | Two HGL bindings map to one existing native scalar identity | Aliases preserve one canonical type; no duplicate native type is created. |
 | Different native canonical identities have identical layouts | Distinct types, including when boxed. |
 | Missing provider, mismatched identity/capabilities/signature | Fail before execution, without inferring a mapping from target source. |
