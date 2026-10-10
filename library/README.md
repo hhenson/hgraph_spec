@@ -21,7 +21,9 @@ call selects it.
 
 - [operator_contracts.md](operator_contracts.md): admission and nil, set
   operators, formatting and sinks, text, numbers, partitioned dictionaries,
-  recording (OP-1 to OP-12).
+  recording and merge (OP-1 to OP-13).
+- [cases_merge.md](cases_merge.md): original-source fallback recency,
+  same-cycle and fallback ties, equal publications, and dictionary removals.
 - [ordinary_replay_record.md](ordinary_replay_record.md): ordinary timed
   scalar data, replay, recording lifecycle and dense eval adaptation.
 - [Ordinary delta types](../language/docs/design/ordinary-delta-types.md)

@@ -97,6 +97,32 @@ argument is valid. There is no placeholder for a missing argument. `print_`,
 argument is valid.
 
 
+Merge
+-----
+
+`merge` combines ordered streams of the same time-series type. Invalid
+sources do not supply a value. When several valid sources publish in the
+same cycle, the leftmost one supplies the output, including an explicit
+publication equal to the previous output (OP-4).
+
+If no valid source publishes in that cycle, a fallback selects the valid
+source with the most recent modification time. This is the time of the
+**original source**, not the time an intermediate merge happened to forward
+its value. Equal times are resolved leftmost. A fallback publishes only
+when its value differs from the current output, or the output has no value
+yet. With no valid source, the value selector publishes nothing; this does
+not publish nil or a removal as a value.
+
+For the ordinary dictionary merge, apply that selection independently to
+each key's original children. Different keys from different inputs can
+publish together. Removing a key from one input permits fallback to another
+input that still holds it. When the last input removes a key, remove it from
+the output (TS-19), rather than retaining the selector's last value. This
+contract does not specify the separate `disjoint=True` optimization.
+
+[Merge cases](cases_merge.md) give the input publications and required traces.
+
+
 Text
 ----
 
@@ -209,6 +235,13 @@ Rules
   to their children. A key leaves the output when it leaves its partition, or
   when the partition that owns it is removed; the latter costs the removed
   partition's own keys.
+- **OP-13** `merge` ignores invalid sources. The leftmost valid source
+  modified in the current cycle supplies the value and its publication is
+  forwarded, even when equal. Otherwise select the valid original source
+  with the latest modification time, leftmost on ties, and publish only a
+  changed value or a first value. With no valid source the value selector
+  publishes nothing. Ordinary dictionary merge applies this rule per key;
+  a key is removed from the output when the last input removes it.
 
 A TSD delta holding a nested dictionary includes the inner dictionary's delta:
 its valid modified children only. An invalid inner child contributes nothing,
