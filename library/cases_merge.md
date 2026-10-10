@@ -5,8 +5,8 @@ not implementation algorithms.
 
 Each table starts a fresh ordinary dictionary merge. Inputs A, B, C and D
 are ordered left to right and hold `TSD[str, TS[int]]`. Times are consecutive
-engine cycles. Input and output cells are **deltas**, not complete dictionary
-values: `k:1` publishes the value 1 at key k, `k:R` removes k, and `none`
+engine cycles. Unless labelled as state observations, input and output cells are **deltas**,
+not complete dictionary values: `k:1` publishes the value 1 at key k, `k:R` removes k, and `none`
 means no publication. Observe after producers and merge have evaluated.
 
 ## MERGE-ORIGINAL-RECENCY: OP-13
@@ -90,3 +90,27 @@ At 0 no source has supplied a value. At 1 each key is selected separately,
 so both publications reach the output. At 2 and 3 no input still holds the
 removed key; the output removes it. Removing the last output key is a
 removal delta, not silence and not an empty-dictionary publication.
+
+## MERGE-INVALID-CHILD: TS-19, OP-13
+
+Run both variants. At cycle 0, A publishes only the valid sibling `"j":9`,
+or remains invalid without publishing an empty dictionary. B then introduces
+`"k"` with a never-ticked child. This is a membership operation, not a nil
+payload publication. Observe the merged output's state after evaluation;
+delta-only recording is insufficient.
+
+| t | B operation | `"k"` live | `"k"` added | `"k"` removed | Root valid | Live `"k"` child valid | `"k"` child payload delta |
+|---|---|---|---|---|---|---|---|
+| 1 | Add `"k"` without a child value | yes | yes | no | yes | no | nil |
+| 2 | None | yes | no | no | yes | no | nil |
+| 3 | Publish 7 to `"k"` | yes | no | no | yes | yes | 7 |
+| 4 | Remove `"k"` | no | no | yes | yes | — | — |
+| 5 | None | no | no | no | yes | — | — |
+
+With a sibling, live keys are `{ "j", "k" }` in cycles 1–3, then
+`{ "j" }`; `"j"` stays valid with value 9. Without a sibling they are
+`{ "k" }`, then empty. At cycle 3 the child's value is 7 and no membership
+addition recurs. At cycle 4 the output delta removes `"k"`; `—` means no
+live child, without changing the removed-child observation rules (TS-11).
+Forwarding only valid child payloads fails at cycle 1: `"k"` must already
+exist, even though it contributes no child payload delta.

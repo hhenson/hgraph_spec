@@ -120,12 +120,16 @@ the inner call is a current-cycle source publication for the outer call,
 even when the inner call derived it by fallback. Calls are not flattened;
 nested calls need not have the same trace as `merge(A, B, C)`.
 
-For the ordinary dictionary merge, apply that selection independently to
-each key's original children. Different keys from different inputs can
-publish together. Removing a key from one input permits fallback to another
-input that still holds it. When the last input removes a key, remove it from
-the output (TS-19), rather than retaining the selector's last value. This
-contract does not specify the separate `disjoint=True` optimization.
+Ordinary dictionary merge maintains the union of its inputs' live keys,
+independently of child validity. Adding a key makes the output dictionary
+valid; a newly introduced child remains invalid until a valid source supplies
+a selected value. Membership alone supplies no child payload. Apply value
+selection independently to each key's original children, so different keys
+from different inputs can publish together. With no valid source for a live
+key, its previous output value is retained; this does not invalidate it.
+Removing a key permits fallback to another input that still holds it. The
+key remains in the output until the last input removes it (TS-19).
+This contract does not specify the separate `disjoint=True` optimization.
 
 [Merge cases](cases_merge.md) give the input publications and required traces.
 
@@ -249,8 +253,10 @@ Rules
   forwarded, even when equal. Otherwise select the valid original source
   with the latest modification time, leftmost on ties, and publish only a
   changed value or a first value. With no valid source the value selector
-  publishes nothing. Ordinary dictionary merge applies this rule per key;
-  a key is removed from the output when the last input removes it.
+  publishes nothing. Ordinary dictionary merge applies value selection per
+  key and maintains the union of live input keys independently of child
+  validity. Adding a key makes the parent valid, with an invalid child until
+  a value is selected; the last input's removal removes the output key.
 
 A TSD delta holding a nested dictionary includes the inner dictionary's delta:
 its valid modified children only. An invalid inner child contributes nothing,
