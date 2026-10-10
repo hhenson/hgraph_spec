@@ -12,6 +12,7 @@ reasoned traces and accepted decisions. No Python, C++ or Rust code lives here.
   with their [error catalogue](language/docs/design/error-catalogue.md)
 - [Source documentation](language/docs/design/documentation.md)
 - [Language guide](language/docs/user-guide/language-tour.md)
+- [Owned REF output routes](compiler/cases_reference_owner_export.md)
 - [Runtime model](runtime/overview.md) and [conformance method](runtime/conformance.md)
 - [HGL compiler conformance](compiler/conformance.md)
 - [Wiring](wiring/wiring.md): how every front end describes a graph
