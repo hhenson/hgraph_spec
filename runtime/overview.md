@@ -481,7 +481,7 @@ Vocabulary
 | Edge | A binding from an output to an input |
 | Evaluation time | The time of the current cycle; the graph's logical "now" |
 | Graph description | What the wiring phase produces and a graph is instantiated from: plain data, never live |
-| Lag | Real elapsed time since the current cycle began, except in the first observed simulation cycle, where it starts at the run's first *now* or *lag* read ([ENG-14](execution_engine.md#rules)). Also called cycle time, or evaluation lag |
+| Lag | Real elapsed time from an origin established at the run's first *now* or *lag* read in simulation, or root-graph startup in real time. Later cycle starts replace it; lifecycle phase boundaries do not ([ENG-14](execution_engine.md#rules)). Also called cycle time, or evaluation lag |
 | Modified | For an owned output, last modified time equals evaluation time. Inputs also observe sampling and keyed withdrawal (TS-14–TS-15). Invalidation of an owned output is not a modification |
 | Nil | The standard representation of no value: what an invalid time-series gives for its value, and an unmodified one for its delta |
 | Notify | Tell whoever is watching a time-series that its state changed. Every tick notifies; so does becoming invalid, and so can a change of binding |

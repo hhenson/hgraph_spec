@@ -143,7 +143,7 @@ for one does not have one.
 
 | Injectable | start | eval | stop |
 |---|---|---|---|
-| clock | yes; evaluation time is the start time | yes | yes |
+| clock | yes; evaluation time is the start time | yes | yes; evaluation time is the last cycle's time, or the start time if no cycle ran |
 | scheduler | yes; may request the start time itself | yes | yes, though a request made in stop can never fall due |
 | alarm | yes; may request the start time itself | yes | no: there is nothing it could mark |
 | output | read | read and write | read |
@@ -160,7 +160,10 @@ time**, **now**, **lag** and **next cycle evaluation time**. Evaluation time
 and *now* are not separate injectables; a node asks for the clock and reads
 the property it needs. *Evaluation time* and *next cycle evaluation time* are
 the same for every node in a cycle; *now* and *lag* move as the cycle
-proceeds, so two nodes in one cycle read different values.
+proceeds, so two nodes in one cycle may read different values. The first
+*now* or *lag* read in any phase establishes simulation's elapsed-time
+origin. Later cycle starts replace it; entering stop does not reset it.
+See [ENG-14](execution_engine.md#rules) for both modes' origins.
 
 Treating these as properties of one value, rather than as free-standing
 operators, also keeps the names out of each other's way: hgraph already has

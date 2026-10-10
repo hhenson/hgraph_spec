@@ -104,8 +104,9 @@ and once with *now* first:
 | Next cycle begins at 40; neither property is read | A sample at cycle start |
 | Next cycle begins at 50; first property reads at 55 | Lag is 5s; now is E + 5s |
 
-A separate simulation with no *now* or *lag* reads takes no timer samples
-throughout the run. In real-time mode, a cycle beginning at timer 10 and
+A separate simulation with no *now* or *lag* reads takes no engine-clock
+elapsed-time samples throughout start, all cycles and stop. Sample counts
+cover the run only, not clock construction before it. In real-time mode, a cycle beginning at timer 10 and
 first observed at 17 instead has lag 7s; *now* is W + 17s.
 Real-time scheduling may sample before any property read.
 
@@ -114,3 +115,23 @@ lag-zero check: its origin at 10 would produce lag 7 at 17. Resetting the
 origin on every cycle's first property read fails the later lag-7 check.
 These exact values rely on the controlled timer, not on physical-clock
 sampling overhead.
+
+## ENGINE-CLOCK-LIFECYCLE — ENG-13, ENG-14, INJ-7
+
+Use the same controlled timer. Each row is a separate run; S is the run's
+logical start time, and E is its most recent cycle's evaluation time. For
+each first-read scenario, run both *now*-first and *lag*-first variants,
+holding the timer fixed until both properties have been read.
+
+| Scenario | Required observations |
+|---|---|
+| Startup begins at 10; first read at 17, another at 20; first cycle begins at 30, read at 37 | No elapsed-time samples before 17. At 17 lag is 0 and now is S; at 20 lag is 3s and now is S + 3s. The cycle samples at 30; at 37 lag is 7s and now is E + 7s |
+| Cycles run without either property read; first read is in stop at 50, another at 53 | No elapsed-time samples before 50. At 50 lag is 0 and now is E; at 53 lag is 3s and now is E + 3s |
+| No cycle runs; first read is in stop at 50, another at 53 | No elapsed-time samples before 50. At 50 lag is 0 and now is S; at 53 lag is 3s and now is S + 3s |
+| Sampling was activated in startup; last cycle begins at 30; stop reads at 40 | Lag is 10s and now is E + 10s: stop did not reset the cycle origin |
+| First read in startup at 17; no cycle runs; stop reads at 40 | Lag is 23s and now is S + 23s: stop retained the startup read's origin |
+
+Real-time controls begin root-graph startup at 10. A startup read at 17 has
+lag 7s and now W + 17s. If no cycle runs, a stop read at 40 has lag 30s;
+if the last cycle began at 30, it instead has lag 10s. Both stop variants
+read now W + 40s, retaining evaluation time S or E respectively.
