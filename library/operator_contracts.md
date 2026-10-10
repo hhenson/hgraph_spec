@@ -97,6 +97,43 @@ argument is valid. There is no placeholder for a missing argument. `print_`,
 argument is valid.
 
 
+Merge
+-----
+
+`merge` combines ordered streams of the same time-series type. Its
+**original sources** are the ordered input streams supplied to that call.
+Invalid sources do not supply a value. When several valid sources publish
+in the same cycle, the leftmost one supplies the output, including an explicit
+publication equal to the previous output (OP-4).
+
+If no valid source publishes in that cycle, a fallback selects the valid
+source with the most recent modification time. This is the time of the
+**original source** for that call; selecting a held value does not refresh
+that source's modification time. Equal times are resolved leftmost. A
+fallback publishes only when its value differs from the current output, or the output has no value
+yet. With no valid source, the value selector publishes nothing; this does
+not publish nil or a removal as a value.
+
+A separately nested call, such as `merge(merge(A, B), C)`, has the inner
+merge's output as one original source of the outer call. A tick published by
+the inner call is a current-cycle source publication for the outer call,
+even when the inner call derived it by fallback. Calls are not flattened;
+nested calls need not have the same trace as `merge(A, B, C)`.
+
+Ordinary dictionary merge maintains the union of its inputs' live keys,
+independently of child validity. Adding a key makes the output dictionary
+valid; a newly introduced child remains invalid until a valid source supplies
+a selected value. Membership alone supplies no child payload. Apply value
+selection independently to each key's original children, so different keys
+from different inputs can publish together. With no valid source for a live
+key, its previous output value is retained; this does not invalidate it.
+Removing a key permits fallback to another input that still holds it. The
+key remains in the output until the last input removes it (TS-19).
+This contract does not specify the separate `disjoint=True` optimization.
+
+[Merge cases](cases_merge.md) give the input publications and required traces.
+
+
 Text
 ----
 
@@ -209,6 +246,17 @@ Rules
   to their children. A key leaves the output when it leaves its partition, or
   when the partition that owns it is removed; the latter costs the removed
   partition's own keys.
+- **OP-13** A `merge` call's original sources are its ordered input streams;
+  a nested merge output is a source, not a flattened list of its inputs.
+  `merge` ignores invalid sources. The leftmost valid source
+  modified in the current cycle supplies the value and its publication is
+  forwarded, even when equal. Otherwise select the valid original source
+  with the latest modification time, leftmost on ties, and publish only a
+  changed value or a first value. With no valid source the value selector
+  publishes nothing. Ordinary dictionary merge applies value selection per
+  key and maintains the union of live input keys independently of child
+  validity. Adding a key makes the parent valid, with an invalid child until
+  a value is selected; the last input's removal removes the output key.
 
 A TSD delta holding a nested dictionary includes the inner dictionary's delta:
 its valid modified children only. An invalid inner child contributes nothing,
