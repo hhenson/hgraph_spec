@@ -36,8 +36,11 @@ does not permit changing either.
 Read-only access is recursive. A `let outer: Outer` cannot assign its inner
 field or mutate that child's contents. No projection restores write authority
 lost at a read-only boundary. An owning `var outer: Outer` may do both when
-the field's ordinary type admits the operation. Required fields cannot be
-unset; this extension adds no optional-field clearing syntax.
+the field's ordinary type admits the operation. Complete construction must
+populate required fields; ordinary mutation cannot clear them. Retention from an
+admitted partial structural observation instead preserves typed absence under
+[required-read rules](unset-required-reads.md); it introduces no field-clearing
+syntax or mutation permission.
 
 For example, ordinary field assignment uses the existing syntax:
 
