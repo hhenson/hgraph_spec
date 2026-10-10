@@ -2,7 +2,8 @@
 
 Extend the existing structural publication profile to `set<K>` and `map<K, S>`,
 where K is any admitted built-in scalar or declared enum and S is any admitted
-publication shape. For `f64`, this extension covers non-NaN values, including
+publication shape. This includes bytes under [BYTE-1–6](bytes-values.md), with
+exact content equality/hash. For `f64`, this extension covers non-NaN values, including
 both infinities. NaN membership and key application remain an explicit open
 boundary; this record does not choose a NaN equality policy. The separate [finite composite-key extension](composite-collection-keys.md)
 admits tuples and concrete structs; native opaque keys remain outside this extension.

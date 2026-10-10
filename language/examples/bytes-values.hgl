@@ -1,0 +1,52 @@
+module examples.bytes_values
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn forward_bytes(value: bytes) -> bytes => pass_through(value)
+fn forward_arrivals(value: rolling<bytes, 2>) -> rolling<bytes, 2> => pass_through(value)
+
+fn construct_bytes(value: atomic<list<i64>>) -> bytes {
+    when { return bytes(value) }
+}
+
+test bytes_values {
+    let empty: bytes = bytes()
+    let a: bytes = bytes([0, 255])
+    let b: bytes = bytes([0, 254])
+    assert len(empty) == 0
+    assert empty == bytes([])
+    assert len(a) == 2
+    assert a == bytes([0, 255])
+    assert a != b
+    assert bytes([0]) < a
+    assert bytes([127]) < bytes([128])
+    let fixed: list<i64, 2> = [0, 255]
+    assert bytes(fixed) == a
+    var source: list<i64> = []
+    push(source, 0)
+    let retained: bytes = bytes(source)
+    push(source, 255)
+    assert retained == bytes([0])
+    assert bytes(source) == a
+    assert eval(forward_bytes, value: [empty, empty, _, a, a, b]) == [
+        empty, empty, _, a, a, b
+    ]
+    assert eval(forward_bytes, value: [_, _]) == [_, _]
+    assert eval(forward_bytes, value: []) == []
+    assert eval(forward_arrivals, value: [empty, a, _, a]) == [empty, a, _, a]
+    assert eval(construct_bytes, value: [[0], _, [255]]) == [bytes([0]), _, bytes([255])]
+}
+
+test bytes_range_failure {
+    assert raises("value.byte_range") {
+        eval(construct_bytes, value: [[256]])
+    }
+    assert raises("value.byte_range") {
+        eval(construct_bytes, value: [[-1]])
+    }
+    # This call executes in the test; its failure must not reject the source.
+    assert raises("value.byte_range") {
+        let invalid: bytes = bytes([256])
+    }
+}

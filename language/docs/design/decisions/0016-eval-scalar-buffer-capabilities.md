@@ -122,7 +122,7 @@ because a key can be chosen for them.
 
 Borrowed store access is bounded to the current hook. The capability cannot
 be retained in state/cache, returned from the hook, captured in a closure or
-stored in an entry. Reads of `bool`, `i64`, `f64`, `str`, `date`, `time`,
+stored in an entry. Reads of `bool`, `i64`, `f64`, `str`, `bytes`, `date`, `time`,
 `datetime`, `duration`, `civil_datetime`, `timezone`, `zoned_datetime`, `zoned_time`
 and declared enums
 produce ordinary owned scalar values under their

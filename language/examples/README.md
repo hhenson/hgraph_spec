@@ -105,6 +105,8 @@ annotations isolate expected source errors alongside executable tests.
   node scheduler and the evaluation clock: a scheduler-driven source with no
   temporal input (`start { schedule(scheduler, 0s) }`, `when scheduled()`),
   `passivate(input)` after a count, and `clock.evaluation_time` (ADR 0010).
+- [`bytes-values.hgl`](bytes-values.hgl) specifies byte construction, exact
+  values, equal/empty publication ticks, silence and executed octet range errors.
 - [`native-provider.hgl`](native-provider.hgl) separates native scalar declarations
   from their providers and exercises injectable propagation through helpers.
   Implementations and provider binding tests live with each compiler/runtime.
