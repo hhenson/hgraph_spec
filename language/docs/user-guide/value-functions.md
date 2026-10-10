@@ -10,7 +10,10 @@ const fn scale(value: f64, factor: f64 = 2.0) -> f64 =>
 The arguments are values for this invocation, not values that must remain
 unchanged throughout a graph run. `const fn` does not mean compile-time-only
 or pure. A parameter explicitly marked `const` still requires fixed scalar
-configuration. Defaults are also allowed on ordinary value-function parameters.
+configuration. Defaults are also allowed on ordinary value-function parameters. They use
+the [defining declaration scope](../design/default-binding-scope.md),
+excluding that function's argument values, including earlier `const`
+configuration. Existing constant-context checks still apply.
 
 ## Selection comes before lifting
 

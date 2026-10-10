@@ -186,3 +186,7 @@ is pinned there. The acceptance sequence is defined in the
 
 - [`native-atomic-values.hgl`](native-atomic-values.hgl) declares the shared
   Token provider contract and tests whole-value pass-through and projection.
+- [`default-binding-scope.hgl`](default-binding-scope.hgl) checks defining
+  declarations before formal/field bindings and generic contextual defaults;
+  its two evals and direct assertions are static requirements, not target results.
+  See [default scope cases](../../compiler/cases_default_binding_scope.md).
