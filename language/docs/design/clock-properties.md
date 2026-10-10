@@ -31,16 +31,21 @@ These properties retain the [engine clock rules](../../../runtime/execution_engi
 
 - Evaluation time is set before each cycle, is the same for every node in
   that cycle, and remains constant throughout it. Successive cycle times
-  increase. At start, evaluation time is the run's start time.
+  increase. At start, evaluation time is the run's start time. Stop retains
+  the most recent cycle's time, or the start time if no cycle ran.
 - Next-cycle evaluation time is evaluation time plus the smallest engine
   step. It changes with evaluation time and is constant within a cycle.
   It is a lower bound on a following cycle's time, not a promise that a
   cycle will run then or a scheduling request.
-- In real time, now reads UTC time from the computer's clock. In simulation,
-  it is evaluation time plus the elapsed real-time lag of the current cycle.
-  It may change between property reads within one node or one cycle; it is
-  not a cycle-frozen sample. This contract adds no monotonicity guarantee for
-  now and does not equate now with evaluation time in real time.
+- In real time, `clock.now` reads UTC time from the computer's clock. In
+  simulation, the run's first `clock.now` read, in start, evaluation or stop,
+  establishes the elapsed-time origin and returns evaluation time. Later
+  reads return evaluation time plus real time elapsed from that origin.
+  Subsequent cycle starts sample a new origin; lifecycle phase boundaries
+  retain it ([ENG-14](../../../runtime/execution_engine.md#rules)). Now may
+  change between reads within one node or cycle. This contract adds no
+  monotonicity guarantee for now and does not equate it with evaluation time
+  in real time.
 
 Read-only describes the caller's access, not a promise that all properties
 remain constant. Saving a property in a local snapshots the value at that
