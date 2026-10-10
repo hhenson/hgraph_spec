@@ -27,7 +27,9 @@ may change type; the box's canonical type remains `any`.
   contained type, equality, hash and order delegate to that value. Equal boxes
   have equal hashes, including empty boxes, which are admitted keys. Unordered
   comparisons make each of `<`, `<=`, `>` and `>=` false. An executed operation
-  requiring a missing contained capability fails with `value.capability`; a required constant fails checking.
+  requiring a missing contained capability fails with `value.capability`;
+  a required constant with a statically known missing capability fails checking
+  with category `type` and code `value.constant_capability`.
   Optional folding preserves execution failures. Earlier effects stand.
   These rules implement VAL-11; they add no unboxing, casts, type inspection or
   prescribed text/hash representation.
@@ -45,7 +47,9 @@ may change type; the box's canonical type remains `any`.
   recipes are admitted. Key use requires the contained value's equality and
   hash; missing capabilities fail with `value.capability` during executed
   construction or cold materialization. Required constant evaluation rejects
-  them. Existing non-NaN key restrictions apply recursively through the box;
+  them with category `type` and code `value.constant_capability` when the missing
+  contained capability is statically known. Existing non-NaN key restrictions
+  apply recursively through the box;
   this extension defines no NaN key identity. Boxed different types remain
   distinct keys. Duplicate and overlap checks retain their existing phase and exact value rules.
 
