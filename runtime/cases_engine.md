@@ -106,8 +106,9 @@ and once with *now* first:
 
 A separate simulation with no *now* or *lag* reads takes no engine-clock
 elapsed-time samples throughout start, all cycles and stop. Sample counts
-cover the run only, not clock construction before it. In real-time mode, a cycle beginning at timer 10 and
-first observed at 17 instead has lag 7s; *now* is W + 17s.
+cover the run only, not clock construction before it. In real-time mode, a
+cycle beginning at timer 10 and first observed at 17 instead has lag 7s;
+*now* is W + 17s.
 Real-time scheduling may sample before any property read.
 
 An eager simulation sampler fails both the no-sample checks and the first

@@ -479,7 +479,7 @@ Vocabulary
 | Cycle | One evaluation of the graph, at one evaluation time |
 | Delta | What changed in a time-series in this cycle |
 | Edge | A binding from an output to an input |
-| Evaluation time | The time of the current cycle; the graph's logical "now" |
+| Evaluation time | The graph's logical "now": the start time before any cycle, then the most recent cycle's time; retained during stop |
 | Graph description | What the wiring phase produces and a graph is instantiated from: plain data, never live |
 | Lag | Real elapsed time from an origin established at the run's first *now* or *lag* read in simulation, or root-graph startup in real time. Later cycle starts replace it; lifecycle phase boundaries do not ([ENG-14](execution_engine.md#rules)). Also called cycle time, or evaluation lag |
 | Modified | For an owned output, last modified time equals evaluation time. Inputs also observe sampling and keyed withdrawal (TS-14–TS-15). Invalidation of an owned output is not a modification |
