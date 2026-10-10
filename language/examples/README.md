@@ -181,3 +181,6 @@ is pinned there. The acceptance sequence is defined in the
 
 - [`any-values.hgl`](any-values.hgl) checks typed boxes, present empty ticks,
   runtime boxing and independent ordinary-value retention.
+
+- [`native-atomic-values.hgl`](native-atomic-values.hgl) declares the shared
+  Token provider contract and tests whole-value pass-through and projection.

@@ -57,7 +57,7 @@ Concept
 | `zoned_datetime` | An instant together with its zone and the offset that zone gave it |
 | `zoned_time` | A time of day in a named zone |
 | an **enum** | A named type with a fixed, ordered list of named members, each with an integer |
-| a **native atomic** | A type supplied from outside the language, opaque to it, brought in with whatever capabilities it declares |
+| a **native atomic** | A type supplied from outside the language, opaque to it, brought in with declared capabilities under [NVAL-1–5](../language/docs/design/native-atomic-values.md) |
 
 ### The composite kinds
 

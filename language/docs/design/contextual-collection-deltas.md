@@ -13,6 +13,7 @@ finite temporal shapes T:
   `datetime`, `duration`, `civil_datetime`, `timezone`, `zoned_datetime`, and `zoned_time`,
   with bytes under [BYTE-1–6](bytes-values.md);
 - `any` leaves under [ANY-1–5](any-values.md);
+- native atomic leaves under [NVAL-1–5](native-atomic-values.md);
 - declared enum leaves under the [enum publication contract](enum-publications.md);
 - `set<K>` for the [admitted scalar keys](scalar-collection-keys.md);
 - fixed `list<S, N>`, with a constant nonnegative size N;

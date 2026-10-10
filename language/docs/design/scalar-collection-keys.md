@@ -6,7 +6,7 @@ publication shape. This includes bytes under [BYTE-1–6](bytes-values.md), with
 exact content equality/hash. For `f64`, this extension covers non-NaN values, including
 both infinities. NaN membership and key application remain an explicit open
 boundary; this record does not choose a NaN equality policy. The separate [finite composite-key extension](composite-collection-keys.md)
-admits tuples and concrete structs; native opaque keys remain outside this extension.
+admits tuples and concrete structs; [native atomic keys](native-atomic-values.md) are separately admitted by NVAL-5.
 
 Keys and members retain their exact ordinary type and identity. Equality and
 hash determine membership; ordering is unnecessary. Equal values must have
