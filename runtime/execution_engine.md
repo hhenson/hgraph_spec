@@ -123,17 +123,39 @@ thought of as a struct: one value with four read-only properties.
 
 | Property | Type | Meaning | Changes |
 |---|---|---|---|
-| evaluation time | `datetime` | The time of the current cycle: the event time that caused the graph to run, and the graph's logical "now" | Once, before each cycle. Constant throughout the cycle |
+| evaluation time | `datetime` | The graph's logical "now": the run's start time before any cycle, then the most recent cycle's time; retained during stop | Once, before each cycle. Constant throughout the cycle |
 | now | `datetime` | The engine's estimate of wall-clock time. In real time, the computer's clock in UTC. In simulation, evaluation time plus the lag | Continuously |
-| lag | `duration` | The real time that has passed between the start of the current cycle and the moment it is read. Measured on the computer's clock in both modes. hgraph calls this *cycle time* | Continuously; restarts each cycle |
+| lag | `duration` | Real elapsed time since the clock's current origin, defined below and in ENG-14. Also called *cycle time* | Continuously; restarts each cycle |
 | next cycle evaluation time | `datetime` | The earliest time a following cycle could have: evaluation time plus the smallest step | With evaluation time |
+
+The injectable evaluation time is not a graph's
+[scheduling cursor](graph.md#state-1). Before the root graph's first cycle,
+the clock reads the run's start time, while the cursor is one smallest step
+earlier so that a request at the start time remains eligible. A nested graph
+likewise keeps its own scheduling progress while reading this shared clock.
 
 Simulated *now* describes the likely lag in the system: had this event
 arrived in real time, the wall clock would by now read about the evaluation
-time plus however long the cycle has been running. It is deliberately a cheap
-estimate. It ignores cumulative effects — a backlog built up over earlier
-cycles — because an estimate that included them would still be inaccurate
-and would cost a great deal to compute.
+time plus elapsed real time, with the first-observation exception below.
+It is deliberately a cheap estimate. It ignores cumulative effects — a
+backlog built up over earlier cycles — because an estimate that included
+them would still be inaccurate and would cost a great deal to compute.
+
+In simulation, the run's first *now* or *lag* read establishes the elapsed-time
+origin, whether in start, evaluation or stop; time before that read is
+excluded. The engine clock takes no elapsed-time samples during the run
+before that read. Thereafter every cycle samples at its start and replaces
+the origin, even if neither property is read in it. Entering or leaving a
+lifecycle phase does not itself reset an established origin. These rules
+concern the run, not clock construction before it.
+
+In real time, the initial elapsed-time origin is the start of the root
+graph's startup; each cycle replaces it at cycle start. Stop retains the
+last origin, including the startup origin if no cycle ran. *Now* reads UTC
+time. In both modes, evaluation time during start is the run's start time;
+during stop it remains the most recent cycle's time, or the start time if
+no cycle ran. Between origin changes simulation *lag* never decreases, and
+simulation *now* is never earlier than evaluation time.
 
 Evaluation time behaves like a monotonic clock: it is guaranteed to increase
 from one cycle to the next. In real time that guarantee can briefly put it
@@ -309,8 +331,11 @@ Rules
 - **ENG-13** In real time *now* is the computer's clock; evaluation time may
   briefly lead it, because ENG-2 takes precedence. In simulation *now* is
   evaluation time plus the lag, and so is never earlier than evaluation time.
-- **ENG-14** The lag is real elapsed time in both modes, measured from the
-  start of the current cycle.
+- **ENG-14** Lag is real elapsed time from the clock's current origin.
+  Simulation establishes that origin at the run's first *now* or *lag* read
+  in any lifecycle phase, taking no elapsed-time samples during the run
+  before it. Real time establishes it at root-graph startup. Once established,
+  each cycle start replaces the origin; lifecycle phase boundaries do not.
 - **ENG-15** Simulation is deterministic: the same graph, inputs, initial
   global-state values, start time and end time produce the same sequence of
   cycles and the same ticks,

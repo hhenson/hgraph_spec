@@ -60,7 +60,9 @@ read the clock.
 | now | not before the evaluation time; the second node's reading is not before the first's |
 | lag | not negative; the second node's reading is not less than the first's |
 
-Nothing a node does changes the clock (ENG-11).
+Nothing a node does writes the clock (ENG-11). The first *now* or *lag*
+read activates simulation sampling as specified by ENG-14; see
+[ENGINE-CLOCK-LAZY](#engine-clock-lazy--eng-13-eng-14).
 
 ## ENGINE-REAL-TIME-ORDER — ENG-2, ENG-6, ENG-8
 
@@ -81,3 +83,80 @@ Externally driven stepping, observers, one-shot callbacks, the runaway guard
 and pausing are optional facilities with no cases
 here. The order of stop and report on failure (Engine point 1) is not
 observable by a graph and has no case.
+
+## ENGINE-CLOCK-STARTUP-CURSOR — ENG-1, ENG-11, GRF-12
+
+Simulation. A source's start hook reads the injectable clock's evaluation
+time and requests its first evaluation at that same time S, the run's
+start time. Let d be the smallest step. The cursor column describes graph
+scheduling progress, not another clock property available to the source.
+
+| Phase | Clock evaluation time | Graph scheduling cursor | Required scheduling observation |
+|---|---|---|---|
+| Startup, before the request | S | S - d | Source has not evaluated |
+| Startup, after requesting S | S | S - d | Next scheduled time is S; source still has not evaluated |
+| First cycle at S | S | S | Source evaluates once at S; its request is consumed |
+| Stop after that cycle | S | S | Clock retains S; no additional source evaluation |
+
+In a separate run that stops without a cycle, the clock still reads S and
+the source never evaluates. Clock reads during startup or stop do not move
+the graph's scheduling cursor. A nested graph started during a parent cycle
+at E initially has cursor E - d while sharing the parent clock at E.
+
+Using the startup clock value S as the strict boundary for future schedule
+entries would exclude the request at S. Returning S - d from the injectable
+clock would instead violate its startup contract. The two roles must not be
+conflated; no independent graph-facing cursor API is required.
+
+## ENGINE-CLOCK-LAZY — ENG-13, ENG-14
+
+Use a controlled real-time timer for the engine clock that records sample
+requests and advances only when the test moves it. This is a test fixture, not a new graph-facing
+clock API. Timer values below are seconds from a fixed UTC origin W, independent of
+logical evaluation time E. Hold the timer fixed while taking paired property reads.
+
+Run these simulation steps twice, once with *lag* as the first property read
+and once with *now* first:
+
+| Step | Required observation |
+|---|---|
+| First cycle: read only evaluation time and next cycle time | No timer samples |
+| Second cycle begins at timer 10; advance to 17 without reading *now* or *lag* | Still no timer samples |
+| At 17, first read followed by the other property | Lag is 0; now is E; sampling has begun |
+| Advance to 20 in the same cycle; read both | Lag is 3s; now is E + 3s |
+| Next cycle begins at 30; first property reads at 37 | A sample at cycle start; lag is 7s, now is E + 7s |
+| Next cycle begins at 40; neither property is read | A sample at cycle start |
+| Next cycle begins at 50; first property reads at 55 | Lag is 5s; now is E + 5s |
+
+A separate simulation with no *now* or *lag* reads takes no engine-clock
+elapsed-time samples throughout start, all cycles and stop. Sample counts
+cover the run only, not clock construction before it. In real-time mode, a
+cycle beginning at timer 10 and first observed at 17 instead has lag 7s;
+*now* is W + 17s.
+Real-time scheduling may sample before any property read.
+
+An eager simulation sampler fails both the no-sample checks and the first
+lag-zero check: its origin at 10 would produce lag 7 at 17. Resetting the
+origin on every cycle's first property read fails the later lag-7 check.
+These exact values rely on the controlled timer, not on physical-clock
+sampling overhead.
+
+## ENGINE-CLOCK-LIFECYCLE — ENG-13, ENG-14, INJ-7
+
+Use the same controlled timer. Each row is a separate run; S is the run's
+logical start time, and E is its most recent cycle's evaluation time. For
+each first-read scenario, run both *now*-first and *lag*-first variants,
+holding the timer fixed until both properties have been read.
+
+| Scenario | Required observations |
+|---|---|
+| Startup begins at 10; first read at 17, another at 20; first cycle begins at 30, read at 37 | No elapsed-time samples before 17. At 17 lag is 0 and now is S; at 20 lag is 3s and now is S + 3s. The cycle samples at 30; at 37 lag is 7s and now is E + 7s |
+| Cycles run without either property read; first read is in stop at 50, another at 53 | No elapsed-time samples before 50. At 50 lag is 0 and now is E; at 53 lag is 3s and now is E + 3s |
+| No cycle runs; first read is in stop at 50, another at 53 | No elapsed-time samples before 50. At 50 lag is 0 and now is S; at 53 lag is 3s and now is S + 3s |
+| Sampling was activated in startup; last cycle begins at 30; stop reads at 40 | Lag is 10s and now is E + 10s: stop did not reset the cycle origin |
+| First read in startup at 17; no cycle runs; stop reads at 40 | Lag is 23s and now is S + 23s: stop retained the startup read's origin |
+
+Real-time controls begin root-graph startup at 10. A startup read at 17 has
+lag 7s and now W + 17s. If no cycle runs, a stop read at 40 has lag 30s;
+if the last cycle began at 30, it instead has lag 10s. Both stop variants
+read now W + 40s, retaining evaluation time S or E respectively.

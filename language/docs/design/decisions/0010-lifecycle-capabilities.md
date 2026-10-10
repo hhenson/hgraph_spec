@@ -33,12 +33,16 @@ method-call aliases are admitted.
    hook. `clock.evaluation_time`, `clock.now` and
    `clock.next_cycle_evaluation_time` are read-only `datetime` properties.
    Evaluation time is the current cycle's logical time and remains constant
-   throughout that cycle. Next-cycle evaluation time is evaluation time plus
+   throughout that cycle. Start uses the run's start time; stop retains the
+   last cycle's time, or the start time if no cycle ran.
+   Next-cycle evaluation time is evaluation time plus
    the engine's smallest step and is equally stable within the cycle. Now is
-   the engine's current wall-time estimate: UTC computer time in real time,
-   or evaluation time plus the current cycle's elapsed lag in simulation.
-   Repeated reads of now may differ. Neither method-call nor free-function
-   aliases are admitted for these properties.
+   the engine's current wall-time estimate: UTC computer time in real time.
+   In simulation, the run's first `clock.now` read in any lifecycle phase
+   establishes an origin and returns evaluation time. Later reads add real
+   elapsed time from that origin; subsequent cycle starts replace it, while
+   phase boundaries retain it (see [clock timing](../clock-properties.md#timing-semantics)).
+   Neither method-call nor free-function aliases are admitted.
 
 2. **`inject scheduler`** provides the node scheduler as `scheduler` in
    every hook. `schedule(scheduler, delay)` and

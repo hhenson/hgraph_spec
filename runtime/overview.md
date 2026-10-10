@@ -479,9 +479,9 @@ Vocabulary
 | Cycle | One evaluation of the graph, at one evaluation time |
 | Delta | What changed in a time-series in this cycle |
 | Edge | A binding from an output to an input |
-| Evaluation time | The time of the current cycle; the graph's logical "now" |
+| Evaluation time | The shared clock's logical "now": the run's start time before any cycle, then the most recent cycle's time; retained during stop. Not a graph's pre-cycle scheduling cursor |
 | Graph description | What the wiring phase produces and a graph is instantiated from: plain data, never live |
-| Lag | The real time that has passed since the current cycle began. Also called cycle time, or evaluation lag |
+| Lag | Real elapsed time from an origin established at the run's first *now* or *lag* read in simulation, or root-graph startup in real time. Later cycle starts replace it; lifecycle phase boundaries do not ([ENG-14](execution_engine.md#rules)). Also called cycle time, or evaluation lag |
 | Modified | For an owned output, last modified time equals evaluation time. Inputs also observe sampling and keyed withdrawal (TS-14–TS-15). Invalidation of an owned output is not a modification |
 | Nil | The standard representation of no value: what an invalid time-series gives for its value, and an unmodified one for its delta |
 | Notify | Tell whoever is watching a time-series that its state changed. Every tick notifies; so does becoming invalid, and so can a change of binding |
@@ -491,6 +491,7 @@ Vocabulary
 | Reclaim | Free or reuse the storage of something removed. Never before the start of the cycle after the removal |
 | Required / optional | A chapter rule every implementation meets, versus a deferred facility an implementation may provide ([Conformance](conformance.md)) |
 | Sampled | An input reports modified because it was (re)bound, not because its output ticked |
+| Scheduling cursor | A graph's boundary for pending work: one smallest step before its start time until its first cycle, then its current or most recent cycle's time. A startup request at the start time is later than this cursor ([Graph](graph.md#state-1)) |
 | Structural | Of an input: it schedules its node when a collection's membership changes and not when a member's value ticks |
 | Schedule | For each node, the next time it needs evaluating |
 | Signature | A node's inputs, output and scalars: what a caller sees and wiring connects. State, recordable state and the other injectables are not in it |

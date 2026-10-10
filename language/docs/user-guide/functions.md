@@ -897,13 +897,17 @@ lifecycle output access remains an open question.
 ## Scheduling, the clock, and input activity
 
 `inject clock` gives three read-only `datetime` properties:
-`clock.evaluation_time` is the current cycle's logical time,
-`clock.next_cycle_evaluation_time` is that time plus the engine's smallest
+`clock.evaluation_time` is the current cycle's logical time. Start uses the
+run's start time; stop retains the last cycle's time, or the start time if
+no cycle ran. `clock.next_cycle_evaluation_time` is that time plus the engine's smallest
 step, and `clock.now` is the engine's wall-time estimate. Evaluation and
 next-cycle time remain constant within a cycle. Now may change between
-reads: it is UTC computer time in real time, and evaluation time plus the
-current cycle's elapsed lag in simulation. These are property reads, with
-no method-call or free-function aliases; see [clock properties](../design/clock-properties.md).
+reads: it is UTC computer time in real time. In simulation, the run's first
+`clock.now` read, whether in start, evaluation or stop, establishes an origin
+and returns evaluation time. Later reads add real elapsed time from that
+origin; subsequent cycle starts replace it, while phase boundaries retain it.
+These are property reads, with no method-call or free-function aliases;
+see [clock properties](../design/clock-properties.md#timing-semantics).
 
 `inject scheduler` gives the node scheduler. `schedule(scheduler, delay)`
 requests an evaluation `delay` after the current evaluation time;
