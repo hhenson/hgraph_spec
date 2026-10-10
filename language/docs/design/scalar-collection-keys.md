@@ -48,3 +48,6 @@ references retain their separate boundaries.
 
 See [examples](../../examples/scalar-collection-keys.hgl) and
 [compiler cases](../../../compiler/cases_scalar_collection_keys.md).
+
+The [any extension](any-values.md) admits boxed keys with contained equality
+and hash; missing capabilities fail at use under ANY-5.

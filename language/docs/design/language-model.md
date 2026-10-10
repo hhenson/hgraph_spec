@@ -1030,3 +1030,6 @@ Observed compiler behavior does not establish a language rule.
   time-series rules, including before the first tick.
 
 Descriptor field names and format versions are implementation concerns.
+
+[Any values](any-values.md) use `any()` or `any(ordinary_value)` and
+publish as complete owning boxes.

@@ -1,0 +1,39 @@
+module examples.any_values
+
+fn box_input(value: i64) -> any {
+    when { return any(value) }
+}
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn forward(value: any) -> any => pass_through(value)
+
+test {
+    test any_boxes_keep_payload_identity_and_presence {
+        let empty: any = any()
+        assert empty == any()
+        assert empty != any(0)
+        assert any(0) != any(false)
+        assert any(any(7)) == any(7)
+        # A present empty box and equal boxes each publish; _ is silence.
+        assert eval(forward, [empty, any(0), any(false), _, any(""), any(""), any(bytes())]) == [
+            empty, any(0), any(false), _, any(""), any(""), any(bytes())
+        ]
+        assert eval(box_input, [0, _, 0, 1]) == [any(0), _, any(0), any(1)]
+    }
+    test any_retains_complete_ordinary_values {
+        var items: list<i64> = []
+        push(items, 1)
+        let retained: any = any(items)
+        push(items, 2)
+        # The first box remains an independent one-element snapshot.
+        assert retained == any([1])
+        assert retained != any(items)
+        assert any(any()) == any()
+    }
+    test boxed_missing_order_is_an_execution_failure {
+        let value: any = any(map<i64, i64>(items: [1: 2]))
+        # A map has no order capability; boxing does not manufacture one.
+        assert raises("value.capability") { assert value < value }
+    }
+}

@@ -25,3 +25,6 @@ children. Internal storage representation does not turn a scalar such as
 
 [Compiler cases](../../../compiler/cases_atomic_scalar_equivalence.md) cover
 canonical identity and the composite boundary.
+
+`atomic<any>` also normalizes to `any` under [ANY-4](any-values.md):
+its contained ordinary value does not become a temporal child.

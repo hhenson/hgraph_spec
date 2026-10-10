@@ -125,8 +125,9 @@ no allocation-free payload construction, assignment or insertion.
 [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) still determines
 const keys, concrete value types, preparation before start and required-read
 presence errors. Binding/access mode is not part of entry type identity.
-Aggregate entries are mutable storage; get does not infer type from node role
-or add per-hook key lookup or dynamic type dispatch.
+Aggregate entries, including [any boxes](any-values.md), are mutable storage.
+Get does not infer type from node role or add per-hook key lookup or dynamic
+type dispatch.
 
 For aggregate V, bind read-only access with:
 

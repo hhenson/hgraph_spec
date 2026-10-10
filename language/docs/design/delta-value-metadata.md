@@ -34,10 +34,11 @@ profile. It is distinct from the `delta_value(endpoint)` accessor and
 the derived delta against the same temporal output shape.
 
 For this scalar publication profile, T is one of
-`bool`, `i64`, `f64`, `str`, `bytes`, `date`, `time`, `datetime`, `duration`,
+`bool`, `i64`, `f64`, `str`, `bytes`, `any`, `date`, `time`, `datetime`, `duration`,
 `civil_datetime`, `timezone`, `zoned_datetime`, `zoned_time`, or a
 [declared enum](enum-publications.md). Bytes construction, ownership and
-publication admission follow [BYTE-1–6](bytes-values.md).
+publication admission follow [BYTE-1–6](bytes-values.md); boxed values follow
+[ANY-1–5](any-values.md).
 The [temporal publication extension](temporal-scalar-publications.md) preserves
 the four additional types' existing identities and construction rules.
 `delta<T>` is the ordinary scalar T because a TS's delta is the scalar
@@ -127,3 +128,6 @@ For a scalar pass-through, an admitted publication is copied
 once; a repeated equal scalar is still a tick; silence has no delta; dense
 horizon materialization retains silent cells. This follows TS-2, the scalar
 row of the runtime delta table, the runtime return contract and EVAL-3/5.
+
+[Any boxes](any-values.md) publish complete typed owning contents;
+`delta<any>` is `any` under ANY-4.
