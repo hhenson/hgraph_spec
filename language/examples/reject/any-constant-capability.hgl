@@ -1,10 +1,12 @@
 module examples.reject.any_constant_capability
 
 struct CapabilityCell { value: any }
+struct CapabilityList { values: list<any> }
 
-# Required defaults inspect ordinary lists/structs containing Any, not boxes.
+# The constructor field supplies exact list<any> context before Field→Index
+# extraction; defaults do not inspect inside Any boxes.
 # expect-error(type, "value.constant_capability")
-struct BadIndexDefault { value: bool = [any(map<i64, i64>(items: []))][0] < any(map<i64, i64>(items: [])) }
+struct BadIndexDefault { value: bool = CapabilityList(values: [any(map<i64, i64>(items: []))]).values[0] < any(map<i64, i64>(items: [])) }
 
 # expect-error(type, "value.constant_capability")
 struct BadFieldDefault { value: bool = CapabilityCell(value: any(map<i64, i64>(items: []))).value < any(map<i64, i64>(items: [])) }
@@ -17,7 +19,7 @@ struct BadKeyDefault { values: set<any> = set<any>(items: [CapabilityCell(value:
 # expect-error(type, "value.constant_capability")
 const fn bad_parameter_default(value: bool = CapabilityCell(value: any(map<i64, i64>(items: []))).value < any(map<i64, i64>(items: []))) -> bool => value
 
-struct GoodIndexDefault { value: bool = [any(1)][0] < any(2) }
+struct GoodIndexDefault { value: bool = CapabilityList(values: [any(1)]).values[0] < any(2) }
 struct GoodFieldDefault { value: bool = CapabilityCell(value: any(1)).value < any(2) }
 struct GoodKeyDefault { values: set<any> = set<any>(items: [any()]) }
 const fn good_parameter_default(value: bool = CapabilityCell(value: any(1)).value < any(2)) -> bool => value
