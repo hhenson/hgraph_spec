@@ -200,7 +200,11 @@ retains its `ref<T>` capture and explicitly dereferences that connection at the
 branch-output boundary before packing the field; a computed branch already
 supplies the same ordinary temporal schema. For an explicitly declared
 `ref<T>` result, the result slot remains `ref<T>` and a forwarding capture is
-packed without dereferencing it. Every branch must produce that same declared
+packed without dereferencing it. A branch-owned designation is exported
+through its owning output boundary under [GRF-27](../../../runtime/graph.md)
+and [TS-20](../../../runtime/time_series.md);
+the parent consumer follows the actual endpoint after the owner completes
+child evaluation. Every branch must produce that same declared
 schema; a branch that cannot produce the required reference binding is rejected.
 The branch bundles consequently have identical schemas at every field, not
 merely compatible root types. If the public native API cannot express the
