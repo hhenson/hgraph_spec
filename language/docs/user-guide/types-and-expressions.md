@@ -307,7 +307,14 @@ See [forwarding an existing binding](../design/control-flow.md#forwarding-an-exi
 
 Inside a node, a reference is opaque and ticks only when its binding changes.
 Code in a `when` handler cannot read fields, index elements, or traverse values
-below a reference layer. Wiring-time access below a reference layer is not yet supported.
+below a reference layer. Graph wiring may select a declared field or a
+constant fixed-list index below a reference layer. The selection wires a
+reference-producing projection to that child; it does not read a runtime
+payload. Retargeting the parent reference retargets the projected connection,
+and ordinary consumers follow the selected child's publications. See
+[wiring-time access](../design/type-extensions.md#wiring-time-access),
+[examples](../../examples/reference-wiring-projections.hgl) and
+[compiler cases](../../../compiler/cases_reference_wiring_projections.md).
 
 A node may index `list<ref<T>, S>` to select and return an opaque reference:
 the list is outside the reference boundary. It cannot index through
