@@ -42,9 +42,11 @@ is no compatibility alias or second TimedValue definition. The field's
 `delta<T>` formation requirement restricts T to the admitted profile.
 
 Every entry holds publication-delta data and an absolute time. Applying its
-data still requires the publication profile; forming or storing empty delta
-data does not admit an empty structural event or denote silence. An admitted
-atomic empty-list value is instead a present complete publication. Omitting an entry
+data follows the publication profile, including
+[empty sparse application](../language/docs/design/empty-delta-validity.md).
+An empty delta entry is present data but may cause no tick on a valid target;
+record retains only actual ticks. An admitted atomic empty-list value is a
+present complete publication. Omitting an entry
 expresses silence. Scalar false, zero and empty text remain present values,
 and equal scalar publications at distinct times remain distinct ticks.
 Neither `_` nor `null` is an ordinary list element. An empty timed list

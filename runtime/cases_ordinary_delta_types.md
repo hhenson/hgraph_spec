@@ -35,8 +35,8 @@ for exact shape identity.
 
 Forming `delta<T>` for an excluded concrete temporal shape fails checking.
 Using a structural delta type as a new temporal endpoint payload is not
-admitted here. A zero-size fixed shape may have a formed delta type without
-acquiring any admitted nonempty publication.
+admitted here. A zero-size fixed shape has no nonempty child publication;
+its empty delta applies under [EMPTY-1](../language/docs/design/empty-delta-validity.md).
 
 ## DELTA-INFER — symbolic formation and matching
 
@@ -112,8 +112,8 @@ not apply sequential membership changes to an endpoint during construction.
 
 An ordinary empty map delta may be retained in a list. The list has one
 element, not zero; this creates no tick. Empty data is neither null nor the
-harness `_`. This case does not decide whether applying that data as an
-empty event is admitted or what it would do.
+harness `_`. Application follows [EMPTY-1–4](../language/docs/design/empty-delta-validity.md);
+storage alone performs no application.
 
 A well-shaped removal can be stored without knowing a target's membership.
 Applying it still needs the existing state-dependent canonical-removal

@@ -60,8 +60,8 @@ constructor argument, collection insertion, or ordinary helper/operator argument
 There is no implicit unwrapping or substitution. A nullable bool is not a
 condition and has no truthiness conversion. False, zero and empty text are
 present scalar payloads; a present structural payload is not absent merely
-because its delta contains no entries. Whether applying an empty structural
-publication is admitted remains its separate contract.
+because its delta contains no entries. Applying it follows the
+[empty sparse application contract](empty-delta-validity.md).
 
 For an immutable local `item` initialized by an indexed read, direct comparisons
 establish these facts:

@@ -27,7 +27,8 @@ The usual set net-membership and map child-publication rules still apply;
 removal followed by a later insertion preserves the exact key. Harness
 comparison ignores entry order while comparing full keys and child deltas.
 The same K is admitted in ordinary atomic set/map snapshots. This extension
-introduces no empty structural event, invalidation or implicit conversion.
+does not change [empty sparse application](empty-delta-validity.md),
+invalidation or implicit-conversion rules.
 
 See [examples](../../examples/composite-collection-keys.hgl) and
 [compiler cases](../../../compiler/cases_composite_collection_keys.md).

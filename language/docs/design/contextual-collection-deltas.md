@@ -1,8 +1,8 @@
 # Contextual collection publication deltas
 
-Status: draft source extension, 2026-09-30. This defines ordinary nonempty
-collection publication deltas. Empty-event application remains a separate
-open boundary; this extension does not decide it.
+Status: source extension, 2026-09-30. This defines ordinary collection
+publication deltas, extended by the accepted
+[empty sparse application rule](empty-delta-validity.md).
 
 ## Shape-derived delta relationship
 
@@ -24,7 +24,7 @@ Recursive nominal definitions, references, signals,
 other scalar types are outside this profile. The
 [finite atomic extension](atomic-delta-publications.md) additionally admits
 atomic children with complete ordinary payloads, including empty lists;
-outer sparse publications retain this contract's nonempty requirements.
+outer sparse publications follow their own application rules.
 
 `delta<T>` names T's publication-delta shape. The
 [ordinary delta type extension](ordinary-delta-types.md) admits this spelling
@@ -101,17 +101,17 @@ duplicate member/index/key entries, out-of-range indices, set added/removed
 overlap, and map upsert/remove overlap are checking errors. Entry order is
 not an ordered sequence of mutations. Payload expressions and their retention
 follow the [written-order construction rule](ordinary-delta-types.md#construction-order-and-failure).
-Empty argument/entry data may be formed in an ordinary delta-value context;
-this does not admit an empty publication. Existing optional-field clearing is
+Empty argument/entry data may be constructed and applied under
+[EMPTY-1–4](empty-delta-validity.md). Existing optional-field clearing is
 not redefined: explicit `null` and invalidation are outside this publication
 profile, and omission continues to mean no change.
 
 ## Ordinary publication application
 
-For this profile, a nonempty publication contains an actual set membership
-change, a map removal, or at least one recursively valid child publication.
-No included structural child is an empty publication. A child scalar
-publication is present even if its value equals its previous value.
+A sparse update contains set membership changes, map removals or child
+deltas, each applied to its own target. Explicit empty deltas follow
+[EMPTY-1–2](empty-delta-validity.md), including at nested children. A child
+scalar publication is present even if its value equals its previous value.
 
 `return d`, where d has exact derived type `delta<T>`, applies d to the
 runtime node's own T output and terminates evaluation. `out = d` applies the
@@ -132,8 +132,8 @@ separate operation.
 
 These rules specify canonical publication transitions: set additions refer
 to absent members, removals to present members, and map removals to present
-keys. They do not select error-versus-no-op behavior for applying a redundant
-membership instruction. Such instructions are outside this bounded profile.
+keys. Invalid nonempty membership instructions are rejected; they are not
+empty updates. Eval reports them through its existing input-profile error.
 In particular, constructor argument names do not desugar to the named output
 mutation functions. The existing strict `insert`/`update`/`remove` and tolerant
 `upsert`/`discard` APIs keep their separate preconditions and behavior.
@@ -147,11 +147,10 @@ and is absent from the new publication delta.
 
 An actual empty set delta can accompany a tick after same-cycle cancellation
 ([collections within a cycle](../../../runtime/time_series.md#collections-within-a-cycle)).
-Whether applying that empty delta to another already-valid output preserves
-the tick is not decided here. Explicit empty set publications, empty fixed
-patches and empty map publications are excluded from this extension's
-application guarantee. No-tick `_` is not an encoding of any such event.
-A nonempty removal that leaves a collection empty is included.
+Applying that payload follows [EMPTY-3](empty-delta-validity.md): an invalid
+target ticks empty and becomes valid; a valid target does not tick. No-tick
+`_` is not an encoding of empty data. A nonempty removal that leaves a
+collection empty remains a publication.
 
 Publication deltas are not complete endpoint-state changes. Whole/child
 invalidation, creation of invalid map children, independent membership

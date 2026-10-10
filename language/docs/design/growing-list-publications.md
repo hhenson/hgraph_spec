@@ -27,15 +27,16 @@ previous length L, nonempty `remove` must contain exactly one contiguous tail
 `items`. In a removal delta, every modified index is below c: no position is
 both removed and reintroduced. With no removals, updates below L preserve
 length and newly appended indices must be exactly `[L, N)` for some N >= L,
-without gaps. Every appended position carries a recursively admitted nonempty
-child publication. Membership without a valid child publication is outside
-this profile.
+without gaps. Every appended position carries a recursively admitted
+child delta that makes the child valid, including an empty structural delta
+under [EMPTY-1](empty-delta-validity.md). Membership without a valid child
+publication is outside this profile.
 
 Each included child follows its own delta application rule. Omitted existing
 children retain their state. Equal scalar child publications still tick.
-At least one tail removal or child publication is required for a publication;
-empty ordinary delta values may still be constructed, but do not become
-admitted empty events. A tail removal down to zero is a nonempty publication:
+An explicit empty delta follows [EMPTY-1–2](empty-delta-validity.md): it
+validates an invalid list without appending children, and is silent on a
+valid list. A tail removal down to zero is a nonempty publication:
 the root stays valid and modified that cycle, holds an empty list, and is
 all-valid because it has no live invalid children. A later append starts at 0.
 This is not whole-list invalidation.
@@ -60,7 +61,7 @@ validating children before any target starts. Gaps, non-tail removals,
 out-of-range removals, removed/modified overlap and unsupported child events
 use the existing input-profile error with parameter and zero-based position.
 Exact typed wrappers retain empty/all-silent lifecycle and dense horizons.
-Fixed-list size identity, invalidation, empty events and references keep their
+Fixed-list size identity, invalidation and references keep their
 existing boundaries.
 
 See [examples](../../examples/growing-list-publications.hgl) and

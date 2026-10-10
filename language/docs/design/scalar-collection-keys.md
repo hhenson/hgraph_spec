@@ -1,6 +1,6 @@
 # Scalar collection keys and members
 
-Extend the existing nonempty publication profile to `set<K>` and `map<K, S>`,
+Extend the existing structural publication profile to `set<K>` and `map<K, S>`,
 where K is any admitted built-in scalar or declared enum and S is any admitted
 publication shape. For `f64`, this extension covers non-NaN values, including
 both infinities. NaN membership and key application remain an explicit open
@@ -39,10 +39,11 @@ resolve a provider-dependent key during source checking without its context.
 Existing type, input-profile and construction-failure diagnostics apply.
 
 Harness comparison ignores set-member and map-entry order while preserving
-exact keys and recursive child deltas. Existing nonempty, state-dependent
-canonical membership, removal, ownership, replay and recording rules apply.
-An equal scalar child update still publishes at its key. This record adds no
-empty structural event, invalidation, invalid child creation or reference.
+exact keys and recursive child deltas. State-dependent canonical membership,
+removal, ownership, replay and recording rules apply, including
+[empty sparse application](empty-delta-validity.md). An equal scalar child
+update still publishes at its key. Invalidation, invalid child creation and
+references retain their separate boundaries.
 
 See [examples](../../examples/scalar-collection-keys.hgl) and
 [compiler cases](../../../compiler/cases_scalar_collection_keys.md).

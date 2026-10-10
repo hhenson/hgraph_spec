@@ -31,10 +31,10 @@ field or apply sparse collection operations.
 
 An empty list is a present complete snapshot. Equal snapshots at distinct
 times remain separate publications. `_` alone denotes silence in an eval
-sequence. Sparse outer collections retain their nonempty, canonical update
-rules; an atomic child containing an empty list is a valid present child,
-not an empty sparse patch. Invalidation and empty structural-event application
-remain outside this profile.
+sequence. Sparse outer collections use their canonical update rules, including
+[empty sparse application](empty-delta-validity.md). An atomic child containing
+an empty list is a valid present child, not an empty sparse patch.
+Invalidation remains outside this profile.
 
 `delta_value(endpoint)` requires that exact endpoint to be valid and modified,
 under the existing evaluation-phase guards. It returns this cycle's complete

@@ -28,8 +28,11 @@ annotations isolate expected source errors alongside executable tests.
   complete atomic replacement, defaults and present empty-list snapshots.
 - [`ordinary-delta-types.hgl`](ordinary-delta-types.hgl) gives generic
   replay/record with typed structural delta storage, retained map updates,
-  and empty ordinary data without empty-event application. See
+  and empty ordinary data retained without application. See
   [ordinary delta types](../docs/design/ordinary-delta-types.md).
+- [`empty-delta-validity.hgl`](empty-delta-validity.hgl) covers first empty
+  validity, repeated silence, nested empty children and complete-payload controls
+  under [EMPTY-1–4](../docs/design/empty-delta-validity.md).
 - [`generator-yield-operands.hgl`](generator-yield-operands.hgl) makes yield
   operand order, negative-duration failure and future resumption explicit,
   with distinct explicit and implicit checked target arithmetic examples.

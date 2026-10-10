@@ -26,8 +26,10 @@ past absolute target is skipped, not an ordering failure.
 `eval.input_delta_profile` is an eval admission failure, catchable by `assert raises`
 before graph execution. It does not turn source-checking or build failures into
 execution errors. Constructor formation and exact-type checking happen first.
-The code covers only violations already excluded by the publication profile;
-it chooses no empty-event, invalidation or redundant runtime mutation semantics.
+The code covers violations excluded by the publication profile. Explicit
+[empty sparse inputs](empty-delta-validity.md) are admitted; invalid nonempty
+membership instructions remain profile errors. Invalidation and general
+runtime mutation APIs retain their separate contracts.
 
 Codes remain attached when an execution error propagates out of a graph to an
 evaluation caller. Wrapping an error must preserve its original code. This

@@ -2,7 +2,8 @@
 
 Status: proposed publication profile, 2026-09-30. This extends the fresh dense
 eval profile using [contextual collection publication deltas](contextual-collection-deltas.md).
-It does not decide empty-event application or introduce full-state replay.
+Empty sparse application follows [EMPTY-1–4](empty-delta-validity.md); this
+does not introduce full-state replay.
 The [ordinary delta type extension](ordinary-delta-types.md) supplies the
 storable data and generic source relationships for this profile. Remaining
 boundaries are listed in [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md#unresolved-source-contracts).
@@ -68,11 +69,13 @@ not invalidated. This does not add `_` to ordinary runtime expressions.
 
 Before starting the graph, validate the supplied trace from a fresh invalid
 endpoint with no live set/map memberships. Each present structural delta
-must be a canonical nonempty publication under the collection contract:
+must satisfy the collection contract, including state-dependent
+[empty sparse application](empty-delta-validity.md):
 set additions are absent members, removals are present members, map removals
 are present keys, and a newly added map child receives a delta making it
 valid. Apply this validation recursively, preserving unchanged child state
-between positions. At an admitted atomic boundary validate a complete V and
+between positions, even when applying an entry causes no tick. The original
+input horizon is unchanged. At an admitted atomic boundary validate a complete V and
 replace that child's whole state; an empty ordinary list is valid present data. An out-of-profile input raises the catalogued `eval.input_delta_profile`
 admission error while executing eval, after ordinary argument evaluation and
 before any graph starts, with a message beginning `eval: input delta outside publication profile`,
@@ -115,16 +118,11 @@ uses the supplied horizon as in [eval composition](eval-operator-composition.md)
 
 ## Boundaries
 
-This profile admits targets whose structural publications remain in the
-ordinary nonempty domain. Actual empty set events, empty fixed/map patches,
-invalidations, invalid-child membership creation and REF designation remain
-outside it. No success or conformance claim may cover those events based on
-this contract. Diagnosing an excluded runtime event as unsupported does not
-choose its eventual application semantics. Dropping it, substituting null or
-a held snapshot, or presenting a successful empty recording cannot establish
-a conforming result for that event. This extension leaves the semantic choice
-for applying an empty publication to a later contract rather than treating
-payload emptiness as general proof that no tick occurred.
+Empty sparse inputs are admitted and applied under
+[EMPTY-1–4](empty-delta-validity.md); record captures actual output ticks.
+Invalidations, invalid-child membership creation and REF designation remain
+outside this input profile. Do not encode those excluded state changes as
+empty deltas, null, omitted entries or held snapshots.
 
 Growing lists use the separate [net delta extension](growing-list-publications.md).
 Rolling windows use the separate [arrival extension](rolling-publications.md).

@@ -25,6 +25,7 @@ The runtime begins where wiring ends: at the builder boundary.
    design_options
    cases_atomic
    cases_collections
+   cases_empty_delta_validity
    cases_windows
    cases_growing_lists
    cases_lifecycle

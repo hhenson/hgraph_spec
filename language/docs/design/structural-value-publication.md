@@ -20,8 +20,9 @@ source under existing retention rules; source endpoint timestamps are not copied
 This bounded clarification covers nonempty structures retaining a valid child;
 growing lists and their length transitions are outside its scope.
 It does not admit wholly invalid values, zero-child or empty structures, new
-invalid map membership, or decide empty-event forwarding. Existing publication,
-notification and child-invalidation rules determine observations.
+invalid map membership. Sparse empty application is separately defined by
+[EMPTY-1–4](empty-delta-validity.md); it does not expand this held-value scope.
+Existing publication, notification and child-invalidation rules determine observations.
 
 The empty/wholly-invalid exclusions apply at every structural depth, even when
 the parent retains a valid sibling. A captured unset child is reconciled as
