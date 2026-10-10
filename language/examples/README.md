@@ -178,3 +178,6 @@ The backend-parity module that is built both ways lives in
 `../tests/codegen/parity.hgl`; the expression-embedded temporal conditional
 is pinned there. The acceptance sequence is defined in the
 [Developer Guide](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/testing-and-compatibility.md#documentation-examples).
+
+- [`any-values.hgl`](any-values.hgl) checks typed boxes, present empty ticks,
+  runtime boxing and independent ordinary-value retention.

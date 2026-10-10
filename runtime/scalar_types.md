@@ -68,7 +68,7 @@ Concept
 | **list** | Values of one type, in order; of a fixed length or any length |
 | **set** | Distinct values of one type, in no order |
 | **map** | Distinct keys of one type, each with a value of another |
-| **any** | A value of whatever type it is given, or nil. The value carries its type with it |
+| **any** | An owning typed value or nil; HGL construction and publications follow [ANY-1–5](../language/docs/design/any-values.md) |
 
 ### Value access and storage
 

@@ -93,7 +93,7 @@ The hard reserved words are:
 module part use as export abstract impl instantiate operator fn cpp struct const requires is let var state cache inject return if else
 start when stop for while yield test assert eval
 true false null
-bool i64 f64 str bytes date time datetime duration
+bool i64 f64 str bytes any date time datetime duration
 civil_datetime zoned_datetime zoned_time timezone
 ```
 
@@ -461,7 +461,7 @@ generic_arguments
                   { ",", generic_argument }, [ "," ], ">";
 generic_argument
                 = type | const_expression;
-scalar_type     = "bool" | "i64" | "f64" | "str" | "bytes"
+scalar_type     = "bool" | "i64" | "f64" | "str" | "bytes" | "any"
                 | "date" | "time" | "datetime" | "duration"
                 | "civil_datetime" | "zoned_datetime"
                 | "zoned_time" | "timezone";
@@ -1371,9 +1371,11 @@ postfix_expr   = primary_expr,
                  | ".", member_name };
 primary_expr   = literal | placeholder | identifier | qualified_name
                | "(", expression, ")" | tuple_literal | sequence_literal
-               | generic_constructor | delta_expression | bytes_constructor
+               | generic_constructor | delta_expression | bytes_constructor | any_constructor
                | function_expr | if_expression | eval_expression | value_selector | block;
 value_selector = "const", "(", identifier, ")";
+any_constructor = "any", "(",
+                  [ argument, { ",", argument }, [ "," ] ], ")";
 bytes_constructor = "bytes", "(",
                     [ argument, { ",", argument }, [ "," ] ], ")";
 generic_constructor
@@ -1535,6 +1537,9 @@ and an ordinary fixed/unbounded i64 list type before execution. Construction,
 octet validation, ordinary length/equality/order and phase rules are specified
 by [BYTE-1–6](../design/bytes-values.md). This grammar adds no byte literal,
 byte indexing or runtime list-literal admission.
+The `any()` and `any(ordinary_value)` forms follow [ANY-1–5](../design/any-values.md).
+Check argument count, ownership and ordinary phase before lowering.
+
 
 Expression precedence is:
 
