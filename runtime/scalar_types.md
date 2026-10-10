@@ -195,6 +195,10 @@ operations are optional, and a type either has each or does not:
 | **hash** | A value can be used as a key | Set elements; map keys; the elements of a TSS; the keys of a TSD |
 | **order** | Two values can be compared for which comes first. May be partial | Sorting, and the comparison operators |
 
+The [Boolean and zone scalar capability index](../language/docs/design/bool-scalar-capabilities.md)
+records bool equality/hash/total order and the existing zone equality/hash
+without order.
+
 A composite has a capability when its parts allow it:
 
 | Kind | equality | hash | order |
