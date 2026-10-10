@@ -176,3 +176,8 @@ The backend-parity module that is built both ways lives in
 `../tests/codegen/parity.hgl`; the expression-embedded temporal conditional
 is pinned there. The acceptance sequence is defined in the
 [Developer Guide](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/testing-and-compatibility.md#documentation-examples).
+
+- [`reference-owner-export.hgl`](reference-owner-export.hgl) follows an explicit
+  REF branch result that preserves a branch-owned scalar endpoint through its
+  owning output boundary. Two evals specify current routing and fresh runs;
+  validation is static only. See the [route matrix](../../compiler/cases_reference_owner_export.md).

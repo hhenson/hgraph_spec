@@ -1,0 +1,42 @@
+module examples.reference_owner_export
+
+fn owned_value(value: i64) -> i64 {
+    when { return delta_value(value) }
+}
+fn route(value: ref<i64>) -> ref<i64> {
+    when valid(value) && modified(value) { return value }
+}
+fn selected(enabled: bool, first: i64, second: i64) -> ref<i64> {
+    var result: ref<i64>
+    if enabled {
+        let child = owned_value(first)
+        result = route(child)
+    } else {
+        let child = owned_value(second)
+        result = route(child)
+    }
+    # GRF-27 exports the child designation, preserving its actual owner.
+    result
+}
+fn read(value: i64) -> i64 {
+    when { return delta_value(value) }
+}
+fn followed(enabled: bool, first: i64, second: i64) -> i64 {
+    # The ordinary consumer follows the REF after the owning branch evaluates.
+    read(selected(enabled, first, second))
+}
+test {
+    test owned_ref_output_follows_current_branch {
+        assert eval(followed,
+            enabled: [true, true, false, false, true, _],
+            first: [7, 8, 9, 10, 11, 12],
+            second: [20, _, _, 21, _, _]
+        ) == [7, 8, 20, 21, 11, 12]
+        # Fresh run and fresh branch instances retain the same boundary contract.
+        assert eval(followed,
+            enabled: [true, true, false, false, true, _],
+            first: [7, 8, 9, 10, 11, 12],
+            second: [20, _, _, 21, _, _]
+        ) == [7, 8, 20, 21, 11, 12]
+    }
+}
