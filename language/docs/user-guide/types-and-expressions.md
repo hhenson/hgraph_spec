@@ -306,6 +306,9 @@ reference only where its own signature writes `ref`, as in
 See [forwarding an existing binding](../design/control-flow.md#forwarding-an-existing-binding).
 
 Inside a node, a reference is opaque and ticks only when its binding changes.
+Two readable operands of the same `ref<T>` type may use `==` and `!=` to
+compare designated endpoint identity. These operations do not read target
+values; see [REF-EQ-1](../design/type-extensions.md#node-access-and-ticks).
 Code in a `when` handler cannot read fields, index elements, or traverse values
 below a reference layer. Graph wiring may select a declared field or a
 constant fixed-list index below a reference layer. The selection wires a

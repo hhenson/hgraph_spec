@@ -134,6 +134,9 @@ annotations isolate expected source errors alongside executable tests.
 - [`reference-wiring-projections.hgl`](reference-wiring-projections.hgl) selects
   a declared field or constant fixed-list index through REF during graph wiring;
   scalar consumers follow the child across parent-reference retargeting.
+- [`reference-identity-equality.hgl`](reference-identity-equality.hgl) compares
+  node REF designations with `==`/`!=`: aliases equate and separate endpoints
+  carrying equal scalar values remain distinct under REF-EQ-1.
 - [`reference-routing.hgl`](reference-routing.hgl) demonstrates `ref<T>`
   parameters and results in runtime functions: forwarding a reference, and
   routing one element of a `list<ref<T>, 3>` by a temporal index. Tests: none
