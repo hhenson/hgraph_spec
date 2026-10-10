@@ -48,6 +48,10 @@ Initialization followed by invalidation is a separate experiment.
 
 ## Preserve empty application; leave forwarding open
 
+Historical proposal: the following empty-application choice is superseded by
+the accepted [EMPTY-1–4 rules](empty-delta-validity.md). Its linked measurements
+remain historical observations, not the accepted application semantics.
+
 Preserve shape-specific application: initial empty set/map data can establish
 validity; repeats can be silent; empty fixed/list/struct data need not publish.
 The [application profile](contextual-collection-deltas.md#deliberate-boundaries)

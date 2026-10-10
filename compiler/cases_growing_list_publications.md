@@ -12,7 +12,7 @@ Check the [net growing-list delta contract](../language/docs/design/growing-list
 | Capture delta then grow/shrink again | Retained removed indices and child deltas remain independent. |
 | Gap while appending, non-tail/out-of-range removal or removed/modified overlap | Reject the supplied trace before target start with the existing input-profile diagnostic and slot. |
 | Duplicate/negative/nonconstant index or unknown constructor argument | Reject during checking. |
-| Empty ordinary delta used as present input | Outside the nonempty publication profile. |
+| Empty ordinary delta used as present input | First application validates and ticks an invalid list without growth; repetition on a valid list is silent ([EMPTY-1](../language/docs/design/empty-delta-validity.md)). |
 | Empty/all-silent sequence through exact wrapper | Normal lifecycle and dense horizon; no fabricated child publication. |
 | `list<S>` versus `atomic<list<S>>` or fixed `list<S,N>` | Preserve distinct temporal shape identities. |
 | Invalid-child growth, invalidation or references | Remain outside this bounded publication profile. |

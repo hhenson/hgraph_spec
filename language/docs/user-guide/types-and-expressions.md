@@ -1118,8 +1118,9 @@ The canonical [delta_value(value)](../design/delta-value-metadata.md) call
 reads the current scalar delta when that specific input is valid and modified.
 The proposed [collection publication contract](../design/contextual-collection-deltas.md)
 adds shape-derived contextual deltas and own-output application for a bounded
-nonempty structural profile. Empty-event application and full-state changes
-remain outside that extension.
+structural profile, including [empty sparse application](../design/empty-delta-validity.md).
+An empty delta validates and ticks an invalid target, but is silent on a valid
+target. Full-state changes retain their separate contracts.
 
 In a runtime function, `last_modified(value)` returns the hgraph engine time at
 which the endpoint last changed. Its type is `datetime`.

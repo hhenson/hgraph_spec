@@ -380,8 +380,9 @@ platform requirements belong to the implementation's documentation.
 The proposed [collection delta eval profile](../design/eval-collection-deltas.md)
 uses `delta<T>(...)` literals for sets, fixed lists, bundles and integer-key maps,
 including recursive child updates. The target still uses `delta_value(value)`;
-eval owns replay and recording. Its ordinary nonempty publication admission
-excludes empty events, invalidation and REF designation pending separate
-contracts. The [finite atomic profile](../design/atomic-delta-publications.md)
+eval owns replay and recording. [Empty sparse inputs](../design/empty-delta-validity.md)
+validate and tick invalid targets, but are silent on valid targets; suppressed
+applications retain their dense input positions. Invalidation and REF
+designation retain their separate contracts. The [finite atomic profile](../design/atomic-delta-publications.md)
 uses complete ordinary values, including present empty lists, at admitted atomic
 boundaries. `_` continues to mean no publication.

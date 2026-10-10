@@ -192,16 +192,15 @@ data shape and exact types, not an unspecified endpoint's current state.
 Applying an owned delta through a matching runtime return, own-output
 assignment or generator yield retains the existing publication profile.
 The payload must have exact type `delta<T>`. Structural originating-shape matching,
-state-dependent membership/removal requirements, nonempty sparse publication
-admission and fresh eval trace validation still apply at their existing
-boundaries. Atomic children use complete V, including admitted empty lists.
+state-dependent membership/removal requirements,
+[empty sparse application](empty-delta-validity.md) and fresh eval trace
+validation apply at their existing boundaries. Atomic children use complete V, including admitted empty lists.
 Copying or storing a delta neither satisfies nor bypasses those requirements.
 
-This extension does not choose empty-event application, invalidation,
-invalid-child membership, reference designation or any excluded publication
-semantics. It must not turn empty stored data into `_`, null, a held snapshot
-or a successful absence of output. A successfully stored value alone makes
-no claim that a later publication using it is admitted.
+Invalidation, invalid-child membership and reference designation remain
+separate contracts. Empty stored data is not `_`, null or a held snapshot;
+its application may be silent only as specified by EMPTY-1–2. A successfully
+stored value alone does not establish state-dependent application preconditions.
 
 ## Replay and recording
 

@@ -1819,8 +1819,9 @@ endpoint must be proven valid and modified; an any-input-modified condition
 alone does not establish this for every input. The proposed
 [collection delta extension](../design/contextual-collection-deltas.md)
 specifies contextual results and own-output application for its ordinary
-nonempty publication profile. Empty-event application and full-state changes
-remain separate boundaries. `delta<S>(...)` is a distinct constructor, not
+structural publication profile. [Empty sparse application](../design/empty-delta-validity.md)
+validates and ticks an invalid target, but is silent on a valid target.
+Full-state changes remain separate boundaries. `delta<S>(...)` is a distinct constructor, not
 an alternative accessor.
 
 `last_modified(value)` is a runtime metadata operation returning `datetime`.

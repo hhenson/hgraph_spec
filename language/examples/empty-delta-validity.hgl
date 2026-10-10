@@ -1,0 +1,86 @@
+module examples.empty_delta_validity
+
+struct EmptyDeltaUnit {}
+
+struct EmptyDeltaPair {
+    left: list<i64, 2>
+    right: i64
+}
+
+fn forward_empty_delta<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn empty_delta_set(value: set<i64>) -> set<i64> => forward_empty_delta(value)
+fn empty_delta_map(value: map<i64, i64>) -> map<i64, i64> => forward_empty_delta(value)
+fn empty_delta_fixed(value: list<i64, 2>) -> list<i64, 2> => forward_empty_delta(value)
+fn empty_delta_growing(value: list<i64>) -> list<i64> => forward_empty_delta(value)
+fn empty_delta_tuple(value: tuple<i64, bool>) -> tuple<i64, bool> => forward_empty_delta(value)
+fn empty_delta_pair(value: EmptyDeltaPair) -> EmptyDeltaPair => forward_empty_delta(value)
+fn empty_delta_unit(value: EmptyDeltaUnit) -> EmptyDeltaUnit => forward_empty_delta(value)
+fn empty_delta_zero(value: list<i64, 0>) -> list<i64, 0> => forward_empty_delta(value)
+fn empty_delta_atomic(value: atomic<list<i64>>) -> atomic<list<i64>> => forward_empty_delta(value)
+fn empty_delta_rolling(value: rolling<list<i64>, 2>) -> rolling<list<i64>, 2> => forward_empty_delta(value)
+fn empty_delta_int(value: i64) -> i64 => forward_empty_delta(value)
+fn empty_delta_bool(value: bool) -> bool => forward_empty_delta(value)
+fn empty_delta_text(value: str) -> str => forward_empty_delta(value)
+const fn empty_delta_list_value() -> list<i64> { return [] }
+
+test empty_sparse_application {
+    assert eval(empty_delta_set, value: [
+        delta<set<i64>>(), delta<set<i64>>(), delta<set<i64>>(added: [1]), delta<set<i64>>(), _
+    ]) == [
+        delta<set<i64>>(), _, delta<set<i64>>(added: [1]), _, _
+    ]
+    assert eval(empty_delta_map, value: [delta<map<i64, i64>>(), delta<map<i64, i64>>()]) == [delta<map<i64, i64>>(), _]
+    assert eval(empty_delta_fixed, value: [delta<list<i64, 2>>(), delta<list<i64, 2>>()]) == [delta<list<i64, 2>>(), _]
+    assert eval(empty_delta_growing, value: [delta<list<i64>>(), delta<list<i64>>()]) == [delta<list<i64>>(), _]
+    assert eval(empty_delta_tuple, value: [
+        delta<tuple<i64, bool>>(), delta<tuple<i64, bool>>()
+    ]) == [
+        delta<tuple<i64, bool>>(), _
+    ]
+    assert eval(empty_delta_pair, value: [
+        delta<EmptyDeltaPair>(), delta<EmptyDeltaPair>()
+    ]) == [
+        delta<EmptyDeltaPair>(), _
+    ]
+    assert eval(empty_delta_unit, value: [delta<EmptyDeltaUnit>(), delta<EmptyDeltaUnit>()]) == [delta<EmptyDeltaUnit>(), _]
+    assert eval(empty_delta_zero, value: [delta<list<i64, 0>>(), delta<list<i64, 0>>()]) == [delta<list<i64, 0>>(), _]
+}
+
+test nested_empty_sparse_application {
+    assert eval(empty_delta_pair, value: [
+        delta<EmptyDeltaPair>(left: delta<list<i64, 2>>()),
+        delta<EmptyDeltaPair>(left: delta<list<i64, 2>>()),
+        delta<EmptyDeltaPair>(right: 7),
+        delta<EmptyDeltaPair>()
+    ]) == [delta<EmptyDeltaPair>(left: delta<list<i64, 2>>()), _, delta<EmptyDeltaPair>(right: 7), _]
+}
+
+test empty_complete_payload_controls {
+    assert eval(empty_delta_atomic, value: [
+        empty_delta_list_value(), empty_delta_list_value()
+    ]) == [
+        empty_delta_list_value(), empty_delta_list_value()
+    ]
+    assert eval(empty_delta_rolling, value: [
+        empty_delta_list_value(), empty_delta_list_value()
+    ]) == [
+        empty_delta_list_value(), empty_delta_list_value()
+    ]
+    assert eval(empty_delta_int, value: [0, 0]) == [0, 0]
+    assert eval(empty_delta_bool, value: [false, false]) == [false, false]
+    assert eval(empty_delta_text, value: ["", ""]) == ["", ""]
+}
+
+test nonempty_membership_errors_after_empty {
+    assert raises("eval.input_delta_profile") {
+        eval(empty_delta_set, value: [delta<set<i64>>(), delta<set<i64>>(removed: [1])])
+    }
+    assert raises("eval.input_delta_profile") {
+        eval(empty_delta_map, value: [delta<map<i64, i64>>(), delta<map<i64, i64>>(remove: [1])])
+    }
+    assert raises("eval.input_delta_profile") {
+        eval(empty_delta_growing, value: [delta<list<i64>>(), delta<list<i64>>(items: [1: 7])])
+    }
+}

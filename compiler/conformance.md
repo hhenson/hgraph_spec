@@ -12,6 +12,9 @@ This does not add generator machinery to the runtime contract.
 
 ## Cases
 
+- [Empty sparse delta application](../runtime/cases_empty_delta_validity.md):
+  validity transitions, preserved horizons and [source examples](../language/examples/empty-delta-validity.hgl).
+
 - [Negative testing](negative_testing/README.md): execution-error assertions,
   source-error expectations and bounded controls that must fail.
 
