@@ -2,7 +2,7 @@
 
 Admit exact `rolling<V, Max, Min>` shapes to the publication profile. V is an
 admitted finite ordinary payload type: a scalar leaf or complete ordinary
-composite under the finite atomic payload grammar. A window's V is ordinary
+composite under the finite atomic payload grammar, including [bytes](bytes-values.md). A window's V is ordinary
 data, not a temporal child. Min is optional: `rolling<V, Max>` is exactly
 `rolling<V, Max, Max>`. Existing size-kind and size-bound rules apply.
 The resolved kind, Max, Min and V all participate in exact shape identity.

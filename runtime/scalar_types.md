@@ -47,7 +47,7 @@ Concept
 | `i64` | A 64-bit signed integer |
 | `f64` | A 64-bit floating-point number |
 | `str` | Text |
-| `bytes` | Uninterpreted bytes |
+| `bytes` | Uninterpreted bytes; HGL construction and publications follow [BYTE-1–6](../language/docs/design/bytes-values.md) |
 | `date` | A calendar date, with no zone |
 | `time` | A time of day, with no zone |
 | `datetime` | An instant on the UTC timeline, to the microsecond. The type of evaluation time |

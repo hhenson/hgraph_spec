@@ -2,7 +2,8 @@
 
 Admit every declared enum E as a scalar publication leaf, including within the
 existing structural and finite atomic profiles. `delta<E>` is E and
-`atomic<E>` normalizes to E. The twelve built-in scalar leaves remain admitted.
+`atomic<E>` normalizes to E. The thirteen built-in scalar leaves, including
+[bytes](bytes-values.md), remain admitted.
 
 Use the existing generic `pass_through`, guarded `delta_value`, `TimedValue<E>`,
 replay and record contracts. Each present member publishes, including equal

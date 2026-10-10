@@ -5,7 +5,8 @@ Status: proposed library data contract, 2026-10-03.
 Replay and record use ordinary values for the finite publication profile in the
 [ordinary delta type extension](../language/docs/design/ordinary-delta-types.md)
 and its collection contract. This includes the admitted scalar leaves and the
-admitted structural shapes, plus the [finite atomic profile](../language/docs/design/atomic-delta-publications.md).
+admitted structural shapes, including [bytes](../language/docs/design/bytes-values.md)
+leaves and keys, plus the [finite atomic profile](../language/docs/design/atomic-delta-publications.md).
 Both use `list<TimedValue<T>>`, where T is the
 temporal shape and the value field carries its publication delta. Signals,
 references, windows and the other excluded shapes remain outside that profile.
@@ -47,7 +48,7 @@ data follows the publication profile, including
 An empty delta entry is present data but may cause no tick on a valid target;
 record retains only actual ticks. An admitted atomic empty-list value is a
 present complete publication. Omitting an entry
-expresses silence. Scalar false, zero and empty text remain present values,
+expresses silence. Scalar false, zero, empty text and empty bytes remain present values,
 and equal scalar publications at distinct times remain distinct ticks.
 Neither `_` nor `null` is an ordinary list element. An empty timed list
 publishes nothing; it carries no dense horizon.

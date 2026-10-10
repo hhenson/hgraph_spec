@@ -108,6 +108,11 @@ empty construction, `len(values)`, `values[index]`, and
 `push(values, item)` for growth through writable unbounded-list access.
 These value operations preserve the binding and retention rules above.
 
+[Bytes values](bytes-values.md) use `bytes()` or `bytes(ordinary_i64_list)`.
+They are atomic leaves with exact content equality/hash, unsigned lexicographic
+order and ordinary octet-count `len`. BYTE-1–6 specifies range failure, owning
+retention and recursive publication/key admission.
+
 [Ordinary tuple construction](ordinary-tuple-values.md) admits runtime element
 expressions in ordinary-value contexts, evaluated and independently retained
 once each in written order. Constant contexts retain their requirements.
