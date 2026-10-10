@@ -403,6 +403,14 @@ This permits graph composition to select fields or collection elements through
 reference-backed sources while preserving the node-level access restriction.
 Reference binding and adaptation belong to the existing hgraph runtime.
 
+For a declared bundle field or constant fixed-list index, this follows WIR-5:
+the graph wires a reference-producing projection. Retargeting the parent
+reference selects the corresponding child of the new target; an ordinary
+consumer follows that child using TS-14/17/25. Selecting a child does not read
+its payload while wiring or permit a node to traverse its opaque REF input.
+See [source examples](../../examples/reference-wiring-projections.hgl) and
+[compiler cases](../../../compiler/cases_reference_wiring_projections.md).
+
 
 ## `signal` inputs
 

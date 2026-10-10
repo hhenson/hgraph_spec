@@ -127,6 +127,9 @@ annotations isolate expected source errors alongside executable tests.
   through an edge. Tests: 3 `test` blocks under `hgl test`
   (`hgraph_language_test_recursive-fields`), asserted again on the generated
   C++ in `generated_recursive_tests.cpp`.
+- [`reference-wiring-projections.hgl`](reference-wiring-projections.hgl) selects
+  a declared field or constant fixed-list index through REF during graph wiring;
+  scalar consumers follow the child across parent-reference retargeting.
 - [`reference-routing.hgl`](reference-routing.hgl) demonstrates `ref<T>`
   parameters and results in runtime functions: forwarding a reference, and
   routing one element of a `list<ref<T>, 3>` by a temporal index. Tests: none
