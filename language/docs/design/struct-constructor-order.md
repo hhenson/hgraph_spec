@@ -34,7 +34,8 @@ After all supplied arguments have succeeded and been retained, retain the
 effective constant defaults for omitted fields in resolved field declaration
 order. Each default is independently retained before proceeding to the next.
 This is retention of an existing constant, not runtime evaluation of a new
-default expression. Optional fields and inherited effective defaults keep
+default expression. The default uses its [defining binding scope](default-binding-scope.md),
+not the supplied or already constructed instance fields. Optional fields and inherited effective defaults keep
 their existing rules; an omitted unset optional field requires no payload
 retention. This rule uses the resolved schema order and does not choose a new
 multiple-parent field linearization.

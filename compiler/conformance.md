@@ -16,6 +16,8 @@ This does not add generator machinery to the runtime contract.
   designation identity, retargeting, sampling and ordinary data followers.
 - [Owned REF output routes](cases_reference_owner_export.md): preserved child
   designations, owner-mediated rank and live boundary composition.
+- [Default expression binding scope](cases_default_binding_scope.md): declaration
+  closure, excluded argument/instance values and generic contextual defaults.
 
 - [Empty sparse delta application](../runtime/cases_empty_delta_validity.md):
   validity transitions, preserved horizons and [source examples](../language/examples/empty-delta-validity.hgl).
