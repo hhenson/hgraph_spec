@@ -2,7 +2,7 @@
 
 Required contract for the narrow stopped-owner clarification of
 [TS-23](../runtime/time_series.md), together with
-[GRF-10/19/20/23/25](../runtime/graph.md) and
+[GRF-10/19/20/23/25/27](../runtime/graph.md) and
 [conditional branch ownership](../language/docs/design/control-flow.md#branch-ownership).
 This case document claims no HGL target execution.
 
@@ -11,7 +11,10 @@ returns its designation through an explicitly `ref<i64>` result. The parent
 captures the first designation in a REF output with a scalar Boolean latch;
 no reference is placed in ordinary state. An independently ticking observer
 binds that held output and the current conditional result to ordinary scalar
-inputs. All routes cross the existing child-graph output boundary. Stop affects
+inputs. The branch-owned designation is exported under GRF-27: the effective producer
+in the parent is the conditional owner, which completes child evaluation
+before the observer. See the [route matrix](cases_reference_owner_export.md).
+Stop affects
 the branch-owned producer, not the captured outer source.
 
 | Cycle | Enabled | First source | Second source | Held value | Current value |
@@ -35,7 +38,7 @@ instances at cycles 5 and 8 preserve current routing without reviving the
 saved designation. A second eval repeats the trace with fresh parent state.
 
 Boundary requirement: the explicit REF result must expose
-the branch-owned intermediate scalar designation through GRF-10, rather than
+the branch-owned intermediate scalar designation through GRF-27, rather than
 substituting a stable parent scalar endpoint. The existing REF result-schema
 rule in control-flow preserves that designation; the fixture deliberately
 puts the scalar producer before the final REF forwarding node. Metadata above
