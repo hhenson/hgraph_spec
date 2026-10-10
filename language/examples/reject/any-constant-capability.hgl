@@ -1,0 +1,35 @@
+module examples.reject.any_constant_capability
+
+struct CapabilityCell { value: any }
+
+# Required defaults inspect ordinary lists/structs containing Any, not boxes.
+# expect-error(type, "value.constant_capability")
+struct BadIndexDefault { value: bool = [any(map<i64, i64>(items: []))][0] < any(map<i64, i64>(items: [])) }
+
+# expect-error(type, "value.constant_capability")
+struct BadFieldDefault { value: bool = CapabilityCell(value: any(map<i64, i64>(items: []))).value < any(map<i64, i64>(items: [])) }
+
+# Structural delta storage is admitted; its missing Eq/hash is still required
+# by the boxed key after ordinary field extraction.
+# expect-error(type, "value.constant_capability")
+struct BadKeyDefault { values: set<any> = set<any>(items: [CapabilityCell(value: any(delta<list<i64, 2>>(items: [0: 1]))).value]) }
+
+# expect-error(type, "value.constant_capability")
+const fn bad_parameter_default(value: bool = CapabilityCell(value: any(map<i64, i64>(items: []))).value < any(map<i64, i64>(items: []))) -> bool => value
+
+struct GoodIndexDefault { value: bool = [any(1)][0] < any(2) }
+struct GoodFieldDefault { value: bool = CapabilityCell(value: any(1)).value < any(2) }
+struct GoodKeyDefault { values: set<any> = set<any>(items: [any()]) }
+const fn good_parameter_default(value: bool = CapabilityCell(value: any(1)).value < any(2)) -> bool => value
+
+test {
+    test valid_defaults_and_executed_failures_survive_source_rejections {
+        assert GoodIndexDefault().value
+        assert GoodFieldDefault().value
+        assert GoodKeyDefault().values == set<any>(items: [any()])
+        assert good_parameter_default()
+        # This operation executes in the test; it retains the runtime code.
+        let unordered: any = any(map<i64, i64>(items: []))
+        assert raises("value.capability") { assert unordered < unordered }
+    }
+}
