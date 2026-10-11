@@ -189,7 +189,10 @@ consumer. Selecting a member of a structural input likewise does not break
 the connection to its producer. Neither is a reason to prune that producer.
 
 A child output connects to its owner through the output binding (GRF-10).
-Its producers are therefore part of a path to a sink outside the child.
+A REF-typed output position exports its designation through this boundary under
+GRF-27, including positions nested in structural outputs. The designated
+endpoint keeps its actual owner. Its producers
+are therefore part of a path to a sink outside the child.
 When describing a child, keep the nodes needed by this binding as well as
 its own sinks. If the owner is pruned, its child graphs are not instantiated
 either. Passing an owner input straight through needs a binding, not an
@@ -300,8 +303,8 @@ classDiagram
 - Every graph in a run, however deeply nested, **reads** the one clock the
   engine owns. A nested graph has no clock, no run mode and no push sources
   of its own.
-- An input in one graph may be **bound to** an output in a graph that
-  encloses it. Nothing else crosses a graph's boundary.
+- Cross-graph input **bindings** use enclosing-graph routes or exported REF
+  positions through owning outputs (GRF-10/24/27); producer order still applies.
 
 ### State
 
@@ -429,11 +432,10 @@ A stopped graph is never started again.
   the child reads the real producer, with nothing in between. The owner's
   output either is the child's chosen time-series, written through, or is
   one of the owner's own inputs passed straight on.
-- **Parallel graphs.** Graphs owned by the same node have no relationship
-  with one another beyond sharing a parent. Everything a nested graph reads
-  comes either from a lower-ranked node inside it or, through its boundary,
-  from the parent graph. Nothing in one is bound to, or refers to, anything
-  in another, and so there is no order between them to keep.
+- **Parallel graphs.** Graphs owned by the same node share only their parent;
+  no direct binding or reference route connects them. Boundary routes obey
+  GRF-10/24/27 and producer order under TS-20, including the effective owning
+  producer for exported REF positions.
 - **Time.** A nested graph is evaluated only from inside its owner's
   evaluation, at the owner's evaluation time, on the same clock.
 - **Schedule.** After evaluating a nested graph, its owner is scheduled for
@@ -510,14 +512,29 @@ of what the runtime provides for a graph that changes shape as it runs.
 - **GRF-23** A nested graph is stopped before it is disposed of, and not
   disposed of in the cycle in which it is stopped.
 - **GRF-24** An input is bound only to an output in its own graph or in a
-  graph that encloses it. Graphs owned by the same node share nothing but
-  their parent.
+  graph that encloses it, or to a designation exported through an owning
+  output boundary under GRF-27. Graphs owned by the same node share nothing
+  but their parent; direct routes between them remain prohibited.
 - **GRF-25** A removal — a stopped nested graph, a removed dictionary child,
   a truncated list element, a reference whose target went away — is
   finalised at the end of the cycle in which it happens, and what was
   removed stays readable until then. Reclamation of its storage happens no
   earlier than the start of the next cycle and may happen later; nothing
   observable depends on when (owner, 2026-09-30).
+- **GRF-27** Each explicitly REF-typed position in a child output's declared
+  temporal schema exports only its designated endpoint or child-designation
+  tree through its owning node's output boundary. This applies recursively
+  through structural fields and collection elements, including REF result
+  slots packed into generated bundles; the containing output gains no outer
+  REF. A parent consumer may follow each exported route. Its effective
+  producer in the parent is the owning node: child evaluation must complete
+  within that owner before the later-ranked parent consumer evaluates
+  (GRF-15/21). Further exports compose through each enclosing owner's output
+  boundary; captured parent routes remain live through input boundaries
+  (GRF-10). This grants no direct access to other child endpoints or parallel
+  graphs and no route around rank order (TS-20). Export preserves the actual
+  designated endpoint and its owner; retaining its REF does not extend that
+  endpoint's lifetime (GRF-19/23/25, TS-23).
 
 
 Deferred
@@ -581,16 +598,12 @@ Points to settle
    pending request, the schedule entry already written stays, so the node is
    considered once with nothing due. hgraph accepts this. It is harmless but
    observable: the node's evaluation runs.
-9. **Nothing reaches backward.** Settled: every edge runs forward (GRF-4),
-   and an input bound through a reference is held to the same rule (see
-   Time-series types, TS-20) — a reference chooses *which* upstream output to
-   read, never a downstream one. What looks like backward flow in hgraph is
-   not a binding: a feedback is a sink scheduling a source for a later cycle,
-   and the paired source and sink that services are built from are library.
-   Across graphs the rule is GRF-24: a nested graph reads from inside itself
-   or from its parent, never from a parallel graph. The residue, a reference
-   carried backward through a feedback, is closed by TS-28 (owner,
-   2026-09-30): a feedback carries values only.
+9. **Nothing reaches backward.** Settled: every edge runs forward (GRF-4)
+   and REF bindings obey TS-20. An exported route's effective producer is
+   the owning node at each enclosing level; child evaluation completes before
+   the later-ranked consumer (GRF-27). GRF-24 admits same-graph, parent and
+   explicitly exported routes, never direct parallel-graph access. Feedback
+   schedules a source for a later cycle and carries values only (TS-28).
 10. **How long a stopped nested graph is kept.** Settled 2026-09-30 (owner):
     GRF-25 is the rule and the minimum — finalised at the end of the cycle,
     reclaimable from the start of the next. hgraph keeping a switch's old

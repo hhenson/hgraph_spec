@@ -192,3 +192,7 @@ is pinned there. The acceptance sequence is defined in the
 
 - [`native-atomic-values.hgl`](native-atomic-values.hgl) declares the shared
   Token provider contract and tests whole-value pass-through and projection.
+- [`reference-owner-export.hgl`](reference-owner-export.hgl) follows an explicit
+  REF branch result that preserves a branch-owned scalar endpoint through its
+  owning output boundary. Two evals specify current routing and fresh runs;
+  validation is static only. See the [route matrix](../../compiler/cases_reference_owner_export.md).

@@ -14,6 +14,8 @@ This does not add generator machinery to the runtime contract.
 
 - [Graph-wired reference observations](cases_reference_values.md):
   designation identity, retargeting, sampling and ordinary data followers.
+- [Owned REF output routes](cases_reference_owner_export.md): preserved child
+  designations, owner-mediated rank and live boundary composition.
 
 - [Empty sparse delta application](../runtime/cases_empty_delta_validity.md):
   validity transitions, preserved horizons and [source examples](../language/examples/empty-delta-validity.hgl).

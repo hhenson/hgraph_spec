@@ -348,17 +348,16 @@ reference.
   re-bound, sampled, to the newly designated output, and from then on shows
   that output's ticks as though bound to it directly. An empty reference
   leaves the input unbound.
-- **A reference does not escape rank order.** What a reference designates is,
-  by definition, one of two things: an output of a node of **lower rank in
-  the same graph**, or an output that came in **from the parent graph** —
-  which, seen from the parent, is of lower rank than the nested node that
-  owns this graph. Either way it has already been evaluated in the cycle.
-  That is simply where references come from: a reference is made from an
-  output a node can already see, and it travels along edges, which only run
-  forward. A reference is a way of choosing *which* upstream output to read,
-  never a way of reading downstream or sideways. Graphs owned by the same
-  node are parallel: they share a parent and nothing else, and nothing in one
-  refers to anything in another.
+- **A reference does not escape rank order.** Its target is an output of a
+  lower-ranked node in the same graph, a route that entered from the parent,
+  or a designation explicitly exported through an owning child-output
+  boundary (GRF-27). For an exported route, the effective producer in the
+  consuming graph is the owning node, which completes its child evaluation
+  before the later-ranked consumer runs. Repeated exports compose through
+  owner boundaries, preserving the actual endpoint and its lifetime.
+  References choose upstream data; they cannot bypass rank or directly reach
+  unexported child endpoints or parallel graphs. Parent routes may be captured
+  through the existing live input bindings (GRF-10).
 
 ### SIGNAL
 
@@ -486,9 +485,12 @@ Rules
   or not its child is valid, and *removed* when it leaves. A child becoming
   valid or invalid neither adds nor removes its key.
 - **TS-20** A reference designates an output of a node of lower rank in the
-  same graph, or an output that entered from the parent graph. An input bound
-  through a reference is therefore bound only to an output already evaluated
-  in the cycle. Nothing refers into a parallel graph.
+  same graph, a route that entered from the parent graph, or a designation
+  exported through owning output boundaries (GRF-27). For an exported route,
+  the owning node is the effective producer at each enclosing graph level
+  and completes child evaluation before the later-ranked consumer. An input
+  bound through a reference therefore observes an output already evaluated
+  in the cycle. No direct route into a parallel graph is admitted.
 - **TS-21** Only an output's own node changes it, and only during that
   node's evaluation. From the end of that evaluation to the end of the cycle,
   what the output shows does not change.
@@ -516,8 +518,9 @@ Rules
   reads need not recompute them. Caches obey invalidation and rebind resets.
   Several consumers may instead share one assembly node and output.
 - **TS-28** A feedback carries a value, never a reference. A reference is
-  bound through only by a consumer of higher rank than the output it
-  designates; no construct carries one to a lower rank (owner, 2026-09-30).
+  bound through only by a consumer downstream of its producer under TS-20,
+  including the effective owning producer for an exported route. No construct
+  bypasses that order (owner, 2026-09-30).
 - **TS-29** An input is bound to an output only when the table under "What
   may bind to what" admits the pair, at every depth. There is no conversion
   at a binding.
@@ -565,8 +568,8 @@ Points to settle
    REF-EXPIRES fixes the cycle boundary and distinguishes using a saved
    reference from inserting a new dictionary member.
 4. **A reference carried backward.** Settled 2026-09-30 (owner): a feedback
-   may not operate on a reference; a reference is always of lower rank than
-   its consumer (TS-28). Wiring refuses a feedback of a reference type.
+   may not operate on a reference; its consumer follows its producer under
+   TS-20/28. Wiring refuses a feedback of a reference type.
 5. **When are two types compatible at a binding?** Settled 2026-09-30: the
    table under "What may bind to what" and TS-29, with the bundle rule the
    owner gave on 2026-09-26 (WIR-15).

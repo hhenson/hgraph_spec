@@ -315,11 +315,12 @@ rests on.
 3. All work due at one time is done in one cycle. The engine never skips or
    merges scheduled times; combining events is a source node's business.
 4. Within a cycle, nodes are evaluated in rank order, each at most once.
-5. An input is bound only to an output of lower rank — whether by an edge, at
-   the boundary of a nested graph, or through a reference. Nothing reads
-   downstream. What must flow backward is a feedback: a sink scheduling a
-   source for a later cycle, not a binding, and it carries a value, never a
-   reference (TS-28).
+5. Bindings follow rank order. A same-graph producer has lower rank than its
+   consumer; parent routes obey GRF-10/24. For an exported REF route, the
+   owning node is the effective producer at each enclosing graph level and
+   completes child evaluation before the later-ranked consumer (GRF-27).
+   Nothing reads downstream. Backward flow uses feedback: a sink schedules
+   a source for a later cycle and carries a value, never a reference (TS-28).
 6. The schedule is the only activation gate. There is no other way to cause a
    node to be evaluated.
 7. A node may schedule a later-ranked node for the current time, and any node
