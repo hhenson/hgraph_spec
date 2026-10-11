@@ -191,7 +191,7 @@ the connection to its producer. Neither is a reason to prune that producer.
 A child output connects to its owner through the output binding (GRF-10).
 A REF-typed output position exports its designation through this boundary under
 GRF-27, including positions nested in structural outputs. The designated
-endpoint keeps its actual child owner. Its producers
+endpoint keeps its actual owner. Its producers
 are therefore part of a path to a sink outside the child.
 When describing a child, keep the nodes needed by this binding as well as
 its own sinks. If the owner is pruned, its child graphs are not instantiated
