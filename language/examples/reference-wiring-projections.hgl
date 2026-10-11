@@ -1,0 +1,65 @@
+module examples.reference_wiring_projections
+
+struct WiringQuote { bid: i64
+    ask: i64 }
+
+# These bodies compose graphs. Selection wires a reference to a child;
+# putting the same field/index access inside when would cross an opaque REF.
+fn reference_bid(value: ref<WiringQuote>) -> ref<i64> => value.bid
+fn reference_second(value: ref<list<i64, 2>>) -> ref<i64> => value[1]
+fn read_integer(value: i64) -> i64 {
+    when { return delta_value(value) }
+}
+fn observed_bid(value: WiringQuote) -> i64 => read_integer(reference_bid(value))
+fn observed_second(value: list<i64, 2>) -> i64 => read_integer(reference_second(value))
+
+fn choose_quote(index: i64, first: ref<WiringQuote>, second: ref<WiringQuote>) -> ref<WiringQuote> {
+    when valid(index) {
+        if index == 0 {
+            if valid(first) && modified(index, first) { return first }
+        } else {
+            if valid(second) && modified(index, second) { return second }
+        }
+    }
+}
+fn selected_bid(index: i64, first: WiringQuote, second: WiringQuote) -> i64 {
+    let selected = choose_quote(index, first, second)
+    read_integer(reference_bid(selected))
+}
+fn nested_selected_bid(outer: i64, inner: i64, other: i64,
+                       first: WiringQuote, second: WiringQuote,
+                       third: WiringQuote) -> i64 {
+    let changing = choose_quote(inner, first, second)
+    let unselected = choose_quote(other, third, first)
+    read_integer(reference_bid(choose_quote(outer, changing, unselected)))
+}
+
+test graph_reference_child_projections {
+    # A sibling's publication does not publish the projected field.
+    assert eval(observed_bid, value: [
+        delta<WiringQuote>(bid: 7), delta<WiringQuote>(ask: 20),
+        delta<WiringQuote>(bid: 7), _
+    ]) == [7, _, 7, _]
+    # The projected child stays invalid until its own first publication.
+    assert eval(observed_second, value: [
+        delta<list<i64, 2>>(items: [0: 7]),
+        delta<list<i64, 2>>(items: [1: 20]), _,
+        delta<list<i64, 2>>(items: [0: 8, 1: 21])
+    ]) == [_, 20, _, 21]
+    # Switching between equal-valued targets samples the newly selected bid.
+    # Target ticks continue through the projection without selector ticks;
+    # republishing the same designation introduces no additional publication.
+    assert eval(selected_bid,
+        index: [0, _, 1, _, 1],
+        first: [delta<WiringQuote>(bid: 7), delta<WiringQuote>(ask: 20)],
+        second: [delta<WiringQuote>(bid: 7), _, _, delta<WiringQuote>(bid: 9)]
+    ) == [7, _, 7, 9, _]
+    # Outer stays at zero. Changing its selected REF retargets the projection;
+    # changing the unselected REF at cycle three publishes nothing.
+    assert eval(nested_selected_bid,
+        outer: [0], inner: [0, 1, _, 1, 0], other: [0, _, 1],
+        first: [delta<WiringQuote>(bid: 7)],
+        second: [delta<WiringQuote>(bid: 8)],
+        third: [delta<WiringQuote>(bid: 20)]
+    ) == [7, 8, _, _, 7]
+}
