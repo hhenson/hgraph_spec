@@ -189,8 +189,9 @@ consumer. Selecting a member of a structural input likewise does not break
 the connection to its producer. Neither is a reason to prune that producer.
 
 A child output connects to its owner through the output binding (GRF-10).
-An explicitly REF output exports its designation through this boundary under
-GRF-27; the designated endpoint keeps its actual child owner. Its producers
+A REF-typed output position exports its designation through this boundary under
+GRF-27, including positions nested in structural outputs. The designated
+endpoint keeps its actual child owner. Its producers
 are therefore part of a path to a sink outside the child.
 When describing a child, keep the nodes needed by this binding as well as
 its own sinks. If the owner is pruned, its child graphs are not instantiated
@@ -521,9 +522,12 @@ of what the runtime provides for a graph that changes shape as it runs.
   removed stays readable until then. Reclamation of its storage happens no
   earlier than the start of the next cycle and may happen later; nothing
   observable depends on when (owner, 2026-09-30).
-- **GRF-27** An explicitly REF child output exports only its designated
-  endpoint or child-designation tree through its owning node's output
-  boundary. A parent consumer may follow that exported route. Its effective
+- **GRF-27** Each explicitly REF-typed position in a child output's declared
+  temporal schema exports only its designated endpoint or child-designation
+  tree through its owning node's output boundary. This applies recursively
+  through structural fields and collection elements, including REF result
+  slots packed into generated bundles; the containing output gains no outer
+  REF. A parent consumer may follow each exported route. Its effective
   producer in the parent is the owning node: child evaluation must complete
   within that owner before the later-ranked parent consumer evaluates
   (GRF-15/21). Further exports compose through each enclosing owner's output
