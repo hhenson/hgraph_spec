@@ -1,6 +1,6 @@
 # Default expression binding scope cases
 
-[DEF-1–5](../language/docs/design/default-binding-scope.md) specify the
+[DEF-1–6](../language/docs/design/default-binding-scope.md) specify the
 scope of existing field and parameter defaults. The
 [positive source](../language/examples/default-binding-scope.hgl) exercises
 module declarations, formal/field shadowing and generic contextual defaults.
@@ -22,6 +22,8 @@ then repeat with the provider precompiled and its default binding artifact.
 | Imported/default specialization has a consumer declaration with the same short name | Preserve the defining binding closure; no caller capture. |
 | An exported generic struct or callable default calls a private helper that calls another private helper | Carry both bodies and their defining bindings; the consumer's colliding name changes neither default. Private helpers remain unavailable to imports. |
 | An externally visible non-generic implementation adds a defaulted parameter absent from its operator contract | Omitting that argument uses the candidate's defining closure, including required private helper bodies; it needs no `export fn` or `instantiate`. |
+| Compatible abstract parents contribute identical bound defaults using the same canonical declaration, including through import aliases | Merge the default; alias spelling and source location do not choose a different closure. |
+| Compatible imported parents use the spelling `seed()` but resolve to distinct private helpers, even if both yield the same constant | Require an explicit child override; textual or folded-value equality cannot choose a closure. |
 | Precompiled provider omits a needed default binding artifact, uses an incompatible version or leaves a binding unresolved | Reject checking without loading executable provider code or substituting consumer declarations. |
 | A substituted default is invalid, or descriptor/artifact/provider fingerprints disagree | Reject checking for an invalid default; reject fingerprint disagreement before wiring. |
 | Default needs an operation or phase absent from its constant context | Existing checking rules reject; the expression grammar adds no permission. |

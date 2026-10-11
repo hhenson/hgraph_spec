@@ -414,7 +414,8 @@ be removed. `null` is accepted as an inherited default only when the original
 field is optional.
 
 When multiple parents contribute a field name, type and optionality must agree.
-Equal defaults merge; differing defaults or a default supplied by only one
+Defaults identical under [DEF-6](../design/default-binding-scope.md) merge;
+differing defaults or a default supplied by only one
 parent require an explicit `inherited_default` in the child. Other conflicts
 are diagnosed. The stable field-linearization rule remains open and must be
 settled before implementation.

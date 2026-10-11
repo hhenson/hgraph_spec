@@ -7,6 +7,7 @@ export struct ImportedDefaults<T> {
     items: list<T> = []
     value: i64 = seed()
 }
+export abstract struct DefaultFamily { value: i64 = seed() }
 export fn configured(value: i64, const fallback: i64 = seed()) -> i64 {
     when { return value + fallback }
 }

@@ -532,10 +532,11 @@ export struct Future: market::Listing {
 
 `Future` keeps this module's namespace while its parent keeps `market.data`'s,
 and it carries the whole inherited layout — `symbol` is the same field for
-`Future` as for any other child of `Listing`. The same restriction applies as
-above: `Instrument`, with its `currency = "USD"` default, could not be
-imported, so a family meant to be extended across a module boundary avoids
-non-null defaults for now.
+`Future` as for any other child of `Listing`. Exported families may also carry
+non-null defaults: importing `Instrument` preserves its `currency = "USD"`
+default and any inherited overrides. Default expressions retain their defining
+bindings through [public default metadata](../design/modules.md#public-default-bindings);
+incomplete metadata is a checking error, not permission to drop a default.
 
 An abstract struct cannot be constructed. A concrete child may add no fields,
 as `GenericInstrument` does, when its nominal identity is the only additional
@@ -569,7 +570,10 @@ initial design has no syntax for removing one. `null` may be a descendant
 default only for a field that was originally declared optional.
 
 When multiple abstract parents contribute the same field name, its type and
-optionality must agree. Equal defaults merge. Different defaults, or a default
+optionality must agree. Defaults merge only when their bound expression/type IR
+agrees under [DEF-6](../design/default-binding-scope.md). Identical spelling such
+as `seed()` does not merge calls to different private declarations, even when
+both return the same constant. Different defaults, or a default
 from only one of otherwise compatible parents, require the child to choose an
 explicit default. A type or optionality conflict is always an error. The exact
 stable ordering rule for fields contributed by multiple parents remains open.

@@ -34,6 +34,12 @@ constructed.
   specialization check that artifact without loading executable provider code;
   missing, incompatible or unresolved bindings are checking errors. Private
   declarations remain unavailable to consumer imports.
+- **DEF-6 — Inherited default identity.** Compare defaults by bound
+  expression/type IR after complete canonical generic substitution, before
+  constant folding. Declaration references compare by canonical identity;
+  source locations and import aliases do not matter. Identical comparison IR
+  merges; otherwise the child must override. Preserve this IR in public default
+  metadata even when a checked constant payload is already available.
 
 ```hgl
 const fn seed() -> i64 => 7

@@ -197,6 +197,8 @@ It carries the default's expression and expected-type IR, generic environment,
 and every defining declaration needed to resolve and check it, transitively.
 Required private helper bodies and their bindings are included as IR; their
 canonical identities are preserved without making them importable.
+Default comparison preserves this bound identity under
+[DEF-6](default-binding-scope.md), even when constant payloads are precomputed.
 
 The consumer applies complete substitution and checks required constants in
 that closure under DEF-1–4. Loading executable provider code, calling a resolver
