@@ -317,8 +317,10 @@ rests on.
 4. Within a cycle, nodes are evaluated in rank order, each at most once.
 5. Bindings follow rank order. A same-graph producer has lower rank than its
    consumer; parent routes obey GRF-10/24. For an exported REF route, the
-   owning node is the effective producer at each enclosing graph level and
-   completes child evaluation before the later-ranked consumer (GRF-27).
+   owning node is the effective producer at each enclosing graph level. When
+   that owner evaluates in a cycle, its child evaluations complete before a
+   later-ranked consumer evaluates in that cycle (GRF-27). An idle live target
+   retains its state; following it does not force producer evaluation.
    Nothing reads downstream. Backward flow uses feedback: a sink schedules
    a source for a later cycle and carries a value, never a reference (TS-28).
 6. The schedule is the only activation gate. There is no other way to cause a

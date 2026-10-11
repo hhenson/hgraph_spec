@@ -493,9 +493,9 @@ of what the runtime provides for a graph that changes shape as it runs.
   cycle.
 - **GRF-14** A schedule entry, once set, moves only earlier until it is used.
   Evaluating a node uses its entry, however the node was woken.
-- **GRF-15** A node that produces is evaluated before every node bound to it
-  that is evaluated in the same cycle — however the binding was made: by an
-  edge, at a nested graph's boundary, or through a reference.
+- **GRF-15** When a producer and a node bound to it both evaluate in a cycle,
+  the producer is evaluated first — however the binding was made: by an edge,
+  at a nested graph's boundary, or through a reference.
 - **GRF-16** However many times a node's inputs are notified in a cycle, the
   node is evaluated once.
 - **GRF-17** A passive input never schedules its node.
@@ -527,11 +527,13 @@ of what the runtime provides for a graph that changes shape as it runs.
   through structural fields and collection elements, including REF result
   slots packed into generated bundles; the containing output gains no outer
   REF. A parent consumer may follow each exported route. Its effective
-  producer in the parent is the owning node: child evaluation must complete
-  within that owner before the later-ranked parent consumer evaluates
-  (GRF-15/21). Further exports compose through each enclosing owner's output
-  boundary; captured parent routes remain live through input boundaries
-  (GRF-10). This grants no direct access to other child endpoints or parallel
+  producer in the parent is the owning node. When that owner evaluates in a
+  cycle, any child evaluation completes within it before a later-ranked parent
+  consumer evaluates in that cycle (GRF-15/21). An independently awakened
+  consumer may read a live idle target's retained state without forcing that
+  owner to evaluate (GRF-11). Further exports compose through each enclosing
+  owner's output boundary; captured parent routes remain live through input
+  boundaries (GRF-10). This grants no direct access to other child endpoints or parallel
   graphs and no route around rank order (TS-20). Export preserves the actual
   designated endpoint and its owner; retaining its REF does not extend that
   endpoint's lifetime (GRF-19/23/25, TS-23).
@@ -600,8 +602,9 @@ Points to settle
    observable: the node's evaluation runs.
 9. **Nothing reaches backward.** Settled: every edge runs forward (GRF-4)
    and REF bindings obey TS-20. An exported route's effective producer is
-   the owning node at each enclosing level; child evaluation completes before
-   the later-ranked consumer (GRF-27). GRF-24 admits same-graph, parent and
+   the owning node at each enclosing level. When that owner evaluates in a
+   cycle, its child evaluations complete before a later-ranked consumer
+   evaluates in that cycle (GRF-27). GRF-24 admits same-graph, parent and
    explicitly exported routes, never direct parallel-graph access. Feedback
    schedules a source for a later cycle and carries values only (TS-28).
 10. **How long a stopped nested graph is kept.** Settled 2026-09-30 (owner):

@@ -352,8 +352,10 @@ reference.
   lower-ranked node in the same graph, a route that entered from the parent,
   or a designation explicitly exported through an owning child-output
   boundary (GRF-27). For an exported route, the effective producer in the
-  consuming graph is the owning node, which completes its child evaluation
-  before the later-ranked consumer runs. Repeated exports compose through
+  consuming graph is the owning node. When that owner evaluates in a cycle,
+  its child evaluations complete before a later-ranked consumer evaluates in
+  that cycle. An idle live target retains its state; following it does not
+  force its producer to evaluate (GRF-11). Repeated exports compose through
   owner boundaries, preserving the actual endpoint and its lifetime.
   References choose upstream data; they cannot bypass rank or directly reach
   unexported child endpoints or parallel graphs. Parent routes may be captured
@@ -406,11 +408,11 @@ still used and is retained. Unused-variable diagnostics belong to the
 authoring language, not to a different runtime pruning rule.
 
 A feedback carries values only, never time-series references (TS-28,
-owner 2026-09-30): a reference designates an output that must already have
-been evaluated when the consumer reads through it (TS-20), and a source
-ranked before the designated output cannot promise that. A feedback of a
-reference type is refused when the graph is described. The feedback operator
-itself is a library operator ([../library/](../library/README.md)).
+owner 2026-09-30): a reference follows an upstream producer that must precede
+the consumer whenever both evaluate in the same cycle (TS-20). A feedback
+source ranked before the designated output cannot promise that order. A
+feedback of a reference type is refused when the graph is described. The
+feedback operator itself is a library operator ([../library/](../library/README.md)).
 
 
 Rules
@@ -487,10 +489,13 @@ Rules
 - **TS-20** A reference designates an output of a node of lower rank in the
   same graph, a route that entered from the parent graph, or a designation
   exported through owning output boundaries (GRF-27). For an exported route,
-  the owning node is the effective producer at each enclosing graph level
-  and completes child evaluation before the later-ranked consumer. An input
-  bound through a reference therefore observes an output already evaluated
-  in the cycle. No direct route into a parallel graph is admitted.
+  the owning node is the effective producer at each enclosing graph level.
+  When that producer evaluates in a cycle, its child evaluations complete
+  before a later-ranked consumer evaluates in that cycle (GRF-15/21). A
+  reference-bound input reads the live target's latest state, including
+  retained state when its effective producer is idle. The reference does not
+  force an idle producer to evaluate (GRF-11). No direct route into a parallel
+  graph is admitted.
 - **TS-21** Only an output's own node changes it, and only during that
   node's evaluation. From the end of that evaluation to the end of the cycle,
   what the output shows does not change.
