@@ -518,8 +518,9 @@ Rules
   reads need not recompute them. Caches obey invalidation and rebind resets.
   Several consumers may instead share one assembly node and output.
 - **TS-28** A feedback carries a value, never a reference. A reference is
-  bound through only by a consumer of higher rank than the output it
-  designates; no construct carries one to a lower rank (owner, 2026-09-30).
+  bound through only by a consumer downstream of its producer under TS-20,
+  including the effective owning producer for an exported route. No construct
+  bypasses that order (owner, 2026-09-30).
 - **TS-29** An input is bound to an output only when the table under "What
   may bind to what" admits the pair, at every depth. There is no conversion
   at a binding.
@@ -567,8 +568,8 @@ Points to settle
    REF-EXPIRES fixes the cycle boundary and distinguishes using a saved
    reference from inserting a new dictionary member.
 4. **A reference carried backward.** Settled 2026-09-30 (owner): a feedback
-   may not operate on a reference; a reference is always of lower rank than
-   its consumer (TS-28). Wiring refuses a feedback of a reference type.
+   may not operate on a reference; its consumer follows its producer under
+   TS-20/28. Wiring refuses a feedback of a reference type.
 5. **When are two types compatible at a binding?** Settled 2026-09-30: the
    table under "What may bind to what" and TS-29, with the bundle rule the
    owner gave on 2026-09-26 (WIR-15).

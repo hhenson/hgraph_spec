@@ -595,16 +595,12 @@ Points to settle
    pending request, the schedule entry already written stays, so the node is
    considered once with nothing due. hgraph accepts this. It is harmless but
    observable: the node's evaluation runs.
-9. **Nothing reaches backward.** Settled: every edge runs forward (GRF-4),
-   and an input bound through a reference is held to the same rule (see
-   Time-series types, TS-20) — a reference chooses *which* upstream output to
-   read, never a downstream one. What looks like backward flow in hgraph is
-   not a binding: a feedback is a sink scheduling a source for a later cycle,
-   and the paired source and sink that services are built from are library.
-   Across graphs the rule is GRF-24: a nested graph reads from inside itself
-   or from its parent, never from a parallel graph. The residue, a reference
-   carried backward through a feedback, is closed by TS-28 (owner,
-   2026-09-30): a feedback carries values only.
+9. **Nothing reaches backward.** Settled: every edge runs forward (GRF-4)
+   and REF bindings obey TS-20. An exported route's effective producer is
+   the owning node at each enclosing level; child evaluation completes before
+   the later-ranked consumer (GRF-27). GRF-24 admits same-graph, parent and
+   explicitly exported routes, never direct parallel-graph access. Feedback
+   schedules a source for a later cycle and carries values only (TS-28).
 10. **How long a stopped nested graph is kept.** Settled 2026-09-30 (owner):
     GRF-25 is the rule and the minimum — finalised at the end of the cycle,
     reclaimable from the start of the next. hgraph keeping a switch's old
