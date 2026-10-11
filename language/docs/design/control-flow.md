@@ -500,6 +500,10 @@ the conditional's work or manufacture an output.
 
 Branch execution follows the runtime's [nested graph lifecycle](../../../runtime/graph.md).
 Conditional syntax does not define a second child-graph lifetime contract.
+A reference returned through the child boundary does not keep a branch-owned
+endpoint alive after that branch stops; TS-23 and GRF-25 govern its expiry.
+Forwarding a parent's endpoint does not change that endpoint's owner. See the
+[conditional reference expiry cases](../../../compiler/cases_reference_conditional_expiry.md).
 
 ## Scope and next topics
 
