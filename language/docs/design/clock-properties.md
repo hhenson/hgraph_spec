@@ -38,9 +38,10 @@ These properties retain the [engine clock rules](../../../runtime/execution_engi
   It is a lower bound on a following cycle's time, not a promise that a
   cycle will run then or a scheduling request.
 - In real time, `clock.now` reads UTC time from the computer's clock. In
-  simulation, the run's first `clock.now` read, in start, evaluation or stop,
-  establishes the elapsed-time origin and returns evaluation time. Later
-  reads return evaluation time plus real time elapsed from that origin.
+  simulation, the shared clock's first `now` or runtime-only `lag` read, in
+  any lifecycle phase, establishes the elapsed-time origin. A `clock.now`
+  read that establishes it returns evaluation time; after another node's
+  `now` or `lag` read, it includes elapsed time from the existing origin.
   Subsequent cycle starts sample a new origin; lifecycle phase boundaries
   retain it ([ENG-14](../../../runtime/execution_engine.md#rules)). Now may
   change between reads within one node or cycle. This contract adds no
