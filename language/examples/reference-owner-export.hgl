@@ -4,7 +4,7 @@ fn owned_value(value: i64) -> i64 {
     when { return delta_value(value) }
 }
 fn route(value: ref<i64>) -> ref<i64> {
-    when valid(value) && modified(value) { return value }
+    when { return value }
 }
 fn selected(enabled: bool, first: i64, second: i64) -> ref<i64> {
     var result: ref<i64>
