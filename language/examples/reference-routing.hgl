@@ -1,7 +1,7 @@
 module examples.reference_routing
 
 export fn forward(value: ref<f64>) -> ref<f64> {
-    when modified(value) && valid(value) {
+    when {
         return value
     }
 }
