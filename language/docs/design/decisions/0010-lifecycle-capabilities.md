@@ -38,9 +38,10 @@ method-call aliases are admitted.
    Next-cycle evaluation time is evaluation time plus
    the engine's smallest step and is equally stable within the cycle. Now is
    the engine's current wall-time estimate: UTC computer time in real time.
-   In simulation, the run's first `clock.now` read in any lifecycle phase
-   establishes an origin and returns evaluation time. Later reads add real
-   elapsed time from that origin; subsequent cycle starts replace it, while
+   In simulation, the shared clock's first `now` or runtime-only `lag` read
+   in any lifecycle phase establishes the origin. `clock.now` returns evaluation
+   time if it establishes that origin; otherwise it adds elapsed time from it.
+   Subsequent cycle starts replace the origin, while
    phase boundaries retain it (see [clock timing](../clock-properties.md#timing-semantics)).
    Neither method-call nor free-function aliases are admitted.
 
