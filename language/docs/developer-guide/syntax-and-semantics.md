@@ -303,7 +303,7 @@ resolve under [DEF-1–4](../design/default-binding-scope.md), before the
 declaring callable's formal bindings or struct's instance-field bindings.
 `const` marks wiring-time function parameters and wiring-time generic values;
 it is not a general local-variable qualifier. `export` applies to a named
-ordinary exact `fn` or a `struct`; other declarations reject it. `impl` marks
+ordinary exact `fn`, a `struct`, or a `native type`; other declarations reject it. `impl` marks
 a named `fn` as an implementation of an operator in scope; the two function
 modifiers are mutually exclusive. Operators are public without a modifier.
 `instantiate` is a module-level request for generic operator implementation
