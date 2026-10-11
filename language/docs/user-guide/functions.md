@@ -902,10 +902,11 @@ run's start time; stop retains the last cycle's time, or the start time if
 no cycle ran. `clock.next_cycle_evaluation_time` is that time plus the engine's smallest
 step, and `clock.now` is the engine's wall-time estimate. Evaluation and
 next-cycle time remain constant within a cycle. Now may change between
-reads: it is UTC computer time in real time. In simulation, the run's first
-`clock.now` read, whether in start, evaluation or stop, establishes an origin
-and returns evaluation time. Later reads add real elapsed time from that
-origin; subsequent cycle starts replace it, while phase boundaries retain it.
+reads: it is UTC computer time in real time. In simulation, the shared clock's
+first `now` or runtime-only `lag` read in any lifecycle phase establishes the
+origin. `clock.now` returns evaluation time if it establishes that origin;
+otherwise it adds elapsed time from it. Subsequent cycle starts replace the
+origin; lifecycle phase boundaries retain it.
 These are property reads, with no method-call or free-function aliases;
 see [clock properties](../design/clock-properties.md#timing-semantics).
 
