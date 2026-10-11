@@ -21,6 +21,7 @@ then repeat with the provider precompiled and its default binding artifact.
 | Contextual empty `list<T>` default in two complete generic struct specializations | Check and retain the correct ordinary list type for each specialization. |
 | Imported/default specialization has a consumer declaration with the same short name | Preserve the defining binding closure; no caller capture. |
 | An exported generic struct or callable default calls a private helper that calls another private helper | Carry both bodies and their defining bindings; the consumer's colliding name changes neither default. Private helpers remain unavailable to imports. |
+| An externally visible non-generic implementation adds a defaulted parameter absent from its operator contract | Omitting that argument uses the candidate's defining closure, including required private helper bodies; it needs no `export fn` or `instantiate`. |
 | Precompiled provider omits a needed default binding artifact, uses an incompatible version or leaves a binding unresolved | Reject checking without loading executable provider code or substituting consumer declarations. |
 | A substituted default is invalid, or descriptor/artifact/provider fingerprints disagree | Reject checking for an invalid default; reject fingerprint disagreement before wiring. |
 | Default needs an operation or phase absent from its constant context | Existing checking rules reject; the expression grammar adds no permission. |

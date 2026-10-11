@@ -10,3 +10,8 @@ export struct ImportedDefaults<T> {
 export fn configured(value: i64, const fallback: i64 = seed()) -> i64 {
     when { return value + fallback }
 }
+
+operator adjust<T>(value: T) -> T
+impl fn adjust(value: i64, const fallback: i64 = seed()) -> i64 {
+    when { return value + fallback }
+}

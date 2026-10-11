@@ -1,7 +1,9 @@
 module examples.default_binding_consumer
-use examples.default_binding_provider::{ImportedDefaults, configured}
+use examples.default_binding_provider::{ImportedDefaults, configured, adjust}
 
 const fn seed() -> i64 => 999
+fn adjusted(value: i64) -> i64 => adjust(value)
+fn adjusted_override(value: i64) -> i64 => adjust(value, fallback: 3)
 
 test {
     test imported_defaults_keep_private_defining_bindings {
@@ -13,6 +15,9 @@ test {
         # A callable default uses that same closure; supplied values override it.
         assert eval(configured, value: [1, 2]) == [8, 9]
         assert eval(configured, value: [1, 2], fallback: 3) == [4, 5]
+        # The public candidate has its own default, absent from the contract.
+        assert eval(adjusted, value: [1, 2]) == [8, 9]
+        assert eval(adjusted_override, value: [1, 2]) == [4, 5]
         assert seed() == 999
     }
 }

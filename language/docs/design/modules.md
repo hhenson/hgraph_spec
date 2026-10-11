@@ -29,7 +29,7 @@ A native package that supports the language supplies a descriptor containing:
   constraints, and abstract-family relationships;
 - specialization artifact references for requested candidates whose retained
   parameters affect body or storage types;
-- binding artifact references for exported default expressions;
+- binding artifact references for public declaration and candidate defaults;
 - target-specific native dependencies and binding metadata;
 - explicit module initialization, registry installation, deinitialization, and
   registration-removal entry points;
@@ -188,10 +188,11 @@ Every candidate and call retains the canonical operator identity, rather than
 reconstructing it from a short name. A target binding may map that identity to
 a native symbol; the mapping does not create another operator.
 
-## Exported default bindings
+## Public default bindings
 
-An exported field or callable parameter default retained as an expression
-requires a versioned compiler-input artifact referenced by its descriptor.
+A field or callable parameter default retained as an expression for a public
+declaration or externally visible implementation candidate requires a versioned
+compiler-input artifact referenced by its descriptor.
 It carries the default's expression and expected-type IR, generic environment,
 and every defining declaration needed to resolve and check it, transitively.
 Required private helper bodies and their bindings are included as IR; their
@@ -202,8 +203,8 @@ that closure under DEF-1–4. Loading executable provider code, calling a resolv
 callback or capturing a consumer declaration cannot replace the artifact.
 A missing or incompatible artifact, unresolved binding or invalid substituted
 default is a checking error. Descriptor, artifact and linked provider
-fingerprints must agree before wiring. This artifact is required independently
-of implementation-candidate selection or `instantiate`.
+fingerprints must agree before wiring. Candidate defaults follow this rule even
+when the implementation body needs no retained-specialization artifact.
 
 ## Cross-module retained specialization
 

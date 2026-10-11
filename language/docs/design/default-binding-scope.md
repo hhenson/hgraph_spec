@@ -27,8 +27,9 @@ constructed.
   phase or capture. Ordinary `const fn` value parameters may have defaults;
   ordinary temporal parameters may not. Default ownership and retention retain
   their existing contracts.
-- **DEF-5 — Imported default closure.** An exported default retained as an
-  expression carries its defining bindings in a descriptor-referenced compiler
+- **DEF-5 — Imported default closure.** A default retained as an expression
+  for a public declaration or externally visible implementation candidate
+  carries its defining bindings in a descriptor-referenced compiler
   artifact, including required private declarations and bodies. Import and
   specialization check that artifact without loading executable provider code;
   missing, incompatible or unresolved bindings are checking errors. Private
@@ -52,4 +53,4 @@ See [source cases](../../../compiler/cases_default_binding_scope.md),
 [name resolution and specialization](../developer-guide/syntax-and-semantics.md),
 [value-function defaults](../user-guide/value-functions.md),
 [struct default retention](struct-constructor-order.md), and
-[module default bindings](modules.md#exported-default-bindings).
+[module default bindings](modules.md#public-default-bindings).
