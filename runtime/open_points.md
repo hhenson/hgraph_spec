@@ -9,7 +9,7 @@ stays in its chapter with its ruling.
 
 | Point | Ruling | Where |
 |---|---|---|
-| A reference carried backward through a feedback | A feedback carries values only; a reference is always of lower rank than its consumer | TS-28; Graph point 9; TS point 4 |
+| A reference carried backward through a feedback | A feedback carries values only; REF consumers follow producer order under TS-20, using the owning node at each enclosing level for exported routes | TS-20/28; GRF-27; Graph point 9; TS point 4 |
 | How long a removed thing is kept | Finalised at the end of its cycle; reclaimable from the start of the next; later at the implementation's option | Overview rule 15; GRF-25; Graph point 10 |
 | Wiring and operators in the runtime chapters | Wiring is specified apart from the runtime; operators are wiring (resolution) and library (contracts); the runtime starts at the builder boundary | Overview; `wiring/`; `library/` |
 | Required versus optional behaviour | Chapter rules are required; deferred facilities are optional and named in a conformance claim | Conformance |
