@@ -1560,6 +1560,11 @@ Direct `bool` equality and comparison follow [BOOL-1](../design/bool-scalar-capa
 Boolean equality/hash and total order with false before true, without numeric
 conversion.
 
+Node `==`/`!=` on readable operands of the same resolved `ref<T>` type
+compares opaque designation identity under
+[REF-EQ-1](../design/type-extensions.md#node-access-and-ticks), without a
+read through either operand. This does not admit additional graph operators.
+
 Calls use positional arguments followed by named arguments:
 
 ```hgl
