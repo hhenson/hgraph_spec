@@ -90,7 +90,7 @@ duration run. `temporal_literal` and `duration_literal` are defined under
 The hard reserved words are:
 
 ```text
-module part use as export abstract impl instantiate operator fn cpp struct const requires is let var state cache inject return if else
+module part use as export abstract impl instantiate operator fn cpp struct enum const requires is let var state cache inject return if else
 start when stop for while yield test assert eval
 true false null
 bool i64 f64 str bytes any date time datetime duration
@@ -119,13 +119,12 @@ and `state`, and each block keyword carries its own placement rule, so there is
 no ambiguity to resolve by making them contextual; they are withheld from
 parameter and variable names deliberately to keep a runtime body readable.
 
-No other word is reserved. In particular `switch`, `case`, `default`, `enum`,
-and `elements` lex as ordinary identifiers today. `elements` is a checked
-prelude intrinsic, like `values`, and does not need to be reserved. The agreed
-[switch](../design/switch.md) and
-[enum](../design/type-extensions.md#enum-types) extensions remain provisional:
-a program using them gets generic parse or name diagnostics, not one that names
-the construct. The agreed `str(value)` extension uses the reserved `str` token in
+No other word is reserved. In particular `switch`, `case`, `default`, and `elements` lex as ordinary
+identifiers. `elements` is a checked
+prelude intrinsic, like `values`, and does not need to be reserved. The agreed [switch](../design/switch.md) extension remains provisional:
+a program using it gets generic parse or name diagnostics, not one that names
+the construct. `enum` introduces a declaration under the grammar below; member
+references use the existing `Type::member` qualified-name form. The agreed `str(value)` extension uses the reserved `str` token in
 an expression position as a conversion call; it remains a type name in an
 annotation and does not become an unrestricted identifier or a general
 type-constructor call rule. It is provisional too: `str` is not an expression
@@ -179,7 +178,7 @@ use_decl        = "use", module_path,
                   ( "::", import_set | "as", identifier );
 import_set      = "{", identifier, { ",", identifier }, [ "," ], "}";
 
-declaration     = cpp_include_decl | struct_decl | operator_decl | instantiate_decl
+declaration     = cpp_include_decl | struct_decl | enum_decl | operator_decl | instantiate_decl
                 | function_decl | native_function_decl | native_type_decl | test_decl | test_context;
 cpp_include_decl
                 = "cpp", "include", cpp_header;
@@ -189,6 +188,10 @@ struct_decl     = [ "export" ], [ "abstract" ], "struct", identifier,
                   [ ":", struct_parent, { ",", struct_parent } ],
                   [ requires_clause ], "{", [ NL ],
                   [ struct_member, { NL, struct_member }, [ NL ] ], "}";
+enum_decl       = "enum", identifier, "{", [ NL ],
+                  [ enum_member, { ",", [ NL ], enum_member }, [ "," ] ],
+                  [ NL ], "}";
+enum_member     = identifier, [ "=", const_expression ];
 struct_parent   = named_type;
 struct_member   = struct_field | inherited_default;
 member_name     = identifier | "time";
@@ -1494,11 +1497,15 @@ to accept the signed minimum without first narrowing its positive decimal
 magnitude to `i64`. These are enum declaration checks, not a general runtime
 integer-overflow policy or a native ABI decision.
 
+Enum declarations are module-private in this slice; `export enum` is rejected.
+Enum descriptor exports and cross-module member imports remain outside this
+module contract.
+
 An enum is a distinct atomic scalar type, not an integer alias. Preserve that
 identity in equality and switch checking; an assigned number or a member of
-another enum is not an interchangeable case label. Integer conversion is
-explicit and uses a type-name call like string conversion; its exact source
-spelling remains to be confirmed. Enumeration exposes member-name strings
+another enum is not an interchangeable case label. Conversion into an enum uses its type-name call with an integer or string
+operand, as defined below. Conversion from an enum to its assigned integer
+remains a separate open spelling. Enumeration exposes member-name strings
 through `keys`, assigned integers through `values`, and typed enum instances
 through `elements`. All three views iterate in declaration order, never
 numeric or alphabetical order. The enum-type calls are `keys(Mode)`,
@@ -2187,8 +2194,9 @@ test midpoint_waits_for_both_sides {
 
 ```ebnf
 test_decl        = "test", identifier, block;
-test_context     = "test", "{", { test_helper | test_decl }, "}";
+test_context     = "test", "{", { test_helper | test_type | test_decl }, "}";
 test_helper      = function_decl; (* private fn or const fn only *)
+test_type        = struct_decl | enum_decl; (* unexported only *)
 assert_statement = "assert", ( expression | raises_assertion );
 raises_assertion = "raises", "(", expression, ")", block;
 eval_expression  = "eval", "(", expression, { ",", argument }, ")";
@@ -2205,8 +2213,9 @@ unique within a module. A `test` body is a composition-phase block plus
 Test declarations are available to the test runner and are omitted from the
 production module artifact.
 
-An unnamed `test { ... }` context contains private function helpers and named
-test declarations. Its declarations join a single module-wide test scope;
+An unnamed `test { ... }` context contains private function helpers,
+test-local `struct` and `enum` declarations, and named test declarations. Its
+declarations join a single module-wide test scope;
 separate contexts and module parts do not introduce separate helper scopes.
 Named tests outside a context use the same test scope. Helpers may reference
 one another forward and may use ordinary module-private declarations. Test
@@ -2216,8 +2225,16 @@ helper roles or test names in the test scope are errors.
 
 Production declarations resolve without the test scope. Test helpers cannot
 be exported, imported by another module, or implemented as operator overloads.
-The initial context admits only private `fn`/`const fn` helpers and named
-tests, not nested contexts, imports, native declarations, or type declarations.
+A test-local type is an unexported `struct` or `enum` declared in a context.
+It joins the same test scope: every test context and named test of the module
+can name it, production declarations cannot, other modules cannot import it,
+and it is omitted from production artifacts and module descriptors. Its name
+must be free in the module: unlike a helper, a test-local type cannot shadow
+a production declaration or import, because a type's identity is its
+module-wide schema name, so such a declaration is an error.
+A context admits private `fn`/`const fn` helpers, test-local types, and named
+tests, not nested contexts, imports, native declarations, or operator
+implementations.
 It contains declarations rather than executable statements; assertions belong
 in named cases. Declarations are newline-separated, except immediately before
 the closing brace, as in ordinary statement blocks.
