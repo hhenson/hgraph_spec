@@ -1,0 +1,12 @@
+module examples.default_binding_provider
+
+const fn base() -> i64 => 7
+const fn seed() -> i64 => base()
+
+export struct ImportedDefaults<T> {
+    items: list<T> = []
+    value: i64 = seed()
+}
+export fn configured(value: i64, const fallback: i64 = seed()) -> i64 {
+    when { return value + fallback }
+}

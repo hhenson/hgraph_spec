@@ -29,6 +29,7 @@ A native package that supports the language supplies a descriptor containing:
   constraints, and abstract-family relationships;
 - specialization artifact references for requested candidates whose retained
   parameters affect body or storage types;
+- binding artifact references for exported default expressions;
 - target-specific native dependencies and binding metadata;
 - explicit module initialization, registry installation, deinitialization, and
   registration-removal entry points;
@@ -71,7 +72,8 @@ public child whose abstract parent is module-private remains to be defined.
 For a generic struct, the public descriptor carries the origin, ordered type
 and `const` parameter kinds, constraint IR, and unsubstituted field, default,
 and parent expressions. A downstream target can therefore validate and create
-the same fully applied nominal specializations without loading user code.
+the same fully applied nominal specializations without loading executable user
+code. Retained default expressions use the binding artifacts defined below.
 
 A `native type` binding is module-private unless declared `export native type`.
 Export places its qualified source binding, canonical native scalar mapping
@@ -185,6 +187,23 @@ signature, requirements and properties through registration.
 Every candidate and call retains the canonical operator identity, rather than
 reconstructing it from a short name. A target binding may map that identity to
 a native symbol; the mapping does not create another operator.
+
+## Exported default bindings
+
+An exported field or callable parameter default retained as an expression
+requires a versioned compiler-input artifact referenced by its descriptor.
+It carries the default's expression and expected-type IR, generic environment,
+and every defining declaration needed to resolve and check it, transitively.
+Required private helper bodies and their bindings are included as IR; their
+canonical identities are preserved without making them importable.
+
+The consumer applies complete substitution and checks required constants in
+that closure under DEF-1–4. Loading executable provider code, calling a resolver
+callback or capturing a consumer declaration cannot replace the artifact.
+A missing or incompatible artifact, unresolved binding or invalid substituted
+default is a checking error. Descriptor, artifact and linked provider
+fingerprints must agree before wiring. This artifact is required independently
+of implementation-candidate selection or `instantiate`.
 
 ## Cross-module retained specialization
 
