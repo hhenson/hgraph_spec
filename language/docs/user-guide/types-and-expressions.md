@@ -52,8 +52,11 @@ publication; `atomic<Token>` and `delta<Token>` are Token. See
 `any(value)` retains an independent typed value; `any()` is a present empty
 box. A box carries one whole value per tick, including a list or struct.
 `atomic<any>` and `delta<any>` are `any`. Different contained types are unequal
-and unordered; missing contained capabilities fail with `value.capability`.
-See [ANY-1–5](../design/any-values.md) and [examples](../../examples/any-values.hgl).
+and unordered. Executed missing-capability operations fail with
+`value.capability`; a statically known missing capability in a required constant
+fails checking with category `type` and code `value.constant_capability`.
+See [ANY-1–5](../design/any-values.md), [examples](../../examples/any-values.hgl)
+and [required-constant cases](../../examples/reject/any-constant-capability.hgl).
 
 ## Bytes values
 

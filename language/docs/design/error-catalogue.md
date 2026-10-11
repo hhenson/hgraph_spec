@@ -73,6 +73,7 @@ after an earlier failure prevents checking a construct.
 | `type` | `rolling.size_bounds` | Sizes have valid matching kinds, but a tick size is nonpositive, a duration maximum is nonpositive, a duration minimum is negative, or minimum exceeds maximum. Locate the offending size argument; for minimum exceeding maximum, the minimum. |
 | `type` | `yield.time_type` | A yield time operand is neither `duration` nor `datetime`. Locate that operand. |
 | `type` | `test.raises_code` | A syntactically valid `raises` argument is not a single string literal naming a catalogued execution code. Locate the argument. Check its source form before constant folding. |
+| `type` | `value.constant_capability` | During required constant evaluation, a boxed operation or key construction is statically known to require equality, hash or order absent from its contained type under ANY-3/5. Locate the required operation or key expression. Existing type, phase and constructor formation checks precede this failure. |
 | `shape` | `delta.unsupported_shape` | A resolved concrete T in `delta<T>` has no admitted delta type. Locate a written concrete T in that application. If generic substitution discovers the failure, locate the constraining call or constructor and identify the failing delta application. |
 | `type` | `delta.type_mismatch` | A supplied expression fails the existing assignment/contextual typing rules for an explicitly required `delta<T>`, or a structural delta is supplied to an incompatible ordinary destination. Locate the supplied expression. Structural originating shapes must agree exactly; reduced scalar, atomic and rolling types retain their ordinary value rules. |
 | `name` | `delta.argument_name` | A structural delta constructor uses an unknown argument or field name. Locate that name. |
@@ -88,6 +89,8 @@ Malformed syntax inside a `raises` argument is a parse error, not
 `test.raises_code`. In particular the grammar admits an expression there but
 the static rule requires a literal. The two catalogues are disjoint: an
 execution code cannot be used as a source-error code or conversely.
+
+Examples: [mixed required-constant and executed cases](../../examples/reject/any-constant-capability.hgl).
 
 For these delta codes, formation precedes use, and entry typing and constant
 admission precede equality/bounds checks that require them. No cascade is
