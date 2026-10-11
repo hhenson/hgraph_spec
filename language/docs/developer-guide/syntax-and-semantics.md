@@ -189,8 +189,8 @@ struct_decl     = [ "export" ], [ "abstract" ], "struct", identifier,
                   [ requires_clause ], "{", [ NL ],
                   [ struct_member, { NL, struct_member }, [ NL ] ], "}";
 enum_decl       = [ "export" ], "enum", identifier, "{", [ NL ],
-                  enum_member, { ",", [ NL ], enum_member },
-                  [ "," ], [ NL ], "}";
+                  [ enum_member, { ",", [ NL ], enum_member }, [ "," ] ],
+                  [ NL ], "}";
 enum_member     = identifier, [ "=", const_expression ];
 struct_parent   = named_type;
 struct_member   = struct_field | inherited_default;
@@ -306,7 +306,8 @@ resolve under [DEF-1–4](../design/default-binding-scope.md), before the
 declaring callable's formal bindings or struct's instance-field bindings.
 `const` marks wiring-time function parameters and wiring-time generic values;
 it is not a general local-variable qualifier. `export` applies to a named
-ordinary exact `fn`, a `struct`, or a `native type`; other declarations reject it. `impl` marks
+ordinary exact `fn`, a `struct`, an `enum`, or a `native type`; other declarations
+reject it. `impl` marks
 a named `fn` as an implementation of an operator in scope; the two function
 modifiers are mutually exclusive. Operators are public without a modifier.
 `instantiate` is a module-level request for generic operator implementation
