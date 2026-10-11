@@ -303,8 +303,8 @@ classDiagram
 - Every graph in a run, however deeply nested, **reads** the one clock the
   engine owns. A nested graph has no clock, no run mode and no push sources
   of its own.
-- An input in one graph may be **bound to** an output in a graph that
-  encloses it. Nothing else crosses a graph's boundary.
+- Cross-graph input **bindings** use enclosing-graph routes or exported REF
+  positions through owning outputs (GRF-10/24/27); producer order still applies.
 
 ### State
 
