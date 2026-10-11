@@ -20,7 +20,8 @@ A native package that supports the language supplies a descriptor containing:
 - canonical language module name and version;
 - compatible hgraph SDK and descriptor-format versions;
 - automatically public nominal operator contracts, explicitly exported exact
-  functions, and exported concrete and abstract struct declarations;
+  functions, exported concrete and abstract struct declarations, and exported
+  native atomic type bindings;
 - operator implementation candidates, including explicit generic
   materializations with any retained resolver parameters, indexed by canonical operator identity,
   provider module, implementation kind, and generic signature;
@@ -71,6 +72,12 @@ For a generic struct, the public descriptor carries the origin, ordered type
 and `const` parameter kinds, constraint IR, and unsubstituted field, default,
 and parent expressions. A downstream target can therefore validate and create
 the same fully applied nominal specializations without loading user code.
+
+A `native type` binding is module-private unless declared `export native type`.
+Export places its qualified source binding, canonical native scalar mapping
+and shared capability contract in the descriptor. Selective imports and module
+aliases expose that same type binding under [NVAL-1/2](native-atomic-values.md);
+they do not create another canonical type or expose its representation.
 
 An `impl fn` is neither a private helper nor an independently exported exact
 function. A non-generic implementation contributes a public candidate to its
@@ -125,8 +132,8 @@ For either form, the compiler:
 
 1. locates the `hgraph.analytics` descriptor through the package search path;
 2. checks its hgraph and language compatibility constraints;
-3. adds its public operators, exported exact functions, and exported nominal
-   structs to name and type resolution;
+3. adds its public operators, exported exact functions, exported nominal
+   structs and exported native atomic type bindings to name and type resolution;
 4. records the referenced declarations and their defining modules in typed IR.
 
 An import does not activate an implementation provider. Generated code includes
@@ -250,6 +257,8 @@ enter the public declaration surface. `impl fn` declarations are registered
 as their operator's candidates when non-generic; generic implementations
 register only their explicit materializations. Their source bodies still determine
 whether each candidate lowers as composition or a runtime node.
+Exported native atomic bindings enter this declaration surface as types with
+their descriptor mappings/capabilities under NVAL-1/2, rather than candidates.
 Exported structs enter the same declaration surface as nominal types rather
 than callable candidates. Their parent relationships also enter the target's
 type-registration inventory. The complete linked module closure, rather than

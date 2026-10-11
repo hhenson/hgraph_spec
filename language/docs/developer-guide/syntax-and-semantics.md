@@ -11,7 +11,7 @@ is accepted.
 
 `const fn` identifies non-temporal value functions; parameter-level `const`
 retains its wiring-time meaning. See [role selection and lifting](../user-guide/value-functions.md).
-Native type lifecycle forms and target-mapping syntax remain open in
+Opaque resource-state lifecycle forms and target-mapping syntax remain open in
 [ADR 0008](../design/decisions/0008-temporal-contracts-and-target-mappings.md).
 
 ## Lexical rules
@@ -93,7 +93,7 @@ The hard reserved words are:
 module part use as export abstract impl instantiate operator fn cpp struct const requires is let var state cache inject return if else
 start when stop for while yield test assert eval
 true false null
-bool i64 f64 str date time datetime duration
+bool i64 f64 str bytes any date time datetime duration
 civil_datetime zoned_datetime zoned_time timezone
 ```
 
@@ -149,7 +149,8 @@ Delta type formation retains its finite admitted shape domain.
 and the pack-reflection functions `len`, `keys`, `types`, and `type_at` are
 compile-time intrinsics inside a `requires` clause.
 `native` is contextual at the start of a declaration, so it remains available
-as an ordinary name or module alias elsewhere. `include` is contextual after
+as an ordinary name or module alias elsewhere. `type` is contextual after
+`native` in a native atomic declaration. `include` is contextual after
 `cpp`; elsewhere it remains an ordinary name. `cpp` is reserved and introduces
 either a module-local C++ header dependency or the opaque C++ projection of a
 `native fn`.
@@ -179,7 +180,7 @@ use_decl        = "use", module_path,
 import_set      = "{", identifier, { ",", identifier }, [ "," ], "}";
 
 declaration     = cpp_include_decl | struct_decl | operator_decl | instantiate_decl
-                | function_decl | native_function_decl | test_decl | test_context;
+                | function_decl | native_function_decl | native_type_decl | test_decl | test_context;
 cpp_include_decl
                 = "cpp", "include", cpp_header;
 cpp_header      = "<", header_name, ">" | '"', header_name, '"';
@@ -211,6 +212,7 @@ materialization_argument
 function_decl   = ( [ "export" | "impl" ], "fn" | "const", "fn" ), identifier,
                   [ generic_parameters ], function_signature,
                   [ requires_clause ], function_body;
+native_type_decl = [ "export" ], "native", "type", identifier;
 native_function_decl
                 = "native", [ "const" ], "fn", identifier, [ generic_parameters ],
                   function_signature, [ "throws" ], [ requires_clause ],
@@ -461,7 +463,7 @@ generic_arguments
                   { ",", generic_argument }, [ "," ], ">";
 generic_argument
                 = type | const_expression;
-scalar_type     = "bool" | "i64" | "f64" | "str"
+scalar_type     = "bool" | "i64" | "f64" | "str" | "bytes" | "any"
                 | "date" | "time" | "datetime" | "duration"
                 | "civil_datetime" | "zoned_datetime"
                 | "zoned_time" | "timezone";
@@ -1371,9 +1373,13 @@ postfix_expr   = primary_expr,
                  | ".", member_name };
 primary_expr   = literal | placeholder | identifier | qualified_name
                | "(", expression, ")" | tuple_literal | sequence_literal
-               | generic_constructor | delta_expression
+               | generic_constructor | delta_expression | bytes_constructor | any_constructor
                | function_expr | if_expression | eval_expression | value_selector | block;
 value_selector = "const", "(", identifier, ")";
+any_constructor = "any", "(",
+                  [ argument, { ",", argument }, [ "," ] ], ")";
+bytes_constructor = "bytes", "(",
+                    [ argument, { ",", argument }, [ "," ] ], ")";
 generic_constructor
                = ( identifier | qualified_name ), generic_arguments,
                  "(", [ struct_arguments ], ")";
@@ -1527,6 +1533,16 @@ The enum result remains its member name. In particular, do not assume native
 for all scalar types; bind the source contract to the appropriate native
 operation. No compiler or runtime implementation is changed by this record.
 
+`bytes` is reserved as a scalar type and admitted as the constructor call head
+`bytes()` or `bytes(ordinary_i64_list)`. Check zero or one positional argument
+and an ordinary fixed/unbounded i64 list type before execution. Construction,
+octet validation, ordinary length/equality/order and phase rules are specified
+by [BYTE-1–6](../design/bytes-values.md). This grammar adds no byte literal,
+byte indexing or runtime list-literal admission.
+The `any()` and `any(ordinary_value)` forms follow [ANY-1–5](../design/any-values.md).
+Check argument count, ownership and ordinary phase before lowering.
+
+
 Expression precedence is:
 
 | Precedence, high to low | Tokens |
@@ -1665,7 +1681,7 @@ The frontend first resolves a canonical value type, then expands it in temporal
 context:
 
 ```text
-temporalize(bool | i64 | f64 | str)
+temporalize(bool | i64 | f64 | str | bytes)
     = atomic hgraph endpoint carrying that scalar
 
 temporalize(date | time | datetime | duration | civil_datetime
@@ -2503,3 +2519,6 @@ records questions that require language rules. Remaining design work includes:
 
 Native signatures and selected target bodies follow the
 [implementation-part rules](../design/native-implementation-parts.md).
+
+[Native atomic declarations](../design/native-atomic-values.md) admit
+`native type Name` and exported forms as opaque nominal value types.

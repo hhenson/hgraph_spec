@@ -125,8 +125,9 @@ no allocation-free payload construction, assignment or insertion.
 [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md) still determines
 const keys, concrete value types, preparation before start and required-read
 presence errors. Binding/access mode is not part of entry type identity.
-Aggregate entries are mutable storage; get does not infer type from node role
-or add per-hook key lookup or dynamic type dispatch.
+Aggregate entries, including [any boxes](any-values.md), are mutable storage.
+Get does not infer type from node role or add per-hook key lookup or dynamic
+type dispatch.
 
 For aggregate V, bind read-only access with:
 
@@ -144,10 +145,12 @@ Each form requires the expected concrete ordinary type. The first borrows
 read-only access. The second borrows exclusive writable access to the existing
 entry, without making an owning local copy. Both are available in start,
 evaluation and stop hooks. An uninitialized entry still makes get fail.
-Primitive reads of `bool`, `i64`, `f64`, `str`, `date`, `time`, `datetime`,
+Primitive reads of `bool`, `i64`, `f64`, `str`, `bytes`, `date`, `time`, `datetime`,
 `duration`, `civil_datetime`, `timezone`, `zoned_datetime` and `zoned_time` retain their
 owned-copy behavior: `var n: i64 = get(...)` is an
 ordinary local, and assigning n does not update the stored integer.
+Declared enum and [native atomic](native-atomic-values.md) reads likewise
+produce independent ordinary copies; `any` remains an aggregate borrow.
 
 A borrow lasts to the end of its declaring lexical block, never beyond the
 hook. It cannot escape in a closure, through an ordinary helper call, or as a

@@ -1,0 +1,30 @@
+module examples.native_atomic_values
+
+# The provider declares Token's owning copy/text, equality, hash and order.
+# Both targets implement these helpers through their checked native interface.
+native type Token
+native const fn token(text: str) -> Token
+native const fn token_text(value: Token) -> str
+
+fn pass_through<T>(value: T) -> T {
+    when { return delta_value(value) }
+}
+fn forward(value: Token) -> Token => pass_through(value)
+fn make_each(value: str) -> Token {
+    when { return token(value) }
+}
+fn observe(value: Token) -> str {
+    when { return token_text(value) }
+}
+fn round_trip(value: str) -> str => observe(pass_through(make_each(value)))
+
+test {
+    test native_atomic_values_preserve_equal_ticks_and_silence {
+        let first: Token = token("first")
+        let second: Token = token("second")
+        assert first == token("first")
+        assert first != second
+        assert eval(forward, [first, first, _, second, _]) == [first, first, _, second, _]
+        assert eval(round_trip, ["first", "first", _, "second", _]) == ["first", "first", _, "second", _]
+    }
+}

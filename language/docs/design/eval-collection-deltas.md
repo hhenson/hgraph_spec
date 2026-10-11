@@ -11,7 +11,8 @@ boundaries are listed in [ADR 0016](decisions/0016-eval-scalar-buffer-capabiliti
 ## Publication shape admission
 
 Admit the recursive scalar, set, fixed-list, positional/named-bundle and
-integer-key-map shapes defined by the contextual collection contract, plus
+map shapes with [admitted keys](scalar-collection-keys.md), including
+[bytes leaves/keys](bytes-values.md), defined by the contextual collection contract, plus
 [finite atomic shapes](atomic-delta-publications.md) at the top level or as
 children. Atomic publications are complete values, not sparse patches.
 Exact concrete input/output shapes must be known before graph construction.

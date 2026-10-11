@@ -4,6 +4,7 @@ The public HGL language and runtime specification: rules, HGL examples,
 reasoned traces and accepted decisions. No Python, C++ or Rust code lives here.
 
 - [Language model](language/docs/design/language-model.md)
+- [Bytes values and publications](language/docs/design/bytes-values.md)
 - [Empty sparse delta application](language/docs/design/empty-delta-validity.md) (accepted)
 - [Publication data and separately observed state](language/docs/design/publication-state-proposal.md) (proposed)
 - [Execution-error assertions](language/docs/design/execution-error-assertions.md)

@@ -136,8 +136,11 @@ represent an exact helper. The direct-wiring backend does not emulate native
 C++: a runtime-bearing program follows the existing generated, compiled, and
 loaded image path.
 
-Calls from wiring-time constant evaluation, automatic temporal lifting, and
-general compile-time execution are outside the first interface. Although the
+Calls from required wiring-time constant evaluation, automatic temporal
+lifting, and general compile-time execution are outside the first interface.
+[NVAL-3](native-atomic-values.md) separately admits descriptor-permitted
+ordinary executed test setup and cold materialization without runtime-only
+capabilities; the source checker never executes native code. Although the
 phase metadata can describe wiring, start, evaluation, and stop, the compiler
 accepts a call only in a phase named by the descriptor and the agreed
 canonical-value and collection-view slices are exercised in evaluation.
@@ -177,6 +180,8 @@ context in which the descriptor permits it. HGL then exposes it as a nominal
 atomic value through that canonical metadata.
 
 The compiler does not infer those operations from a C++ class definition.
+The [native atomic value contract](native-atomic-values.md) defines source
+declarations, capabilities and publication admission.
 
 ## Initial safety envelope
 

@@ -105,6 +105,8 @@ annotations isolate expected source errors alongside executable tests.
   node scheduler and the evaluation clock: a scheduler-driven source with no
   temporal input (`start { schedule(scheduler, 0s) }`, `when scheduled()`),
   `passivate(input)` after a count, and `clock.evaluation_time` (ADR 0010).
+- [`bytes-values.hgl`](bytes-values.hgl) specifies byte construction, exact
+  values, equal/empty publication ticks, silence and executed octet range errors.
 - [`native-provider.hgl`](native-provider.hgl) separates native scalar declarations
   from their providers and exercises injectable propagation through helpers.
   Implementations and provider binding tests live with each compiler/runtime.
@@ -176,3 +178,9 @@ The backend-parity module that is built both ways lives in
 `../tests/codegen/parity.hgl`; the expression-embedded temporal conditional
 is pinned there. The acceptance sequence is defined in the
 [Developer Guide](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/testing-and-compatibility.md#documentation-examples).
+
+- [`any-values.hgl`](any-values.hgl) checks typed boxes, present empty ticks,
+  runtime boxing and independent ordinary-value retention.
+
+- [`native-atomic-values.hgl`](native-atomic-values.hgl) declares the shared
+  Token provider contract and tests whole-value pass-through and projection.

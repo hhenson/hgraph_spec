@@ -47,7 +47,7 @@ Concept
 | `i64` | A 64-bit signed integer |
 | `f64` | A 64-bit floating-point number |
 | `str` | Text |
-| `bytes` | Uninterpreted bytes |
+| `bytes` | Uninterpreted bytes; HGL construction and publications follow [BYTE-1–6](../language/docs/design/bytes-values.md) |
 | `date` | A calendar date, with no zone |
 | `time` | A time of day, with no zone |
 | `datetime` | An instant on the UTC timeline, to the microsecond. The type of evaluation time |
@@ -57,7 +57,7 @@ Concept
 | `zoned_datetime` | An instant together with its zone and the offset that zone gave it |
 | `zoned_time` | A time of day in a named zone |
 | an **enum** | A named type with a fixed, ordered list of named members, each with an integer |
-| a **native atomic** | A type supplied from outside the language, opaque to it, brought in with whatever capabilities it declares |
+| a **native atomic** | A type supplied from outside the language, opaque to it, brought in with declared capabilities under [NVAL-1–5](../language/docs/design/native-atomic-values.md) |
 
 ### The composite kinds
 
@@ -68,7 +68,7 @@ Concept
 | **list** | Values of one type, in order; of a fixed length or any length |
 | **set** | Distinct values of one type, in no order |
 | **map** | Distinct keys of one type, each with a value of another |
-| **any** | A value of whatever type it is given, or nil. The value carries its type with it |
+| **any** | An owning typed value or nil; HGL construction and publications follow [ANY-1–5](../language/docs/design/any-values.md) |
 
 ### Value access and storage
 

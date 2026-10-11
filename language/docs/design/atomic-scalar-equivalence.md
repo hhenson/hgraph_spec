@@ -1,7 +1,7 @@
 # Atomic scalar equivalence
 
 For every non-composite value type S, `atomic<S>` and S are the same canonical
-type. This includes `bool`, `i64`, `f64`, `str`, all temporal scalar types and
+type. This includes `bool`, `i64`, `f64`, `str`, [bytes](bytes-values.md), all temporal scalar types and
 enums. Scalar identity is preserved: `atomic<Mode>` is Mode, not `i64`.
 
 Where the grammar admits `atomic<S>`, normalize it to S before type equality,
@@ -25,3 +25,6 @@ children. Internal storage representation does not turn a scalar such as
 
 [Compiler cases](../../../compiler/cases_atomic_scalar_equivalence.md) cover
 canonical identity and the composite boundary.
+
+`atomic<any>` also normalizes to `any` under [ANY-4](any-values.md):
+its contained ordinary value does not become a temporal child.

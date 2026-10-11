@@ -5,7 +5,7 @@ They specify compiler behavior; they are not measured implementation results.
 
 | Case | Required result |
 |---|---|
-| Compare S with `atomic<S>` for every non-composite value type, including all twelve built-in scalars and enums. | Equal canonical types; no conversion or second endpoint schema. |
+| Compare S with `atomic<S>` for every non-composite value type, including all thirteen built-in scalars and enums. | Equal canonical types; no conversion or second endpoint schema. |
 | Compare `atomic<Mode>` with `i64` or another enum. | Unequal; retain Mode's nominal identity. |
 | Compare `list<atomic<i64>, 2>` with `list<i64, 2>`. | Equal, recursively normalized child types; preserve fixed size. |
 | Compare `TimedValue<atomic<i64>>` with `TimedValue<i64>`. | One nominal specialization, with the same scalar delta field. |

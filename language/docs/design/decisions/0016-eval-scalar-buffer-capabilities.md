@@ -122,7 +122,7 @@ because a key can be chosen for them.
 
 Borrowed store access is bounded to the current hook. The capability cannot
 be retained in state/cache, returned from the hook, captured in a closure or
-stored in an entry. Reads of `bool`, `i64`, `f64`, `str`, `date`, `time`,
+stored in an entry. Reads of `bool`, `i64`, `f64`, `str`, `bytes`, `date`, `time`,
 `datetime`, `duration`, `civil_datetime`, `timezone`, `zoned_datetime`, `zoned_time`
 and declared enums
 produce ordinary owned scalar values under their
@@ -365,3 +365,7 @@ were resolved, are listed here; the keyed store supplies none implicitly:
 Persistence, checkpoint/restart, shared state across separate runs and traits
 remain outside this foundation. It settles a reusable store and eval's
 configuration direction, not a complete general resource language.
+
+[Any](../any-values.md) remains an aggregate for lexical entry borrowing,
+even though its temporalization is one leaf. Boxing a borrowed observation
+is an independent owning retention boundary under ANY-1/2.

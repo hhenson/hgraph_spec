@@ -30,7 +30,8 @@ named arguments and sparse entries.
 
 T must have a finite shape admitted by the
 [collection publication profile](contextual-collection-deltas.md): the admitted
-scalar leaves; sets with admitted scalar members; fixed lists with nonnegative constant sizes;
+scalar leaves, including [bytes](bytes-values.md), [any](any-values.md) and
+[native atomics](native-atomic-values.md); sets with admitted scalar members; fixed lists with nonnegative constant sizes;
 growing lists under their [net delta contract](growing-list-publications.md);
 positional tuples; fully applied concrete nominal structs; and maps with admitted scalar keys,
 with recursively admitted children. Exact rolling shapes use their
@@ -146,7 +147,9 @@ Storage admission does not admit new state/cache forms, escaping borrows,
 general nullable values, or temporal endpoints whose payload is a structural
 delta object. A structural delta type is an ordinary type in this extension;
 using it as a new temporal shape, including inside an atomic boundary, is
-outside this profile.
+outside this profile. The [any extension](any-values.md) separately permits
+boxing an owning delta as ordinary data; this adds no direct delta endpoint,
+inspection or missing value capability.
 
 ## Construction order and failure
 

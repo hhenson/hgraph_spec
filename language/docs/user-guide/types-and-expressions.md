@@ -14,6 +14,7 @@ The initial scalar vocabulary is:
 | `i64` | Signed 64-bit integer | `20` |
 | `f64` | 64-bit floating-point value | `2.0` |
 | `str` | UTF-8 string | `"bid"` |
+| `bytes` | Uninterpreted octets | No literal; construct with `bytes([0, 255])` |
 | `date` | Calendar date | `@2026-09-03` |
 | `time` | Time of day | `@09:30` |
 | `datetime` | Instant on the UTC timeline, the engine clock type | `@2026-09-03T09:30Z` |
@@ -33,6 +34,35 @@ to make a composite value publish as one complete value.
 fn scale(value: f64, const factor: f64) -> f64 =>
     value * factor
 ```
+
+## Native atomic values
+
+`native type Token` names opaque ordinary data supplied by a checked provider.
+Construct and observe it through the provider's `native const fn` helpers.
+Its exact nominal identity, copies and declared capabilities survive temporal
+publication; `atomic<Token>` and `delta<Token>` are Token. See
+[NVAL-1–5](../design/native-atomic-values.md) and
+[examples](../../examples/native-atomic-values.hgl).
+
+## Any values
+
+`any(value)` retains an independent typed value; `any()` is a present empty
+box. A box carries one whole value per tick, including a list or struct.
+`atomic<any>` and `delta<any>` are `any`. Different contained types are unequal
+and unordered; missing contained capabilities fail with `value.capability`.
+See [ANY-1–5](../design/any-values.md) and [examples](../../examples/any-values.hgl).
+
+## Bytes values
+
+`bytes()` constructs a present empty scalar. `bytes(octets)` accepts an ordinary
+fixed or unbounded i64 list, checks every element is from 0 through 255, and
+retains its contents independently. It runs at the ordinary call phase; an
+executed range failure has code `value.byte_range`. Bytes equality compares
+exact contents, order is unsigned lexicographic, and `len(value)` returns the
+octet count. `atomic<bytes>` and `delta<bytes>` are bytes. Bytes is admitted
+recursively in publications, keys/members, complete atomic payloads and rolling
+arrivals under [BYTE-1–6](../design/bytes-values.md). Byte indexing, mutation and
+text encoding are outside this extension. See [examples](../../examples/bytes-values.hgl).
 
 ## Enum types
 
