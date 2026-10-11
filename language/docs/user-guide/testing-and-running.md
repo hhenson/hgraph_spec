@@ -39,7 +39,8 @@ artifact.
 
 ## Test-only helpers and module parts
 
-Wrap test helpers and their cases in an unnamed `test { ... }` context:
+Wrap test helpers, test-local types and their cases in an unnamed
+`test { ... }` context:
 
 ```hgl
 module examples.test_contexts
@@ -47,8 +48,17 @@ module examples.test_contexts
 export fn identity(value: i64) -> i64 => value
 
 test {
+    struct Fixture {
+        value: i64
+        doubled: i64
+    }
+
     fn fixture(value: i64) -> i64 {
         when { return value + 1 }
+    }
+
+    fn fixture_pair(value: i64) -> Fixture {
+        when { return Fixture(value: value, doubled: value * 2) }
     }
 
     test fixture_ticks {
@@ -60,30 +70,40 @@ test {
     test shared_fixture {
         assert eval(fixture, value: [3]) == [4]
         assert eval(identity, value: [3]) == [3]
+        assert eval(fixture_pair, value: [3]) == [delta<Fixture>(value: 3, doubled: 6)]
     }
 }
 ```
 
-All test contexts contribute to **one module-wide test scope**. Helpers are
-visible in every test context and named test in that module, including across
-its parts and regardless of declaration order. A context groups source code;
-it does not create a separate namespace. Test code can use the module's
-ordinary private declarations too.
+All test contexts contribute to **one module-wide test scope**. Helpers and
+test-local types are visible in every test context and named test in that
+module, including across its parts and regardless of declaration order. A
+context groups source code; it does not create a separate namespace. Test
+code can use the module's ordinary private declarations too.
 
-Production functions cannot reference these helpers. Other modules cannot
-import them, and helpers cannot be exported. A test helper may shadow a
+Production functions cannot reference these helpers or types. Other modules
+cannot import them, and they cannot be exported. A test helper may shadow a
 production function; the production definition is unaffected. Within each
 scope, the ordinary const/temporal function selection rules still apply.
 
-A test context contains private `fn` and `const fn` declarations and
-named `test` cases. Put assertions inside a named case, not directly in the
-context. Nested contexts, test-local types, imports, native declarations, and
-operator implementations are not supported in this first slice.
+A test-local type is a `struct` or `enum` declared inside a context without
+`export`. Use it for fixtures a test needs that the module itself does not
+declare, such as a struct carried through a reference route, so the fixture
+never becomes part of the module's production interface or package. Its name
+must be free in the module: a test-local type cannot shadow a production
+declaration or an import, because a type's identity is its module-wide schema
+name, and declaring one is reported as a conflict.
+
+A test context contains private `fn` and `const fn` declarations, test-local
+`struct` and `enum` declarations, and named `test` cases. Put assertions
+inside a named case, not directly in the context. Nested contexts, imports,
+native declarations, and operator implementations are not supported in a
+test context.
 
 `hgl test` includes and runs the helpers; `emit-cpp` and `hgl_add_module()` omit
-test-only helpers and cases from the package. In the REPL, a context adds its helpers to
-the session and runs only its newly declared cases. A helper-only context
-does not rerun earlier tests.
+test-only helpers, test-local types and cases from the package. In the REPL, a
+context adds its helpers and types to the session and runs only its newly
+declared cases. A helper-only context does not rerun earlier tests.
 
 When splitting a module into parts, place helper declarations in any part's
 test context and pass that part alongside the cases:

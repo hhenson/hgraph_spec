@@ -2193,8 +2193,9 @@ test midpoint_waits_for_both_sides {
 
 ```ebnf
 test_decl        = "test", identifier, block;
-test_context     = "test", "{", { test_helper | test_decl }, "}";
+test_context     = "test", "{", { test_helper | test_type | test_decl }, "}";
 test_helper      = function_decl; (* private fn or const fn only *)
+test_type        = struct_decl | enum_decl; (* unexported only *)
 assert_statement = "assert", ( expression | raises_assertion );
 raises_assertion = "raises", "(", expression, ")", block;
 eval_expression  = "eval", "(", expression, { ",", argument }, ")";
@@ -2211,8 +2212,9 @@ unique within a module. A `test` body is a composition-phase block plus
 Test declarations are available to the test runner and are omitted from the
 production module artifact.
 
-An unnamed `test { ... }` context contains private function helpers and named
-test declarations. Its declarations join a single module-wide test scope;
+An unnamed `test { ... }` context contains private function helpers,
+test-local `struct` and `enum` declarations, and named test declarations. Its
+declarations join a single module-wide test scope;
 separate contexts and module parts do not introduce separate helper scopes.
 Named tests outside a context use the same test scope. Helpers may reference
 one another forward and may use ordinary module-private declarations. Test
@@ -2222,8 +2224,16 @@ helper roles or test names in the test scope are errors.
 
 Production declarations resolve without the test scope. Test helpers cannot
 be exported, imported by another module, or implemented as operator overloads.
-The initial context admits only private `fn`/`const fn` helpers and named
-tests, not nested contexts, imports, native declarations, or type declarations.
+A test-local type is an unexported `struct` or `enum` declared in a context.
+It joins the same test scope: every test context and named test of the module
+can name it, production declarations cannot, other modules cannot import it,
+and it is omitted from production artifacts and module descriptors. Its name
+must be free in the module: unlike a helper, a test-local type cannot shadow
+a production declaration or import, because a type's identity is its
+module-wide schema name, so such a declaration is an error.
+A context admits private `fn`/`const fn` helpers, test-local types, and named
+tests, not nested contexts, imports, native declarations, or operator
+implementations.
 It contains declarations rather than executable statements; assertions belong
 in named cases. Declarations are newline-separated, except immediately before
 the closing brace, as in ordinary statement blocks.
