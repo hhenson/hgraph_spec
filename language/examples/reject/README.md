@@ -38,3 +38,8 @@ names. Ordinary source-checking commands still reject these annotated errors.
 - `any-constant-capability.hgl`: required-constant Any capability failures in
   named defaults, including ordinary index/field extraction and boxed keys,
   with surviving defaults and an executed-error control.
+
+- [`default-binding-scope.hgl`](default-binding-scope.hgl) is a standalone
+  negative checking input for earlier/current/later parameter values and
+  instance-field references in defaults. These failures remain uncoded; it is
+  not an in-source coded-rejection fixture.

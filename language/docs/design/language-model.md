@@ -218,7 +218,8 @@ clearable even after a descendant gives it a non-null default. A `null`
 override is valid only for a field whose original declaration is optional.
 
 Multiple abstract parents may contribute the same field only when type and
-optionality agree. Identical defaults merge; differing defaults, including a
+optionality agree. Defaults identical under [DEF-6](default-binding-scope.md)
+merge; differing defaults, including a
 default contributed by only one otherwise compatible parent, require an
 explicit choice in the child. Type and optionality conflicts are errors. Field
 order remains stable schema metadata; the exact deterministic multiple-parent

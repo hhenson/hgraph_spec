@@ -1,0 +1,25 @@
+module examples.default_binding_consumer
+use examples.default_binding_provider::{ImportedDefaults, DefaultFamily, configured, adjust}
+
+const fn seed() -> i64 => 999
+struct ImportedChild: DefaultFamily {}
+fn adjusted(value: i64) -> i64 => adjust(value)
+fn adjusted_override(value: i64) -> i64 => adjust(value, fallback: 3)
+
+test {
+    test imported_defaults_keep_private_defining_bindings {
+        # Both specializations use the provider's private seed and base.
+        assert ImportedDefaults<i64>().value == 7
+        assert ImportedDefaults<str>().value == 7
+        assert len(ImportedDefaults<i64>().items) == 0
+        assert len(ImportedDefaults<str>().items) == 0
+        assert ImportedChild().value == 7
+        # A callable default uses that same closure; supplied values override it.
+        assert eval(configured, value: [1, 2]) == [8, 9]
+        assert eval(configured, value: [1, 2], fallback: 3) == [4, 5]
+        # The public candidate has its own default, absent from the contract.
+        assert eval(adjusted, value: [1, 2]) == [8, 9]
+        assert eval(adjusted_override, value: [1, 2]) == [4, 5]
+        assert seed() == 999
+    }
+}

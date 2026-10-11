@@ -196,3 +196,12 @@ is pinned there. The acceptance sequence is defined in the
   REF branch result that preserves a branch-owned scalar endpoint through its
   owning output boundary. Two evals specify current routing and fresh runs;
   validation is static only. See the [route matrix](../../compiler/cases_reference_owner_export.md).
+- [`default-binding-scope.hgl`](default-binding-scope.hgl) checks defining
+  declarations before formal/field bindings and generic contextual defaults;
+  its two evals and direct assertions are static requirements, not target results.
+  See [default scope cases](../../compiler/cases_default_binding_scope.md).
+
+- [`default-binding-imports/consumer.hgl`](default-binding-imports/consumer.hgl)
+  uses its [provider](default-binding-imports/provider.hgl)'s private default
+  closure despite a colliding consumer name. Source and precompiled-provider
+  cases remain static requirements.
