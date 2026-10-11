@@ -3,8 +3,17 @@ module examples.test_contexts
 export fn identity(value: i64) -> i64 => value
 
 test {
+    struct Fixture {
+        value: i64
+        doubled: i64
+    }
+
     fn fixture(value: i64) -> i64 {
         when { return value + 1 }
+    }
+
+    fn fixture_pair(value: i64) -> Fixture {
+        when { return Fixture(value: value, doubled: value * 2) }
     }
 
     test fixture_ticks {
@@ -16,5 +25,6 @@ test {
     test shared_fixture {
         assert eval(fixture, value: [3]) == [4]
         assert eval(identity, value: [3]) == [3]
+        assert eval(fixture_pair, value: [3]) == [delta<Fixture>(value: 3, doubled: 6)]
     }
 }
