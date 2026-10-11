@@ -4,12 +4,12 @@ fn relay(value: ref<i64>) -> ref<i64> {
     when valid(value) && modified(value) { return value }
 }
 fn same(first: ref<i64>, second: ref<i64>, step: i64) -> bool {
-    when valid(step) && modified(step) && valid(first, second) {
+    when modified(step) && valid(first, second) {
         return first == second
     }
 }
 fn different(first: ref<i64>, second: ref<i64>, step: i64) -> bool {
-    when valid(step) && modified(step) && valid(first, second) {
+    when modified(step) && valid(first, second) {
         return first != second
     }
 }
