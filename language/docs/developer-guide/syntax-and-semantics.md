@@ -188,7 +188,7 @@ struct_decl     = [ "export" ], [ "abstract" ], "struct", identifier,
                   [ ":", struct_parent, { ",", struct_parent } ],
                   [ requires_clause ], "{", [ NL ],
                   [ struct_member, { NL, struct_member }, [ NL ] ], "}";
-enum_decl       = [ "export" ], "enum", identifier, "{", [ NL ],
+enum_decl       = "enum", identifier, "{", [ NL ],
                   [ enum_member, { ",", [ NL ], enum_member }, [ "," ] ],
                   [ NL ], "}";
 enum_member     = identifier, [ "=", const_expression ];
@@ -306,8 +306,7 @@ resolve under [DEF-1–4](../design/default-binding-scope.md), before the
 declaring callable's formal bindings or struct's instance-field bindings.
 `const` marks wiring-time function parameters and wiring-time generic values;
 it is not a general local-variable qualifier. `export` applies to a named
-ordinary exact `fn`, a `struct`, an `enum`, or a `native type`; other declarations
-reject it. `impl` marks
+ordinary exact `fn`, a `struct`, or a `native type`; other declarations reject it. `impl` marks
 a named `fn` as an implementation of an operator in scope; the two function
 modifiers are mutually exclusive. Operators are public without a modifier.
 `instantiate` is a module-level request for generic operator implementation
@@ -1498,6 +1497,10 @@ range and distinct from earlier members. Preserve enough literal information
 to accept the signed minimum without first narrowing its positive decimal
 magnitude to `i64`. These are enum declaration checks, not a general runtime
 integer-overflow policy or a native ABI decision.
+
+Enum declarations are module-private in this slice; `export enum` is rejected.
+Enum descriptor exports and cross-module member imports remain outside this
+module contract.
 
 An enum is a distinct atomic scalar type, not an integer alias. Preserve that
 identity in equality and switch checking; an assigned number or a member of
