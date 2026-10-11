@@ -1,7 +1,7 @@
 module examples.reference_identity_equality
 
 fn relay(value: ref<i64>) -> ref<i64> {
-    when valid(value) && modified(value) { return value }
+    when { return value }
 }
 fn same(first: ref<i64>, second: ref<i64>, step: i64) -> bool {
     when modified(step) && valid(first, second) {
