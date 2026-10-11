@@ -1,8 +1,8 @@
 # Graph-wired reference observations
 
 These cases use [REF authoring](../language/docs/design/type-extensions.md#node-access-and-ticks),
-[routing](../language/examples/reference-routing.hgl), WIR-6–14 and
-TS-14/16/17/20/22/25. Inputs to eval are ordinary scalar or structural
+[routing](../language/examples/reference-routing.hgl), WIR-5/6 and
+TS-14/16/17/20. Inputs to eval are ordinary scalar or structural
 publication traces. Graph bindings obtain references; scalar or complete
 atomic observation outputs expose results. No raw REF input trace, REF delta
 constructor or empty-reference literal is admitted by these cases.
@@ -24,6 +24,9 @@ constructor or empty-reference literal is admitted by these cases.
 | Project an ordinary fixed-list child or nominal field before binding it to a REF input | Preserve child identity, initial invalidity, equal ticks and sibling silence under WIR-5. |
 
 ## Boundaries requiring separate work
+
+Generic resolution (WIR-7–14), fixed peered/assembled binding transitions
+(TS-25) and ordinary input-value retention (TS-22) are outside this matrix.
 
 Graph access below REF follows WIR-5 and the accepted type-extension contract;
 its separate [projection clarification](../language/docs/design/type-extensions.md#wiring-time-access)
