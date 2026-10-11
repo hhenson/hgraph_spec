@@ -432,11 +432,10 @@ A stopped graph is never started again.
   the child reads the real producer, with nothing in between. The owner's
   output either is the child's chosen time-series, written through, or is
   one of the owner's own inputs passed straight on.
-- **Parallel graphs.** Graphs owned by the same node have no relationship
-  with one another beyond sharing a parent. Everything a nested graph reads
-  comes either from a lower-ranked node inside it or, through its boundary,
-  from the parent graph. Nothing in one is bound to, or refers to, anything
-  in another, and so there is no order between them to keep.
+- **Parallel graphs.** Graphs owned by the same node share only their parent;
+  no direct binding or reference route connects them. Boundary routes obey
+  GRF-10/24/27 and producer order under TS-20, including the effective owning
+  producer for exported REF positions.
 - **Time.** A nested graph is evaluated only from inside its owner's
   evaluation, at the owner's evaluation time, on the same clock.
 - **Schedule.** After evaluating a nested graph, its owner is scheduled for
