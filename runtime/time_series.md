@@ -368,6 +368,13 @@ output ticked: it reads modified when the output does, and has no value worth
 reading. It is how a node says "wake me when that changes; I do not care what
 it is".
 
+A SIGNAL never binds to a reference. Offered a REF output, it is bound to the
+output the reference designates, exactly as an ordinary `X` input offered a
+`REF<X>` output is: a changed designation re-binds it (TS-17), and it is
+modified when the designated output ticks, not when only the designation
+changes. A generic time-series input dereferences the same way. Only an
+input declared REF observes designations (TS-16).
+
 ### What may bind to what
 
 An input of one type may be bound to an output of another only when the rule
@@ -482,7 +489,9 @@ Rules
   sampled; unchanged fixed child bindings are preserved (TS-25).
   An empty reference unbinds it.
 - **TS-18** A SIGNAL input is modified exactly when the output it is bound to
-  is.
+  is. Offered a REF output, it is bound to the designated output, never to
+  the reference: it follows re-pointing like any ordinary input (TS-17) and
+  a designation change alone does not modify it.
 - **TS-19** A dictionary key is *added* when it joins the dictionary, whether
   or not its child is valid, and *removed* when it leaves. A child becoming
   valid or invalid neither adds nor removes its key.
