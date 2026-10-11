@@ -13,6 +13,7 @@ it introduces no raw REF trace, REF literal or empty-reference constructor.
 | Parent publishes only a sibling field/index | Do not publish the projected child's held value. |
 | Parent is valid but projected child has not published | The ordinary consumer remains invalid and publishes nothing until that child is valid. |
 | Parent reference changes between targets whose projected values are equal | Sample the newly designated valid child; endpoint identity is distinct even when payloads are equal. |
+| Selected incoming REF retargets while the outer selector is silent | Republish the changed designation and sample its projected child; changes to an unselected input do not republish. |
 | Selected child publishes while the selector is silent | The ordinary consumer follows its publication without reevaluating the selector. |
 | Selector republishes the same parent designation | No REF tick or additional sampling/publication. |
 | Node `when` body accesses fields/indices below its REF input | Reject opaque-value traversal; graph projection admission does not change node access. |
