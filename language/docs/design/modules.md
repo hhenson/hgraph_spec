@@ -20,8 +20,8 @@ A native package that supports the language supplies a descriptor containing:
 - canonical language module name and version;
 - compatible hgraph SDK and descriptor-format versions;
 - automatically public nominal operator contracts, explicitly exported exact
-  functions, exported concrete and abstract struct declarations, and exported
-  native atomic type bindings;
+  functions, exported concrete and abstract struct declarations, exported enums,
+  and exported native atomic type bindings;
 - operator implementation candidates, including explicit generic
   materializations with any retained resolver parameters, indexed by canonical operator identity,
   provider module, implementation kind, and generic signature;
@@ -74,6 +74,14 @@ and `const` parameter kinds, constraint IR, and unsubstituted field, default,
 and parent expressions. A downstream target can therefore validate and create
 the same fully applied nominal specializations without loading executable user
 code. Retained default expressions use the binding artifacts defined below.
+
+An `enum` is module-private unless declared `export enum`. Its descriptor
+carries the canonical module-qualified identity and member names with their
+assigned `i64` numbers in declaration order. Imports preserve that nominal
+identity, member table and order; aliases do not create a new enum or renumber
+its members. The imported type uses the same member references, checked
+construction and enumeration rules as the defining type. Test-local enums
+cannot be exported.
 
 A `native type` binding is module-private unless declared `export native type`.
 Export places its qualified source binding, canonical native scalar mapping

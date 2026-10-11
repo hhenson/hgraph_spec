@@ -66,11 +66,12 @@ use my.analytics as analytics
 analytics::zscore(prices)
 ```
 
-An `operator` declaration is public automatically. An ordinary exact function
-is public only when declared `export fn`, and a nominal struct only when
-declared `export struct` or `export abstract struct`; unexported functions and
-structs remain module-internal. Both selective and aliased imports expose only
-this public declaration surface.
+An `operator` is public automatically. Other declarations require `export`:
+`export fn`, `export struct`, `export abstract struct`, `export enum`, or
+`export native type`. Unexported declarations remain module-internal. Both
+selective and aliased imports expose only this public surface. An imported enum
+retains its defining identity, member names, assigned numbers and declaration
+order; importing it does not create another enum type.
 
 There are no wildcard imports or re-exports. In particular, an implementation
 module does not create a second import path for an operator defined elsewhere.
