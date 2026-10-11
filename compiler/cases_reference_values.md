@@ -2,7 +2,7 @@
 
 These cases use [REF authoring](../language/docs/design/type-extensions.md#node-access-and-ticks),
 [routing](../language/examples/reference-routing.hgl), WIR-6–14 and
-TS-14/16/17/20/22/23/25. Inputs to eval are ordinary scalar or structural
+TS-14/16/17/20/22/25. Inputs to eval are ordinary scalar or structural
 publication traces. Graph bindings obtain references; scalar or complete
 atomic observation outputs expose results. No raw REF input trace, REF delta
 constructor or empty-reference literal is admitted by these cases.
