@@ -820,7 +820,7 @@ time-zone provider and therefore never folds at compile time.
 | --- | --- | --- |
 | `datetime + duration`, `duration + datetime`, `datetime - duration` | `datetime` | checked overflow |
 | `datetime - datetime` | `duration` | checked overflow |
-| `date + duration`, `date - duration` | `date` | uses the duration's floor-based whole-day component: `d + 36h` is `d + 1d` and `d - 1us` is `d - 1d`, matching Python `date` arithmetic |
+| `date + duration`, `date - duration` | `date` | uses the duration's floor-based whole-day component, as Python `date` arithmetic and hgraph's operators do: `d + 36h` is `d + 1d`, `d + -1us` is `d - 1d`, and subtraction removes that day count, so `d - 1us` is `d` and `d - -36h` is `d + 2d` |
 | `date - date` | `duration` | a whole number of days |
 | `date + time` | `civil_datetime` | combines the fields |
 | `civil_datetime + duration`, `civil_datetime - duration` | `civil_datetime` | checked overflow, no zone involved |
