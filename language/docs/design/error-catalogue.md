@@ -80,7 +80,7 @@ after an earlier failure prevents checking a construct.
 | `type` | `result.required_variant` | A result payload property lacks the matching success/failure fact for its immutable local or ordinary parameter binding. Locate the property. |
 | `type` | `result.propagation_type` | Postfix ? has a non-result operand, a value function without a matching result error type, or a node when operand whose E is not error. Locate ?. |
 | `phase` | `result.propagation_phase` | Postfix ? appears outside an ordinary value function or node when handler. Locate ?. |
-| `phase` | `capture.phase` | capture is called outside graph composition. Locate the call. |
+| `phase` | `capture.phase` | capture is called outside graph composition, or its selected ordinary call is wiring-time value evaluation rather than a temporal call. Locate capture. |
 | `type` | `capture.output_field` | .value is requested from capture of an outputless callable. Locate the property. |
 | `type` | `value.constant_capability` | During required constant evaluation, a boxed operation or key construction is statically known to require equality, hash or order absent from its contained type under ANY-3/5. Locate the required operation or key expression. Existing type, phase and constructor formation checks precede this failure. |
 | `shape` | `delta.unsupported_shape` | A resolved concrete T in `delta<T>` has no admitted delta type. Locate a written concrete T in that application. If generic substitution discovers the failure, locate the constraining call or constructor and identify the failing delta application. |

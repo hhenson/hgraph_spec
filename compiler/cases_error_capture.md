@@ -38,7 +38,7 @@ An uncoded failure remains uncoded through capture; no catalogue alias is added.
 | New child with same later key | Fresh lifetime/context; no retained failure leaks from removed child. |
 | Callable returns result Err normally | Value side publishes Err; capture error side stays unchanged. |
 | Captured start or stop failure | Failure escapes; existing startup/cleanup rules apply. Cleanup failure cannot satisfy assert raises. |
-| Capture used in value function/handler | Reject capture.phase. |
+| Capture used in value function/handler, or selected call is wiring-time scalar evaluation | Reject capture.phase. |
 | Read value field of outputless capture | Reject capture.output_field. |
 
 The source fixture covers node/whole-graph capture, held messages, failure
