@@ -13,6 +13,9 @@ annotations isolate expected source errors alongside executable tests.
   dictionary reads and strict missing-key failures; its
   [rejection fixture](reject/nullable-map-lookup.hgl) checks required guards
   and exact fallback typing. These are source requirements, not target results.
+- [`result-errors.hgl`](result-errors.hgl) specifies tagged outcomes, local
+  recovery, helper/handler propagation and complete result publications; its
+  [rejections](reject/result-errors.hgl) check payload and propagation contexts.
 
 - [`eval-profile-errors.hgl`](eval-profile-errors.hgl) checks coded input-trace
   rejection before graph start, fresh-run membership and canonical positive

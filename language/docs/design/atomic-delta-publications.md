@@ -19,6 +19,10 @@ list is a finite snapshot, not a growing temporal list. The separate
 [ordinary set/map extension](atomic-set-map-publications.md) adds finite
 set/map payloads and their exact typed constructors.
 
+The [result extension](result-errors.md) adds `error` and `result<T,E>`
+as complete atomic outcomes when T/E recursively fit this finite ordinary
+payload profile. A tagged result never acquires independent temporal fields.
+
 For non-composite S, `atomic<S>` normalizes to S under
 [atomic scalar equivalence](atomic-scalar-equivalence.md). This profile does
 not create a second scalar shape or extend the admitted scalar leaves.

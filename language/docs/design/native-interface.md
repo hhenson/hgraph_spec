@@ -73,6 +73,12 @@ hgraph operator implementation explicitly.
 
 ### Exact native value and view functions
 
+Recoverable local failures use a declared `result<T, error>` return under
+[the result contract](result-errors.md). Returning Err is ordinary data;
+postfix `?` in a node handler explicitly enters its failure channel. Strict
+execution failures retain their specified canonical code and graph cleanup
+behavior. No production source exception clause is introduced.
+
 An exact native function is callable only in phases allowed by its descriptor.
 A value parameter receives the current canonical scalar payload. A collection
 `input-view` parameter receives the corresponding live `TSL`, `TSS`, `TSD`, or
@@ -101,12 +107,12 @@ separate erased-value accessors. Additional operations require the following con
 
 | Missing surface | Required language or ABI feature |
 | --- | --- |
-| ordinary value equality | generic value transport and a throwing/effect contract because user-defined equality may throw |
+| ordinary value equality | generic value transport plus declared recoverable results or the applicable strict execution-failure/effect contract |
 | current-value expressions and `delta_value` results | ordinary HGL value typing plus borrowed/dependent result lifetime |
 | `reference()` | a dependent reference result whose target schema is selected from the argument |
-| `hash()` | an agreed unsigned hash carrier and the throwing/unhashable contract |
+| `hash()` | an agreed unsigned hash carrier and a declared recoverable-result or strict unhashable-failure contract |
 | `compare()` | an HGL ordering result which represents less, equal, greater, and unordered |
-| `to_string()` / `format_string()` | a generic value parameter; a `str` result by value and a `throws` policy are already admitted |
+| `to_string()` / `format_string()` | a generic value parameter; recoverable failure must appear in a declared `result<str,error>` contract |
 | erased output access and mutation | an output-view parameter mode with explicit mutation and lifetime rules |
 
 Specialized collection iteration remains on typed views and HGL intrinsics; it

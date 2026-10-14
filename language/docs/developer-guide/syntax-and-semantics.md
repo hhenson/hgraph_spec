@@ -131,7 +131,7 @@ type-constructor call rule. It is provisional too: `str` is not an expression
 start in the current grammar, so `str(x)` is `parse: expected an expression,
 found 'str'`.
 
-`atomic`, `tuple`, `list`, `set`, `map`, and `rolling` are contextual type
+`atomic`, `tuple`, `list`, `set`, `map`, `rolling`, `result`, and `error` are contextual type
 keywords, and `unbounded` is a contextual constant in a list-size position.
 Outside a type position, the same spelling can resolve to a function,
 as in `map(values, fn(value) => value * 2.0)`. `in` is contextual: it is the
@@ -448,6 +448,7 @@ generic inference rules remain open.
 
 ```ebnf
 type            = scalar_type
+                | result_type | "error"
                 | delta_type
                 | tuple_type
                 | list_type
@@ -459,6 +460,7 @@ type            = scalar_type
                 | named_type
                 | "atomic", "<", value_type, ">";
 value_type      = scalar_type
+                | result_type | "error"
                 | delta_type
                 | value_tuple_type
                 | value_list_type
@@ -466,6 +468,7 @@ value_type      = scalar_type
                 | value_map_type
                 | named_type;
 delta_type      = "delta", "<", type, ">";
+result_type     = "result", "<", value_type, ",", value_type, ">";
 named_type      = ( identifier | qualified_name ), [ generic_arguments ];
 generic_arguments
                 = "<", generic_argument,
@@ -496,6 +499,12 @@ value_map_type  = "map", "<", value_type, ",", value_type, ">";
 Types carry no mutability qualifier. Prefixing an input or time-series type
 with `mut` is a syntax error. Ordinary value access is controlled by `let`
 and `var`, as specified in [value mutability](../design/value-mutability.md).
+
+`error` is an ordinary atomic diagnostic. `result<T,E>` stores one tagged
+ordinary outcome and is atomic in a temporal signature; its properties require
+tag refinement. `ok`, `err`, `error`, `is_ok` and `is_err` use ordinary checked
+call syntax. Postfix `?` follows the context/type rules in
+[results and propagation](../design/result-errors.md), not nullable unwrapping.
 
 `delta<T>` is contextual type syntax for an ordinary publication-delta
 value; it is not a value-level call or new reserved word. Its argument is a
@@ -1381,7 +1390,7 @@ unary_expr     = ( "-" | "!" ), unary_expr | postfix_expr;
 postfix_expr   = primary_expr,
                  { "(", [ argument, { ",", argument }, [ "," ] ], ")"
                  | "[", expression, "]"
-                 | ".", member_name };
+                 | ".", member_name | "?" };
 primary_expr   = literal | placeholder | identifier | qualified_name
                | "(", expression, ")" | tuple_literal | sequence_literal
                | generic_constructor | delta_expression | bytes_constructor | any_constructor
@@ -1562,7 +1571,7 @@ Expression precedence is:
 
 | Precedence, high to low | Tokens |
 | --- | --- |
-| Postfix | calls, indexing, field access |
+| Postfix | calls, indexing, field access, result propagation `?` |
 | Unary | `-`, `!` |
 | Multiplicative | `*`, `/`, `%` |
 | Additive | `+`, `-` |

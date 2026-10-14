@@ -13,6 +13,10 @@ Status: accepted, 2026-10-14.
    absence. An explicit non-null `default: value` must have the map's exact V
    type; the result is ordinary V, including when the stored value is zero,
    false, or empty. Absence does not fail, publish, or create an empty REF.
+   All written arguments are evaluated once in written order, including an
+   explicit fallback even when the key is present; no lazy-default rule is
+   introduced. A missing lookup alone does not suppress the containing handler:
+   only that handler's explicit control/output operations determine publication.
 3. **LOOKUP-3 — Presence checks.** With the null default, the result may
    initialize an inferred immutable `let`. Before payload use, establish its
    presence by comparing that binding with `null`. The

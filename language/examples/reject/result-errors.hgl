@@ -1,0 +1,41 @@
+module examples.reject_result_errors
+
+const fn unchecked(value: result<i64, error>) -> i64 {
+    # expect-error(type, "result.required_variant")
+    return value.value
+}
+const fn wrong_tag(value: result<i64, error>) -> i64 {
+    if is_err(value) {
+        # expect-error(type, "result.required_variant")
+        return value.value
+    }
+    return value.value
+}
+const fn incompatible(value: result<i64, error>) -> i64 {
+    # expect-error(type, "result.propagation_type")
+    return value?
+}
+fn wrong_handler_error(value: result<i64, str>) -> i64 {
+    when {
+        # expect-error(type, "result.propagation_type")
+        return value?
+    }
+}
+const fn nullable_operand(book: map<str, i64>) -> result<i64, error> {
+    let item = get(book, "X")
+    # expect-error(type, "result.propagation_type")
+    return ok(item?)
+}
+const fn no_expected_type() -> i64 {
+    # expect-error(type, "result.context_type")
+    let missing = ok(1)
+    return 0
+}
+fn graph_propagation(value: result<i64, error>) -> i64 {
+    # expect-error(phase, "result.propagation_phase")
+    value?
+}
+test surviving_result_control {
+    let value: result<i64, error> = ok(7)
+    if is_ok(value) { assert value.value == 7 }
+}

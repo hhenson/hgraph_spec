@@ -1272,6 +1272,12 @@ See [nullable dictionary lookup](../design/nullable-map-lookup.md). Safe lookup
 of a present invalid temporal child remains open in the
 [surface completion record](../design/native-surface-proposal.md).
 
+`result<T,E>` is an ordinary tagged success/failure value and a complete atomic
+payload in a temporal signature. `is_ok`/`is_err` establish which immutable
+local property, `.value` or `.error`, may be read. Canonical `error` carries
+message, optional code and guarded original graph provenance. See
+[absence and recoverable failures](error-management.md).
+
 Use ordinary expressions to read current values and `delta_value` for
 supported delta access. See the [surface completion record](../design/native-surface-proposal.md)
 for the remaining restrictions.

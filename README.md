@@ -13,6 +13,7 @@ reasoned traces and accepted decisions. No Python, C++ or Rust code lives here.
   with their [error catalogue](language/docs/design/error-catalogue.md)
 - [Source documentation](language/docs/design/documentation.md)
 - [Language guide](language/docs/user-guide/language-tour.md)
+- [Absence, tagged results and propagation](language/docs/user-guide/error-management.md)
 - [Owned REF output routes](compiler/cases_reference_owner_export.md)
 - [Runtime model](runtime/overview.md) and [conformance method](runtime/conformance.md)
 - [HGL compiler conformance](compiler/conformance.md)
