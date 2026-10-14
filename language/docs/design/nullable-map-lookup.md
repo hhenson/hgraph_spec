@@ -2,8 +2,9 @@
 
 Status: accepted, 2026-10-14.
 
-1. **LOOKUP-1 — Values.** In a value function or node handler, ordinary
-   dictionary values and `atomic<map<K, V>>` payloads use point-in-time value
+1. **LOOKUP-1 — Values.** During ordinary value evaluation, including
+   value functions, node handlers and test bodies, ordinary dictionary values
+   and `atomic<map<K, V>>` payloads use point-in-time value
    lookup. `m[key]` and `at(m, key)` return the present ordinary V and fail with
    `value.missing_key` on absence. Executed calls preserve that code through
    graph propagation; required constant evaluation rejects a missing key.
