@@ -32,7 +32,7 @@ how source calls reach hgraph.
 Source examples are collected under [language/examples](../../examples/README.md).
 
 [Absence and recoverable failures](error-management.md) covers guarded nullable
-lookup, tagged results, canonical diagnostics and explicit propagation.
+lookup, tagged results, canonical diagnostics, explicit propagation and capture.
 
 ## Current language shape
 

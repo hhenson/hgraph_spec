@@ -10,6 +10,7 @@ are normative requirements, not claimed target execution.
 | Present zero, missing key, explicitly empty dictionary | Preserve present zero; absent safe reads produce null and require a check. |
 | Guarded immutable local, early absent return | Continuing path admits the exact V payload. |
 | Explicit fallback of exact V | Result is ordinary V; no presence check required. |
+| Explicit fallback expression fails while key is present | The failure escapes: all written arguments are evaluated once before lookup. |
 | Fallback of another type | Reject `lookup.default_type`. |
 | Payload used before a presence check | Reject `nullable.required_presence`. |
 | Guard one read, use a second read | Reject: presence belongs to the local binding. |

@@ -1,0 +1,138 @@
+module examples.error_capture
+
+const fn checked(value: i64) -> result<i64, error> {
+    if value < 0 { return err(error(message: "negative price")) }
+    return ok(value)
+}
+fn required(value: i64) -> i64 {
+    when { return checked(value)? }
+}
+fn forward(value: i64) -> i64 { when { return value } }
+fn pipeline(value: i64) -> i64 => forward(required(value))
+fn tagged(value: i64) -> result<i64, error> { when { return checked(value) } }
+fn is_failure(value: result<i64, error>) -> bool {
+    when { return is_err(value) }
+}
+fn error_event(failure: error, step: i64) -> bool {
+    when modified(step) { return modified(failure) }
+}
+fn error_present(failure: error, step: i64) -> bool {
+    when modified(step) { return valid(failure) }
+}
+fn message(failure: error, step: i64) -> str {
+    when modified(step) && valid(failure) { return failure.message }
+}
+fn origin_is_current(failure: error, step: i64) -> bool {
+    inject clock
+    when modified(step) && valid(failure) {
+        let origin = failure.context
+        if origin != null {
+            return origin.phase == "evaluation" && origin.evaluation_time == clock.evaluation_time
+        }
+    }
+}
+fn captured_value(value: i64) -> i64 {
+    let seen = capture(required, value)
+    forward(seen.value)
+}
+fn captured_graph_value(value: i64) -> i64 {
+    let seen = capture(pipeline, value)
+    forward(seen.value)
+}
+fn captured_events(value: i64, step: i64) -> bool {
+    let seen = capture(required, value)
+    error_event(seen.error, step)
+}
+fn captured_presence(value: i64, step: i64) -> bool {
+    let seen = capture(required, value)
+    error_present(seen.error, step)
+}
+fn captured_messages(value: i64, step: i64) -> str {
+    let seen = capture(required, value)
+    message(seen.error, step)
+}
+fn captured_origin(value: i64, step: i64) -> bool {
+    let seen = capture(required, value)
+    origin_is_current(seen.error, step)
+}
+fn tagged_value(value: i64) -> bool {
+    let seen = capture(tagged, value)
+    is_failure(seen.value)
+}
+fn tagged_events(value: i64, step: i64) -> bool {
+    let seen = capture(tagged, value)
+    error_event(seen.error, step)
+}
+fn inner_error(value: i64) -> error {
+    let inner = capture(required, value)
+    inner.error
+}
+fn outer_events(value: i64, step: i64) -> bool {
+    let outer = capture(inner_error, value)
+    error_event(outer.error, step)
+}
+fn forwarded_origin(value: i64, step: i64) -> bool {
+    let outer = capture(inner_error, value)
+    origin_is_current(outer.value, step)
+}
+fn writes_first(value: i64) -> i64 {
+    inject out
+    when {
+        out = value
+        let accepted = checked(value)?
+        return accepted + 100
+    }
+}
+fn preserved_writes(value: i64) -> i64 {
+    let seen = capture(writes_first, value)
+    forward(seen.value)
+}
+fn consume_value(value: i64) { when { } }
+fn consume_error(failure: error) { when { } }
+fn unrelated(value: i64) -> i64 { when { return value + 100 } }
+fn sibling_continues(value: i64) -> i64 {
+    let seen = capture(required, value)
+    consume_error(seen.error)
+    unrelated(value)
+}
+fn per_key(book: map<str, i64>) {
+    for key, value in items(book) {
+        let seen = capture(required, value)
+        consume_value(seen.value)
+        consume_error(seen.error)
+    }
+}
+fn fails_start(value: i64) -> i64 {
+    start { at(map<str, i64>(items: []), "X") }
+    when { return value }
+}
+fn captured_start(value: i64) -> i64 {
+    let seen = capture(fails_start, value)
+    seen.value
+}
+
+test capture_retains_events_and_continues {
+    assert eval(tagged_value, value: [-1, -1, 7]) == [true, true, false]
+    assert eval(tagged_events, value: [-1, -1, 7], step: [0, 1, 2]) == [false, false, false]
+    assert eval(captured_value, value: [7, -1, _, 8, -1, -1, _]) == [7, _, _, 8, _, _, _]
+    assert eval(captured_graph_value, value: [7, -1, _, 8]) == [7, _, _, 8]
+    assert eval(captured_events, value: [7, -1, _, 8, -1, -1, _], step: [0, 1, 2, 3, 4, 5, 6]) == [
+        false, true, false, false, true, true, false
+    ]
+    assert eval(captured_presence, value: [7, -1, _, 8], step: [0, 1, 2, 3]) == [false, true, true, true]
+    assert eval(captured_messages, value: [7, -1, _, 8], step: [0, 1, 2, 3]) == [
+        _, "negative price", "negative price", "negative price"
+    ]
+    assert eval(captured_origin, value: [7, -1, _, 8, -1], step: [0, 1, 2, 3, 4]) == [_, true, false, false, true]
+    assert eval(outer_events, value: [7, -1, _, 8, -1], step: [0, 1, 2, 3, 4]) == [false, false, false, false, false]
+    assert eval(forwarded_origin, value: [7, -1, _, 8, -1], step: [0, 1, 2, 3, 4]) == [_, true, false, false, true]
+    assert eval(preserved_writes, value: [7, -1, 8, -1]) == [107, -1, 108, -1]
+    assert eval(sibling_continues, value: [7, -1, 8, -1]) == [107, 99, 108, 99]
+    eval(per_key, book: [
+        delta<map<str, i64>>(upsert: ["A": -1, "B": 7]),
+        delta<map<str, i64>>(upsert: ["A": 8, "B": 9]),
+        delta<map<str, i64>>(remove: ["A"]),
+        delta<map<str, i64>>(upsert: ["A": -1])
+    ])
+    assert raises("value.missing_key") { eval(captured_start, value: [1]) }
+}

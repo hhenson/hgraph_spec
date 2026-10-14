@@ -21,6 +21,9 @@ Use `result<T, E>` for local recovery. `ok(value)` and `err(error_value)`
 construct its tags; the expected result type fixes both payload types.
 Check `is_ok(local)` before reading `.value`, or `is_err(local)` before
 reading `.error`. A result time series publishes one complete atomic outcome.
+The intrinsic envelope needs no extra atomic wrapper. Graph uses of `is_ok`
+and `is_err` follow ordinary automatic lifting and prove no input validity or
+graph-side payload facts.
 
 ```hgl
 native const fn parse_price(text: str) -> result<i64, error>
@@ -54,3 +57,29 @@ Recoverable native functions declare `result<T, error>`. There is no source
 An ordinary-T native operation can still fail under its strict contract.
 Returning a result describes recoverable outcomes; it does not turn invalid
 arguments, ownership violations or strict operation failures into Err data.
+
+In graph composition, `let attempt = capture(required_price, text)` exposes
+the normal connection as `attempt.value` and an error stream as `attempt.error`.
+The closest capture consumes an evaluation failure once. Later cycles and
+unrelated scheduled work continue; completed writes stand. Capturing a graph
+covers failures leaving its whole subgraph, while capture inside a keyed child
+body keeps errors with that child's key and lifetime.
+
+```hgl
+fn failure_this_cycle(failure: error, step: i64) -> bool {
+    when modified(step) { return modified(failure) }
+}
+
+fn price_failures(text: str, step: i64) -> bool {
+    let attempt = capture(required_price, text)
+    failure_this_cycle(attempt.error, step)
+}
+```
+
+`valid(attempt.error)` means a past failure remains readable;
+`modified(attempt.error)` means a failure occurred in this cycle. Each failure
+ticks, even with an equal message/code. Success leaves the retained error
+unchanged. Start/stop failures escape capture. Match escaping catalogued
+execution failures with `assert raises` after cleanup; inspect returned results
+and captured errors with ordinary assertions. See
+[capture rules and cases](../design/error-capture.md).

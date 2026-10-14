@@ -166,6 +166,12 @@ Errors a graph publishes as data use ordinary output assertions. See the
 [complete rules](../design/execution-error-assertions.md) and
 [examples](../../examples/execution-errors.hgl).
 
+Returned Err values are complete result data. Captured failures appear on a
+retained error stream: assert its code/message as data and use `modified` to
+observe each failure event, including equal repeats. Success does not clear
+the stream. Neither form satisfies `assert raises` unless a separate execution
+failure escapes; see [error capture](../design/error-capture.md).
+
 ## Expected source errors
 
 Put `# expect-error(category, "code")` immediately before the source line that

@@ -1,0 +1,24 @@
+module examples.reject_error_capture
+
+fn identity(value: i64) -> i64 { when { return value } }
+fn sink(value: i64) { when { } }
+const fn value_capture(value: i64) -> i64 {
+    # expect-error(phase, "capture.phase")
+    let seen = capture(identity, value)
+    return 0
+}
+fn handler_capture(value: i64) -> i64 {
+    when {
+        # expect-error(phase, "capture.phase")
+        let seen = capture(identity, value)
+        return value
+    }
+}
+fn outputless_value(value: i64) -> i64 {
+    let seen = capture(sink, value)
+    # expect-error(type, "capture.output_field")
+    seen.value
+}
+test surviving_capture_control {
+    assert eval(identity, value: [7]) == [7]
+}
