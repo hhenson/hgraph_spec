@@ -19,7 +19,7 @@ run before the error stream is valid as well as after a failure.
 | 5 | -1 | 8 / false | true / true | negative price |
 | 6 | _ | 8 / false | true / false | negative price |
 
-Every failure has canonical original-node context with phase "evaluation"
+Every failure has canonical original-node context with phase "evaluate"
 and its cycle's logical time. The diagnostic at 5 equals that at 4 as an error
 value but still ticks. At 3 success does not clear or republish the last error.
 An uncoded failure remains uncoded through capture; no catalogue alias is added.
