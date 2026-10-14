@@ -3,6 +3,11 @@
 Status: accepted legacy authoring form (2026-09-18), superseded by the
 shared native interfaces in [ADR 0014](0014-native-implementation-interfaces.md).
 
+The backend examples and exception specifications below are historical.
+Current portable recovery and propagation use
+[tagged results and canonical errors](../result-errors.md); they do not derive
+HGL source behavior from those former backend examples.
+
 ## Context
 
 HGL must express most hgraph graphs and nodes without becoming a general-purpose

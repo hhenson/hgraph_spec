@@ -46,13 +46,13 @@ For every exposed native declaration the descriptor records:
 - value, owned, shared, or borrowed ownership and any dependent lifetime;
 - whether a parameter receives its current scalar value or its live typed input
   view;
-- exception and thread-safety policy;
+- declared recoverable result types, strict execution-failure contract and thread-safety policy;
 - target-specific binding identity and native dependencies;
 - module lifecycle entry points, provider identity, compatibility versions, and
   descriptor fingerprint.
 
 An imported native declaration retains its full signature, phases, effects,
-ownership, dependent lifetimes, exception policy and provider identity.
+ownership, dependent lifetimes, failure contract and provider identity.
 Checking must validate these before execution. The representation and format
 version are implementation choices; serializing a declaration must not weaken
 its contract.
@@ -78,6 +78,13 @@ Recoverable local failures use a declared `result<T, error>` return under
 postfix `?` in a node handler explicitly enters its failure channel. Strict
 execution failures retain their specified canonical code and graph cleanup
 behavior. No production source exception clause is introduced.
+
+A native function returning ordinary T may still signal strict execution
+failure under its operation contract, without a source exception annotation.
+Even a result-returning function can fail operationally: argument/ownership
+contract violations and strict intrinsic failures are not silently converted
+into Err values. Declared recoverable Err outcomes remain ordinary data until
+the caller explicitly propagates them.
 
 An exact native function is callable only in phases allowed by its descriptor.
 A value parameter receives the current canonical scalar payload. A collection
@@ -203,9 +210,9 @@ The first native-value interface is intentionally narrow at its HGL boundary:
 - collection type and extent generics participate in compile-time selection but
   are not automatically exposed as runtime values;
 - opaque state uses owned RAII storage and cannot cross a temporal port;
-- evaluation functions are non-blocking; they are `noexcept` unless declared
-  `throws` (descriptor policy `translated`), in which case a raise ends the
-  evaluation under hgraph's node error model (ADR 0009);
+- evaluation functions are non-blocking; recoverable failure is declared as
+  `result<T,error>`, while a strict execution failure enters the canonical
+  node failure channel under [PROP-2](result-errors.md);
 - mutation is restricted to an explicitly identified state argument;
 - raw pointers, lifetimes, callbacks, variadic calls, and open C++ templates are
   not representable in the HGL signature or descriptor; a local C++ body is

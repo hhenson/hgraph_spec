@@ -48,7 +48,7 @@ The corresponding Rust library implements the generated trait:
 Rust implements the corresponding contract through its native binding interface.
 
 Both may delegate to existing native functions. Generated checks include the
-resolved parameter/result types, temporal role and exception policy. C++
+resolved parameter/result types, temporal role and declared failure contract. C++
 implicit conversions cannot satisfy a mismatched signature. Overloads retain
 their HGL identities; compiler-generated candidate ordinals are not public API.
 

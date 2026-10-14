@@ -157,7 +157,7 @@ Missing values and incompatible types remain distinct errors. Type conflicts
 are diagnosed during checking or construction as described above; there is
 no wrong-type alternative after a successful typed binding. An executed get
 of an uninitialized entry fails under the
-[translated node error contract](0009-native-errors-and-the-node-error-model.md).
+[canonical node failure contract](../result-errors.md).
 Start failure, evaluation failure and stop failure follow their existing
 lifecycle rules. Diagnostics identify the key and distinguish missing value
 from type conflict. Allocation/copy failures propagate without partial entry

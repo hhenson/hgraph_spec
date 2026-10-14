@@ -32,7 +32,8 @@ native fn filter(value: i64, const limit: i64) -> i64 {
 - No body means declaration only; `{}` is not a missing implementation.
 - `native const fn` remains a value helper, including with an empty body.
 - An implementation completes exactly one matching declaration. Match names,
-  parameter names/types/constness, generics, result and exception policy.
+  parameter names/types/constness, generics and complete canonical result type,
+  including any `result<T,error>` recovery contract.
   Duplicate declarations or selected implementations are errors.
 - Select parts explicitly in the target build. Part names and folder names
   have no target-selection magic. One unnamed interface file may accompany
@@ -64,7 +65,7 @@ reasoned/Python/C++ helper and clock traces remain the runtime oracle.
 | Matching value implementation with logger | One value callable; callers silently acquire logger |
 | Select C++ logger part or Rust empty part | Same signature; selected requirements differ |
 | Reverse part order | Same selected callable and requirements |
-| Changed type, constness, result or throws | No matching declaration; reject |
+| Changed type, constness or complete canonical result type | No matching declaration; reject |
 | Two implementations or two identical declarations | Reject, never another overload |
 | Hook repeated, value hook, start/stop without when | Reject |
 | Native temporal call inside node evaluation | Reject; no implicit lifecycle or ownership |

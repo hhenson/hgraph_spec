@@ -218,7 +218,7 @@ function_decl   = ( [ "export" | "impl" ], "fn" | "const", "fn" ), identifier,
 native_type_decl = [ "export" ], "native", "type", identifier;
 native_function_decl
                 = "native", [ "const" ], "fn", identifier, [ generic_parameters ],
-                  function_signature, [ "throws" ], [ requires_clause ],
+                  function_signature, [ requires_clause ],
                   [ native_contract_body ];
 native_contract_body
                 = "{", [ NL ], { ( inject_decl, [ ";" ] | native_hook ), [ NL ] },
@@ -336,20 +336,19 @@ rejected in ordinary signatures, locals, state, captures, results, and
 outputs. Schema views do not accept runtime value predicates: they describe
 endpoint types rather than values.
 
-A `native fn` is automatically public and contains exactly one C++ projection.
-Its HGL signature uses the ordinary grammar, but its parameters cannot have
-defaults. An optional `throws` after the signature declares that the body may
-raise; the generated function then has no `noexcept` and the descriptor
-records the `translated` policy. `throws` is a contextual keyword, like
-`native`, and cannot be used as a name. A raise ends the evaluation under
-hgraph's node error model
-([ADR 0009](../design/decisions/0009-native-errors-and-the-node-error-model.md)). Requirements must retain their meaning when a native declaration is imported.
-An implementation unable to represent them must reject the contract. The lexer
-retains the balanced C++ parameter list and compound statement verbatim,
-accounting for C++ comments, quoted literals, and raw strings. HGL does not
-parse their contents. The form is top-level; a value native is callable in
-`start`, `when`, and `stop`, a view native only in `when`; it cannot
-appear inside another function body.
+A shared native declaration uses the ordinary function signature and the
+[selected implementation-part contract](../design/native-implementation-parts.md).
+Recoverable failure appears in a `result<T,error>` return type. There is no
+source `throws` clause; the former clause is rejected by the function grammar.
+Strict execution failures follow the canonical node failure contract, and
+imported declarations preserve their result types, effects and requirements.
+The [result rules](../design/result-errors.md) specify ordinary data versus
+explicit propagation. Native declarations remain top-level and respect their
+declared value/view phase restrictions.
+
+The former inline C++ projection is historical authoring material in
+[ADR 0005](../design/decisions/0005-inline-cpp-native-functions.md); its backend
+exception specifications do not define the current portable HGL error model.
 
 A `cpp include` is module-level build metadata for source-defined C++ only.
 The header must be a literal `<...>` or `"..."` name; macro, computed, and

@@ -1014,13 +1014,13 @@ Later decisions must define:
 The following questions remain open unless settled by a later design record.
 Observed compiler behavior does not establish a language rule.
 
-- **Error model for runtime nodes.** Decided
-  ([ADR 0009](decisions/0009-native-errors-and-the-node-error-model.md)): a
-  raise, from a `throws` native, a strict intrinsic or a delegated native
-  operator, ends the evaluation under hgraph's node error model. Earlier
-  writes in that evaluation stand; a captured error output ticks a
-  `NodeError`, otherwise the exception propagates. HGL has no exception
-  surface of its own.
+- **Error model for runtime nodes.** Decided by the
+  [tagged result and canonical error contract](result-errors.md), superseding
+  ADR 0009's source exception clause. Recoverable results are ordinary atomic
+  data; explicit `?` in a node handler and strict execution failures enter
+  the canonical failure channel. Earlier writes stand; capture follows
+  NOD-19/29, otherwise the execution failure escapes. There is no production
+  `throw`/`try`/`catch` control.
 - **Numeric edge cases.** True division of two `i64` values produces `f64`.
   Overflow and zero divisors need explicit domain contracts; scalar NaN
   comparisons follow [NaN comparisons](nan-comparisons.md).

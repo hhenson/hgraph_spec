@@ -34,7 +34,7 @@ contextual `delta<T>` relationship where separately admitted.
 
 Require `0 <= index < len(result)` before accessing a slot. Out-of-bounds
 access fails under the applicable value-operation error contract; inside a
-node hook it follows the translated node error contract. An absent in-range
+node hook it follows the canonical node failure contract. An absent in-range
 slot is a successful read. A missing global-state key is a separate error,
 not an absent sequence element.
 

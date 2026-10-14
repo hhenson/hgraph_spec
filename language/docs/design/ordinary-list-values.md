@@ -105,7 +105,7 @@ of those choices. Retention and any required capacity acquisition complete
 before the new element becomes part of the logical sequence. If either fails,
 the list keeps its previous length, elements and element values. Such a failure
 propagates through the applicable value-operation error contract; a node
-evaluation uses the translated node error contract. This failure guarantee is
+evaluation uses the canonical node failure contract. This failure guarantee is
 a requirement of this extension, not an assumption about a representation.
 
 The first argument distinguishes this ordinary-value operation from

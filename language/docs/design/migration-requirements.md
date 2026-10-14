@@ -102,10 +102,13 @@ and never leak to sibling implementations.
 
 ### MIG-012: effects and capabilities
 
-Source-native evaluation functions remain non-blocking. ADR 0009 admits
-`throws` and the descriptor's `translated` policy under hgraph's node error
-model; functions without `throws` remain `noexcept`. Owned scalar results are
-admitted, while owned non-scalar results remain B1. ADR 0010 specifies the
+Source-native evaluation functions remain non-blocking. Recoverable failure
+uses the complete declared `result<T,error>` type under the
+[portable result contract](result-errors.md); strict execution failures use
+the canonical graph failure channel. The historical source exception clause
+and backend exception specifications are not portable HGL contracts.
+Ordinary payload admission follows the accepted finite value/publication
+profiles; resource and borrowing contracts remain explicit. ADR 0010 specifies the
 clock and scheduler capabilities, scheduled activation, and evaluation-time
 input activity. Non-recordable storage, input access in lifecycle hooks, and
 external resource ownership remain B2. A C++ body is not permission to publish

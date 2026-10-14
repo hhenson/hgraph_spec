@@ -70,6 +70,9 @@ Status: accepted, 2026-10-14.
    offering recoverable failure declare `result<T, error>`; callers inspect
    or propagate it. No `throws` clause or `throw`/`try`/`catch` source control
    is added. Strict operations retain their execution-failure contracts.
+   This also applies to strict native functions returning ordinary T.
+   A declared result return does not convert operational argument/ownership
+   violations or strict intrinsic failures into Err data.
 
 ```hgl
 native const fn parse_price(text: str) -> result<i64, error>

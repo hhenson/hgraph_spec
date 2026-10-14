@@ -93,7 +93,7 @@ implicit no-output tick implements nullable lookup.
 The accepted initial accessors are `at(window, index)`, `time_at(window, index)`,
 `front(window)`, `back(window)`, and `removed_value(window)`. For tick-count windows, access preserves logical order through storage wraparound. Indices are
 zero-based in oldest-to-newest logical order. Strict bounds errors propagate
-through the generated node; they are not hidden inside a `noexcept` wrapper.
+through the node's execution-failure channel; they cannot be silently suppressed.
 List `front` and `back` use the same strict bounds policy.
 Strict list/map value access also rejects a present but invalid child instead
 of reading its retained storage. `valid(at(value, key))` can inspect the child

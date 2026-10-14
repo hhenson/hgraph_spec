@@ -50,3 +50,7 @@ context. A code outside the execution catalogue cannot satisfy `assert raises`.
 Recoverable native functions declare `result<T, error>`. There is no source
 `throw`, `try` or `catch` control. See the
 [complete result and propagation rules](../design/result-errors.md).
+
+An ordinary-T native operation can still fail under its strict contract.
+Returning a result describes recoverable outcomes; it does not turn invalid
+arguments, ownership violations or strict operation failures into Err data.

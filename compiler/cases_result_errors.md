@@ -21,3 +21,5 @@ normative; their presence claims no compiler execution.
 | Equal diagnostics at different graph times | Equal error values, separate failure events. |
 | Node when ? propagates catalogued error | Escaping failure preserves code for assert raises after cleanup. |
 | Recoverable native function | Declare result<T,error>; no source exception clause. |
+| Ordinary-T strict native failure or result helper's operational contract violation | Execution failure remains distinct from declared recoverable Err data. |
+| Retired source exception clause | Reject under ordinary function grammar; see [rejection fixture](../language/examples/reject/retired-throws.hgl). |

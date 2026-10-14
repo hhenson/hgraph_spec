@@ -39,6 +39,8 @@ names. Ordinary source-checking commands still reject these annotated errors.
   guards and exact fallback types.
 - [`result-errors.hgl`](result-errors.hgl) checks result constructor context,
   tag guards and the type/phase limits of postfix `?`.
+- [`retired-throws.hgl`](retired-throws.hgl) rejects the former source exception
+  clause alongside a surviving ordinary signature.
 - `any-constant-capability.hgl`: required-constant Any capability failures in
   named defaults, including ordinary index/field extraction and boxed keys,
   with surviving defaults and an executed-error control.
