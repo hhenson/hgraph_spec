@@ -53,7 +53,7 @@ Status: accepted, 2026-10-14.
 5. **ERROR-2 — Provenance.** `.context` is a read-only contextual nullable
    provenance record. A locally constructed error has no context. On first
    entry into a graph failure channel, the graph attaches the failing node's
-   identity (`.node: str`), phase (`.phase: str`, one of `"evaluation"`,
+   identity (`.node: str`), phase (`.phase: str`, one of `"evaluate"`,
    `"start"`, `"stop"`), and logical time (`.evaluation_time: datetime`).
    Node identity identifies the original node/graph instance in that run;
    its display spelling is not a stable error code. Bind and presence-check

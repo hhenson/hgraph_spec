@@ -41,6 +41,8 @@ publications, state writes and external effects remain; no rollback or retry
 is introduced. Each `eval` retains its ordinary run ownership and teardown.
 If the graph captures an error and publishes it as data, it has not raised
 that error to this assertion: inspect its output with ordinary assertions.
-This adds no error type, catch binding, rethrow, or production exception syntax.
+The assertion adds no catch binding, rethrow or production exception syntax.
+[Canonical errors and result values](result-errors.md) and
+[captured error streams](error-capture.md) use ordinary data assertions.
 
 See [executable examples](../../examples/execution-errors.hgl).

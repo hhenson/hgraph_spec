@@ -16,6 +16,9 @@ annotations isolate expected source errors alongside executable tests.
 - [`result-errors.hgl`](result-errors.hgl) specifies tagged outcomes, local
   recovery, helper/handler propagation and complete result publications; its
   [rejections](reject/result-errors.hgl) check payload and propagation contexts.
+- [`error-capture.hgl`](error-capture.hgl) specifies retained error streams,
+  repeated events, nested capture, preserved writes and later continuation;
+  [rejections](reject/error-capture.hgl) check graph-only admission and outputless fields.
 
 - [`eval-profile-errors.hgl`](eval-profile-errors.hgl) checks coded input-trace
   rejection before graph start, fresh-run membership and canonical positive
