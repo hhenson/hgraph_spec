@@ -14,10 +14,10 @@ fn is_failure(value: result<i64, error>) -> bool {
     when { return is_err(value) }
 }
 fn error_event(failure: error, step: i64) -> bool {
-    when modified(step) { return modified(failure) }
+    when modified(step) && valid(step) { return modified(failure) }
 }
 fn error_present(failure: error, step: i64) -> bool {
-    when modified(step) { return valid(failure) }
+    when modified(step) && valid(step) { return valid(failure) }
 }
 fn message(failure: error, step: i64) -> str {
     when modified(step) && valid(failure) { return failure.message }

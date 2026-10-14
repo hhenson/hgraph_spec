@@ -6,7 +6,8 @@ and [phase/type rejections](../language/examples/reject/error-capture.hgl)
 are normative fixtures, not target execution claims.
 
 For a node accepting nonnegative integers, capture its normal i64 output and
-error output. An independent step makes metadata observers run every cycle.
+error output. Metadata observers use `modified(step) && valid(step)` so they
+run before the error stream is valid as well as after a failure.
 
 | Cycle | Input publication | Value / value modified | Error valid / modified | Held diagnostic |
 |---|---|---|---|---|
