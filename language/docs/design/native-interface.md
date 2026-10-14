@@ -200,8 +200,9 @@ declarations, capabilities and publication admission.
 
 The first native-value interface is intentionally narrow at its HGL boundary:
 
-- value arguments and results are canonical scalar values or an opaque state
-  value declared by the same module;
+- value arguments and results are canonical scalar values, complete
+  `result<T,error>` envelopes with admitted ordinary payloads, or an opaque
+  state value declared by the same module;
 - collection arguments may use generic `list`, `set`, `map`, or `rolling`
   patterns only when the parameter explicitly requests `input-view` access;
 - the complete input-only `signal` pattern may request `input-view` access and
