@@ -31,6 +31,8 @@ An uncoded failure remains uncoded through capture; no catalogue alias is added.
 | Whole captured graph fails before a downstream child | Remaining work in that subgraph pass does not run; unrelated outer work continues. |
 | Later input or retained future schedule wakes the failed node/graph | Same live instance evaluates; no sticky evaluating state, teardown or automatic retry. |
 | Inner capture inside outer capture | Inner failure appears once; outer error stays invalid unless another failure escapes the inner boundary. |
+| Consumer ? propagates a retained error on another cycle | New captured event; code/message/original context remain unchanged. |
+| Child start/stop fails during a keyed creation/removal evaluation | Failure escapes enclosing capture as a lifecycle failure. |
 | Error forwarded as normal data through another graph | Code/message/original context remain intact; no new failure event. |
 | Existing keyed body captures each child | Failed key gets its error; successful sibling runs; removal ends only the removed child's error lifetime. |
 | New child with same later key | Fresh lifetime/context; no retained failure leaks from removed child. |
