@@ -67,7 +67,7 @@ body keeps errors with that child's key and lifetime.
 
 ```hgl
 fn failure_this_cycle(failure: error, step: i64) -> bool {
-    when modified(step) { return modified(failure) }
+    when modified(step) && valid(step) { return modified(failure) }
 }
 
 fn price_failures(text: str, step: i64) -> bool {
