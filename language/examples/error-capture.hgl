@@ -75,6 +75,22 @@ fn forwarded_origin(value: i64, step: i64) -> bool {
     let outer = capture(inner_error, value)
     origin_is_current(outer.value, step)
 }
+fn refail(failure: error, step: i64) -> i64 {
+    when modified(step) && valid(step, failure) {
+        let rejected: result<i64, error> = err(failure)
+        return rejected?
+    }
+}
+fn refailed_events(value: i64, step: i64) -> bool {
+    let inner = capture(required, value)
+    let outer = capture(refail, inner.error, step)
+    error_event(outer.error, step)
+}
+fn refailed_origin(value: i64, step: i64) -> bool {
+    let inner = capture(required, value)
+    let outer = capture(refail, inner.error, step)
+    origin_is_current(outer.error, step)
+}
 fn writes_first(value: i64) -> i64 {
     inject out
     when {
@@ -126,6 +142,9 @@ test capture_retains_events_and_continues {
     assert eval(captured_origin, value: [7, -1, _, 8, -1], step: [0, 1, 2, 3, 4]) == [_, true, false, false, true]
     assert eval(outer_events, value: [7, -1, _, 8, -1], step: [0, 1, 2, 3, 4]) == [false, false, false, false, false]
     assert eval(forwarded_origin, value: [7, -1, _, 8, -1], step: [0, 1, 2, 3, 4]) == [_, true, false, false, true]
+    # Refailing a retained error creates new events, preserving its first origin.
+    assert eval(refailed_events, value: [7, -1, _, 8], step: [0, 1, 2, 3]) == [false, true, true, true]
+    assert eval(refailed_origin, value: [7, -1, _, 8], step: [0, 1, 2, 3]) == [_, true, false, false]
     assert eval(preserved_writes, value: [7, -1, 8, -1]) == [107, -1, 108, -1]
     assert eval(sibling_continues, value: [7, -1, 8, -1]) == [107, 99, 108, 99]
     eval(per_key, book: [

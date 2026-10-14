@@ -37,14 +37,19 @@ Status: accepted, 2026-10-14.
    See GRF-11/14/16/22 and the node scheduler contract for ordinary future wakes.
 4. **CAPTURE-4 — Nesting and keyed lifetime.** The closest capturing
    boundary consumes a failure once; an outer capture does not duplicate it.
-   A new failure in a consumer is a separate event. Capture inside an existing
+   A new failure in a consumer is a separate event, even when `?` propagates
+   a retained error whose original provenance is unchanged. Capture inside an existing
    [independent keyed child-composition body](iteration.md#dynamic-structures-independent-bodies-first)
    preserves that child's key and lifetime.
    Its failure does not prevent sibling children evaluating in that cycle;
    its error output/entry leaves with the child, under NOD-29. This adds no
    new keyed iteration syntax or ordinary reference storage.
 5. **CAPTURE-5 — Escaping failures and tests.** Start/stop failures are
-   uncapturable (NOD-20). Uncaptured execution failure leaves the graph under
+   uncapturable (NOD-20), including child creation/removal driven during
+   evaluation. Eligibility follows the failing operation, not a retained
+   diagnostic's historical `.context.phase`. A new `?` failure in `when` is
+   an evaluation failure even when its error already has older provenance.
+   Uncaptured execution failure leaves the graph under
    its existing cleanup contract. `assert raises("catalogued.code")` matches
    only an escaping execution failure after successful ordinary cleanup,
    preserving its code. Captured errors and returned Err values are data for
