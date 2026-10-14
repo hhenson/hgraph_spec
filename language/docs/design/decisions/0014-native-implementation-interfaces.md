@@ -48,7 +48,7 @@ The corresponding Rust library implements the generated trait:
 Rust implements the corresponding contract through its native binding interface.
 
 Both may delegate to existing native functions. Generated checks include the
-resolved parameter/result types, temporal role and exception policy. C++
+resolved parameter/result types, temporal role and declared failure contract. C++
 implicit conversions cannot satisfy a mismatched signature. Overloads retain
 their HGL identities; compiler-generated candidate ordinals are not public API.
 
@@ -220,11 +220,16 @@ the interface. Checking an interface must not load its native library.
 | All-`const` parameters on temporal function | Retain temporal result/activation |
 | Wrong argument or result type | Native compile error, including convertible types |
 | Missing member or incompatible overload | Native compile error |
-| No-throw contract with potentially throwing C++ implementation | Compile error |
+| Declared result<T,error> bound to an ordinary-T implementation | Reject incompatible canonical result contract |
 | Value helper called from a node | Existing activation and output tick rules |
 | Borrowed input retained beyond its call | Rejected by lifetime contract |
 | Provider missing or ambiguous | Diagnostic before executable generation |
 | Nested REF introduced by substitution | Normalize before binding checks |
+
+Target-specific ABI exception validation is separate from portable HGL source
+semantics. Recoverable Err outcomes follow the declared result type; strict
+operational failures follow their canonical execution-failure contract.
+Neither is inferred from a retired source exception clause.
 
 Record reasoned results before execution. Preserve existing scalar operator
 traces against Python and C++; this migration must not change their ticks.

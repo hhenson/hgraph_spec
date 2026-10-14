@@ -14,6 +14,8 @@ This does not add generator machinery to the runtime contract.
 
 - [Nullable dictionary lookup](cases_nullable_map_lookup.md): safe ordinary/atomic
   absence, local presence checks, exact fallbacks and strict missing-key failures.
+- [Results and propagation](cases_result_errors.md): tagged atomic outcomes,
+  guarded payloads, canonical errors and explicit `?` propagation.
 
 - [Graph-wired reference observations](cases_reference_values.md):
   designation identity, retargeting, sampling and ordinary data followers.

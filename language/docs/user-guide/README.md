@@ -31,6 +31,9 @@ how source calls reach hgraph.
 
 Source examples are collected under [language/examples](../../examples/README.md).
 
+[Absence and recoverable failures](error-management.md) covers guarded nullable
+lookup, tagged results, canonical diagnostics and explicit propagation.
+
 ## Current language shape
 
 The current temporal implementation model uses `fn` and does not ask authors

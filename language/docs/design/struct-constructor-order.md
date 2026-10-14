@@ -73,7 +73,7 @@ omitted default fails, stop before retaining later defaults or assembling a
 result. Failure during final assembly also produces no completed value. Propagate the failure through
 the applicable value-operation error contract. Constant evaluation fails
 checking, wiring-time evaluation fails construction, and a node hook follows
-its applicable error contract; node evaluation uses the translated node error
+its applicable error contract; node evaluation uses the canonical node failure
 contract.
 
 Earlier completed effects remain. This is not a transaction over called

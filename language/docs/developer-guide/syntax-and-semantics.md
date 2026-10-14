@@ -131,7 +131,7 @@ type-constructor call rule. It is provisional too: `str` is not an expression
 start in the current grammar, so `str(x)` is `parse: expected an expression,
 found 'str'`.
 
-`atomic`, `tuple`, `list`, `set`, `map`, and `rolling` are contextual type
+`atomic`, `tuple`, `list`, `set`, `map`, `rolling`, `result`, and `error` are contextual type
 keywords, and `unbounded` is a contextual constant in a list-size position.
 Outside a type position, the same spelling can resolve to a function,
 as in `map(values, fn(value) => value * 2.0)`. `in` is contextual: it is the
@@ -218,7 +218,7 @@ function_decl   = ( [ "export" | "impl" ], "fn" | "const", "fn" ), identifier,
 native_type_decl = [ "export" ], "native", "type", identifier;
 native_function_decl
                 = "native", [ "const" ], "fn", identifier, [ generic_parameters ],
-                  function_signature, [ "throws" ], [ requires_clause ],
+                  function_signature, [ requires_clause ],
                   [ native_contract_body ];
 native_contract_body
                 = "{", [ NL ], { ( inject_decl, [ ";" ] | native_hook ), [ NL ] },
@@ -336,20 +336,19 @@ rejected in ordinary signatures, locals, state, captures, results, and
 outputs. Schema views do not accept runtime value predicates: they describe
 endpoint types rather than values.
 
-A `native fn` is automatically public and contains exactly one C++ projection.
-Its HGL signature uses the ordinary grammar, but its parameters cannot have
-defaults. An optional `throws` after the signature declares that the body may
-raise; the generated function then has no `noexcept` and the descriptor
-records the `translated` policy. `throws` is a contextual keyword, like
-`native`, and cannot be used as a name. A raise ends the evaluation under
-hgraph's node error model
-([ADR 0009](../design/decisions/0009-native-errors-and-the-node-error-model.md)). Requirements must retain their meaning when a native declaration is imported.
-An implementation unable to represent them must reject the contract. The lexer
-retains the balanced C++ parameter list and compound statement verbatim,
-accounting for C++ comments, quoted literals, and raw strings. HGL does not
-parse their contents. The form is top-level; a value native is callable in
-`start`, `when`, and `stop`, a view native only in `when`; it cannot
-appear inside another function body.
+A shared native declaration uses the ordinary function signature and the
+[selected implementation-part contract](../design/native-implementation-parts.md).
+Recoverable failure appears in a `result<T,error>` return type. There is no
+source `throws` clause; the former clause is rejected by the function grammar.
+Strict execution failures follow the canonical node failure contract, and
+imported declarations preserve their result types, effects and requirements.
+The [result rules](../design/result-errors.md) specify ordinary data versus
+explicit propagation. Native declarations remain top-level and respect their
+declared value/view phase restrictions.
+
+The former inline C++ projection is historical authoring material in
+[ADR 0005](../design/decisions/0005-inline-cpp-native-functions.md); its backend
+exception specifications do not define the current portable HGL error model.
 
 A `cpp include` is module-level build metadata for source-defined C++ only.
 The header must be a literal `<...>` or `"..."` name; macro, computed, and
@@ -448,6 +447,7 @@ generic inference rules remain open.
 
 ```ebnf
 type            = scalar_type
+                | result_type | "error"
                 | delta_type
                 | tuple_type
                 | list_type
@@ -459,6 +459,7 @@ type            = scalar_type
                 | named_type
                 | "atomic", "<", value_type, ">";
 value_type      = scalar_type
+                | result_type | "error"
                 | delta_type
                 | value_tuple_type
                 | value_list_type
@@ -466,6 +467,7 @@ value_type      = scalar_type
                 | value_map_type
                 | named_type;
 delta_type      = "delta", "<", type, ">";
+result_type     = "result", "<", value_type, ",", value_type, ">";
 named_type      = ( identifier | qualified_name ), [ generic_arguments ];
 generic_arguments
                 = "<", generic_argument,
@@ -496,6 +498,12 @@ value_map_type  = "map", "<", value_type, ",", value_type, ">";
 Types carry no mutability qualifier. Prefixing an input or time-series type
 with `mut` is a syntax error. Ordinary value access is controlled by `let`
 and `var`, as specified in [value mutability](../design/value-mutability.md).
+
+`error` is an ordinary atomic diagnostic. `result<T,E>` stores one tagged
+ordinary outcome and is atomic in a temporal signature; its properties require
+tag refinement. `ok`, `err`, `error`, `is_ok` and `is_err` use ordinary checked
+call syntax. Postfix `?` follows the context/type rules in
+[results and propagation](../design/result-errors.md), not nullable unwrapping.
 
 `delta<T>` is contextual type syntax for an ordinary publication-delta
 value; it is not a value-level call or new reserved word. Its argument is a
@@ -1381,7 +1389,7 @@ unary_expr     = ( "-" | "!" ), unary_expr | postfix_expr;
 postfix_expr   = primary_expr,
                  { "(", [ argument, { ",", argument }, [ "," ] ], ")"
                  | "[", expression, "]"
-                 | ".", member_name };
+                 | ".", member_name | "?" };
 primary_expr   = literal | placeholder | identifier | qualified_name
                | "(", expression, ")" | tuple_literal | sequence_literal
                | generic_constructor | delta_expression | bytes_constructor | any_constructor
@@ -1562,7 +1570,7 @@ Expression precedence is:
 
 | Precedence, high to low | Tokens |
 | --- | --- |
-| Postfix | calls, indexing, field access |
+| Postfix | calls, indexing, field access, result propagation `?` |
 | Unary | `-`, `!` |
 | Multiplicative | `*`, `/`, `%` |
 | Additive | `+`, `-` |

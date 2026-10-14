@@ -45,6 +45,12 @@ smooth(bid, ask, window: 50)
 
 ## Value-level functions
 
+Value functions may return `result<T,E>` for recoverable local failure.
+In a compatible result-returning helper, postfix `?` unwraps success or returns
+the same failure. In node `when`, failed `result<T,error>` enters the implicit
+failure channel while the normal output retains its type. See
+[absence and recoverable failures](error-management.md).
+
 See [Value functions and lifting](value-functions.md) for role selection,
 `const(function)` and testing.
 

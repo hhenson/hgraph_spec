@@ -35,6 +35,12 @@ names. Ordinary source-checking commands still reject these annotated errors.
   constructor names/constants/types/duplicates/bounds/overlap, and valid controls.
   State-dependent trace failures instead use `assert raises` in
   [`eval-profile-errors.hgl`](../eval-profile-errors.hgl).
+- [`nullable-map-lookup.hgl`](nullable-map-lookup.hgl) checks local presence
+  guards and exact fallback types.
+- [`result-errors.hgl`](result-errors.hgl) checks result constructor context,
+  tag guards and the type/phase limits of postfix `?`.
+- [`retired-throws.hgl`](retired-throws.hgl) rejects the former source exception
+  clause alongside a surviving ordinary signature.
 - `any-constant-capability.hgl`: required-constant Any capability failures in
   named defaults, including ordinary index/field extraction and boxed keys,
   with surviving defaults and an executed-error control.

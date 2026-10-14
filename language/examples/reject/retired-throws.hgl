@@ -1,0 +1,9 @@
+module examples.reject_retired_throws
+
+# expect-error(parse, "syntax.expected_token")
+native const fn retired(value: i64) -> i64 throws
+
+const fn ordinary(value: i64) -> i64 => value
+test surviving_portable_signature {
+    assert ordinary(7) == 7
+}

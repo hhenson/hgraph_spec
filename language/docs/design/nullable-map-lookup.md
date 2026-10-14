@@ -2,8 +2,9 @@
 
 Status: accepted, 2026-10-14.
 
-1. **LOOKUP-1 — Values.** In a value function or node handler, ordinary
-   dictionary values and `atomic<map<K, V>>` payloads use point-in-time value
+1. **LOOKUP-1 — Values.** During ordinary value evaluation, including
+   value functions, node handlers and test bodies, ordinary dictionary values
+   and `atomic<map<K, V>>` payloads use point-in-time value
    lookup. `m[key]` and `at(m, key)` return the present ordinary V and fail with
    `value.missing_key` on absence. Executed calls preserve that code through
    graph propagation; required constant evaluation rejects a missing key.
@@ -13,6 +14,10 @@ Status: accepted, 2026-10-14.
    absence. An explicit non-null `default: value` must have the map's exact V
    type; the result is ordinary V, including when the stored value is zero,
    false, or empty. Absence does not fail, publish, or create an empty REF.
+   All written arguments are evaluated once in written order, including an
+   explicit fallback even when the key is present; no lazy-default rule is
+   introduced. A missing lookup alone does not suppress the containing handler:
+   only that handler's explicit control/output operations determine publication.
 3. **LOOKUP-3 — Presence checks.** With the null default, the result may
    initialize an inferred immutable `let`. Before payload use, establish its
    presence by comparing that binding with `null`. The
