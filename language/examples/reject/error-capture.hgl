@@ -19,6 +19,12 @@ fn outputless_value(value: i64) -> i64 {
     # expect-error(type, "capture.output_field")
     seen.value
 }
+const fn scalar_only(value: i64) -> i64 => value + 1
+fn scalar_target() -> i64 {
+    # expect-error(phase, "capture.phase")
+    let seen = capture(scalar_only, 1)
+    seen.value
+}
 test surviving_capture_control {
     assert eval(identity, value: [7]) == [7]
 }
