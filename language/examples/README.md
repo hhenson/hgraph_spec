@@ -9,6 +9,11 @@ The entries below identify the implementation tests for each example.
 [Source-rejection examples](reject/README.md) use ordinary `hgl test`;
 annotations isolate expected source errors alongside executable tests.
 
+- [`nullable-map-lookup.hgl`](nullable-map-lookup.hgl) specifies guarded safe
+  dictionary reads and strict missing-key failures; its
+  [rejection fixture](reject/nullable-map-lookup.hgl) checks required guards
+  and exact fallback typing. These are source requirements, not target results.
+
 - [`eval-profile-errors.hgl`](eval-profile-errors.hgl) checks coded input-trace
   rejection before graph start, fresh-run membership and canonical positive
   controls. [`reject/delta-errors.hgl`](reject/delta-errors.hgl) isolates delta

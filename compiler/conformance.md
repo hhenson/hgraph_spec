@@ -12,6 +12,9 @@ This does not add generator machinery to the runtime contract.
 
 ## Cases
 
+- [Nullable dictionary lookup](cases_nullable_map_lookup.md): safe ordinary/atomic
+  absence, local presence checks, exact fallbacks and strict missing-key failures.
+
 - [Graph-wired reference observations](cases_reference_values.md):
   designation identity, retargeting, sampling and ordinary data followers.
 - [Owned REF output routes](cases_reference_owner_export.md): preserved child

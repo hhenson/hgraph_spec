@@ -28,10 +28,16 @@ the generic explicit-delta pass-through fixture. The constructor remains
 | `modified(key_set(value))` | Keys were added or removed, not merely child values changed |
 | `contains(collection, key)` | Membership, independent of a child's validity; strings use substring membership |
 | `at(value, key_or_index)` | Strict access; missing key or out-of-range index is an error |
-| `get(value, key_or_index, default=null)` | Proposed safe lookup; nullable and invalid-child rules remain open |
+| `get(value, key_or_index, default=null)` | Ordinary/atomic dictionary lookup returns a guarded nullable payload or exact-V fallback; temporal invalid-child rules remain open |
 
 The `default=null` notation above describes the parameter default. HGL named
 call arguments retain their existing colon syntax: `get(value, key, default: 0)`.
+
+Ordinary/scalar dictionary values and atomic map payloads follow
+[LOOKUP-1–4](nullable-map-lookup.md): strict bracket/`at` lookup fails on an
+absent key, while safe `get` returns `null` by default. Its immutable local
+requires presence refinement before payload use; an exact non-null fallback
+instead yields ordinary V.
 
 
 ```hgl
@@ -71,11 +77,11 @@ the compiler can retain membership history across rebinds. A composition-level
 `key_set` endpoint already supplies persistent tracking.
 
 
-Open detail for `get`: whether a present but invalid child returns the fallback
+Open detail for temporal `get`: whether a present but invalid child returns the fallback
 or remains distinct from an absent key/index. The proposed rule is absent-only,
 preserving removal versus invalidation; this detail still needs agreement.
-The general nullable-expression and `get` result contract also remains to be
-specified. The [nullable indexing contract](nullable-replay-indexing.md)
+General nullable type/storage formation remains open; ordinary/atomic dictionary
+lookup's local presence checks are specified separately. The [nullable indexing contract](nullable-replay-indexing.md)
 preserves local presence refinement but does not settle general sequence
 source types or temporal child lookup. Run-wide `get(global_state, key)` is a
 distinct capability operation: it requires an expected ordinary value type
@@ -116,7 +122,7 @@ intrinsic is one possible realization, not a distinct source operation.
 
 Further work, using the same ordinary value operations:
 
-- General nullable `get`, including its invalid-child policy.
+- General nullable type/storage formation and temporal `get`'s invalid-child policy.
 - Uniform current/delta-value expression lowering for atomic collections,
   tuples, structs and generic values; no representation-specific accessors.
 - Atomic collection lookup and traversal, which must use scalar collection
