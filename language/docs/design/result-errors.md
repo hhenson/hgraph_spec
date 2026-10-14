@@ -10,6 +10,11 @@ Status: accepted, 2026-10-14.
    Equal outcomes still tick; silence is not an outcome. Finite eval/publication
    profiles admit it when both payloads are admitted ordinary atomic payloads,
    additionally admitting `error` as an atomic payload.
+   `delta<result<T,E>>` is the complete result value and `delta<error>` is
+   the complete error value; neither has a sparse delta constructor.
+   Both are intrinsic logically scalar envelopes despite owned payload
+   children: `atomic<result<T,E>>` normalizes to `result<T,E>` and
+   `atomic<error>` to `error`, without new type identities.
 2. **RESULT-2 — Construction.** `ok(value)` constructs success and
    `err(value)` constructs failure. Both type arguments come from the expected
    `result<T, E>` context, checking the supplied payload against its side.
@@ -30,9 +35,15 @@ Status: accepted, 2026-10-14.
    snapshot instead. In node evaluation, the temporal input's ordinary
    payload read must first meet its existing validity/readability rules.
    A tag predicate establishes no time-series validity or modification fact.
+   These predicates follow ordinary value-function selection and automatic
+   lifting. Applied to a temporal argument in graph composition, their lifted
+   node uses the existing valid/modified admission and produces a bool time
+   series; it adds no graph overload or graph-side payload refinement.
 4. **ERROR-1 — Canonical diagnostic.** `error(message: "text")` constructs
    an ordinary atomic error; optional `code: "value.missing_key"` supplies
-   its code. `.message` is str. `.code` is a contextual nullable str: bind it
+   its code. The message argument is required str; code accepts str or null
+   and defaults to null. Arguments follow ordinary written evaluation order.
+   `.message` is str. `.code` is a contextual nullable str: bind it
    with `let` and prove presence before payload use, under LOOKUP-3/4.
    Omission means no code, not an invented unknown-code alias. Domain codes
    outside the [execution catalogue](error-catalogue.md#execution-errors)

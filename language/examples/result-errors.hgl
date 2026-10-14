@@ -11,6 +11,10 @@ const fn doubled(book: map<str, i64>, key: str) -> result<i64, error> {
     let item = price(book, key)?
     return ok(item * 2)
 }
+const fn propagate_before_strict(book: map<str, i64>, key: str) -> result<i64, error> {
+    let item = price(book, key)?
+    return ok(item + at(map<str, i64>(items: []), "unreachable-on-Err"))
+}
 const fn recovered(book: map<str, i64>, key: str) -> i64 {
     let outcome = price(book, key)
     if is_err(outcome) { return 0 }
@@ -26,6 +30,13 @@ fn required(book: atomic<map<str, i64>>, key: str) -> i64 {
 fn outcome(book: atomic<map<str, i64>>, key: str) -> result<i64, error> {
     when { return price(book, key) }
 }
+fn graph_is_failure(value: result<i64, error>) -> bool => is_err(value)
+fn alias_outcome(value: atomic<result<i64, error>>) -> result<i64, error> {
+    when { return value }
+}
+fn alias_error(value: atomic<error>) -> error {
+    when { return value }
+}
 
 test tagged_results_and_propagation {
     let full = map<str, i64>(items: ["X": 10])
@@ -35,6 +46,8 @@ test tagged_results_and_propagation {
         err(error(code: "value.missing_key", message: "missing price"))
     assert doubled(full, "X") == success
     assert doubled(empty, "X") == failure
+    assert propagate_before_strict(empty, "X") == failure
+    assert raises("value.missing_key") { propagate_before_strict(full, "X") }
     assert recovered(full, "X") == 10
     assert recovered(empty, "X") == 0
     assert diagnostic(failure) == "missing price"
@@ -42,8 +55,12 @@ test tagged_results_and_propagation {
     assert uncoded.code == null
     assert uncoded.context == null
     let code = error(code: "value.missing_key", message: "missing price").code
+    assert code != null
     if code != null { assert code == "value.missing_key" }
     let ten: result<i64, error> = ok(10)
+    assert eval(graph_is_failure, value: [_, ten, failure, failure]) == [_, false, true, true]
+    assert eval(alias_outcome, value: [ten, failure]) == [ten, failure]
+    assert eval(alias_error, value: [uncoded, uncoded]) == [uncoded, uncoded]
     assert eval(outcome, book: [full, empty, empty, _], key: ["X"]) == [
         ten, failure, failure, _
     ]

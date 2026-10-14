@@ -8,6 +8,8 @@ normative; their presence claims no compiler execution.
 | Case | Required result |
 |---|---|
 | Ok/Err with expected result<i64,error> | Infer both sides; retain only the selected payload. |
+| atomic<result<T,E>> and atomic<error> | Normalize to their direct intrinsic types before equality, generic inference or binding. |
+| Graph is_ok/is_err with temporal result input | Ordinary automatic lifting produces bool ticks under existing valid/modified admission, with no graph payload refinement. |
 | No expected E for ok(1) | Reject result.context_type. |
 | Guarded immutable result, including early failure return | Permit only the proven tag's property. |
 | Unguarded property, wrong tag, mutable alias, or different guarded expression | Reject result.required_variant. |

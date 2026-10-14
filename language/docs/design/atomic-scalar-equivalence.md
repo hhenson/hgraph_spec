@@ -28,3 +28,8 @@ canonical identity and the composite boundary.
 
 `atomic<any>` also normalizes to `any` under [ANY-4](any-values.md):
 its contained ordinary value does not become a temporal child.
+
+Likewise, intrinsic logically scalar `error` and `result<T,E>` envelopes
+normalize under [RESULT-1](result-errors.md): `atomic<error>` is `error`, and
+`atomic<result<T,E>>` is `result<T,E>`. Their owned ordinary payload children
+never become separate temporal fields. Deltas carry one complete outcome.
