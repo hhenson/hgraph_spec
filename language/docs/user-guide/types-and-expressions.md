@@ -1263,8 +1263,13 @@ Missing keys, invalid child value reads, empty `front`/`back`, and out-of-range
 indices are errors. They do not fabricate default values. `contains` checks
 membership, not child validity. The access rules here describe structural time-series inputs.
 
-The safe counterpart `get(value, key_or_index, default=null)` is accepted in principle. The nullable result and the treatment of a present
-but invalid child remain outstanding; see the
+Ordinary/scalar dictionaries and atomic map payloads use
+`get(value, key, default: null)` for safe lookup. Bind the result with `let`
+and compare it with `null` before using the payload. A supplied non-null
+fallback has the exact stored value type and yields an ordinary result.
+Strict bracket/`at` lookup instead fails with `value.missing_key` on absence.
+See [nullable dictionary lookup](../design/nullable-map-lookup.md). Safe lookup
+of a present invalid temporal child remains open in the
 [surface completion record](../design/native-surface-proposal.md).
 
 Use ordinary expressions to read current values and `delta_value` for

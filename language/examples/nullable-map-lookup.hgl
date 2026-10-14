@@ -1,0 +1,35 @@
+module examples.nullable_map_lookup
+
+const fn price_or_zero(book: map<str, i64>, key: str) -> i64 {
+    let price = get(book, key)
+    if price == null { return 0 }
+    return price
+}
+const fn fallback(book: map<str, i64>, key: str) -> i64 =>
+    get(book, key, default: 5)
+const fn strict(book: map<str, i64>, key: str) -> i64 => book[key]
+const fn strict_at(book: map<str, i64>, key: str) -> i64 => at(book, key)
+fn atomic_price(book: atomic<map<str, i64>>, key: str) -> i64 {
+    when {
+        let price = get(book, key, default: null)
+        if price != null { return price }
+    }
+}
+fn atomic_strict(book: atomic<map<str, i64>>, key: str) -> i64 {
+    when { return book[key] }
+}
+
+test nullable_dictionary_lookup {
+    let zero = map<str, i64>(items: ["X": 0])
+    let empty = map<str, i64>(items: [])
+    assert price_or_zero(zero, "X") == 0
+    assert price_or_zero(empty, "X") == 0
+    assert fallback(zero, "X") == 0
+    assert fallback(empty, "X") == 5
+    assert eval(atomic_price, book: [zero, empty, zero], key: ["X"]) == [0, _, 0]
+    assert raises("value.missing_key") { strict(empty, "X") }
+    assert raises("value.missing_key") { strict_at(empty, "X") }
+    assert raises("value.missing_key") {
+        eval(atomic_strict, book: [empty], key: ["X"])
+    }
+}
