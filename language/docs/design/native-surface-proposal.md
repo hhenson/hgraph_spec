@@ -39,6 +39,11 @@ absent key, while safe `get` returns `null` by default. Its immutable local
 requires presence refinement before payload use; an exact non-null fallback
 instead yields ordinary V.
 
+Graph key selection from a non-atomic `map<K, V>` selects a `ref<V>`
+connection: absent membership publishes empty REF, arrival selects the child,
+and removal clears that connection. Ordinary consumers follow the selected
+child; selection does not read its payload. See the accepted
+[map key connection rules](map-key-connections.md).
 
 ```hgl
 fn membership_changed(value: map<i64, f64>) -> bool {

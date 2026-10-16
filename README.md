@@ -15,6 +15,7 @@ reasoned traces and accepted decisions. No Python, C++ or Rust code lives here.
 - [Language guide](language/docs/user-guide/language-tour.md)
 - [Absence, tagged results, propagation and capture](language/docs/user-guide/error-management.md)
 - [Owned REF output routes](compiler/cases_reference_owner_export.md)
+- [Live map key connections](language/docs/design/map-key-connections.md)
 - [Runtime model](runtime/overview.md) and [conformance method](runtime/conformance.md)
 - [HGL compiler conformance](compiler/conformance.md)
 - [Wiring](wiring/wiring.md): how every front end describes a graph

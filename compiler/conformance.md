@@ -21,6 +21,8 @@ This does not add generator machinery to the runtime contract.
 
 - [Graph-wired reference observations](cases_reference_values.md):
   designation identity, retargeting, sampling and ordinary data followers.
+- [Map key connections](cases_map_key_connections.md): absent-key empty REF,
+  arrival/removal, saved-child expiry and strict/safe dictionary value lookup.
 - [Owned REF output routes](cases_reference_owner_export.md): preserved child
   designations, owner-mediated rank and live boundary composition.
 - [Default expression binding scope](cases_default_binding_scope.md): declaration

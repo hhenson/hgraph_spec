@@ -423,6 +423,14 @@ its payload while wiring or permit a node to traverse its opaque REF input.
 See [source examples](../../examples/reference-wiring-projections.hgl) and
 [compiler cases](../../../compiler/cases_reference_wiring_projections.md).
 
+Graph key selection `book[key]` from a non-atomic `map<K, V>` likewise returns
+a `ref<V>` connection. Missing membership produces an empty REF; arrival and
+removal maintain the connection even with a silent key input. This differs
+from strict ordinary/atomic map value lookup. See the
+[map key contract](map-key-connections.md), its
+[source examples](../../examples/map-key-connections.hgl) and
+[compiler cases](../../../compiler/cases_map_key_connections.md).
+
 
 ## `signal` inputs
 

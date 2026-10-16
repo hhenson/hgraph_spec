@@ -1,0 +1,136 @@
+module examples.map_key_connections
+
+fn select_price(book: map<str, i64>, key: str) -> ref<i64> => book[key]
+fn select_reference_price(book: ref<map<str, i64>>, key: str) -> ref<i64> => book[key]
+fn read_price(value: i64) -> i64 {
+    when { return delta_value(value) }
+}
+fn followed_price(book: map<str, i64>, key: str) -> i64 =>
+    read_price(select_price(book, key))
+fn followed_reference_price(book: map<str, i64>, key: str) -> i64 =>
+    read_price(select_reference_price(book, key))
+fn choose_book(index: i64, first: ref<map<str, i64>>, second: ref<map<str, i64>>) -> ref<map<str, i64>> {
+    when valid(index) {
+        if index == 0 {
+            if valid(first) && modified(index, first) { return first }
+        } else {
+            if valid(second) && modified(index, second) { return second }
+        }
+    }
+}
+fn followed_selected_book(index: i64, first: map<str, i64>, second: map<str, i64>, key: str) -> i64 {
+    read_price(select_reference_price(choose_book(index, first, second), key))
+}
+
+fn ref_tick(value: ref<i64>, step: i64) -> bool {
+    when modified(step) && valid(value) { return modified(value) }
+}
+fn selection_ticks(book: map<str, i64>, key: str, step: i64) -> bool =>
+    ref_tick(select_price(book, key), step)
+
+fn capture_first(value: ref<i64>, readable: i64) -> ref<i64> {
+    state captured: bool = false
+    when valid(value, readable) {
+        if !captured {
+            captured = true
+            return value
+        }
+    }
+}
+fn sampled_price(value: i64, step: i64) -> i64 {
+    when modified(step) && valid(value) { return value }
+}
+fn saved_price(book: map<str, i64>, key: str, step: i64) -> i64 {
+    let selected = select_price(book, key)
+    sampled_price(capture_first(selected, selected), step)
+}
+
+fn atomic_price(book: atomic<map<str, i64>>, key: str) -> i64 {
+    when { return book[key] }
+}
+fn atomic_missing(book: atomic<map<str, i64>>, key: str) -> bool {
+    when {
+        let item = get(book, key)
+        return item == null
+    }
+}
+fn atomic_at(book: atomic<map<str, i64>>, key: str) -> i64 {
+    when { return at(book, key) }
+}
+const fn missing_price(book: map<str, i64>, key: str) -> bool {
+    let item = get(book, key)
+    return item == null
+}
+const fn strict_price(book: map<str, i64>, key: str) -> i64 => book[key]
+const fn strict_at(book: map<str, i64>, key: str) -> i64 => at(book, key)
+const fn fallback_price(book: map<str, i64>, key: str) -> i64 =>
+    get(book, key, default: 0)
+
+test map_key_connections {
+    # A readable key selects absence even before the map's first publication.
+    assert eval(selection_ticks,
+        book: [_, _, delta<map<str, i64>>(upsert: ["X": 10])],
+        key: ["X"], step: [0, 1, 2]
+    ) == [true, false, true]
+    assert eval(followed_price,
+        book: [_, _, delta<map<str, i64>>(upsert: ["X": 10])], key: ["X"]
+    ) == [_, _, 10]
+    let idle = delta<map<str, i64>>()
+    let changes = [
+        idle,
+        delta<map<str, i64>>(upsert: ["X": 7]),
+        delta<map<str, i64>>(upsert: ["Y": 20]),
+        delta<map<str, i64>>(upsert: ["X": 8]),
+        delta<map<str, i64>>(remove: ["X"]),
+        idle,
+        delta<map<str, i64>>(upsert: ["X": 8]),
+        idle, idle, idle, idle, delta<map<str, i64>>(upsert: ["Y": 21])
+    ]
+    let steps = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    assert eval(followed_price, book: changes,
+        key: ["X", _, _, _, _, _, _, "Y", "Y", "Missing", "OtherMissing", _]
+    ) == [
+        _, 7, _, 8, _, _, 8, 20, _, _, _, _
+    ]
+    assert eval(selection_ticks, book: changes, step: steps,
+        key: ["X", _, _, _, _, _, _, "Y", "Y", "Missing", "OtherMissing", _]
+    ) == [
+        true, true, false, false, true, false, true, true, false, true, false, false
+    ]
+    # Different live children with equal payloads still retarget and sample.
+    assert eval(followed_price,
+        book: [delta<map<str, i64>>(upsert: ["X": 7, "Y": 7])],
+        key: ["X", "Y", "Y"]
+    ) == [7, 7, _]
+    assert eval(selection_ticks,
+        book: [delta<map<str, i64>>(upsert: ["X": 7, "Y": 7])],
+        key: ["X", "Y", "Y"], step: [0, 1, 2]
+    ) == [true, true, false]
+    # A held designation keeps A through removal, then expires permanently.
+    assert eval(saved_price, book: changes, step: steps,
+        key: ["X", _, _, _, _, _, _, "Y", "Y", "Missing", "OtherMissing", _]
+    ) == [
+        _, 7, 7, 8, 8, _, _, _, _, _, _, _
+    ]
+    # Selection also composes below an outer map REF and follows its retargeting.
+    assert eval(followed_reference_price,
+        book: [_, delta<map<str, i64>>(upsert: ["X": 7]), delta<map<str, i64>>(remove: ["X"])],
+        key: ["X"]
+    ) == [_, 7, _]
+    assert eval(followed_selected_book,
+        index: [0, 1, _, 1, 0], key: ["X"],
+        first: [delta<map<str, i64>>(upsert: ["X": 7])],
+        second: [delta<map<str, i64>>(upsert: ["X": 7]), _, delta<map<str, i64>>(upsert: ["X": 8])]
+    ) == [7, 7, 8, _, 7]
+    let zero = map<str, i64>(items: ["X": 0])
+    let empty = map<str, i64>(items: [])
+    assert !missing_price(zero, "X")
+    assert missing_price(empty, "X")
+    assert fallback_price(empty, "X") == 0
+    assert eval(atomic_price, book: [zero], key: ["X"]) == [0]
+    assert eval(atomic_missing, book: [zero, empty], key: ["X"]) == [false, true]
+    assert raises("value.missing_key") { strict_price(empty, "X") }
+    assert raises("value.missing_key") { strict_at(empty, "X") }
+    assert raises("value.missing_key") { eval(atomic_price, book: [empty], key: ["X"]) }
+    assert raises("value.missing_key") { eval(atomic_at, book: [empty], key: ["X"]) }
+}
