@@ -76,7 +76,7 @@ test map_key_connections {
         book: [_, _, delta<map<str, i64>>(upsert: ["X": 10])], key: ["X"]
     ) == [_, _, 10]
     let idle = delta<map<str, i64>>()
-    let changes = [
+    let changes: list<delta<map<str, i64>>, 12> = [
         idle,
         delta<map<str, i64>>(upsert: ["X": 7]),
         delta<map<str, i64>>(upsert: ["Y": 20]),
@@ -86,7 +86,7 @@ test map_key_connections {
         delta<map<str, i64>>(upsert: ["X": 8]),
         idle, idle, idle, idle, delta<map<str, i64>>(upsert: ["Y": 21])
     ]
-    let steps = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    let steps: list<i64, 12> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     assert eval(followed_price, book: changes,
         key: ["X", _, _, _, _, _, _, "Y", "Y", "Missing", "OtherMissing", _]
     ) == [
