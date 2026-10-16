@@ -146,6 +146,10 @@ annotations isolate expected source errors alongside executable tests.
 - [`reference-wiring-projections.hgl`](reference-wiring-projections.hgl) selects
   a declared field or constant fixed-list index through REF during graph wiring;
   scalar consumers follow the child across parent-reference retargeting.
+- [`map-key-connections.hgl`](map-key-connections.hgl) specifies graph key
+  selection, empty/rebound designations, saved-child expiry and ordinary/atomic
+  dictionary lookup under the [map key contract](../docs/design/map-key-connections.md).
+  These are source requirements, not target execution results.
 - [`reference-identity-equality.hgl`](reference-identity-equality.hgl) compares
   node REF designations with `==`/`!=`: aliases equate and separate endpoints
   carrying equal scalar values remain distinct under REF-EQ-1.

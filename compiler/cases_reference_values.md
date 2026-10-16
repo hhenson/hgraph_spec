@@ -39,6 +39,7 @@ which excludes `ref`, and global value storage does not admit temporal
 endpoints. A REF output can hold a designation without those storage forms,
 but these graph-wired fixed/scalar cases do not dispose of an ephemeral
 dictionary child. They therefore do not establish expiry, generation/key reuse,
-cross-graph reference escape or saved-reference ordinary storage. Dynamic-child
-capture and expired-designation fixtures need a separately specified source
-path; no new lifecycle or storage surface is inferred here.
+cross-graph reference escape or saved-reference ordinary storage. The separate
+[map key cases](cases_map_key_connections.md) supply dynamic-child capture
+and expiry through graph selection and a held REF output; no new ordinary
+reference storage or empty-reference constructor is inferred here.

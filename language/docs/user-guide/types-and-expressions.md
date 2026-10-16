@@ -1259,9 +1259,17 @@ Runtime collection access also supports:
 
 These calls currently take positional arguments. Indices are zero-based;
 window samples are ordered oldest to newest, including after wraparound.
-Missing keys, invalid child value reads, empty `front`/`back`, and out-of-range
-indices are errors. They do not fabricate default values. `contains` checks
-membership, not child validity. The access rules here describe structural time-series inputs.
+During evaluation, missing keys, invalid child value reads, empty `front`/`back`,
+and out-of-range indices are strict access errors. They do not fabricate
+default values. `contains` checks membership, not child validity. Graph
+connection selection is separate from these payload reads.
+
+In graph composition, `book[key]` on a non-atomic `map<K, V>` selects a
+`ref<V>` connection. An absent key publishes an empty REF; later arrival
+selects its child even while the key is silent, and removal clears the
+connection. Ordinary consumers follow that child. A separately held old
+designation survives through the removal cycle and cannot retarget to a
+later replacement. See [map key connections](../design/map-key-connections.md).
 
 Ordinary/scalar dictionaries and atomic map payloads use
 `get(value, key, default: null)` for safe lookup. Bind the result with `let`
