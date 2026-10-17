@@ -137,8 +137,7 @@ it is read and written only by the node, it never ticks, and nothing outside
 the node can see it. It is a cache: a node must behave the same whether its
 state survived or was rebuilt from equivalent inputs, recordable history and
 pending work. The same future events must give the same observations and
-effects. A lost running total is not a cache. Native `State` does not enforce
-this distinction.
+effects. A lost running total is not a cache.
 
 **Recordable state** is a time-series the node owns, and it **works the same
 as the output**. The node reads what it holds and writes to it during eval —
@@ -160,8 +159,7 @@ and start rebuilds it.
 In HGL, `state` is recordable state and `cache` is state. HGL hides the
 intended machinery: to the code, a `state` is a variable that is read and
 assigned, and that it is a time-series underneath — ticking, recordable, restorable —
-does not show. Mixed HGL state/cache lowering remains separate work; see
-[implementation evidence](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/evidence.md).
+does not show.
 
 
 Behaviour
