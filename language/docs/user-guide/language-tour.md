@@ -212,10 +212,12 @@ true only when every argument is valid. `valid(value)` tests the endpoint
 itself; use `all_valid(value)` when every child of a structural or collection
 endpoint must also be valid.
 
-Inside a function-level `when` header, empty calls select all temporal
-parameters. Omitting the modification or validity selector supplies that same
-default, so `when { ... }` means “any input modified and all inputs valid.”
-Empty selector calls outside `when` are rejected.
+Inside a function-level `when` header, an omitted modification selector
+subscribes to all time-series inputs, and an omitted validity selector requires
+all of them valid. Explicit `modified()` subscribes to none; explicit `valid()`
+requires none valid and leaves validity checks to the body. Notifications from
+subscribed inputs include invalidation. Empty selector calls outside `when`
+are rejected.
 
 The collection traversal surface uses `keys`, `values`, `elements`, and
 `items`. `values` projects values from keyed or named collections;

@@ -200,8 +200,10 @@ still moves on. Validity is checked afresh every time; nothing is latched.
 HGL handler policies distinguish omission from an explicit empty validity set:
 omission requires every time-series input valid, while `when valid()` requires
 none and leaves checking to the body. Declared handler validity constraints can
-request managed output invalidation without executing a rejected body; see
-[handler validity handling](../language/docs/user-guide/functions.md#invalidation-and-notification-subscriptions).
+request managed output invalidation without executing a rejected body. For the
+single-handler managed case, failed admission still invalidates the dependent
+output during that activation; skipping eval does not skip this requested
+validity handling. See [handler validity handling](../language/docs/user-guide/functions.md#invalidation-and-notification-subscriptions).
 This does not make generic admission failure invalidate every node's output.
 Invalidation activates processing through the same input subscriptions as other
 notifications; a passive input's invalidation does not itself schedule the node.

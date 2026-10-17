@@ -47,6 +47,15 @@ introduced by this document.
 | Recovery | Managed single-input function returns its input; after invalidation, the input republishes a valid value equal to its old value | The result becomes valid and publishes again; equality with the old invalidated result does not suppress recovery. |
 | Silence | A subscribed input remains valid without another notification | Its held value remains available; silence alone neither activates the handler nor invalidates the result. |
 
+### Separate handler subscriptions
+
+An outputless function has two handlers: `when modified(a) && valid()` logs
+`"a"`, and `when modified(b) && valid()` logs `"b"`. Start with both inputs
+valid; in a later cycle, invalidate only `a`. Only `"a"` is logged, even though
+both inputs read unmodified. In a fresh run, invalidating only `b` instead logs
+only `"b"`. This checks handler dispatch without choosing a shared-output
+invalidation policy.
+
 ## Empty activation and warnings
 
 An explicit `modified()` selects no input notifications; omitted `modified`

@@ -1882,8 +1882,11 @@ Top-level `modified(...)` selectors declare notification subscriptions,
 including invalidation. They must not be rechecked as tick-only metadata
 predicates in a way that drops an invalidation activation. Ordinary
 `modified(a)` observations inside the body retain their endpoint meaning;
-invalidation can notify while that observation is false. An unsubscribed or
-passive input does not independently activate processing on invalidation.
+invalidation can notify while that observation is false. With multiple
+handlers, a notification activates only handlers subscribed to its input:
+invalidating `a` alone must not activate a handler subscribed only to `b`.
+An unsubscribed or passive input does not independently activate processing
+on invalidation.
 
 For a single-handler function, declared validity constraints request managed
 invalidation of the dependent output when an activation is processed and those
