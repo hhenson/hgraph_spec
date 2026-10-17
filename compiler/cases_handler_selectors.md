@@ -35,8 +35,9 @@ internal successful validity check. `valid()` itself proves no input valid.
 Use one handler per function and observe after producers and the consumer have
 processed the cycle. An independent observer must inspect output validity and
 notification delivery; publication deltas alone do not encode invalidation.
-These are runtime-driver cases: no new HGL whole-output invalidation syntax is
-introduced by this document.
+A runtime driver invalidates the source endpoint for these cases; `_` does
+not encode that action. Manual output invalidation uses `invalidate(out)`, as
+shown below.
 
 | Case | Setup and action | Expected observation |
 | --- | --- | --- |
@@ -46,6 +47,20 @@ introduced by this document.
 | Unsubscribed required input | Function uses `when modified(a) && valid(a, b)`; only `b` becomes invalid | No activation occurs solely because `b` became invalid. On a later notification from `a`, the failed requirement for `b` invalidates the output without running the body. |
 | Recovery | Managed single-input function returns its input; after invalidation, the input republishes a valid value equal to its old value | The result becomes valid and publishes again; equality with the old invalidated result does not suppress recovery. |
 | Silence | A subscribed input remains valid without another notification | Its held value remains available; silence alone neither activates the handler nor invalidates the result. |
+
+### Manual whole-output invalidation
+
+[`manual_forward`](../language/examples/when-defaults.hgl) returns its input
+when valid and calls `invalidate(out)` otherwise. Start by publishing `5.0`;
+then invalidate the source in a later cycle and observe after the handler runs.
+
+| Action | Expected result |
+| --- | --- |
+| Source becomes invalid | Output becomes invalid, unmodified, with time `never`; subscribers are notified without a value tick. |
+| Source later republishes `5.0` | Output becomes valid and publishes `5.0` again. |
+| Call `invalidate(out)` while the output is already invalid | No change or new notification. |
+| Write output, then invalidate it in the same evaluation | Final output is invalid; reversing the actions leaves it valid. |
+| Attempt `invalidate` on an input or ordinary value, or use it in `start`/`stop` | Reject; this effect requires the injected output during evaluation. |
 
 ### Separate handler subscriptions
 

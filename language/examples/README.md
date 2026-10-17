@@ -95,7 +95,8 @@ annotations isolate expected source errors alongside executable tests.
   from explicit empty selections. Omitted selectors expand to all time-series
   inputs; `valid()` requires none valid and `modified()` subscribes to none.
   Five named tests specify defaults, explicit lists, manual validity checks
-  and a deliberately dormant node with an expected warning. An annotated
+  and a deliberately dormant node with an expected warning. `manual_forward`
+  demonstrates explicit whole-output invalidation with `invalidate(out)`. An annotated
   `null_sink` separately demonstrates selective suppression with
   `@suppress_warning("node.no_activation")`.
   See the [selector cases](../../compiler/cases_handler_selectors.md).

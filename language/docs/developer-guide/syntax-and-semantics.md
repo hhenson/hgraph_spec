@@ -2189,11 +2189,20 @@ writes made by earlier blocks.
 then returning. A bare `return` terminates evaluation after any preceding
 incremental output mutations.
 
-Collection output mutations are function-shaped effects whose first argument
-must be the injected `out` binding:
+Output mutations are function-shaped effects whose first argument must be
+the injected `out` binding. `invalidate(out)` invalidates the whole output,
+including scalar results, under the [time-series invalidation rules](../../../runtime/time_series.md#becoming-invalid).
+It clears validity and modification time, invalidates descendants, and notifies
+subscribers without a value tick. An already invalid output is unchanged.
+The call continues evaluation: later writes can validate the output again;
+a later whole-output invalidation clears an earlier write. Any validity facts
+for `out` and its descendants cease to hold after the call. This effect is
+restricted to evaluation; inputs, ordinary values, and `start`/`stop` are not
+valid mutation targets or contexts.
 
 | Output | Operations |
 | --- | --- |
+| Any output type | `invalidate(out)` |
 | `set<T>` | `insert(out, value)`, `upsert(out, value)`, `remove(out, value)`, `discard(out, value)`, `clear(out)` |
 | `map<K, V>` | `insert(out, key, value)`, `update(out, key, value)`, `upsert(out, key, value)`, `remove(out, key)`, `discard(out, key)`, `invalidate(out, key)`, `clear(out)` |
 | `list<V, unbounded>` | `push(out, value)`, `pop(out)`, `invalidate(out, index)`, `clear(out)` |

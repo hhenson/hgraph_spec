@@ -691,8 +691,9 @@ framework-managed validity handling. When an activation is processed and its
 required validity fails, the dependent output is invalidated without executing
 the guarded body. The invalidation follows the time-series notification rules;
 it is not a value tick. With `valid()`, the body decides whether to invalidate,
-retain, or replace the output, subject to the operator's contract. This is not
-unconditional invalidation propagation through every node or passive input.
+retain, or replace the output, subject to the operator's contract. Use
+[`invalidate(out)`](#output-access) for explicit whole-output invalidation.
+This is not unconditional propagation through every node or passive input.
 
 The authoring convention is to propagate invalidity to dependent results.
 System libraries follow it unless an operator documents a reason for different
@@ -1210,6 +1211,25 @@ fn running_total(value: f64) -> f64 {
 output value, including writes performed earlier in the same evaluation.
 Assigning it produces an output tick. `return value` is equivalent to assigning
 the complete output and then terminating evaluation.
+
+`invalidate(out)` explicitly invalidates the whole output, including a scalar
+result. This forwarder handles input validity inside its body:
+
+```hgl
+fn manual_forward(value: f64) -> f64 {
+    inject out
+    when valid() {
+        if valid(value) { return value }
+        invalidate(out)
+    }
+}
+```
+
+The call follows [output invalidation](../../../runtime/time_series.md#becoming-invalid):
+validity is cleared, descendants become invalid, and subscribers are notified
+without a value tick. An already invalid output is unchanged. The call does
+not end evaluation; a later output write can make it valid again. It requires
+`inject out` and is permitted only during evaluation, not in `start` or `stop`.
 
 Use `out` as the previous state when the last public output is exactly the
 information required by the next evaluation. Use `state` when the function
