@@ -91,10 +91,14 @@ annotations isolate expected source errors alongside executable tests.
 - [`stateful-node.hgl`](stateful-node.hgl) demonstrates aggregate state,
   grouped injectables, lifecycle blocks, ordered handlers, previous output,
   and incremental collection output.
-- [`when-defaults.hgl`](when-defaults.hgl) makes omitted and zero-argument
-  handler selectors executable: `when {}` matches
-  `when modified() && valid()`, while either omitted selector expands over all
-  temporal parameters. Three named tests express these equivalences.
+- [`when-defaults.hgl`](when-defaults.hgl) distinguishes omitted selectors
+  from explicit empty selections. Omitted selectors expand to all time-series
+  inputs; `valid()` requires none valid and `modified()` subscribes to none.
+  Five named tests specify defaults, explicit lists, manual validity checks
+  and a deliberately dormant node with an expected warning. An annotated
+  `null_sink` separately demonstrates selective suppression with
+  `@suppress_warning("node.no_activation")`.
+  See the [selector cases](../../compiler/cases_handler_selectors.md).
 - [`collection-views.hgl`](collection-views.hgl) demonstrates dual-phase
   `key_set`, runtime `keys`/`values`/`elements`/`items`, built-in and inline
   predicates, `last_modified`, and mutable lexical `var`.

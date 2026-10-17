@@ -1137,22 +1137,34 @@ delta_value(value)
 ```
 
 Source does not expose `value.modified`, `value.valid`, or `value.value`.
-In a runtime `when` predicate, `modified(value)` and `valid(value)` inspect the
-input endpoint while ordinary expressions read its current payload. Both
-predicates accept one or more explicit arguments: `modified(a, b, c)` is true
-when any argument was modified, while `valid(a, b, c)` is true only when every
-argument is valid. In a function-level `when` predicate, an empty argument list
-selects all temporal parameters: `modified()` means any was modified and
-`valid()` means all are top-level valid. A handler that omits either selector
-receives the corresponding complete-input default; consequently
-`when { ... }` means any input may trigger once every input is valid. Empty
-selector calls outside `when` are invalid, and `all_valid` always requires an
-explicit argument.
+In runtime expressions, `modified(a, b, c)` is true when any argument was
+modified and `valid(a, b, c)` is true when every argument is valid. Payload
+reads still require a successful validity check.
 
-An explicitly scheduled handler can run without active inputs (see
-[Scheduling](functions.md#scheduling-the-clock-and-input-activity)). There is
-no general source spelling for an explicitly empty validity set. `modified()`
-and `valid()` select the complete temporal parameter list, not an empty set.
+At the top level of a function-level `when` conjunction, these calls declare
+handler input policies. Omitting `modified` subscribes to all time-series
+inputs; omitting `valid` or `all_valid` requires all time-series inputs valid.
+For inputs `a` and `b`, a bare `when` has the selections of
+`when modified(a, b) && valid(a, b)`.
+
+An explicit `modified()` subscribes to no input notifications. The node needs
+another driver, such as an alarm or scheduler armed during startup; otherwise
+the compiler should warn that it cannot be activated. An intentional dormant
+sink remains valid source.
+
+An explicit `valid()` requires no inputs to be valid. With `when valid()`,
+all inputs still activate by default, but the body must check validity before
+reading any input payload. A check inside `if` does not itself remove a
+missing handler validity selector's all-input default. Empty selector calls
+outside `when` are rejected, and `all_valid` requires an explicit argument.
+
+An input activation subscription includes invalidation notifications, even
+when the endpoint's `modified` metadata is false. Unsubscribed inputs do not
+independently activate the handler on invalidation. A top-level validity
+constraint requests managed output invalidation for a single-handler function;
+`valid()` leaves that handling to the body. See [handler selectors and validity
+handling](functions.md#handler-selectors-and-validity-handling) for the policy
+table, scheduled activation and the unresolved multiple-handler case.
 
 `valid(value)` checks the input itself. For a list, bundle, or temporal map,
 `all_valid(value)` additionally checks that every immediate child is `valid`.

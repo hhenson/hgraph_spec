@@ -197,6 +197,15 @@ A node is evaluated in a cycle when all of these hold:
 If 1 holds but 2 or 3 does not, eval is not called. The node's scheduler
 still moves on. Validity is checked afresh every time; nothing is latched.
 
+HGL handler policies distinguish omission from an explicit empty validity set:
+omission requires every time-series input valid, while `when valid()` requires
+none and leaves checking to the body. Declared handler validity constraints can
+request managed output invalidation without executing a rejected body; see
+[handler validity handling](../language/docs/user-guide/functions.md#invalidation-and-notification-subscriptions).
+This does not make generic admission failure invalidate every node's output.
+Invalidation activates processing through the same input subscriptions as other
+notifications; a passive input's invalidation does not itself schedule the node.
+
 Admission does not look at *modified*. A node is woken by notifications, and
 a notification is not always a tick (see Time-series types): an implementation
 that cares which input changed asks the input.

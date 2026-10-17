@@ -55,6 +55,10 @@ statements on one line are a diagnostic. An `inject` list continues past
 a trailing comma and newline only when the next line starts with an
 identifier.
 
+At a named function declaration, `@suppress_warning("node.no_activation")`
+starts a warning annotation, not a temporal literal. See
+[selective warning suppression](#selective-warning-suppression).
+
 A temporal literal is one token: `@` followed by an RFC 3339 date, time, or
 instant, optionally with an RFC 9557 zone annotation (`@2026-09-03`,
 `@09:30`, `@2026-09-03T09:30Z`, `@09:30[America/New_York]`,
@@ -212,7 +216,10 @@ instantiation   = identifier, "<", materialization_argument,
                   { ",", materialization_argument }, [ "," ], ">";
 materialization_argument
                 = type | const_expression | "_";
-function_decl   = ( [ "export" | "impl" ], "fn" | "const", "fn" ), identifier,
+warning_annotation
+                = "@", "suppress_warning", "(", string_literal, ")";
+function_decl   = { warning_annotation, NL },
+                  ( [ "export" | "impl" ], "fn" | "const", "fn" ), identifier,
                   [ generic_parameters ], function_signature,
                   [ requires_clause ], function_body;
 native_type_decl = [ "export" ], "native", "type", identifier;
@@ -1281,13 +1288,13 @@ contribute safely to the node's activation policy.
 These are semantic restrictions rather than parser shortcuts so diagnostics
 can identify the misplaced or duplicate construct precisely.
 
-An omitted `when` expression is the canonical default handler. It is
-equivalent to writing `modified() && valid()`: any temporal parameter may
-activate the node, and every temporal parameter must be top-level valid before
-the handler is admitted. The empty calls are contextual handler-selector
-forms. Empty metadata calls outside a handler are rejected; they are not
-zero-argument graph-operator calls. The parser and both IR layers preserve an
-omitted condition, and the generated runtime backend expands the defaults.
+An omitted `when` expression is the default handler. Both its activation
+subscriptions and its required-valid inputs expand to the complete list of
+time-series parameters. With parameters `a` and `b`, its selections equal
+`modified(a, b) && valid(a, b)`. Do not normalize a missing validity selector
+to the explicit call `valid()`: that call requires no inputs valid and requests
+manual validity handling. Empty metadata calls outside a function-level
+handler are rejected. See [handler selectors](#temporal-metadata-syntax).
 
 An inject declaration may span lines after `inject`; newlines around commas do
 not terminate it. Duplicate injectable names are rejected after name
@@ -1831,25 +1838,61 @@ modified(a, b, c) = modified(a) || modified(b) || modified(c)
 valid(a, b, c)    = valid(a) && valid(b) && valid(c)
 ```
 
-Within a function-level `when` predicate, `modified()` selects all temporal
-parameters and retains the ordinary disjunction, while `valid()` selects all
-temporal parameters and retains the ordinary conjunction. `const` parameters,
-state, injected capabilities, and `out` are not members of that implicit input
-list. Empty calls outside a `when` predicate are rejected until separate
-semantics are specified.
+Within a function-level `when`, an omitted activation selector subscribes
+to all time-series parameters; an omitted validity selector requires all those
+parameters valid. `const` parameters, state, injected capabilities and `out`
+are excluded. The implicit policy expands to named inputs, not to zero-argument
+calls. Explicit `modified()` selects no input subscriptions; explicit `valid()`
+selects no required-valid inputs. For parameters `a` and `b`:
 
-The handler also supplies either selector when its top-level conjunction omits
-it. Thus `when modified(a) { ... }` implicitly requires `valid()`, and
-`when valid(a) { ... }` implicitly uses `modified()` for activation. A bare
-`when { ... }` supplies both. Calls nested under `||`, `!`, another call, or
-another residual expression do not suppress a missing top-level default. These
-defaults test endpoint validity only; checking immediate child validity instead
-requires `all_valid(value)`.
+| Handler | Subscribed inputs | Required-valid inputs |
+| --- | --- | --- |
+| `when { ... }` | `a`, `b` | `a`, `b` |
+| `when valid() { ... }` | `a`, `b` | none |
+| `when modified() { ... }` | none | `a`, `b` |
+| `when modified() && valid() { ... }` | none | none |
+| `when modified(a) { ... }` | `a` | `a`, `b` |
+| `when valid(a) { ... }` | `a`, `b` | `a` |
+| `when modified(a) && valid() { ... }` | `a` | none |
 
-A scheduler-driven handler can select an explicitly empty input activation
-set with `scheduled()`. A general empty validity selector remains undefined.
-Neither `modified()` nor `valid()` means an empty selector: an empty argument
-list selects all temporal parameters. Planning preserves that distinction.
+`valid()` is the explicit empty validity set: it is satisfied without requiring
+any input valid. It leaves checks for every payload read to the body. Empty
+selector calls are contextual to function-level `when`, not zero-argument
+graph-operator calls. `all_valid` requires an explicit argument.
+
+A node with an empty activation set can still execute through an alarm or
+scheduler. The compiler should warn when no active inputs or other usable
+activation driver are apparent. Merely declaring an alarm or scheduler, without
+arming it in reachable startup work, does not resolve that warning; scheduling
+only within an otherwise unreachable handler cannot start it. The warning is
+analogous to an unused-variable diagnostic and does not reject intentional
+inert terminals such as `null_sink`. An intentional inert terminal should
+explicitly suppress the dormant-node warning with a declaration annotation;
+its name or outputless result does not itself silence the warning. See
+[selective warning suppression](#selective-warning-suppression).
+
+Only a top-level selector in the handler conjunction replaces the corresponding
+default. Calls nested under `||`, `!`, another call or another residual
+expression do not. In particular, `if valid(a)` inside the body does not remove
+the implicit all-input validity requirement. `scheduled()` supplies scheduled
+activation without adding default input subscriptions; it does not remove the
+default validity requirement.
+
+Top-level `modified(...)` selectors declare notification subscriptions,
+including invalidation. They must not be rechecked as tick-only metadata
+predicates in a way that drops an invalidation activation. Ordinary
+`modified(a)` observations inside the body retain their endpoint meaning;
+invalidation can notify while that observation is false. An unsubscribed or
+passive input does not independently activate processing on invalidation.
+
+For a single-handler function, declared validity constraints request managed
+invalidation of the dependent output when an activation is processed and those
+constraints fail; the guarded body is not executed. With `valid()`, output
+validity is controlled inside the body. This follows subscriptions and does
+not add unconditional validity maintenance to passive inputs. Combining managed
+invalidation across multiple handlers sharing an output remains open; the
+ordered-handler policy below does not settle that question. See
+[authoring guidance](../user-guide/functions.md#invalidation-and-notification-subscriptions).
 
 The compiler may consume these calls while deriving node input policies, so
 they need not remain as runtime calls in generated C++. `valid(value)` tests
@@ -2025,10 +2068,12 @@ and phase checking derive one safe node policy across the complete body:
   runtime conditions.
 
 Before deriving that policy, each handler is normalized with its implicit
-selectors. A missing top-level `modified(...)` selector becomes `modified()`;
-a missing top-level validity selector (`valid(...)` or `all_valid(...)`)
-becomes `valid()`. Calls nested under `||`, `!`, or another residual expression
-do not suppress these defaults.
+selectors. A missing top-level `modified(...)` selector subscribes to all
+time-series inputs; a missing top-level validity selector (`valid(...)` or
+`all_valid(...)`) requires all time-series inputs valid. Preserve the difference
+between that omitted selector and an explicit `valid()` empty requirement.
+Calls nested under `||`, `!`, or another residual expression do not suppress
+these defaults.
 
 A function classified as runtime by another node-only construct but containing
 no `when` uses hgraph's default policy: every ordinary temporal input is active
@@ -2472,6 +2517,42 @@ recovery alone does not establish safe rejection-case boundaries;
 must also hold before any test executes.
 
 ## Diagnostics
+
+### Selective warning suppression
+
+The compiler supports `@suppress_warning("warning.id")` immediately before a
+named function declaration. Each annotation takes one string literal naming a
+stable warning identifier; multiple annotation lines can select additional
+warnings. The annotation precedes any `export`, `impl` or `const` function
+modifier and belongs to that function declaration.
+
+```hgl
+@suppress_warning("node.no_activation")
+fn null_sink<T>(value: T) {
+    when modified() && valid() {}
+}
+```
+
+The [warning catalogue](../design/error-catalogue.md#compiler-warnings) defines
+`node.no_activation`: the runtime node has no active inputs and no apparent
+independent driver. The example deliberately creates an inert terminal; the
+annotation explicitly suppresses that warning without adding an activation.
+
+Suppression affects the named warning on the annotated declaration; unrelated
+warnings remain enabled. Annotating a library declaration does not suppress
+warnings on its callers or neighboring declarations. The annotation changes
+diagnostic reporting, not activation, validity, runtime behavior or source
+legality. It cannot suppress an error or make an invalid program valid.
+
+Additional annotation scopes and treatment of unknown warning identifiers
+remain open. This is distinct from `# expect-error`, which tests rejection
+and excludes rejected owners from execution; warning suppression permits the
+otherwise valid declaration to be compiled normally. A warning identifier is
+not an execution-error or source-rejection code. See the
+[annotated source example](../../examples/when-defaults.hgl) and
+[compiler cases](../../../compiler/cases_handler_selectors.md#empty-activation-and-warnings).
+
+### Diagnostic categories and source errors
 
 Diagnostic categories are `parse`, `name`, `type`, `shape`, `constraint`,
 `function-kind`, `phase`, `injectable`, `operator`, `module`, and `build`.

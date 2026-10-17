@@ -73,6 +73,13 @@ Within a still-valid assembled structure, child invalidation is a local change
 observation (TS-7). A node may also be scheduled with no modified input and
 discover the change through *valid*.
 
+HGL handler activation subscriptions include these invalidation notifications.
+A top-level `modified(input)` selector subscribes to them even when the input's
+ordinary `modified` observation is false. Unsubscribed or passive inputs do not
+independently activate processing on invalidation. See
+[handler validity handling](../language/docs/user-guide/functions.md#invalidation-and-notification-subscriptions)
+for declared validity constraints and manual checks.
+
 ### The kinds
 
 | Kind | In HGL | What it is |

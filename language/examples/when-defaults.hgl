@@ -1,4 +1,4 @@
-# Omitted and empty handler selectors have the same all-input defaults.
+# Omitted selectors select all inputs; explicit empty selectors select none.
 
 module examples.when_defaults
 
@@ -9,7 +9,7 @@ fn default_sum(a: f64, b: f64) -> f64 {
 }
 
 fn explicit_default_sum(a: f64, b: f64) -> f64 {
-    when modified() && valid() {
+    when modified(a, b) && valid(a, b) {
         return a + b
     }
 }
@@ -26,6 +26,31 @@ fn any_input_when_a_valid(a: f64, b: f64) -> f64 {
     }
 }
 
+# The explicit empty validity set admits invalid inputs for internal checking.
+fn manual_sum_or_zero(a: f64, b: f64) -> f64 {
+    when valid() {
+        if valid(a) && valid(b) {
+            return a + b
+        }
+        return 0.0
+    }
+}
+
+# Expected dormant-node warning: no subscribed inputs or startup driver.
+# The warning does not prevent checking or executing this deliberate case.
+fn no_input_activation(a: f64, b: f64) -> f64 {
+    when modified() && valid() {
+        return 0.0
+    }
+}
+
+# Intentional inert terminal: acknowledge just the dormant-node warning.
+# The unannotated no_input_activation function above remains a warning control.
+@suppress_warning("node.no_activation")
+fn null_sink<T>(value: T) {
+    when modified() && valid() {}
+}
+
 test implicit_and_explicit_defaults_match {
     assert eval(default_sum, a: [1.0, _, 3.0], b: [_, 10.0, 20.0]) == [_, 11.0, 23.0]
     assert eval(explicit_default_sum, a: [1.0, _, 3.0], b: [_, 10.0, 20.0]) == [_, 11.0, 23.0]
@@ -37,4 +62,12 @@ test omitted_validity_uses_all_inputs {
 
 test omitted_activation_uses_all_inputs {
     assert eval(any_input_when_a_valid, a: [1.0, _, 3.0], b: [_, 10.0, 20.0]) == [1.0, 1.0, 3.0]
+}
+
+test explicit_empty_validity_leaves_checks_to_body {
+    assert eval(manual_sum_or_zero, a: [1.0, _, 3.0], b: [_, 10.0, 20.0]) == [0.0, 11.0, 23.0]
+}
+
+test explicit_empty_activation_ignores_input_ticks {
+    assert eval(no_input_activation, a: [1.0, _, 3.0], b: [_, 10.0, 20.0]) == [_, _, _]
 }

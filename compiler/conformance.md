@@ -12,6 +12,10 @@ This does not add generator machinery to the runtime contract.
 
 ## Cases
 
+- [Handler selectors](cases_handler_selectors.md): omitted all-input defaults,
+  explicit empty validity, guarded manual reads and subscription-sensitive
+  invalidation notifications.
+
 - [Nullable dictionary lookup](cases_nullable_map_lookup.md): safe ordinary/atomic
   absence, local presence checks, exact fallbacks and strict missing-key failures.
 - [Results and propagation](cases_result_errors.md): tagged atomic outcomes,
