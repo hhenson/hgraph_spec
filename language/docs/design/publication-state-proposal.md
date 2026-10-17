@@ -1,7 +1,9 @@
 # Publication data and separately observed state
 
-Status: proposed, 2026-10-08. These decisions are for review; no new mutation
-syntax or application semantics are adopted. References remain excluded.
+Status: proposed, 2026-10-08. Remaining decisions are for review. Whole-output
+invalidation is now specified separately as
+[`invalidate(out)`](../user-guide/functions.md#output-access); other mutation
+extensions below remain open. References remain excluded.
 
 ## Decision 1: keep `delta<T>` as publication data
 
@@ -35,9 +37,9 @@ provides `contains(watched, 9)` for membership and `items(watched)` with
 `valid(child)` for child validity.
 
 Existing [map/list child invalidation](../user-guide/functions.md#output-access)
-preserves membership/length. Isolate four missing mutation extensions:
+preserves membership/length. Whole-output invalidation is covered by the linked
+`invalidate(out)` contract. Three mutation extensions remain open:
 
-- whole-output invalidation;
 - struct/tuple child invalidation;
 - creating initially invalid map membership;
 - appending an initially invalid list child.

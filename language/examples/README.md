@@ -1,11 +1,8 @@
 # Language examples
 
-These HGL files describe language behaviour. Compiler validation runs in
-[hgraph's language tests](https://github.com/hhenson/hgraph/blob/main/language/tests/CMakeLists.txt)
-after shared-source setup. That suite discovers examples, checks them, runs
-supported `test` blocks and compiles generated fixtures. Native test support
-varies by platform; this source-only repository has no CMake/CTest project.
-The entries below identify the implementation tests for each example.
+These HGL files describe language behaviour. The entries below explain what
+each example demonstrates. Named `test` blocks express expected results and
+can be run with `hgl test`.
 [Source-rejection examples](reject/README.md) use ordinary `hgl test`;
 annotations isolate expected source errors alongside executable tests.
 
@@ -74,75 +71,61 @@ annotations isolate expected source errors alongside executable tests.
   copies and construction. Its `test` uses value functions and does not
   invoke eval. It belongs to the proposed
   [value-mutability contract](../docs/design/value-mutability.md).
-  This is a normative source example; compiler acceptance and execution of
-  the extended content-mutation cases have not yet been validated.
+  This is a normative source example.
 - [`test-contexts.hgl`](test-contexts.hgl) keeps a runtime helper and a
   test-local struct in a module-wide test scope shared by two contexts. Its
-  two cases run through `hgraph_language_test_test-contexts`; cross-part
-  visibility and production exclusion of helpers and test-local types are
-  covered by `hgraph_language_test_contexts` and emitter tests.
+  two named tests check fixture ticks and shared helper/type visibility. The
+  test scope extends across module parts; test-only helpers and types are
+  excluded from production artifacts.
 - [`midpoint.hgl`](midpoint.hgl) uses an internal helper, `export fn`, an
   atomic tuple, a `const` window, and a `test` of the unexported helper. It
-  imports `hgraph.analytics`. Tests: 1 `test` under `hgl test`
-  (`hgraph_language_test_midpoint`, gated on `hgraph::analytics`) and
-  `generated_example_tests.cpp`.
+  imports `hgraph.analytics` and contains one named test.
 - [`runtime-choice.hgl`](runtime-choice.hgl) contrasts a wiring-time topology
   choice, explicit time-series selection, and a `when` runtime function. It
-  imports `hgraph.analytics`. Tests: none in the file;
-  `generated_example_tests.cpp` builds it.
+  imports `hgraph.analytics`.
 - [`pull-sources.hgl`](pull-sources.hgl) drives sources without temporal
   input: `inject alarm` for a one-shot wake-up, and `yield` generator sources
   with `while` loops, a bare `return`, an absolute time and a skipped past
-  time ([ADR 0015](../docs/design/decisions/0015-pull-sources.md)). Tests:
-  2 `test` blocks under `hgl test` (`hgraph_language_test_pull-sources`),
-  discovered once hgraph's pin of this repository follows hgraph PR #1670.
+  time ([ADR 0015](../docs/design/decisions/0015-pull-sources.md)). It contains
+  two named tests.
 - [`stateful-node.hgl`](stateful-node.hgl) demonstrates aggregate state,
   grouped injectables, lifecycle blocks, ordered handlers, previous output,
-  and incremental collection output. Tests: none in the file; native behaviour
-  in `generated_example_tests.cpp`, and the `--dump-hir` /
-  `--dump-hgraph-ir` CTest cases read this example.
-- [`when-defaults.hgl`](when-defaults.hgl) makes omitted and zero-argument
-  handler selectors executable: `when {}` matches
-  `when modified() && valid()`, while either omitted selector expands over all
-  temporal parameters. Tests: 3 `test` blocks under `hgl test`
-  (`hgraph_language_test_when-defaults`) plus focused generated-code checks.
+  and incremental collection output.
+- [`when-defaults.hgl`](when-defaults.hgl) distinguishes omitted selectors
+  from explicit empty selections. Omitted selectors expand to all time-series
+  inputs; `valid()` requires none valid and `modified()` subscribes to none.
+  Five named tests specify defaults, explicit lists, manual validity checks
+  and a deliberately dormant node with an expected warning. `manual_forward`
+  demonstrates explicit whole-output invalidation with `invalidate(out)`. An annotated
+  `null_sink` separately demonstrates selective suppression with
+  `@suppress_warning("node.no_activation")`.
+  See the [selector cases](../../compiler/cases_handler_selectors.md).
 - [`collection-views.hgl`](collection-views.hgl) demonstrates dual-phase
   `key_set`, runtime `keys`/`values`/`elements`/`items`, built-in and inline
-  predicates,
-  `last_modified`, and mutable lexical `var`. Tests: none in the file; native
-  behaviour in `generated_example_tests.cpp`.
+  predicates, `last_modified`, and mutable lexical `var`.
 - [`const-debug.hgl`](const-debug.hgl) connects an HGL constant source to an
-  HGL printing sink. Only integer printing is native; select the C++
-  part under `impl/`. Tests: `generated_const_debug_tests.cpp` compiles the
-  C++ binding and checks source ticks, duplicate sink ticks and fresh runs.
+  HGL printing sink. Integer printing is declared as a native function.
 - [`lifecycle-capabilities.hgl`](lifecycle-capabilities.hgl) injects the
   node scheduler and the evaluation clock: a scheduler-driven source with no
   temporal input (`start { schedule(scheduler, 0s) }`, `when scheduled()`),
   `passivate(input)` after a count, and `clock.evaluation_time` (ADR 0010).
 - [`bytes-values.hgl`](bytes-values.hgl) specifies byte construction, exact
-  values, equal/empty publication ticks, silence and executed octet range errors.
+  values, equal/empty publication ticks, silence and octet range errors.
 - [`native-provider.hgl`](native-provider.hgl) separates native scalar declarations
   from their providers and exercises injectable propagation through helpers.
-  Implementations and provider binding tests live with each compiler/runtime.
 - [`operators-and-generics.hgl`](operators-and-generics.hgl) demonstrates a
   nominal bodyless `operator`, a generic `impl fn` implementation, const-generic
   rolling-window sizes, an exported exact function, the default minimum window
   size, and a duration window. Operators, functions, and structs may carry
-  the agreed `requires` constraint syntax. Tests: none in the file; generic
-  resolution and window ticks in `generated_generic_tests.cpp` and, on the
-  direct backend, `../tests/wiring/backend_coverage_tests.cpp`.
+  the agreed `requires` constraint syntax.
 - [`structural-types.hgl`](structural-types.hgl) demonstrates a recursively
   temporal struct, `atomic<S>`, a type-generic struct, closed-set requirements,
   abstract-only inheritance with a default override, and a sparse delta in a
-  runtime function, alongside temporal maps and an anonymous `fn`. Tests: none
-  in the file; `generated_structural_tests.cpp`, and direct-wiring struct
-  cases in `../tests/wiring/backend_tests.cpp`.
+  runtime function, alongside temporal maps and an anonymous `fn`.
 - [`recursive-fields.hgl`](recursive-fields.hgl) declares recursive struct
   fields (ADR 0012): a linked list and a generic tree whose edges are optional
   `atomic` fields, a construction whose edge is a port, and field access
-  through an edge. Tests: 3 `test` blocks under `hgl test`
-  (`hgraph_language_test_recursive-fields`), asserted again on the generated
-  C++ in `generated_recursive_tests.cpp`.
+  through an edge. It contains three named tests.
 - [`reference-wiring-projections.hgl`](reference-wiring-projections.hgl) selects
   a declared field or constant fixed-list index through REF during graph wiring;
   scalar consumers follow the child across parent-reference retargeting.
@@ -155,53 +138,31 @@ annotations isolate expected source errors alongside executable tests.
   carrying equal scalar values remain distinct under REF-EQ-1.
 - [`reference-routing.hgl`](reference-routing.hgl) demonstrates `ref<T>`
   parameters and results in runtime functions: forwarding a reference, and
-  routing one element of a `list<ref<T>, 3>` by a temporal index. Tests: none
-  in the file; routing ticks in `generated_reference_tests.cpp` and, for the
-  composition shapes, `../tests/wiring/backend_coverage_tests.cpp`.
+  routing one element of a `list<ref<T>, 3>` by a temporal index.
 - [`fixed-list-iteration.hgl`](fixed-list-iteration.hgl) demonstrates a
   graph-phase `for` over a fixed temporal list with `elements` and `items`,
-  wiring one body per child connection. Tests: none in the file; per-child
-  wiring in `generated_iteration_tests.cpp` and
-  `../tests/wiring/backend_tests.cpp`.
+  wiring one body per child connection.
 - [`dynamic-collection-iteration.hgl`](dynamic-collection-iteration.hgl)
   demonstrates a graph-phase `for` over a temporal map and an unbounded list,
   one sink child graph per key or index, with shared captures passed whole.
-  Tests: none in the file; child-map ownership in
-  `generated_iteration_tests.cpp` and recorded child ticks in
-  `../tests/wiring/backend_coverage_tests.cpp`.
 - [`conditional-result.hgl`](conditional-result.hgl),
   [`conditional-results.hgl`](conditional-results.hgl), and
   [`conditional-mixed-results.hgl`](conditional-mixed-results.hgl) exercise
   temporal branch results, escaping assignments, structural result packing,
-  and remapping in both compiler backends. Tests: none in the files; ticks in
-  `generated_tests.cpp` and `../tests/wiring/backend_tests.cpp`.
+  and remapping.
 - [`conditional-forwarding.hgl`](conditional-forwarding.hgl) preserves an
   initialized result through an implicit or explicit unassigned branch and
   exercises independent reference forwarding for structural result fields.
-  Tests: none in the file; ticks in `generated_tests.cpp` and
-  `../tests/wiring/backend_tests.cpp`.
 - [`conditional-omitted-else.hgl`](conditional-omitted-else.hgl) shows that a
   consumed temporal conditional without `else` produces no tick while false,
-  using a type-resolved `nothing` branch in both compiler backends. Tests:
-  1 `test` under `hgl test` (`hgraph_language_test_conditional-omitted-else`)
-  and `generated_tests.cpp`.
+  using a type-resolved `nothing` branch. It contains one named test.
 - [`conditional-early-return.hgl`](conditional-early-return.hgl) returns from
   one temporal branch and composes the rest of the body as the other branch's
   continuation, for top-level, nested, tail, assigned, and outputless forms.
-  Tests: 8 `test` blocks under `hgl test`
-  (`hgraph_language_test_conditional-early-return`) and `generated_tests.cpp`.
+  It contains eight named tests.
 - [`conditional-sinks.hgl`](conditional-sinks.hgl) controls child-graph
-  lifetime with an outputless temporal conditional through the native sink
-  switch, keeps a second sink outside it, and discards a sink conditional
-  inside a value-producing graph. Tests: none in the file; `generated_tests.cpp`
-  and `../tests/wiring/backend_tests.cpp`.
-
-As compiler slices land, each example should advance from parsing and typed IR
-coverage through `hgl test` to generated C++ behavior and backend parity.
-The backend-parity module that is built both ways lives in
-`../tests/codegen/parity.hgl`; the expression-embedded temporal conditional
-is pinned there. The acceptance sequence is defined in the
-[Developer Guide](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/testing-and-compatibility.md#documentation-examples).
+  lifetime with an outputless temporal conditional, keeps a second sink outside
+  it, and discards a sink conditional inside a value-producing graph.
 
 - [`any-values.hgl`](any-values.hgl) checks typed boxes, present empty ticks,
   runtime boxing and independent ordinary-value retention.
@@ -210,8 +171,8 @@ is pinned there. The acceptance sequence is defined in the
   Token provider contract and tests whole-value pass-through and projection.
 - [`reference-owner-export.hgl`](reference-owner-export.hgl) follows an explicit
   REF branch result that preserves a branch-owned scalar endpoint through its
-  owning output boundary. Two evals specify current routing and fresh runs;
-  validation is static only. See the [route matrix](../../compiler/cases_reference_owner_export.md).
+  owning output boundary. Two evals specify current routing and fresh runs.
+  See the [route matrix](../../compiler/cases_reference_owner_export.md).
 - [`default-binding-scope.hgl`](default-binding-scope.hgl) checks defining
   declarations before formal/field bindings and generic contextual defaults;
   its two evals and direct assertions are static requirements, not target results.

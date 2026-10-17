@@ -737,43 +737,57 @@ the union of their activation dependencies and the validity requirements common
 to all handlers as the most permissive safe node-level policy. Remaining predicates are evaluated in source order. Later handlers observe state
 and output changes made by earlier handlers.
 
-`modified(a, b, ...)` is true when any listed input was modified, while
-`valid(a, b, ...)` is true only when every listed input is valid. In a
-function-level `when` predicate, the empty forms select the complete temporal
-parameter list: `modified()` is the disjunction over that list and `valid()`
-is its top-level-valid conjunction. `const` parameters, state, injectables, and
-`out` are excluded.
+In ordinary runtime expressions, `modified(a, b, ...)` is true when any
+listed input was modified, while `valid(a, b, ...)` is true only when every
+listed input is valid. Top-level selectors in a function-level `when` also
+declare activation subscriptions and validity requirements.
 
-A handler that has no top-level `modified(...)` conjunction receives an
-implicit `modified()` selector. A handler with no top-level validity selector
-(`valid(...)` or `all_valid(...)`) receives an implicit `valid()` selector.
-Calls nested in a residual expression do not suppress the defaults. The
-canonical degenerate form is:
+A handler without a top-level `modified(...)` conjunction subscribes to all
+time-series parameters. A handler without a top-level validity selector
+(`valid(...)` or `all_valid(...)`) requires all time-series parameters valid.
+These are named-input defaults: for parameters `a` and `b`, `when { ... }`
+has the selections of `when modified(a, b) && valid(a, b) { ... }`.
+`const` parameters, state, injectables and `out` are excluded from those lists.
+Calls nested in residual expressions do not suppress a missing default.
 
-```hgl
-when {
-    # Any temporal input activates this handler, after all are valid.
-}
-```
+An explicit `modified()` selects no input activation subscriptions. An alarm
+or scheduler may still drive evaluation. If a node has no active inputs and no
+other usable driver, the compiler should warn; an injected scheduling capability
+that is never armed does not supply a driver. Intentional dormant sinks such as
+`null_sink` remain valid programs and should explicitly suppress that warning
+with `@suppress_warning("node.no_activation")` on the function declaration;
+their name does not exempt them. See
+[selective warning suppression](../developer-guide/syntax-and-semantics.md#selective-warning-suppression)
+and [handler authoring guidance](../user-guide/functions.md#handler-selectors-and-validity-handling).
 
-It is equivalent to `when modified() && valid() { ... }`. The compiler
-converts activation predicates into hgraph input metadata when they are
-statically representable and retains admission and residual conditions in the
-ordered per-tick body. Empty selector calls outside a function-level `when`
-are rejected because this decision assigns them no meaning there.
+An explicit `valid()` selects no required-valid inputs. Thus `when valid()`
+retains the default all-input activation subscriptions and leaves validity
+decisions for every input to checks such as `if valid(a)` inside the body.
+An internal check alone does not suppress a handler's implicit all-input
+validity requirement. Empty selector calls outside a function-level `when`
+are rejected; `all_valid` always requires an explicit argument.
 
-`scheduled()` is the scheduler's handler selector
-([ADR 0010](decisions/0010-lifecycle-capabilities.md)): true when the current
-evaluation is the node's alarm. A handler naming it at top level receives no
-implicit `modified()` and contributes no input to the activation set; its
-implicit `valid()` is unchanged. When no handler names an input the activation
-set is explicitly empty, which is the agreed spelling of that set. A runtime
-function with no temporal parameters is a source and must inject `scheduler`
-or `alarm`, or be a generator written with `yield`
-([ADR 0015](decisions/0015-pull-sources.md));
-its implicit `valid()` is vacuous and its implicit `modified()` never holds.
-The other half of the open question, a handler that intentionally admits
-invalid inputs with an explicitly empty validity set, remains open.
+Activation subscriptions include invalidation notifications. An invalidation
+on a subscribed input activates processing even though the endpoint's ordinary
+`modified` observation can be false. An unsubscribed or passive input does not
+independently activate processing, including on invalidation.
+
+For a single-handler function, validity requirements in `when` request managed
+handling: on activation, failed requirements invalidate the dependent output
+without running the guarded body. `valid()` leaves output handling to the body.
+Propagation is the authoring convention and the default convention for system
+libraries, with reasoned exceptions stated in operator contracts. It is not an
+unconditional runtime policy. Managed invalidation across multiple handlers
+sharing an output remains open. See [handler validity handling](../user-guide/functions.md#invalidation-and-notification-subscriptions).
+
+`scheduled()` selects the scheduler's alarm
+([ADR 0010](decisions/0010-lifecycle-capabilities.md)). A top-level occurrence
+adds no implicit input activation subscriptions; the default requirement that
+all time-series parameters be valid is unchanged unless explicitly replaced.
+A runtime function with no time-series parameters is a source and must inject
+`scheduler` or `alarm`, or be a generator written with `yield`
+([ADR 0015](decisions/0015-pull-sources.md)). Its all-input validity requirement
+is vacuously satisfied and its default input activation set is empty.
 
 `passivate(input)` and `activate(input)` are runtime statements on a direct
 temporal parameter; they change what activates the node from that evaluation

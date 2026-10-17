@@ -60,17 +60,22 @@ method-call aliases are admitted.
    (`is_scheduled_now`). A source on the stateless `alarm` of
    [ADR 0015](0015-pull-sources.md) does not use it: it publishes from a
    plain `when`, since every evaluation is its wake-up. A handler with `scheduled()` at top level receives
-   no implicit `modified()`; its implicit `valid()` is unchanged. Such a
-   handler adds no input to the node's activation set. When no handler names
-   an input, the set is explicitly empty: every input is passive and the
-   node evaluates only when scheduled. This is the agreed spelling of the
-   empty activation set; `modified()` keeps its complete-list meaning.
+   no implicit input activation subscriptions; its default requirement that
+   all time-series inputs be valid is unchanged. An explicit `valid()` instead
+   requires no input valid and leaves validity decisions to the body. Such a
+   scheduled handler adds no input to the node's activation set. When no
+   handler names an input, the set is empty: every input is passive and the
+   node evaluates only when scheduled. Explicit `modified()` also selects no
+   input subscriptions. If no handler contributes active inputs and no other
+   usable driver is armed, the compiler should warn; injecting a scheduler
+   without using it to start evaluation is insufficient. Intentional dormant
+   sinks remain valid source. See [handler selectors](../../user-guide/functions.md#handler-selectors-and-validity-handling).
 
 4. **A runtime function may have no temporal parameters when it injects
    `scheduler`.** It is a source: `start { schedule(scheduler, 0s) }` asks
    for evaluation in the starting cycle, which is how a static node's
-   `schedule_on_start` is spelled. The implicit `valid()` of such a
-   function is vacuously true and its implicit `modified()` never holds.
+   `schedule_on_start` is spelled. Its default all-input validity requirement
+   is vacuously satisfied, and its default input activation set is empty.
    [ADR 0015](0015-pull-sources.md) extends this decision: a source may
    instead inject the stateless `alarm`, or be a generator written with
    `yield`.

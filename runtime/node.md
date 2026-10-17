@@ -137,8 +137,7 @@ it is read and written only by the node, it never ticks, and nothing outside
 the node can see it. It is a cache: a node must behave the same whether its
 state survived or was rebuilt from equivalent inputs, recordable history and
 pending work. The same future events must give the same observations and
-effects. A lost running total is not a cache. Native `State` does not enforce
-this distinction.
+effects. A lost running total is not a cache.
 
 **Recordable state** is a time-series the node owns, and it **works the same
 as the output**. The node reads what it holds and writes to it during eval —
@@ -160,8 +159,7 @@ and start rebuilds it.
 In HGL, `state` is recordable state and `cache` is state. HGL hides the
 intended machinery: to the code, a `state` is a variable that is read and
 assigned, and that it is a time-series underneath — ticking, recordable, restorable —
-does not show. Mixed HGL state/cache lowering remains separate work; see
-[implementation evidence](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/evidence.md).
+does not show.
 
 
 Behaviour
@@ -198,6 +196,17 @@ A node is evaluated in a cycle when all of these hold:
 
 If 1 holds but 2 or 3 does not, eval is not called. The node's scheduler
 still moves on. Validity is checked afresh every time; nothing is latched.
+
+HGL handler policies distinguish omission from an explicit empty validity set:
+omission requires every time-series input valid, while `when valid()` requires
+none and leaves checking to the body. Declared handler validity constraints can
+request managed output invalidation without executing a rejected body. For the
+single-handler managed case, failed admission still invalidates the dependent
+output during that activation; skipping eval does not skip this requested
+validity handling. See [handler validity handling](../language/docs/user-guide/functions.md#invalidation-and-notification-subscriptions).
+This does not make generic admission failure invalidate every node's output.
+Invalidation activates processing through the same input subscriptions as other
+notifications; a passive input's invalidation does not itself schedule the node.
 
 Admission does not look at *modified*. A node is woken by notifications, and
 a notification is not always a tick (see Time-series types): an implementation

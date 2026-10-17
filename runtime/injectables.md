@@ -64,8 +64,7 @@ The agreed [language capability contract](https://github.com/hhenson/hgraph_spec
 also permits context services in value functions. Its requirements are visible
 to the checker, without adding caller-supplied arguments. Selected native implementation parts declare their own requests; only those
 services need provisioning. Helpers borrow access for the call and acquire no node of their
-own. Calls silently upgrade the caller's injectable list. The C++ compiler
-supports value-helper logger/clock forwarding from the selected part.
+own. Calls silently upgrade the caller's injectable list.
 
 
 Relationships

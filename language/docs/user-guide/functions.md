@@ -592,43 +592,120 @@ read permits `b` to be invalid. In a runtime function, `return value` writes
 one output tick and terminates the current evaluation. Reaching the end without
 writing or returning produces no output tick.
 
-The activation and admission predicates have defaults. A missing `modified`
-term means any temporal input may activate the handler; a missing `valid` term
-means every temporal input must be valid. Empty calls make those sets explicit:
-`modified()` is any input and `valid()` is all inputs. The compact form uses
-both defaults:
+### Handler selectors and validity handling
+
+Omitting a selector and writing an explicit empty validity selector are
+different choices. A missing top-level `modified` selector subscribes to every
+time-series input. A missing top-level `valid` or `all_valid` selector requires
+every time-series input to be valid. For parameters `a` and `b`, the compact
+form:
 
 ```hgl
-fn add(a: f64, b: f64) -> f64 {
-    when {
-        return a + b
+when { return a + b }
+```
+
+has the same input selections as:
+
+```hgl
+when modified(a, b) && valid(a, b) { return a + b }
+```
+
+An explicit `modified()` subscribes to **no inputs**. Input publications and
+invalidations therefore do not activate that handler. An alarm or scheduler
+can still drive evaluation; an empty activation set is not a rule forbidding
+scheduled execution.
+
+An explicit `valid()` requires **no inputs** to be valid. It is an empty
+validity requirement, satisfied even when every input is invalid; it does not
+disable input activation. The body controls validity for every input it reads:
+
+```hgl
+fn sum_or_zero(a: f64, b: f64) -> f64 {
+    when valid() {
+        if valid(a) && valid(b) {
+            return a + b
+        }
+        return 0.0
     }
 }
 ```
 
-It is equivalent to `when modified() && valid() { ... }`. Explicit arguments
-still narrow their respective predicate, so `when modified(a) && valid(a)`
-does not require `b` and does not activate for changes to `b`.
+This function deliberately chooses a fallback. An internal `if valid(a)` does
+not remove the implicit all-input validity requirement of a bare `when`;
+write `when valid()` to make that choice inside the body.
 
-| Handler | Activation | Validity admission |
+| Handler | Input notification subscriptions | Required valid inputs |
 | --- | --- | --- |
-| `when { ... }` | Any temporal input | Every temporal input |
-| `when modified() && valid() { ... }` | Any temporal input | Every temporal input |
-| `when modified(a) { ... }` | `a` | Every temporal input |
-| `when valid(a) { ... }` | Any temporal input | `a` |
-| `when modified(a, b) && valid(a) { ... }` | `a` or `b` | `a` |
+| `when { ... }` | All time-series inputs | All time-series inputs |
+| `when valid() { ... }` | All time-series inputs | None; checked inside the body |
+| `when modified() { ... }` | None; needs another driver | All time-series inputs |
+| `when modified() && valid() { ... }` | None; needs another driver | None; checked inside the body |
+| `when valid(a) { ... }` | All time-series inputs | `a` |
+| `when modified(a) { ... }` | `a` | All time-series inputs |
+| `when modified(a) && valid() { ... }` | `a` | None; checked inside the body |
+| `when modified(a, b) && valid(a) { ... }` | `a` and `b` | `a` |
 
-These defaults apply to temporal function parameters, not `const` parameters,
-state, injectables, or `out`. `valid()` is not recursive for structural inputs;
-use `all_valid(value)` when every child must be valid. Empty selector calls are
-valid only in a function-level `when` predicate. `scheduled()` selects scheduler-driven activation without an input trigger.
-There is no general spelling for “no validity requirement”; `valid()` selects
-the complete temporal input list.
+The implicit lists contain time-series function parameters, excluding `const`
+parameters, state, injectables and `out`. `valid(a)` tests top-level validity;
+use `all_valid(a)` when every immediate child must also be valid. Empty
+selector calls are contextual to a function-level `when`; `all_valid` always
+requires an argument. `scheduled()` selects scheduler-driven activation.
 
-`when` is a function-level handler rather than a nested control-flow form.
-Use `if valid(value) { ... }` inside a handler when only part of that handler
-needs a value. Validity guards follow normal left-to-right short-circuit order,
-so place `valid(value)` before reading `value` in the same `&&` condition.
+A node with no active inputs needs another driver, such as an alarm or a
+scheduler armed from `start`. The compiler should warn when no activation or
+other usable driver is apparent, like an unused-variable warning. Merely
+injecting a scheduler or alarm is insufficient if no reachable startup action
+arms it. Scheduling only inside an otherwise unreachable handler does not
+bootstrap that handler. This is a warning, not a source error: a dormant
+`null_sink`-style terminal can deliberately consume a connection without doing
+work. Such a declaration should explicitly suppress the specific dormant-node
+warning using a compiler annotation, rather than relying on a special exemption
+for its name or for outputless functions. Other warnings on that declaration
+remain enabled. Write the function annotation immediately before its declaration:
+
+```hgl
+@suppress_warning("node.no_activation")
+fn null_sink<T>(value: T) {
+    when modified() && valid() {}
+}
+```
+
+`node.no_activation` identifies this warning. The annotation suppresses that
+warning on this function, without changing its behavior or suppressing warnings
+on callers and neighboring declarations. See
+[selective warning suppression](../developer-guide/syntax-and-semantics.md#selective-warning-suppression).
+
+### Invalidation and notification subscriptions
+
+A top-level `modified(a)` selector subscribes the handler to notifications
+from `a`, including invalidation. Handler activation must not discard an
+invalidation because the invalid endpoint reads `modified(a) == false`.
+Inside the body, `modified(a)` remains the endpoint modification observation;
+`valid(a)` is the way to inspect current validity. An unsubscribed or passive
+input does not independently activate processing when it becomes invalid.
+Its current validity is still checked if another subscribed input or the
+scheduler later activates the function.
+
+For a single-handler function, a validity constraint in `when` requests
+framework-managed validity handling. When an activation is processed and its
+required validity fails, the dependent output is invalidated without executing
+the guarded body. The invalidation follows the time-series notification rules;
+it is not a value tick. With `valid()`, the body decides whether to invalidate,
+retain, or replace the output, subject to the operator's contract. Use
+[`invalidate(out)`](#output-access) for explicit whole-output invalidation.
+This is not unconditional propagation through every node or passive input.
+
+The authoring convention is to propagate invalidity to dependent results.
+System libraries follow it unless an operator documents a reason for different
+behavior. An implementer may realize that contract manually or use the
+framework-managed form. Combining managed invalidation across multiple `when`
+handlers sharing an output remains an open decision; this clarification does
+not assign each failed handler an independent right to invalidate that output.
+
+`when` is function-level. Use `if valid(value)` inside it for local decisions,
+and guard payload reads before use. Boolean conditions short-circuit from left
+to right. See the [selector cases](../../../compiler/cases_handler_selectors.md)
+and [source examples](../../examples/when-defaults.hgl).
 
 Under the [iteration model](../design/iteration.md), `for` follows the
 containing function's phase. During graph construction, fixed temporal lists
@@ -926,9 +1003,9 @@ starting cycle; that is how a node schedules itself on start.
 
 `scheduled()` is a handler selector: it is true when the current evaluation
 is the node's own alarm firing. A handler whose condition names `scheduled()`
-at top level gets no implicit `modified()`, and it adds no input to the node's
-activation. When no handler names an input, the node's activation set is
-explicitly empty and the node evaluates only when scheduled. A runtime
+at top level gets no implicit all-input activation selector, and it adds no
+input to the node's activation. When no handler names an input, the node's
+activation set is explicitly empty and the node evaluates only when scheduled. A runtime
 function with no temporal parameters at all is a source: it injects
 `scheduler` (below) or `alarm`, or it is a generator written with `yield`
 (both under "`alarm` or `scheduler`" and "Generator sources"):
@@ -1134,6 +1211,25 @@ fn running_total(value: f64) -> f64 {
 output value, including writes performed earlier in the same evaluation.
 Assigning it produces an output tick. `return value` is equivalent to assigning
 the complete output and then terminating evaluation.
+
+`invalidate(out)` explicitly invalidates the whole output, including a scalar
+result. This forwarder handles input validity inside its body:
+
+```hgl
+fn manual_forward(value: f64) -> f64 {
+    inject out
+    when valid() {
+        if valid(value) { return value }
+        invalidate(out)
+    }
+}
+```
+
+The call follows [output invalidation](../../../runtime/time_series.md#becoming-invalid):
+validity is cleared, descendants become invalid, and subscribers are notified
+without a value tick. An already invalid output is unchanged. The call does
+not end evaluation; a later output write can make it valid again. It requires
+`inject out` and is permitted only during evaluation, not in `start` or `stop`.
 
 Use `out` as the previous state when the last public output is exactly the
 information required by the next evaluation. Use `state` when the function

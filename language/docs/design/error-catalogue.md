@@ -1,8 +1,10 @@
 # Error catalogue
 
-Codes identify a specified failure independently of diagnostic text. The tables
-enumerate all codes admitted by negative-test expectations. They are an initial
-catalogue, not a claim that every possible failure has a stable code. An
+Codes identify specified diagnostics independently of their text. The source
+and execution-error tables enumerate all codes admitted by negative-test
+expectations. Compiler warnings are listed separately and cannot satisfy those
+expectations. These are initial catalogues, not a claim that every possible
+failure or warning has a stable code. An
 unlisted failure still fails normally and cannot satisfy a coded expectation.
 Code spelling and meaning are language contracts; messages may supply context.
 
@@ -109,3 +111,19 @@ needed; `delta.duplicate_entry` and `delta.overlap` do not require guessing it
 at checking time. This catalogue adds no general constructor-execution code.
 See the [delta failure fixtures](../../examples/reject/delta-errors.hgl) and
 [eval admission fixtures](../../examples/eval-profile-errors.hgl).
+
+## Compiler warnings
+
+Warnings do not reject an otherwise valid program. These identifiers are
+accepted by [selective warning suppression](../developer-guide/syntax-and-semantics.md#selective-warning-suppression);
+they are not accepted by `# expect-error` or `assert raises`.
+
+| Code | Warning condition |
+| --- | --- |
+| `node.no_activation` | A runtime node has no active time-series inputs and no apparent independent activation driver, such as an alarm or scheduler armed from reachable startup work. Merely injecting a scheduling capability, or scheduling only inside an otherwise unreachable handler, does not supply that driver. |
+
+An intentional inert terminal such as `null_sink` suppresses this warning with
+`@suppress_warning("node.no_activation")` on its function declaration. Its
+name or outputless result alone is not an exemption. Suppression changes
+reporting only; errors and unrelated warnings remain visible. Additional warning
+identifiers and treatment of unknown identifiers remain open.

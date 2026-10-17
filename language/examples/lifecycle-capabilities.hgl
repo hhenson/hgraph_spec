@@ -55,12 +55,11 @@ export fn stamped(value: i64) -> datetime {
     }
 }
 
-# A bare handler has an implicit modified() predicate. With no inputs it
-# never fires, even when start requests an evaluation.
+# Expected compiler warning: no input subscriptions and no startup driver.
+# An armed alarm or scheduler would be an independent way to drive evaluation.
 export fn dormant() -> bool {
     inject scheduler
-    start { schedule(scheduler, 0s) }
-    when { return true }
+    when modified() && valid() { return true }
 }
 
 # Only the alarm activates this node; sample remains passive between alarms.
