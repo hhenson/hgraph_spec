@@ -54,6 +54,32 @@ These expectations are accepted observation by observation: Python supports
 the complete removal delta; C++ supports invalidity on withdrawal. Neither
 implementation's complete withdrawal row currently conforms.
 
+## REF-PER-CHILD — TS-14 and TS-25
+
+A producer publishes a fixed list of two references, writing the children one
+after another in each evaluation: the child at the selected index designates
+the scalar output A, the other child is empty. A list-of-scalars input follows
+the list. A publishes 5 at 0, 6 at 1 and 7 at 3; the index is 0 at 0, 1 at 2
+and 0 at 4.
+
+| t | A publishes | Index | Delta | Child 0 | Child 1 |
+|---|---|---|---|---|---|
+| 0 | 5 | 0 | 0:5 | 5 | nil |
+| 1 | 6 | — | 0:6 | 6 | nil |
+| 2 | — | 1 | 1:6 | nil | 6 |
+| 3 | 7 | — | 1:7 | nil | 7 |
+| 4 | — | 0 | 0:7 | 7 | nil |
+
+Each child follows its own reference (TS-25): at 2 child 1 samples A's current
+value although A did not publish, and child 0 becomes invalid and contributes
+no delta (TS-14). Writing the children in sequence within one evaluation does
+not delay any retarget to a later cycle. A bundle of references behaves the
+same way, field by field.
+
+Python 0.5.41 publishes this sequence. hgraph C++ applied each cycle's
+retargets one routing change late until the fixed collection followed each
+reference leaf; this case is not yet part of the recorded validation set.
+
 ## REF-EXPIRES — TS-11 and TS-23
 
 Publish X=7 at 0. Save a reference to X's child in a separate node. Remove X at
