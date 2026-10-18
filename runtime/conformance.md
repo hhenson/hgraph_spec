@@ -34,7 +34,7 @@ licence for arbitrary behaviour.
 The rules of the seven chapters are **required**: an implementation that
 claims the runtime conforms to every one of them, and every case below is a
 check of a required rule. Everything a chapter lists under **Deferred** is
-**optional** behaviour (owner, 2026-09-30): observers, externally driven
+**optional** behaviour: observers, externally driven
 stepping, one-shot cycle callbacks, the phase hook,
 the runaway guard, pausing, checkpointing and recovery, recording and
 replay, serial forms, and values owned by a language bridge. An
@@ -97,26 +97,14 @@ Document checks do not establish runtime conformance.
 
 ## Accepting an expectation
 
-State the expected observations and their rule derivation before execution.
-Compare each observation with isolated Python and C++ runs:
+Derive expected observations from the specified rules before execution.
+Compare each field separately; one matching field does not validate a whole
+trace. An unavailable observation, crash or harness failure is not a matching
+value. Record the failed phase.
 
-- Reasoning matches both: accept.
-- Reasoning matches either: accept; retain the other result as a variation.
-- Python and C++ agree against reasoning: recheck the derivation and adapter.
-  Record why an expectation changed; never regenerate it from actual output.
-- No pair agrees: ask the user and preserve all three results. A user ruling
-  accepts the contract, not a claim that either implementation conforms.
-- An explicit user ruling supersedes an earlier acceptance. Retain the old
-  expectation, the ruling and both measured results; do not rewrite history.
-
-Python has the stronger testing history and is the preferred guide where
-reasoning leaves an interpretation open. Compare fields separately: one
-matching field does not validate the whole trace. An unavailable observation,
-crash or harness failure is not a matching value. Record the failed phase.
-
-A variation names the case, rules, exact input and observation point, expected
-and actual results, implementation identities, repeats and any remaining
-uncertainty about the adapter or native core. Keep it until reviewed.
+Keep expected and actual results separate. Agreement between implementations
+does not change the contract. Rule extraction and its acceptance records belong
+in [audit](https://github.com/hhenson/hgraph_spec_audit/blob/main/docs/spec-extraction.md).
 
 ## An implementation card
 
