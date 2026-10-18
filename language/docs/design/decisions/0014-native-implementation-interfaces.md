@@ -75,8 +75,9 @@ native const fn describe(value: i64) -> str {
 }
 ```
 
-Binding must preserve the checked contracts. Value-helper access to logger or
-clock requires the selected provider to supply it in an admitted phase.
+Binding must preserve the checked contracts. A value helper borrows logger or
+clock from an admitted call context; its selected binding must accept and
+forward that context's capability.
 
 An HGL implementation requests capabilities in its body. The checked contract
 records capability requirements for both forms, including descriptor imports.
