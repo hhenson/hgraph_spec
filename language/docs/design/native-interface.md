@@ -139,15 +139,13 @@ not source-level types.
 Native declarations may share one canonical identity when their HGL signatures
 differ. The compiler treats them as one overload family, unifies generic
 collection patterns against the argument types, and records the unique selected
-candidate before HGraph IR lowering. No implicit conversions or native-overload
+candidate during checking. No implicit conversions or native-overload
 ranking are involved: no match is an error, and overlapping matches are
 ambiguous. A package should therefore publish disjoint patterns.
 
-The generated C++ calls the declared symbol, its package-provided wrapper, or a
-source-native generated function directly. It never subclasses an operator to
-represent an exact helper. The direct-wiring backend does not emulate native
-C++: a runtime-bearing program follows the existing generated, compiled, and
-loaded image path.
+An exact value helper is a direct value call with no independent node,
+activation or output. Native execution and loading mechanisms belong to the
+target implementation.
 
 Calls from required wiring-time constant evaluation, automatic temporal
 lifting, and general compile-time execution are outside the first interface.
@@ -228,14 +226,8 @@ migration requires them and their HGL-facing semantics are defined.
 
 ## Desired HGL experience
 
-A small helper owned by an HGL module can be implemented directly. The HGL
-signature remains the public contract and the C++ projection states the exact
-native ABI used by the generated call:
-
-[Native example 3](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/native-interface.md#example-3)
-
-For a separately built native package, an imported descriptor supplies the
-same call-site contract. For example, a package may expose a non-throwing
+A native package exposes a checked HGL signature through its descriptor.
+The imported declaration supplies the call-site contract. For example, a package may expose a non-throwing
 scalar update function so an HGL node can be written as:
 
 ```hgl
@@ -266,7 +258,7 @@ impl fn len_<T, const size: i64>(value: list<T, size>) -> i64 {
 ```
 
 `T` and `size` select the list-view overload. The body does not need either
-value: the selected C++ overload reads `value.size()` from the live input view.
+value: the selected helper reads the current length from the live input view.
 This is the important distinction between a generic required to instantiate or
 select a callable, a marker retained only as part of a type, and runtime
 information explicitly available through a native view.

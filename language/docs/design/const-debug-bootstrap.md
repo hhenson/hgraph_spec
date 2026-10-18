@@ -3,14 +3,12 @@
 The first complete compiler case connects two HGL nodes. `const_` has a fixed
 `i64` argument, schedules itself at start, and publishes once in `when scheduled()`.
 `debug_print` consumes a valid tick and calls the native value helper `print_i64`.
-The graph connects `const_(42)` to `debug_print`. `const` is a reserved word, so
-the authored source uses `const_`.
+The graph connects the local helper `const_(42)` to `debug_print`. This
+bootstrap helper is separate from the standard-library `const` operator.
 
 Only integer formatting and console output are native. Source scheduling,
 admission, publication and composition stay in HGL. Target parts complete the
 same native declaration; the helper returns no value and creates no node.
-`hgraph` supplies the C++ part and provider; `hgl` supplies its own Rust pair.
-Only the shared HGL source is mirrored between them.
 This is an i64 bootstrap, not the full generic, labelled standard-library API.
 
 ## Expected observations
@@ -23,13 +21,9 @@ This is an i64 bootstrap, not the full generic, labelled standard-library API.
 | Source configured with -7 | One tick carrying -7 |
 | Sink receives absent, 42, absent, 42, -7 | Print 42, 42, -7; absent cells do nothing |
 | Construct/check/emit without running | No printing |
-| Source with bare `when` | No modified inputs, so no publication even if scheduled |
+| Source with bare `when` and an armed schedule | Publishes when scheduled; no input subscription is required |
 | Missing implementation or wrong native signature | Reject before native execution |
 | Temporal input passed as fixed source configuration | Type error |
 
-Validate the source and generated C++ on hgraph first. Then compile the same
-HGL with the Rust compiler and run emitted nodes and graph construction on the
-Rust engine. Compare ticks and effects, not generated names or output handles.
-Python and C++ operator comparisons cover the source and sink behaviour;
-reference debug-print prefixes are excluded from the integer-payload comparison.
-The bootstrap itself prints only the integer and a newline.
+Compare values, ticks and effects against these expectations. The bootstrap
+prints only the integer and a newline.

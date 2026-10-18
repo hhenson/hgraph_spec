@@ -5,8 +5,8 @@ Status: accepted authoring model.
 ## Contract
 
 An HGL native declaration defines the language contract. It contains no target
-body, header, crate path or symbol map. C++ and Rust implement the same contract
-in ordinary source files. Native-library builds own their dependencies.
+body, header, crate path or symbol map. Native providers implement the same
+contract in their own source files and builds.
 
 `native` changes the implementation language, not the typing rules:
 
@@ -38,17 +38,8 @@ types erase that distinction.
 
 ## Implementations
 
-The compiler generates the implementation interface. A C++ library supplies a
-class with static members and binds it through the generated `bind<T>()`:
-
-[Native example 1](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/decisions/0014-native-implementation-interfaces.md#example-1)
-
-The corresponding Rust library implements the generated trait:
-
-Rust implements the corresponding contract through its native binding interface.
-
-Both may delegate to existing native functions. Generated checks include the
-resolved parameter/result types, temporal role and declared failure contract. C++
+Derive binding checks from the shared HGL contract: resolved parameter and
+result types, temporal role and declared failure behavior must match. Native
 implicit conversions cannot satisfy a mismatched signature. Overloads retain
 their HGL identities; compiler-generated candidate ordinals are not public API.
 
@@ -84,8 +75,8 @@ native const fn describe(value: i64) -> str {
 }
 ```
 
-The compiler checks these contracts; temporal execution still needs its provider
-ABI. Value helpers support logger/clock in C++ and logger in Rust traits.
+Binding must preserve the checked contracts. Value-helper access to logger or
+clock requires the selected provider to supply it in an admitted phase.
 
 An HGL implementation requests capabilities in its body. The checked contract
 records capability requirements for both forms, including descriptor imports.
@@ -96,9 +87,9 @@ explicit and inferred requests. Missing `inject` in the caller is not an error;
 an unavailable capability or forbidden phase still is.
 
 The shared declaration owns types and observable behaviour. The selected
-implementation part owns injectable requests and lifecycle hooks. C++ may
-request `out, logger` while Rust requests only `out`; each generated interface
-uses its selected requirements. Calls silently inherit selected value-helper
+implementation part owns injectable requests and lifecycle hooks. One part
+may request `out, logger` while another requests only `out`; each binding uses
+its selected requirements. Calls silently inherit selected value-helper
 requirements. A constructed node owns its own capabilities. Target selection
 may expose an unavailable service, which is a checking error. It cannot relax
 promised observable behaviour. Provider-private allocators and scratch storage
@@ -130,20 +121,10 @@ state or cache. Check requirements at each call, including transitive calls,
 and preserve them across imports. Do not constant-fold or reorder effects
 merely because the function is `const`.
 
-Illustrative target signatures for the declarations above (not existing APIs):
-
-[Native example 3](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/decisions/0014-native-implementation-interfaces.md#example-3)
-
-Rust implements the corresponding contract through its native binding interface.
-
-C++ `bind<Implementation>()` and the Rust trait check their target's generated
-signatures. The examples show implementations requesting both capabilities;
-neither requires all targets to use that same parameter list. The selected
-implementation part supplies the target requirements.
-The first implementation publishes through `out`; its native `void`/unit result
-does not remove the HGL temporal result. The second returns a scalar string.
-The adapter for temporal implementations returning a complete value, and the
-full lifecycle ABI, remain separate implementation work.
+A temporal provider publishing through `out` still has the declared temporal
+result even if its native hook returns no value. A value helper returns its
+ordinary scalar result. Complete-value temporal provider binding and the full
+lifecycle ABI remain separate contracts.
 
 ### Calling from a node
 
@@ -168,10 +149,9 @@ never implies ownership of the caller's temporal output.
 
 ### Acceptance cases
 
-Acceptance expectations. Value-helper inference, imports, logger forwarding,
-clock reads and ordinary/native call checks have executable coverage. Temporal
-provider output and borrowed-output cases remain pending. Target-specific
-requests, graph/node shape and lifecycle metadata have compiler coverage.
+These cases specify expected binding, capability and call behavior. Temporal
+provider binding and borrowed-output access retain their separate contract
+boundaries.
 
 | Case | Expected result |
 | --- | --- |
@@ -182,7 +162,7 @@ requests, graph/node shape and lifecycle metadata have compiler coverage.
 | Value helper requests logger in a supplied logging context | Direct value call plus logging; no extra node or tick |
 | Caller omits `inject logger`, including through a helper/import | Silently infer one logger requirement on each caller |
 | Inferred capability has no valid provider in the call context | Diagnostic before emission |
-| C++ uses `out, logger`; Rust uses only `out` | Same signature; each selected implementation part supplies its requirements |
+| One part requests `out, logger`; another requests only `out` | Same signature; each selected implementation part supplies its requirements |
 | Provider requests a capability absent from its selected HGL implementation part | Binding diagnostic; internal runtime machinery needs no HGL declaration |
 | Target cannot supply a required capability | Binding diagnostic; no silent fallback |
 | Scheduler request without a node, or clock without runtime context | Diagnostic; no implicit owner |
@@ -192,19 +172,15 @@ requests, graph/node shape and lifecycle metadata have compiler coverage.
 | Temporal HGL/native function called inside `when` | Same diagnostic; no graph wiring during evaluation |
 | Nested output receives two different child writes in one evaluation | One accumulated delta under the existing output rules |
 
-Language diagnostics have no Python/C++ runtime oracle. For runtime cases,
-record values, ticks, effects and owner identity against reasoned, Python and
-C++ results before implementing bindings. Accept two-way agreement with a
-variation report; if Python and C++ agree against reasoning, revisit reasoning.
-Escalate three-way disagreement. The [helper reference traces](https://github.com/hhenson/hgl/blob/codex/native-interface-bindings/docs/compiler/capabilities/README.md)
-agree across reasoning, Python and C++ for duplicate/idle ticks, helper call
-counts and evaluation-clock reads. Compiler diagnostics are validated separately.
+Derive runtime observations before execution and apply the existing
+[conformance acceptance policy](../../../../runtime/conformance.md#accepting-an-expectation).
+Check values, ticks, effects and owner identity. Source diagnostics and native
+binding checks are separate from runtime trace conformance.
 
 ## Dependencies
 
 HGL consumers import the shared interface. A package selects its implementation
-once. Native imports stay in C++/Rust source; dependencies stay in that library's
-ordinary CMake/Cargo build. The build exports generated binding information for
+once. Native imports and dependencies stay in that library's ordinary build. The build exports generated binding information for
 consumers, including the provider entry point and required link dependencies.
 There is no separately authored per-function configuration or symbol manifest.
 
@@ -215,7 +191,7 @@ the interface. Checking an interface must not load its native library.
 
 | Scenario | Required result |
 |---|---|
-| Value `bit_and(6, 3)` | `2` in C++ and Rust |
+| Value `bit_and(6, 3)` | `2` |
 | Temporal `bit_and` bound to scalar arguments/result | Compile error |
 | All-`const` parameters on temporal function | Retain temporal result/activation |
 | Wrong argument or result type | Native compile error, including convertible types |
@@ -231,7 +207,7 @@ semantics. Recoverable Err outcomes follow the declared result type; strict
 operational failures follow their canonical execution-failure contract.
 Neither is inferred from a retired source exception clause.
 
-Record reasoned results before execution. Preserve existing scalar operator
-traces against Python and C++; this migration must not change their ticks.
+Record expected results before execution. Native binding must preserve scalar
+operator values, ticks and effects.
 Collection-view spelling and its migration must be settled before replacing
 existing view helpers. Opaque state and recovery require their own contracts.

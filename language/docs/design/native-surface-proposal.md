@@ -134,7 +134,7 @@ Further work, using the same ordinary value operations:
   views rather than pretending they are TSL/TSS/TSD endpoints.
 - Native bundle/reference patterns and duration-window const generics.
 - Numeric, text and temporal value operations beyond existing arithmetic and
-  predicates; preserve existing C++ semantics and flag genuinely undecided
+  predicates; preserve specified scalar behavior and identify undecided
   names or policies separately.
 
 Storage pointers, slot indices, notifiers, binding mutation and ownership hooks

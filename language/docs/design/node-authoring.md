@@ -22,9 +22,8 @@ receives two values; it cannot schedule, publish or retain an input view.
   role. `native const fn hgraph.native.bit_and(i64,i64)->i64` is a value helper;
   `hgraph.operators.bit_and` is a temporal operator. Neither substitutes for
   the other. Resolve candidates in the checker, retain the selection in IR.
-- **NAT-2:** Generate the implementation interface from the HGL contract. C++
-  uses a checked `bind<T>()` adapter; Rust implements a generated trait. Keep
-  implementations in native source and dependencies in its normal library build.
+- **NAT-2:** Derive binding checks from the shared HGL contract. Keep native
+  implementations and their dependencies in the provider's library build.
   Select the provider once, without a separately authored function-symbol map.
   Missing, ambiguous or incompatible providers are compile errors.
 - **NAT-3:** Value helpers receive admitted payloads. Input-view helpers borrow
