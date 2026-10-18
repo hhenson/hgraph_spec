@@ -4,9 +4,7 @@ Wiring
 Status: draft. Rewritten as a generic model on 2026-09-30 after the owner's
 review; the rules WIR-1 to WIR-24 keep their numbers and their meaning. Type
 resolution (Part 2), projections (WIR-5) and candidate selection (WIR-16 to
-WIR-18) are validated against two independent implementations
-([wiring validation](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/wiring/README.md)); the Evidence table
-says which rules rest on cases and which on source reading only.
+WIR-18) have [required cases](cases_wiring.md).
 
 Wiring is how a graph is **described**. It is not the runtime: it produces
 the description the runtime instantiates from, and once that description
@@ -405,9 +403,8 @@ flowchart TD
 Deferred
 --------
 
-Parts of wiring that hgraph provides and the rules above do not yet cover.
-The first four are next: code generated for HGL calls operators that rely
-on them, so they need rules and cases as type resolution has.
+Parts of wiring not yet covered by the rules above. Each needs its own
+rules and cases.
 
 - **Defaults and default resolvers, and conditions** on candidates: what a
   condition may read, and when defaults are applied relative to matching.
@@ -448,12 +445,8 @@ failure in a host language is undefined behavior, not a required rejection.
 Evidence and cases
 ------------------
 
-[Wiring cases](cases_wiring.md) derive each decision from the rules; the
-[wiring validation](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/wiring/README.md) records the observations
-on hgraph's Python implementation (0.5.41) and its C++ implementation, and
-on the HGL front end.
-
-Implementation comparisons and test coverage are maintained in the
+[Wiring cases](cases_wiring.md) derive each required decision from the rules.
+Implementation comparisons and coverage are recorded in the
 [audit evidence](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/wiring/README.md).
 
 The owner's ruling of 2026-09-24 states WIR-7 and WIR-9: "whenever resolving

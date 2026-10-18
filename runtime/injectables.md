@@ -207,8 +207,7 @@ they come into being with it, last until it is disposed of, and are the same
 values from one call to the next — what is borrowed for the call is the
 access, not the memory. No other node can ask for them.
 
-**Logger.** Follows the shape common to logging interfaces — Python's
-`logging`, spdlog — and no more than that:
+**Logger.** Provides:
 
 - **levels** of increasing severity: trace, debug, info, warn, error,
   critical;
@@ -310,15 +309,10 @@ Deferred
 Points to settle
 ----------------
 
-1. **Writing the output in start.** Reading is settled (INJ-8). Writing in
-   start is possible in principle, and hgraph does not do it:
+1. **Writing the output in start.** Reading is settled (INJ-8); writing
+   remains excluded.
 
-   - Of the node implementations in hgraph's C++ standard library, 59 have a
-     start that is handed the output. Every one of them only *reads its
-     type* — to work out, once, how values of that type are built or
-     converted, and keep the answer in state. None writes a value.
-   - No stop is handed the output at all.
-   - What a write in start would mean is clear enough: a tick at the start
+   - A possible write in start would mean: a tick at the start
      time, before the first cycle, which schedules the nodes bound to it for
      the start time — so they run in the first cycle, as they would after
      schedule-on-start and an eval. It would let a node publish an initial
@@ -336,7 +330,7 @@ Points to settle
    in simulation, where that is exactly the lag; in real time the same
    difference also includes however late the cycle started, and the two
    cannot be told apart. Adding `lag` to HGL's `clock` is a language
-   extension, so it lands in hgraph first.
+   extension and remains open.
 
 Implementation source references are recorded in the
 [audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes).

@@ -573,9 +573,8 @@ Deferred
 - **Clearing a window**, and windows that evict on a timer rather than on
   arrival (hgraph RFCs 0006 and 0007, neither accepted). Optional if
   provided.
-- **How the two directions of reference binding are carried out.** hgraph
-  has the *output* own a converted view of itself for each kind of input that
-  asks; that is a mechanism, and only what an input sees is specified here.
+- **How reference binding is carried out.** Only what an input observes is
+  specified here; the binding mechanism is an implementation choice.
 - **Choices of representation** for an output's value.
 
 
@@ -583,7 +582,7 @@ Points to settle
 ----------------
 
 1. **When is an owned bundle valid?** A bundle *output* is valid once it has
-   ticked, and in hgraph stays valid even if its only valid field is later
+   ticked, and stays valid even if its only valid field is later
    invalidated. A non-peered bundle *input* is valid only while some child
    is. The same bundle can therefore read differently from its two ends.
 2. **Keyed withdrawal** is specified under Binding and exercised by
@@ -614,11 +613,5 @@ Points to settle
 Sources
 -------
 
-In hgraph: `docs/source/developer_guide/data_structures/schemas/
-time_series.rst` (tick semantics, value and delta by kind);
-`data_structures/plans_and_ops/time_series.rst` and `linking_strategies.rst`
-(binding, sampling, keyed unbinds, delta visibility);
-`developer_guide/binding_vocabulary.rst`; RFC 0031 (growing lists), RFC 0036
-(references); the ruling of 2026-09-19 on `all_valid`; HGL's
-`language-model.md` (canonical temporal types, temporal metadata, collection
-traversal).
+Source provenance is recorded in [extraction](extraction.md) and the
+[audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes).

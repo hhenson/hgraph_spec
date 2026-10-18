@@ -277,8 +277,7 @@ A description is meant to be storable: written out after wiring, loaded
 later, and instantiated without wiring again. For that to be possible it must
 be plain data — it names what implements a node by a stable identity and
 never holds the implementation itself, a live resource, or anything
-process-local. hgraph does not do this today; it is a goal the description is
-specified to allow.
+process-local.
 
 
 The builder boundary
@@ -511,11 +510,10 @@ Points to settle
 
 1. **What a graph description contains.** Settled: it is what passes from
    wiring to evaluation, it is plain data, and it is meant to be storable and
-   instantiated on demand. A first pass at its contents, taken from hgraph's
-   graph builder, is in [Graph](graph.md). The hard part it leaves open is
-   how a description names what implements a node: hgraph holds behaviour as
-   process-local function pointers, which is why its RFC 0022 manifest can
-   *identify* a wired program but not rebuild one.
+   instantiated on demand. Its proposed contents are in [Graph](graph.md).
+   How a description names a node's behavior remains open; a storable
+   description needs identities that can be resolved outside its original
+   process.
 2. **How much of the wiring phase is specified depends on how HGL is
    compiled.** Settled 2026-09-26 (owner): the first route below is kept,
    and [Wiring](../wiring/wiring.md) specifies the wiring interface, type
@@ -523,8 +521,7 @@ Points to settle
    (owner): wiring is specified apart from the runtime, and the runtime
    begins at the builder boundary. The description stays complete and
    self-contained, so the second route remains possible.
-   - *The compiler emits code that does the wiring when run* — what has been
-     done so far. The runtime distribution then provides everything that
+   - *The compiler emits code that does the wiring when run*. The runtime distribution then provides everything that
      code calls: the wiring interface, type resolution, operator resolution.
      All of it is specified in Wiring.
    - *The compiler does the wiring itself and emits a stored graph
@@ -561,8 +558,7 @@ Settled here, with a detail left for the chapter that owns it.
   2026-09-30). Anything an implementation does beyond the minimum — delayed
   reclamation, paired address spaces for a switch — is a design option.
 - **Scalar types: the list.** `any` is a value kind of the runtime. Cyclic
-  buffer and queue are not: hgraph has them to implement windows, and they
-  are an implementation's concern. `zoned_time` and `bytes` are in the
+  buffer and queue are not: window storage is an implementation concern. `zoned_time` and `bytes` are in the
   runtime's scalar list. HGL bytes construction and publications follow
   [BYTE-1–6](../language/docs/design/bytes-values.md).
 - **Scalar types: who may change a value.** Content changes require writable
@@ -574,19 +570,8 @@ Settled here, with a detail left for the chapter that owns it.
 Sources
 -------
 
-In hgraph: `docs/source/developer_guide/architecture.rst` (the engine, the
-cycle, lifecycle); `developer_guide/data_structures/` and
-`binding_vocabulary.rst` (time-series and values); `developer_guide/
-nested_graphs.rst` (for the components nested nodes rely on, not the nodes);
-the RFCs, notably 0002 (temporal types), 0022 (serialisable graph manifest),
-0027 (push queues), 0031 (unbounded lists), 0036 (reference transparency); the Python implementation for design
-intent; the older `docs/source/specification/` chapters for framing;
-`language/docs/design/` for the names HGL gives these concepts; and the
-`.hgspec` runtime-contract draft (PR #796).
+Source provenance is recorded in [extraction](extraction.md) and the
+[audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes).
 
-[Dynamic-case validation](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation.md) records the TSD, REF and nested-graph
-expectations, executed traces and implementation variations.
-
-[Fixed collection cases](cases_fixed.md) validate the next TSL/TSB slice,
-including nesting and whole-output versus child bindings. User rulings
-and recorded variations are in its [comparison report](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/fixed/README.md).
+[Fixed collection cases](cases_fixed.md) specify TSL/TSB observations,
+including nesting and whole-output versus child bindings.

@@ -72,9 +72,9 @@ removal and reuse. Live migration needs its own protocol.
 
 | Realization | Model and cases | Storage | Evidence |
 |---|---|---|---|
-| AtomicCell | ATOMIC-RETENTION, ATOMIC-ZERO | [AtomicStorage](layout_example.md) | proposed; no native implementation |
-| MapQuote | QUOTE-HISTORY | NodeMap | proposed; no native implementation |
-| PivotQuote | QUOTE-HISTORY | FlatPivot | proposed; no native implementation |
+| AtomicCell | ATOMIC-RETENTION, ATOMIC-ZERO | [AtomicStorage](layout_example.md) | proposed |
+| MapQuote | QUOTE-HISTORY | NodeMap | proposed |
+| PivotQuote | QUOTE-HISTORY | FlatPivot | proposed |
 
 Record model/storage revisions, rules, layout arguments, target traits,
 implementation, adapter and results. A behaviour change invalidates affected

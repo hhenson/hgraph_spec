@@ -349,8 +349,7 @@ Rules
 Deferred
 --------
 
-Facilities hgraph's engine has that no concept above needs yet. Each is
-specified when an implementation requires it, and each is **optional**
+Facilities beyond the engine's required core. Each is specified when needed, and each is **optional**
 behaviour ([Conformance](conformance.md)): a conformance claim says which of
 them it includes, and none of them changes a required observation.
 
@@ -361,8 +360,8 @@ them it includes, and none of them changes a required observation.
   engine's obligations: never backwards, and never past work that is due.
 - **Observers.** Before-and-after notifications for graph and node start,
   evaluation and stop, one set per run, seeing nested graphs too. Tracing,
-  profiling and diagnostics are built on them. hgraph pairs every *before*
-  with an *after* for evaluation and stop even on failure, but not for start.
+  profiling and diagnostics are built on them. Evaluation and stop pair every
+  *before* with an *after* even on failure; start does not.
 - **One-shot cycle callbacks.** Work registered to run once, just before or
   just after the current cycle; drained until none remain.
 - **Run logger.** Which logger a run uses, and that nested graphs share it.
@@ -371,9 +370,8 @@ them it includes, and none of them changes a required observation.
   that span.
 - **Runaway guard.** Failing a run whose graph reschedules itself one
   smallest step ahead for more than a configured number of cycles.
-- **Pausing a cycle.** hgraph lets a node pause the cycle it is in and have
-  it resumed at the same evaluation time (mesh uses this while waiting on a
-  dependency). ENG-2 assumes no such thing exists. Whether the mesh library
+- **Pausing a cycle.** A proposed facility would let a node pause its cycle
+  and resume at the same evaluation time. ENG-2 assumes no such facility. Whether the mesh library
   construct needs this facility, or a design without it, is a decision to
   take before mesh gets a library contract (point to settle 2).
 
@@ -381,36 +379,32 @@ them it includes, and none of them changes a required observation.
 Points to settle
 ----------------
 
-1. **Failure handling: is *report, then stop* a concept?** What hgraph does:
+1. **Failure handling: is *report, then stop* a concept?** Two host-visible
+   cleanup orders are under consideration:
 
    - A failure that no node captures escapes the root graph. The engine
      must then do two things: stop the graph (every started node's stop, in
      reverse rank order) and report the failure to whoever started the run.
-   - hgraph's `cleanup_on_error` option chooses the **order**. *True* (the
-     default): stop first, then report — by the time the caller sees the
-     failure, every stop hook has run. *False*: report first — the caller
-     receives the failure together with the failed run, still started, and
-     the stop happens when the caller lets go of it.
+   - *Stop, then report*: every stop hook has run before the caller sees the
+     failure. *Report, then stop*: the caller receives the failure with the
+     run still started; mandatory cleanup follows when inspection ends.
    - It exists for **inspection**. Stop hooks close resources and unbind
      edges; after them, the state that explains the failure is gone. With
      *false*, a debugger, a test or an exception handler can look at live
-     values and the schedule as they were when the node failed. In Python the
-     failed run is kept alive by the raised exception and torn down when the
-     exception is released.
+     values and the schedule as they were when the node failed.
    - What it **cannot** change: the stop is mandatory in both cases (ENG-10
      holds), no further cycle runs, and no tick differs. A graph cannot
      observe which was chosen. Only the host can.
-   - hgraph has a second, separate setting alongside it: how much context the
-     report of an escaped failure carries — how far upstream of the failing
-     node to walk, and whether to include the input values found there. That
-     is the content of a node error and belongs in Node.
+   - How much context accompanies an escaped failure is a separate question:
+     how far upstream to walk and whether to include input values. Node owns
+     that error-reporting contract.
 
    The choice: specify only *stop, then report* and move the alternative to
    Deferred, as a facility for hosts and debuggers; or keep both as run
    configuration, as drafted. Since no graph can tell the difference, the
    test for what belongs here says defer.
-2. **Pausing a cycle, for mesh.** hgraph's mesh pauses the cycle while a
-   dependency is resolved. Either pausing becomes an optional engine facility
+2. **Pausing a cycle, for mesh.** Either pausing while a dependency is resolved
+   becomes an optional engine facility
    with rules of its own, or mesh is designed without it (a dependency
    resolved in a later cycle, one smallest step on). Until decided, ENG-2
    stands and mesh has no library contract.

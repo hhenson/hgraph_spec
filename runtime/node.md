@@ -496,25 +496,21 @@ Points to settle
    temporal input access"), which is stricter than this chapter is about the
    output. This draft follows HGL for inputs. Is that the runtime's rule, or
    only the language's?
-2. **The output on a cycle that fails.** hgraph says what was written before
-   the failure stands, and calls the result "unspecified" in places. NOD-19
-   says it stands. Should a failing eval instead leave no tick on the main
-   output at all?
-3. **A request for the past** is quietly ignored by hgraph's scheduler but is
-   an error in hgraph's graph schedule (see Graph, point 7).
+2. **The output on a cycle that fails.** NOD-19 preserves writes completed
+   before failure. Whether a failing eval should instead leave no tick on
+   the main output remains an open question.
+3. **A request for the past.** Should the node scheduler reject it as the
+   graph schedule does (Graph, point 7), or ignore it?
 4. **Where the queue's type is recorded.** Settled: how pending events are
    handed over is a choice of queue implementation, not of node, and the
    node's signature has to match it (NOD-24). A graph description names a
    node's implementation and its type (see Graph). Is the queue's type part
    of the push source's implementation identity, or a separate item in the
    node description that instantiation checks against the output type?
-5. **Structural inputs.** Settled 2026-09-30: defined above and in NOD-28,
-   from hgraph's third input activity. Whether the key set of a dictionary,
+5. **Structural inputs.** Settled 2026-09-30: defined above and in NOD-28. Whether the key set of a dictionary,
    bound on its own, is the same observation as a structural input on the
    dictionary is a question for the cases.
-6. **Error capture for nested nodes.** Settled 2026-09-30 from hgraph's
-   `try_except` and keyed `map_` capture: NOD-29. hgraph does not yet capture
-   for switch and mesh; that is an implementation gap, not a rule.
+6. **Error capture for nested nodes.** Settled 2026-09-30: NOD-29.
 
 
 Implementation source references are recorded in the

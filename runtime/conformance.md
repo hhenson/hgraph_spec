@@ -1,7 +1,6 @@
 # Conformance
 
-Status: proposed methodology; the bounded [dynamic cases](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation.md) have
-recorded Python/C++ runs. Other cases retain their stated evidence limits.
+Status: proposed methodology.
 
 An idle cycle keeps a value but has no delta. Publishing the same value later
 can still be a tick. Conformance compares the **trace**, not just the final
@@ -124,5 +123,4 @@ uncertainty about the adapter or native core. Keep it until reviewed.
 Name dependencies, deliverables, preserved rules, files, exclusions, checks
 and open decisions. For the atomic proof: an isolated owner and action driver;
 shared cases; layout and lifetime checks; sanitizers; measured cell costs.
-Core integration then needs public C++/Python coverage and the full acceptance
-gates. The [layout example](layout_example.md) remains a proposal.
+Core integration needs the full acceptance gates. The [layout example](layout_example.md) remains a proposal.

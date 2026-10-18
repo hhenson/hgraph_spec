@@ -563,10 +563,7 @@ Points to settle
 ----------------
 
 1. **How an implementation is named.** This is the crux of a storable
-   description and of the builder boundary (Overview, point 3). In hgraph today a node's behaviour is held as function
-   pointers and a process-local token; the builder can also retain opaque
-   extension state. None of that can be written out, which is why hgraph's
-   RFC 0022 manifest can identify a wired graph but not rebuild one. A stable
+   description and of the builder boundary (Overview, point 3). A stable
    identity needs a namespace (HGL already has module and provider
    identities, with fingerprints), a way to supply implementations to the
    runtime before instantiating, and a rule for generic implementations —
@@ -577,29 +574,26 @@ Points to settle
    description names; or the description carries the body itself in a form
    the runtime can execute. The second makes a description fully
    self-contained; the first does not.
-3. **How types appear.** hgraph refers to types by interned address. A
-   storable description must carry them — by value, as a table of the types
-   it uses, or by canonical name. It must also carry, for each abstract
-   struct family, the closed set of concrete members wiring knew about:
-   hgraph freezes that set when wiring finishes, and a graph ignores members
-   registered later.
+3. **How types appear.** A storable description must carry types — by
+   value, as a table of the types it uses, or by canonical name. It must also
+   carry, for each abstract struct family, the closed set of concrete members
+   known when wiring finishes. A graph ignores members registered later.
 4. **Is input peering stored, or derived?** The target paths of the edges
    already say which input positions are bound, and everything above a bound
-   position is a non-peered parent. hgraph stores the peering explicitly;
-   what cannot be derived from edges is a **local** input, and a collection
+   position is a non-peered parent. What cannot be derived from edges is a
+   **local** input, and a collection
    input whose members are created while the graph runs.
-5. **Structural inputs** are listed because hgraph's node type has them. They
-   need a definition in Time-series types before they can stay.
+5. **Structural inputs** are defined by NOD-28 in [Node](node.md).
 6. **Output mode** is set per node by whoever builds a nested node, not by
    the node's author. Is "forwards" part of the node description, or implied
    by the child graph's output binding?
-7. **Scheduling in the past.** hgraph's graph treats it as an error; hgraph's
-   node scheduler quietly ignores a request for a time that is not in the
-   future. GRF-12 takes the first. Should a node's scheduler be as strict?
+7. **Scheduling in the past.** GRF-12 rejects a graph schedule request for
+   a time not in the future. Should the node scheduler reject it too, or
+   ignore it?
 8. **A cancelled request still wakes the node.** When a node cancels its only
    pending request, the schedule entry already written stays, so the node is
-   considered once with nothing due. hgraph accepts this. It is harmless but
-   observable: the node's evaluation runs.
+   considered once with nothing due. This is observable: the node's
+   evaluation runs.
 9. **Nothing reaches backward.** Settled: every edge runs forward (GRF-4)
    and REF bindings obey TS-20. An exported route's effective producer is
    the owning node at each enclosing level. When that owner evaluates in a
@@ -609,9 +603,9 @@ Points to settle
    schedules a source for a later cycle and carries values only (TS-28).
 10. **How long a stopped nested graph is kept.** Settled 2026-09-30 (owner):
     GRF-25 is the rule and the minimum — finalised at the end of the cycle,
-    reclaimable from the start of the next. hgraph keeping a switch's old
-    branch until the next switch, or holding two address spaces for a switch,
-    is a design option ([Design options](design_options.md)).
+    reclaimable from the start of the next. Keeping a switch's old branch
+    until the next switch, or holding two address spaces, is a design option
+    ([Design options](design_options.md)).
 
 
 Implementation source references are recorded in the
