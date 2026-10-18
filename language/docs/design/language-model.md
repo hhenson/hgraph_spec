@@ -700,23 +700,18 @@ fn combined_total(a: f64, b: f64) -> f64 {
 ```
 
 All state variables aggregate into one typed state value. State initializers
-lower to replay-aware startup initialization and do not overwrite restored
-state. `state` is by definition a time series and is always recordable: the
-language sets as its default the practice hgraph's own library applies only to
-loopback state. Reconstructible node-local data has the separate agreed
-`cache<T>` concept, mapped to native `State<T>` rather than
-`RecordableState<TSchema>`. It need not be global or module-owned. Cache does
-not require recordability, but rebuilding it must preserve observable
-computation; arbitrary resources still need a native ownership/lifecycle
-contract. `cache name[: T] = init` is the declaration
-([ADR 0011](decisions/0011-cache-declarations.md)): scalar cache fields share one generated native struct, re-initialized on
-every start, and may be declared beside `state`.
-Both cache and state storage/objects must be constructed before `start`,
-separately from logical initialization or restore. See
+run at startup and do not overwrite restored state. `state` is a time series
+and is always recordable. Reconstructible node-local data uses
+`cache name[: T] = init` ([ADR 0011](decisions/0011-cache-declarations.md))
+and may be declared beside `state`. Cache does not require recordability,
+but rebuilding it must preserve observable computation. Its initializer runs
+on every start, using restored state. Arbitrary resources still need an
+ownership/lifecycle contract.
+
+Both state and cache objects must be constructed before `start`, separately
+from logical initialization or restore. See
 [ADR 0008](decisions/0008-temporal-contracts-and-target-mappings.md#cache-versus-recordable-state)
-for the reconstruction contract. Native nodes support both state selectors, and
-a function declaring `state` and `cache` lowers to both: a restored state field
-wins over its initializer, a cache field is rebuilt by every start.
+for the reconstruction contract.
 
 `inject` is a comma-separated function-level declaration of approved runtime
 capabilities. It does not add caller-visible parameters. `out` is a special

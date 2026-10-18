@@ -163,14 +163,13 @@ the explicit collection-borrow contract is settled.
 
 The language distinguishes semantic history from reconstructible local data:
 
-| HGL concept | Meaning | Current native counterpart | Record/replay |
-| --- | --- | --- | --- |
-| `state` | Persistent data needed to determine subsequent computation | `RecordableState<TSchema>` | Recorded and restored |
-| `cache<T>` | Node-local data reconstructible independently of missing history | `State<T>` | Excluded; rebuilt after restart |
+| HGL concept | Meaning | Record/replay |
+| --- | --- | --- |
+| `state` | Persistent data needed to determine subsequent computation | Recorded and restored |
+| `cache<T>` | Node-local data reconstructible independently of missing history | Excluded; rebuilt after restart |
 
-`cache<T>` names the agreed concept. The scalar declaration and initializer grammar is settled in
-[ADR 0011](0011-cache-declarations.md). It does not rename C++ `State` or introduce
-a native `Cache` selector.
+`cache<T>` names the agreed concept. The scalar declaration and initializer
+grammar is settled in [ADR 0011](0011-cache-declarations.md).
 
 Given the same restored inputs and recordable state, restarting with an empty
 or reconstructed cache must preserve subsequent output values, validity,
@@ -212,9 +211,8 @@ state; cache reconstruction must use the restored authoritative data.
 Normal teardown runs semantic `stop` before destroying the constructed
 objects and releasing their storage. Partial initialization must clean up
 whatever was successfully constructed without assuming `start` completed.
-Native static nodes destroy constructed slots after a failed `start`, without
-calling that node's `stop`; partial resource acquisition must use RAII or a
-rollback guard. Generic HGL native construction hooks remain future work.
+If `start` fails, constructed objects still require cleanup; that node's
+`stop` does not run. Generic native construction hooks remain an open question.
 
 Cache follows state's applicable typing and lifetime rules but does not
 require recordability. It may therefore contain admitted native/non-recordable
@@ -224,9 +222,8 @@ does not remove this distinction. Cache is also not a blanket permission to
 own external resources or introduce I/O outside a native lifecycle contract.
 
 A node may declare both recordable history and a derived cache. Restoration
-precedes `start`; cache rebuilding uses the restored state. Their storage may
-be planned independently, but that choice must not change initialization order
-or observable recovery behavior.
+precedes `start`; cache rebuilding uses the restored state. Storage choices
+must preserve initialization order and observable recovery behavior.
 
 For **HGL-MIG-005**, this settles the reconstructible-cache distinction, not
 generic recordable-state construction. Non-default-constructible generic

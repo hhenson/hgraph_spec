@@ -172,11 +172,10 @@ also required for partial initialization. A resource that needs observable
 shutdown exposes a permitted stop-phase operation in addition to its destructor.
 
 Opaque storage is not an exemption from the language's persistence contract.
-Reconstructible non-recordable data belongs in HGL cache (native `State<T>`);
-semantic history belongs in HGL `state` (native `RecordableState<TSchema>`) and
-requires recordable types. Native nodes support both selectors with independent
-storage and restore recordable state before `start` rebuilds the cache. Mixed
-HGL lowering and the opaque-type lifecycle bridge remain implementation work.
+Reconstructible non-recordable data belongs in HGL cache; semantic history
+belongs in HGL `state` and requires recordable types. State restoration precedes
+`start`, and cache rebuilding uses the restored state. The opaque-type lifecycle
+bridge remains a planned extension.
 
 Borrowed values are confined to the call or evaluation that produced them.
 They cannot be returned, stored in state or output, captured, placed in a

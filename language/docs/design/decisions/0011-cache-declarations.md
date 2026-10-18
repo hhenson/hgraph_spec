@@ -14,8 +14,7 @@ or pending event cannot be made a cache merely to match existing native storage.
 Cache objects are constructed before `start` and initialized on every start.
 Recordable state is restored before cache initialization; its initializer
 must not overwrite a restored value. Initializers run in declaration order
-across state and cache, so each can read earlier declarations. An implementation
-could group cache fields in one storage object, provided that these rules hold.
+across state and cache, so each can read earlier declarations.
 Non-scalar cache construction and generic state without an initializer remain
 separate design questions.
 

@@ -1276,14 +1276,12 @@ assignment_operator
 State, cache, and inject declarations precede executable blocks. The first
 slice requires a state or cache initializer and permits at most one `start`
 and one `stop` block. A `cache` is node-local data outside record/replay,
-re-initialized on every start; multiple scalar cache fields share a generated struct in one native
-`State<>` slot. A function may declare both: the two storages are planned
-independently, as native static nodes admit one `State<>` and one
-`RecordableState<>`, and `start` seeds a state field only when it is not
-already valid while assigning every cache field unconditionally -- so a
-restored state survives and its cache is rebuilt from it
-([ADR 0011](../design/decisions/0011-cache-declarations.md)). It permits multiple function-level `when` blocks and preserves their
-source order; a `when` nested in another block is rejected because it cannot
+initialized on every start. A function may declare both state and cache.
+State initialization must not overwrite restored values; cache initialization
+uses the restored state and runs on every start
+([ADR 0011](../design/decisions/0011-cache-declarations.md)). Multiple
+function-level `when` blocks are permitted and preserve their source order;
+a `when` nested in another block is rejected because it cannot
 contribute safely to the node's activation policy.
 These are semantic restrictions rather than parser shortcuts so diagnostics
 can identify the misplaced or duplicate construct precisely.
