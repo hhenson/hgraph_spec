@@ -1,8 +1,8 @@
 # Library contracts
 
 Status: provisional home, 2026-09-30. The standard library's specification
-is its own project; the contracts kept here were derived while triaging
-runtime parity issues and are held until that project exists. Nothing here
+is its own project; the contracts kept here are held until that project
+exists. Nothing here
 adds a runtime concept.
 
 Two meanings of "operator" meet in this repository, and each document says

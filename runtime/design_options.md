@@ -4,8 +4,7 @@ Status: recorded 2026-09-30 (owner direction). Nothing here is a rule.
 
 A rule says what a test can observe. A design option is a way of meeting the
 rules that an implementation may take or leave, recorded so that the
-reasoning behind hgraph's choices is not lost and so that a new
-implementation can weigh the same trade-offs. Where a rule fixes a minimum
+reasoning and trade-offs can be considered by different implementations. Where a rule fixes a minimum
 (the earliest a removal may be reclaimed, GRF-25), an option describes what
 an implementation may do beyond it. An option never changes an observation;
 if it would, it is a rule and belongs in a chapter.

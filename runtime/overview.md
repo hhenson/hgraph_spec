@@ -425,8 +425,8 @@ These are intended rules. Proposals and implementation gaps are marked in
 [Evidence](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/evidence.md); the written cases do not certify a runtime.
 
 **Concept first.** The specification starts from the concept and is refined
-only as far as working behaviour requires. A facility hgraph has that no
-concept here yet needs — externally driven stepping, observers,
+only as far as working behaviour requires. A facility no concept here yet
+needs — externally driven stepping, observers,
 pausing a cycle — is *deferred*, not rejected: it is named in
 its chapter's Deferred section and specified when an implementation needs it.
 Deferred facilities are **optional** behaviour; the chapter rules are

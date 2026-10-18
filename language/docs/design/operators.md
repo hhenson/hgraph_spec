@@ -143,8 +143,8 @@ values, not just a mathematical analogy:
   identities and reordering. There is no unconditional floating-point
   associativity declaration or implicit “fast math” permission.
 - Floating `min`/`max` cannot inherit total-order laws when NaNs and signed-zero
-  selection are observable. Custom native/Python scalar operators inherit no
-  laws merely because C++ supplies an overloaded operator.
+  selection are observable. Custom scalar operators require their own
+  domain-specific laws; native overloading supplies no automatic guarantee.
 
 Scalar comparisons follow [NaN comparisons](nan-comparisons.md), including
 self-inequality and unordered comparisons when either operand is NaN.

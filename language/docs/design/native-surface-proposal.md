@@ -8,7 +8,7 @@ Type erasure is an implementation detail, not a separate HGL value category.
 Reading a value uses ordinary HGL expressions and operations. A delta is obtained
 with the existing name `delta_value`, regardless of whether its type is named,
 generic, or known only through runtime metadata. Do not introduce `value_equals`,
-erased-value accessors, or different spelling based on the C++ representation.
+erased-value accessors, or different spelling based on the target representation.
 
 This decision does not claim that the compiler already lowers every value and
 delta shape. Missing transport, borrowing, and operator implementations are

@@ -264,14 +264,11 @@ wiring.
 The compiler owns language name resolution and type checking but does not own a
 second hgraph overload algorithm. Name resolution first chooses exactly one
 nominal operator. The candidates for that identity from the complete target
-universe are then presented to a compiler bridge over hgraph's `TypePattern`,
-`ResolutionMap`, and operator registry. The bridge returns the selected
-candidate, resolved output schema, and rejected-candidate diagnostics.
-
-Generated C++ makes the corresponding public operator wiring call. Both paths
-therefore consume the same registrations and matching rules. A mismatch between
-compiler prediction and generated wiring is a compiler defect and belongs in a
-cross-mode regression test.
+universe are resolved using the same candidate matching and ranking rules as
+wiring. Checking retains the selected candidate, resolved output schema and
+rejected-candidate diagnostics. Executable wiring must agree with that
+selection; it must not discover a different candidate set or use a second
+resolution policy.
 
 User-defined functions without a local operator binding retain exact typed
 declarations and do not form overload sets. Only those declared `export fn`

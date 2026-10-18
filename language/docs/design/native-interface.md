@@ -203,7 +203,7 @@ The first native-value interface is intentionally narrow at its HGL boundary:
 - collection arguments may use generic `list`, `set`, `map`, or `rolling`
   patterns only when the parameter explicitly requests `input-view` access;
 - the complete input-only `signal` pattern may request `input-view` access and
-  receives a common `TSInputView`; it is rejected as a value parameter, nested
+  receives a payload-free input view; it is rejected as a value parameter, nested
   type, const parameter, or result;
 - collection type and extent generics participate in compile-time selection but
   are not automatically exposed as runtime values;
@@ -212,12 +212,11 @@ The first native-value interface is intentionally narrow at its HGL boundary:
   `result<T,error>`, while a strict execution failure enters the canonical
   node failure channel under [PROP-2](result-errors.md);
 - mutation is restricted to an explicitly identified state argument;
-- raw pointers, lifetimes, callbacks, variadic calls, and open C++ templates are
-  not representable in the HGL signature or descriptor; a local C++ body is
-  still real C++ and remains the author's responsibility;
-- an open C++ template is still exposed only through an explicit specialization
-  or wrapper; generic HGL input-view patterns erase to reviewed non-template C++
-  view types;
+- raw pointers, lifetimes, callbacks, variadic calls and open native templates
+  are not representable in the HGL signature or descriptor;
+- an open native template needs an explicit specialization or wrapper with a
+  checked HGL signature; generic input-view patterns retain their declared
+  shape, access and borrowing contracts;
 - native declarations do not participate in implicit conversions;
 - descriptor and loaded-provider fingerprints must agree before wiring.
 

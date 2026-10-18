@@ -44,11 +44,11 @@ reset generations and installer replay. Ownership, borrowing, exclusive
 mutation and shared immutable retention need distinct lifetimes. Evaluation
 borrows a node; views and iterators cannot escape through state or callbacks.
 
-C handles, C++ views, Rust borrows and Swift facades may realize these rules.
 An ABI separately fixes widths, versions, contexts, handles, view lifetimes
 and error returns. Package, schema, source and binary compatibility differ.
-Generation, if revisited, must leave handwritten algorithms intact and be
-proved on a small two-backend example. Grammar and tooling remain deferred.
+Binding generation, if provided, must preserve handwritten algorithms and the
+shared ownership and lifecycle contracts, checked with a small example on two
+independent targets. Grammar and tooling remain deferred.
 
 ## Recovery and libraries
 

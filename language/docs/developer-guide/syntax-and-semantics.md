@@ -985,8 +985,8 @@ Type equality participates in inference. If exactly one side is an unbound
 generic and the other side can be evaluated from known bindings and `const`
 values, the compiler binds the generic. If both sides are known, equality
 validates them. The compiler repeats these steps to a fixed point; an
-unresolved dependency or cycle is diagnosed rather than deferred to generated
-C++. Only equalities in a positive conjunction can introduce a binding. An
+unresolved dependency or cycle is diagnosed during checking. Only equalities
+in a positive conjunction can introduce a binding. An
 equality beneath `||` or `!` is an admission predicate and requires both sides
 to have been resolved elsewhere.
 
@@ -1491,8 +1491,8 @@ uses `enum Mode { first, second }` and qualified member references such as
 an explicit integer number. Otherwise the first member starts at zero and
 each later member takes its immediately preceding member's resolved number
 plus one. Reject duplicate resolved numbers within the enum, including
-collisions introduced by automatic numbering; do not rely on C++ emission or
-native registration to enforce this source rule. Stringification returns the
+collisions introduced by automatic numbering. Enforce this during source
+checking. Stringification returns the
 declared member name, without a type prefix or numeric value. The source call
 is `str(value)`, including `str(Mode::first)`.
 
@@ -2039,8 +2039,8 @@ another rule is deliberately unresolved
 this document does not invent one.
 
 Classification is based on resolved source syntax. It must not be guessed
-from which imported overload happens to win, inferred from generated C++, or
-changed between scripted and AOT modes.
+from which imported overload happens to win or changed between scripted and
+AOT modes.
 
 After classification, phase and effect checking gives identifiers different
 meanings in the two phases. A temporal parameter is a port in a composition

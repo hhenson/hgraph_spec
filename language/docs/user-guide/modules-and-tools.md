@@ -218,12 +218,12 @@ the machine does not automatically make its implementations available.
 
 Operator resolution considers enabled implementations of the selected contract.
 It does not choose a different contract just because the names look alike.
-Current builds require explicit dependencies; automatic discovery and locking
-of a complete transitive package set remain planned.
+Applications declare their implementation dependencies explicitly. Automatic
+discovery and locking of a complete transitive package set remain open.
 
 ## Native adaptors stay native
 
-A C++ extension may expose a typed function contract backed by a graph, node,
+A native extension may expose a typed function contract backed by a graph, node,
 source, sink, service, or operator overload:
 
 ```hgl
@@ -231,13 +231,13 @@ use acme.market_data::{subscribe_quotes}
 ```
 
 The language call can supply temporal arguments and `const` configuration
-declared by that module. The C++ package remains responsible for callback
+declared by that module. The native package remains responsible for callback
 admission, threads, queues, backpressure, resource ownership, start and stop,
 protocol acknowledgement, and teardown.
 
-Language source cannot declare an adaptor. A top-level `native fn` may contain
-local evaluation-time C++, but it does not acquire callback, thread, queue,
-service, module-lifecycle, or external dependency semantics.
+Language source cannot declare an adaptor. A native function declaration does
+not acquire callback, thread, queue, service, module-lifecycle or external
+dependency semantics merely by being native.
 
 ## Command-line workflow
 
