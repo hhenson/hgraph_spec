@@ -776,8 +776,11 @@ For a single-handler function, validity requirements in `when` request managed
 handling: on activation, failed requirements invalidate the dependent output
 without running the guarded body. `valid()` leaves output handling to the body.
 Propagation is the authoring convention and the default convention for system
-libraries, with reasoned exceptions stated in operator contracts. It is not an
-unconditional runtime policy. Managed invalidation across multiple handlers
+libraries. An operator with time-series inputs invalidates its dependent output
+when all those inputs are invalid, including with `valid()`; it may propagate
+sooner. Exclusions must state their behavior and justification in the operator
+contract. Sources with no time-series inputs are outside this rule. This is not
+an unconditional runtime policy. Managed invalidation across multiple handlers
 sharing an output remains open. See [handler validity handling](../user-guide/functions.md#invalidation-and-notification-subscriptions).
 
 `scheduled()` selects the scheduler's alarm

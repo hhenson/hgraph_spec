@@ -696,11 +696,15 @@ retain, or replace the output, subject to the operator's contract. Use
 This is not unconditional propagation through every node or passive input.
 
 The authoring convention is to propagate invalidity to dependent results.
-System libraries follow it unless an operator documents a reason for different
-behavior. An implementer may realize that contract manually or use the
-framework-managed form. Combining managed invalidation across multiple `when`
-handlers sharing an output remains an open decision; this clarification does
-not assign each failed handler an independent right to invalidate that output.
+For an operator with one or more time-series inputs, all inputs being invalid
+is sufficient to invalidate its dependent output; its contract may propagate
+sooner. System libraries follow this even with `when valid()`, unless the
+operator documents an exclusion with its behavior and justification. Sources
+with no time-series inputs are outside this rule. An implementer may realize
+that contract manually or use the framework-managed form. Combining managed
+invalidation across multiple `when` handlers sharing an output remains an open
+decision; this clarification does not assign each failed handler an independent
+right to invalidate that output.
 
 `when` is function-level. Use `if valid(value)` inside it for local decisions,
 and guard payload reads before use. Boolean conditions short-circuit from left

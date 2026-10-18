@@ -27,13 +27,23 @@ valid before the operator is evaluated. An invalid input is nil (TS-2). It is
 not an empty collection, a zero or a default. A set that has never ticked
 is not the empty set; it is no set at all.
 
+System-library operators propagate invalidity to dependent outputs. For an
+operator with one or more time-series inputs, all inputs being invalid is
+sufficient to invalidate its output; its contract may require invalidation
+sooner. This convention also applies when `when valid()` leaves validity
+handling to the body. An exclusion must document its behavior and justification
+in the operator's contract. This is an authoring rule, applied through the
+existing activation subscriptions, not unconditional framework enforcement.
+Sources with no time-series inputs are outside this rule.
+
 A contract may name inputs that the operator reads while they are invalid.
-It must then say what an invalid input contributes. `union` names every
-operand: the empty set is its identity and gathering is its purpose, so an
-invalid operand contributes nothing. `format_` with `__strict__` false
-names its arguments. `mean` over a dictionary names its whole input and
-produces NaN for a dictionary that has never ticked. `sum_`, `min_` and
-`max_` name no invalid input and publish nothing.
+It must then say what an invalid input contributes. `union` reads the valid
+operands and ignores invalid ones, but its output is invalid when none is
+valid. `format_` with `__strict__` false admits invalid arguments, subject to
+the same all-inputs-invalid rule unless its contract documents an exclusion.
+`is_empty` and `mean`, including dictionary `mean`, propagate input invalidity;
+invalid input produces neither `True` nor NaN. An empty valid collection is a
+separate case.
 
 A non-peered fixed collection is valid while any child is valid. An aggregate
 over a fixed list is therefore admitted once one element is valid, and reads
@@ -101,8 +111,8 @@ source with the most recent modification time. This is the time of the
 **original source** for that call; selecting a held value does not refresh
 that source's modification time. Equal times are resolved leftmost. A
 fallback publishes only when its value differs from the current output, or the output has no value
-yet. With no valid source, the value selector publishes nothing; this does
-not publish nil or a removal as a value.
+yet. With no valid source, the output is invalidated rather than retaining a
+previous value. Invalidation is a notification, not a value tick or a removal.
 
 A separately nested call, such as `merge(merge(A, B), C)`, has the inner
 merge's output as one original source of the outer call. A tick published by
@@ -116,7 +126,9 @@ valid; a newly introduced child remains invalid until a valid source supplies
 a selected value. Membership alone supplies no child payload. Apply value
 selection independently to each key's original children, so different keys
 from different inputs can publish together. With no valid source for a live
-key, its previous output value is retained; this does not invalidate it.
+key, that output child is invalidated rather than retaining its previous value.
+Child invalidation does not remove the live key. If all input dictionaries are
+invalid, the whole output is invalidated.
 Removing a key permits fallback to another input that still holds it. The
 key remains in the output until the last input removes it (TS-19).
 This contract does not specify the separate `disjoint=True` optimization.
@@ -192,12 +204,17 @@ Rules
 -----
 
 - **OP-1** Unless its contract names an input it may read while invalid, an
-  operator publishes nothing until every input is valid. It never substitutes
-  an empty collection, a zero or a default for a nil input.
-- **OP-2** An aggregate over a collection — `sum_`, `mean`, `min_`, `max_`,
-  `all_`, `any_`, `len_` of a set — follows OP-1. A default value answers an
-  empty valid collection, not an invalid one. An aggregate over a fixed list
-  reads its valid elements once any element is valid.
+  operator propagates invalidity when any input is invalid. An operator with
+  one or more time-series inputs propagates invalidity when all are invalid,
+  even if none is required valid by its handler. Exclusions must document
+  their behavior and justification. Propagation follows activation subscriptions
+  and invalidates a previous output; silence alone is insufficient. A nil input
+  is not an empty collection, a zero or a default.
+- **OP-2** `is_empty` and an aggregate over a collection — `sum_`, `mean`,
+  `min_`, `max_`, `all_`, `any_`, `len_` of a set — follow OP-1, including
+  dictionary `mean`. A default value answers an empty valid collection, not an
+  invalid one. An aggregate over a fixed list reads its valid elements once any
+  element is valid.
 - **OP-3** An operator never changes an input or its producer. A derived view
   of an output — a key set's emptiness, a membership test — is read without
   ticking that output.
@@ -208,7 +225,8 @@ Rules
   child forwards the operand the table names (OP-4); a derived change of
   forwarding operand publishes only a different value. The first admitted
   evaluation publishes the result, empty or not.
-- **OP-6** `union` reads the valid operands and ignores an invalid one.
+- **OP-6** `union` reads the valid operands and ignores an invalid one;
+  when all operands are invalid, its output is invalid.
   `intersection`, `difference` and `symmetric_difference` follow OP-1.
 - **OP-7** `union`, `intersection` and `symmetric_difference` fold pairwise
   over any number of operands; `difference` takes exactly two.
@@ -230,11 +248,13 @@ Rules
   modified in the current cycle supplies the value and its publication is
   forwarded, even when equal. Otherwise select the valid original source
   with the latest modification time, leftmost on ties, and publish only a
-  changed value or a first value. With no valid source the value selector
-  publishes nothing. Ordinary dictionary merge applies value selection per
-  key and maintains the union of live input keys independently of child
-  validity. Adding a key makes the parent valid, with an invalid child until
-  a value is selected; the last input's removal removes the output key.
+  changed value or a first value. With no valid source, invalidate the output.
+  Ordinary dictionary merge applies this rule per live key, invalidating a
+  child without removing its key when no source child is valid. It maintains
+  the union of live input keys independently of child validity and invalidates
+  the whole output when all input dictionaries are invalid. Adding a key makes
+  the parent valid, with an invalid child until a value is selected; the last
+  input's removal removes the output key.
 
 A TSD delta holding a nested dictionary includes the inner dictionary's delta:
 its valid modified children only. An invalid inner child contributes nothing,
@@ -255,9 +275,11 @@ Points to settle
    an unordered map and provides no ordering guarantee, so the order of its
    text is unspecified (Scalar types, Text; OP-9). A set has no order either
    (VAL-8) and is treated the same way.
-3. **The emptiness of an invalid set.** Whether `is_empty` should return
-   `True` for an invalid set as an explicit exception, or follow OP-1, remains
-   for separate discussion.
+3. **Invalid inputs.** Settled 2026-10-18 by the owner: `is_empty` and
+   `mean` propagate invalidity. `union` and `merge` propagate when all inputs
+   are invalid. This is the general system-library convention, including for
+   handlers with no required-valid inputs; exclusions require a documented
+   justification (OP-1).
 
 
 Implementation source references are recorded in the
