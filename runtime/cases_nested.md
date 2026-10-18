@@ -1,6 +1,6 @@
 # Nested graph cases
 
-Status: validated on Python and C++ hgraph; see [results](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation.md).
+Status: expected traces for nested graphs.
 
 ## KEYED-ROUTE-TIMER
 
@@ -38,8 +38,7 @@ At 4 and 9, only a child deadline causes work. Start/stop events are
 `start, stop, start, stop`; the final stop is run shutdown. Repeat with an
 outer `switch(True)` owning the map: the complete trace is unchanged.
 
-The fixture uses native/Python `STATE` to observe instance lifetime. This does
-not validate recording, recovery or HGL's state/cache lowering.
+Recording and recovery are outside this case's scope.
 
 ## DEADLINES-AND-REMOVAL
 
@@ -58,8 +57,8 @@ The [input and expected-output arrays](validation/reasoned.json) fix four cases:
   remove both at 8. No extra tick or sibling interference.
 
 Idle positions remain no-tick, including trailing positions before the
-exclusive run end. These cases validate deadline propagation and cancellation;
-they do not establish memory bounds or absence of physical allocations.
+exclusive run end. These cases specify deadline propagation and cancellation;
+memory bounds and allocation behavior are outside their scope.
 
 ## CHILD-FAILURE
 

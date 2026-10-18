@@ -1,9 +1,7 @@
-Fixed collections: validation cases
-==================================
+Fixed collections: expected observations
+=======================================
 
-Status: 44 cases compared with Python and C++; user rulings recorded.
-See the [comparison report](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/fixed/README.md).
-The prototype slice covers fixed-size TSL and TSB. Growing TSL is separate.
+These cases cover fixed-size TSL and TSB. Growing TSL is separate.
 
 A field or position is a time-series, including when it is a collection.
 Peering belongs to each input: an assembled parent can contain a peered child
