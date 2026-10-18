@@ -77,7 +77,7 @@ describe a source that ticks. Parameter-level `const` continues to mean
 wiring-time configuration, not a value argument supplied on each call.
 
 The [design decision](../design/decisions/0008-temporal-contracts-and-target-mappings.md)
-includes an HGL caller and expected C++ lowering. Combinations with `impl`,
+includes a value helper and its temporal caller. Combinations with `impl`,
 `native`, and `export`, and migration of existing `native fn` helpers, remain
 open syntax/compatibility work. There is no new accepted spelling for them in
 this section.
@@ -835,7 +835,7 @@ results.
 ## Explicit switch
 
 Status: the following source form and node-style/graph-style semantics are
-agreed design; compiler implementation remains separate work. See
+agreed design. See
 [Explicit switch dispatch](../design/switch.md).
 
 ```hgl
@@ -937,8 +937,7 @@ Use `cache` for data reconstructible from authoritative current inputs and
 restored state without missing history. Rebuilding must preserve subsequent
 values, validity, ticks, deltas and effects. Historical counters, running totals
 and unconsumed events belong in `state`. In particular, pending schedules and
-finite-schedule progress must survive recovery; current native parity alone
-does not establish that guarantee.
+finite-schedule progress must survive recovery.
 
 Multiple scalar cache variables are supported, and a function may declare
 `cache` and `state` together: the node then carries both storages, a restored
@@ -1160,7 +1159,7 @@ fn monitored_total(value: f64) -> f64 {
 flushing or releasing an approved handle. Ordinary state storage and injected
 capabilities are runtime-owned and require no explicit disposal. External
 threads, callbacks, transports, and arbitrary native resources remain the
-responsibility of C++ extensions.
+responsibility of native extensions.
 
 ## Ordered activation
 

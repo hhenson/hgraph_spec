@@ -1,9 +1,7 @@
 # Wiring cases
 
-Status: validated expectations with recorded variations; rewritten for
-clarity on 2026-09-30 with the case names, rule references and expected
-decisions unchanged. The observations are in the
-[wiring validation](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/wiring/README.md).
+Status: expected wiring decisions; clarified on 2026-09-30 without changing
+case names, rule references or expected decisions.
 
 ## How to read a case
 
@@ -16,9 +14,7 @@ cycle from the first; `—` means nothing was published that cycle.
 Type notation is the runtime's: `TS<i64>` is a series of integers,
 `TSL<TS<i64>, 3>` a fixed list of three, `TSD<str, TS<i64>>` a dictionary
 keyed by strings, `TSB{a: TS<i64>}` a bundle with one field, `REF<X>` a
-reference to a time-series of type `X`, and `T` a type variable. In the
-recorded runs these are hgraph's Python spellings (`TS[int]`,
-`TSD[str, REF[TS[int]]]`); the correspondence is one to one.
+reference to a time-series of type `X`, and `T` a type variable.
 
 Three helper nodes recur:
 

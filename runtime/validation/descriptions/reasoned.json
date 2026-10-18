@@ -1,5 +1,5 @@
 {
-  "status": "Reasoned before reference execution; previously accepted rules apply.",
+  "status": "Expected observations under the accepted rules; not observed results.",
   "cases": {
     "owned": {
       "ticks": [
@@ -1341,7 +1341,7 @@
                       "delta": null
                     }
                   },
-                  "peer": true
+                  "peer": false
                 },
                 "right": {
                   "valid": false,
@@ -1366,10 +1366,10 @@
                       "delta": null
                     }
                   },
-                  "peer": true
+                  "peer": false
                 }
               },
-              "peer": true
+              "peer": false
             }
           }
         },
@@ -4670,7 +4670,7 @@
                       "delta": null
                     }
                   },
-                  "peer": true
+                  "peer": false
                 },
                 "right": {
                   "valid": false,
@@ -4695,10 +4695,10 @@
                       "delta": null
                     }
                   },
-                  "peer": true
+                  "peer": false
                 }
               },
-              "peer": true
+              "peer": false
             }
           }
         },
@@ -7999,7 +7999,7 @@
                       "delta": null
                     }
                   },
-                  "peer": true
+                  "peer": false
                 },
                 "right": {
                   "valid": false,
@@ -8024,10 +8024,10 @@
                       "delta": null
                     }
                   },
-                  "peer": true
+                  "peer": false
                 }
               },
-              "peer": true
+              "peer": false
             }
           }
         },
@@ -11328,7 +11328,7 @@
                       "delta": null
                     }
                   },
-                  "peer": true
+                  "peer": false
                 },
                 "right": {
                   "valid": false,
@@ -11353,10 +11353,10 @@
                       "delta": null
                     }
                   },
-                  "peer": true
+                  "peer": false
                 }
               },
-              "peer": true
+              "peer": false
             }
           }
         },
@@ -14657,7 +14657,7 @@
                       "delta": null
                     }
                   },
-                  "peer": true
+                  "peer": false
                 },
                 "right": {
                   "valid": false,
@@ -14682,10 +14682,10 @@
                       "delta": null
                     }
                   },
-                  "peer": true
+                  "peer": false
                 }
               },
-              "peer": true
+              "peer": false
             }
           }
         },

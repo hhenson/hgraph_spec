@@ -139,15 +139,13 @@ not source-level types.
 Native declarations may share one canonical identity when their HGL signatures
 differ. The compiler treats them as one overload family, unifies generic
 collection patterns against the argument types, and records the unique selected
-candidate before HGraph IR lowering. No implicit conversions or native-overload
+candidate during checking. No implicit conversions or native-overload
 ranking are involved: no match is an error, and overlapping matches are
 ambiguous. A package should therefore publish disjoint patterns.
 
-The generated C++ calls the declared symbol, its package-provided wrapper, or a
-source-native generated function directly. It never subclasses an operator to
-represent an exact helper. The direct-wiring backend does not emulate native
-C++: a runtime-bearing program follows the existing generated, compiled, and
-loaded image path.
+An exact value helper is a direct value call with no independent node,
+activation or output. Native execution and loading mechanisms belong to the
+target implementation.
 
 Calls from required wiring-time constant evaluation, automatic temporal
 lifting, and general compile-time execution are outside the first interface.
@@ -205,7 +203,7 @@ The first native-value interface is intentionally narrow at its HGL boundary:
 - collection arguments may use generic `list`, `set`, `map`, or `rolling`
   patterns only when the parameter explicitly requests `input-view` access;
 - the complete input-only `signal` pattern may request `input-view` access and
-  receives a common `TSInputView`; it is rejected as a value parameter, nested
+  receives a payload-free input view; it is rejected as a value parameter, nested
   type, const parameter, or result;
 - collection type and extent generics participate in compile-time selection but
   are not automatically exposed as runtime values;
@@ -214,12 +212,11 @@ The first native-value interface is intentionally narrow at its HGL boundary:
   `result<T,error>`, while a strict execution failure enters the canonical
   node failure channel under [PROP-2](result-errors.md);
 - mutation is restricted to an explicitly identified state argument;
-- raw pointers, lifetimes, callbacks, variadic calls, and open C++ templates are
-  not representable in the HGL signature or descriptor; a local C++ body is
-  still real C++ and remains the author's responsibility;
-- an open C++ template is still exposed only through an explicit specialization
-  or wrapper; generic HGL input-view patterns erase to reviewed non-template C++
-  view types;
+- raw pointers, lifetimes, callbacks, variadic calls and open native templates
+  are not representable in the HGL signature or descriptor;
+- an open native template needs an explicit specialization or wrapper with a
+  checked HGL signature; generic input-view patterns retain their declared
+  shape, access and borrowing contracts;
 - native declarations do not participate in implicit conversions;
 - descriptor and loaded-provider fingerprints must agree before wiring.
 
@@ -228,14 +225,8 @@ migration requires them and their HGL-facing semantics are defined.
 
 ## Desired HGL experience
 
-A small helper owned by an HGL module can be implemented directly. The HGL
-signature remains the public contract and the C++ projection states the exact
-native ABI used by the generated call:
-
-[Native example 3](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/native-interface.md#example-3)
-
-For a separately built native package, an imported descriptor supplies the
-same call-site contract. For example, a package may expose a non-throwing
+A native package exposes a checked HGL signature through its descriptor.
+The imported declaration supplies the call-site contract. For example, a package may expose a non-throwing
 scalar update function so an HGL node can be written as:
 
 ```hgl
@@ -266,7 +257,7 @@ impl fn len_<T, const size: i64>(value: list<T, size>) -> i64 {
 ```
 
 `T` and `size` select the list-view overload. The body does not need either
-value: the selected C++ overload reads `value.size()` from the live input view.
+value: the selected helper reads the current length from the live input view.
 This is the important distinction between a generic required to instantiate or
 select a callable, a marker retained only as part of a type, and runtime
 information explicitly available through a native view.

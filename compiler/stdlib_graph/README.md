@@ -13,8 +13,7 @@ The literal expectations in `cases.json` follow ADR 0015 and the library's
 control-operator contracts. Tick cells are one microsecond apart, starting at
 `MIN_START`. Missing cells do not admit the sink. Equal ordinary ticks count
 separately. Sampling counts admitted ticks, so sample 2 prints only the second
-42 in `[_, 42, _, 42, -7]`. Backend timestamp prefixes are excluded from the
-comparison; the label, sampling prefix and scalar text are retained.
+42 in `[_, 42, _, 42, -7]`. Compare the label, sampling prefix and scalar text.
 
 The earlier `const_`/`print_i64` bootstrap remains a compiler regression fixture.
 It does not exercise the current imported standard-library operators.

@@ -3,8 +3,6 @@
 # The imported type IS the exporting module's type: there is no copy under
 # this module's namespace, so a value built here crosses back to
 # examples.market_data without conversion and both modules see one schema.
-# Generated C++ refers to that module's own definition and includes its
-# header rather than re-declaring the struct.
 #
 # Checking this module needs the exporter's descriptor:
 #     hgl test instrument-book.hgl --module-descriptor market-data.hgl-module.json

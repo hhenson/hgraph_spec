@@ -7,9 +7,8 @@ Status: proposed; spelling agreed with the project owner on 2026-09-28.
 [ADR 0010](0010-lifecycle-capabilities.md) made a source a runtime function
 with no temporal parameters that injects `scheduler`, schedules itself in
 `start`, and publishes in a `when scheduled()` handler. That is three hooks
-to publish one value, and `scheduler` binds hgraph's `NodeScheduler`: a
-per-node state slot of tagged pending events that checkpoints capture and
-restore. A constant source neither needs nor wants that.
+to publish one value. The scheduler's pending events are captured and
+restored by checkpoints. A constant source neither needs nor wants that.
 
 Two scheduling capabilities serve different purposes. The reliable scheduler
 retains tagged alarms, supports cancellation and queries, and participates in
@@ -24,7 +23,7 @@ write an explicit resume state machine.
 
 ### 1. `inject alarm` binds the stateless scheduler
 
-`alarm` is an injectable that maps to `SingleShotScheduler`. It offers
+`alarm` provides one-shot scheduling. It offers
 `schedule(alarm, delay)` and `schedule_at(alarm, time)`, both available in
 `start` and during evaluation. Repeated requests keep the earliest time; a
 later request never cancels or postpones an earlier one. There is no
@@ -54,7 +53,7 @@ generator (decision 3).
 
 | | `alarm` | `scheduler` |
 | --- | --- | --- |
-| Node state | none | pending events (tagged inside hgraph; tags are not exposed, ADR 0010) |
+| Node state | none | pending events (tags are not exposed, ADR 0010) |
 | After a restore | `start` re-arms; nothing is restored | pending alarms are restored |
 | Requests | `schedule(alarm, delay)`, `schedule_at(alarm, time)`; earliest wins | `schedule(scheduler, delay)`, `schedule_at(scheduler, time)`, `is_scheduled(scheduler)`, `next_scheduled_time(scheduler)` |
 | Wall clock | no | `schedule(scheduler, delay, true)` under a real-time executor |
@@ -101,11 +100,10 @@ generator source:
   or `alarm`, or contain `when`, `start` or `stop`: `yield` owns the output
   and the scheduling. A `return` carries no value: `yield` publishes, and a
   bare `return` finishes the source. `for` is not admitted (see the open
-  questions): its iteration owns the body, so a suspension inside it could
-  not resume.
+  questions).
 - A `yield` is a statement of the body, of a `while` block or of an `if`
-  statement. It cannot sit inside a value (an `if` used as an expression,
-  a lambda), where a backend has no resume point to jump to.
+  statement. It cannot sit inside a value, such as an `if` used as an
+  expression or a lambda.
 - The body starts running in the node's first evaluation, which the runtime
   requests at start. `yield t: v` with a `duration` `t` means `t` after the
   evaluation time at which the body is running; with a `datetime` it is
@@ -125,8 +123,7 @@ generator source:
   When the node evaluates, it publishes `v` and resumes the body after the
   `yield`. A body that ends is finished: the node never evaluates again.
 - Locals live across suspensions as node-local storage and are not
-  recorded. After a restore the body restarts from its first statement,
-  which is what hgraph's generator does.
+  recorded. After a restore the body restarts from its first statement.
 
 #### Operand evaluation, resolution and retention
 
@@ -156,8 +153,6 @@ generator source:
 
 See [compiler cases](../../../../compiler/cases_generator_operands.md) and
 [examples](../../../examples/generator-yield-operands.hgl).
-Audit evidence: [negative durations](https://github.com/hhenson/hgraph_spec_audit/blob/9967125fe6fad385e2d120e40049348402e0c686/runtime/validation/generator_negative/README.md)
-and [target ordering](https://github.com/hhenson/hgraph_spec_audit/blob/9967125fe6fad385e2d120e40049348402e0c686/runtime/validation/generator_ordering/README.md).
 
 ```hgl
 fn constant(const value: i64, const delay: duration = 0s) -> i64 {
@@ -172,12 +167,6 @@ fn heartbeat(const period: duration, const beats: i64) -> bool {
     }
 }
 ```
-
-A generator needs no runtime node kind. The compiler lowers the body to a
-state machine: a resume position and the hoisted locals in node-local
-storage, one parked value, and the stateless scheduler for the wake-up. A
-generator is therefore sugar over decision 1, and the only runtime change
-both decisions need is exposing `SingleShotScheduler` to HGL.
 
 ### 4. `while` is the conditional loop
 
@@ -210,23 +199,12 @@ and, like `out`, `clock` and `scheduler`, stays contextual.
   source completion alone cannot bound every harness run. The explicit end
   spelling remains a separate harness decision.
 
-## Possible realization
-
-An implementation could represent a generator by its resume position, live
-locals and a pending publication. At a future yield it saves that state and
-schedules resumption; at a due yield it publishes and continues in source
-order. It must preserve skipped past absolute times, negative-duration and
-duplicate-time errors, loops, conditionals and termination. Native coroutines and explicit state machines
-are possible realizations, not language requirements.
-
 ## Open questions
 
-- Whether a generator may carry a `stop` block. hgraph's `@generator.stop`
-  exists; the block would run at teardown with the `const` parameters only.
+- Whether a generator may carry a `stop` block, running at teardown with
+  the `const` parameters only.
 - Whether an absolute `yield` time in the past should be a diagnostic
-  rather than skipped. hgraph skips silently; this record follows it.
-- `for` inside a generator, which hgraph's replay generators use over a
-  constant collection. It needs the loop index hoisted beside the locals
-  and an index-based loop in each backend; until then the checker rejects
-  it and points to `while`.
+  rather than skipped.
+- `for` inside a generator. It remains rejected; the diagnostic points to
+  `while`.
 - `break` and `continue` for `while`.

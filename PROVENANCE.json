@@ -151,12 +151,6 @@
       "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
     },
     {
-      "path": "runtime/validation/fixed/reasoning_corrections.json",
-      "source_project": "hgraph",
-      "source_path": "docs/source/runtime_spec/validation/fixed/reasoning_corrections.json",
-      "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
-    },
-    {
       "path": "runtime/validation/fixed/recipes/tsb_assembled.json",
       "source_project": "hgraph",
       "source_path": "docs/source/runtime_spec/validation/fixed/recipes/tsb_assembled.json",
@@ -569,12 +563,6 @@
       "source_project": "hgraph",
       "source_path": "docs/source/runtime_spec/wiring.md",
       "source_revision": "2738ca7688ec13602a97dd33489f3842ab757618"
-    },
-    {
-      "path": "runtime/validation/descriptions/corrections.json",
-      "source_project": "hgl",
-      "source_path": "docs/runtime_spec/validation/descriptions/corrections.json",
-      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
     },
     {
       "path": "runtime/validation/descriptions/reasoned.json",
@@ -1252,12 +1240,6 @@
       "path": "runtime/validation/fixed/reasoned.json",
       "source_project": "hgl",
       "source_path": "docs/runtime_spec/validation/fixed/reasoned.json",
-      "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
-    },
-    {
-      "path": "runtime/validation/fixed/reasoning_corrections.json",
-      "source_project": "hgl",
-      "source_path": "docs/runtime_spec/validation/fixed/reasoning_corrections.json",
       "source_revision": "6718df0b9f01a36cd7c7c47aa878cc780016b6f8"
     },
     {

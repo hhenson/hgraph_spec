@@ -5,12 +5,10 @@ capture/result analysis, and `switch selector { case value: ... default: ... }`
 agreed, 2026-09-06. Case values must be expressible as constants in source.
 Duplicate cases after constant resolution and enum exhaustiveness checks are
 also agreed. Partial enum coverage remains permitted with no-match failure.
-Compiler implementation remains separate work.
 
-[Paired HGL and C++ examples](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/control-flow-cpp-mappings.md)
-describe node and graph scenarios, captures and results, defaults and failures,
-sinks, early returns, and state lifetime. The source examples also live in the
-[standard-library design corpus](../../stdlib/examples/switch-scenarios.hgl).
+[Source examples](../../stdlib/examples/switch-scenarios.hgl) cover node and
+graph dispatch, captures, results, defaults, failures, sinks, early returns
+and state lifetime.
 
 ## Source form and constant case values
 
@@ -109,11 +107,6 @@ unknown enum values at native import boundaries; that remains separate design
 work. A supplied default remains a real branch with the existing capture,
 result, and definite-assignment checks.
 
-[Paired enum-switch HGL/C++ examples](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/enum-switch-cpp-mappings.md)
-cover exhaustive and partial dispatch, a supplied default, and intentional
-duplicate/type errors. No new source syntax or compiler implementation is
-introduced by these checks.
-
 ## One construct in both function phases
 
 Explicit `switch` must be supported in both node-style functions and graph
@@ -124,7 +117,7 @@ runtime node.
 | Context | Dispatch behaviour |
 | --- | --- |
 | Graph composition, wiring-time selector | Select and compose the matching case, or the default, during wiring. |
-| Graph composition, temporal selector | Wire native `switch_` with generated branch callables and boundary signatures. |
+| Graph composition, temporal selector | Select a child graph with the required captures and result signature. |
 | Node evaluation, including a `when` handler | Dispatch on the current readable selector value inside the node's evaluation. |
 
 Case labels are source-expressible constant values. One matching branch is
@@ -139,10 +132,9 @@ must supply a value suitable for comparison with the case labels, rather than
 an arbitrary temporal structure or an untyped condition. It need not be a
 Boolean condition as it is for `if`.
 
-For a temporal graph switch, the selector must bind to the native `switch_`
-scalar-key input, and the case values must be compatible with the selected key
-contract. The native input is `TS<ScalarVar<K>>`; source compatibility and any
-REF binding adaptation must use the existing type and wiring rules. Wiring
+For a temporal graph switch, the selector supplies a scalar key. Case values
+must be compatible with that key type. Source compatibility and any REF
+binding adaptation follow the existing type and wiring rules. Wiring
 must not read the selector's current runtime payload to choose a branch.
 
 In node evaluation, the selector must be readable under the existing validity
@@ -151,19 +143,14 @@ permit reading the referenced value to make a case comparison. This does not
 restrict the separately supported forwarding of REF values by a branch.
 
 The exact set of admitted scalar key types, including imported native types,
-is not fixed here. A backend's ability to emit a particular C++ statement is
-not by itself evidence that every source type has a valid switch-key contract.
+is not fixed here. Every admitted source type requires a valid switch-key
+contract.
 
-## Node-style lowering to C++
+## Node-local dispatch
 
-A node-style switch must lower to native C++ dispatch within the generated
-node's evaluation code. It must not require Python execution or create a
-graph-level `switch_` merely to implement local control flow.
-
-The generated C++ may use a C++ `switch` where the admitted selector and case
-types permit that statement. For other admitted types, equivalent native C++
-comparison-based dispatch may be needed. This is a code-generation distinction,
-not an agreement to admit additional selector types or new source syntax.
+A node-style switch dispatches within the enclosing node's evaluation. It
+creates no child graph for local control flow. The dispatch mechanism does
+not change admitted selector types or source syntax.
 
 Branch statements operate on the current evaluation's local values and the
 enclosing node's declared state and output capabilities. Changing the selected
@@ -184,7 +171,7 @@ cases and the optional default:
    Preserve reference forwarding intent and `signal` input restrictions. The selector
    is the switch key; a branch which also reads it has that lexical dependency.
 3. Derive compatible result signatures, including used expression results and
-   escaping assignments. Zero results use the native outputless switch path;
+   escaping assignments. Zero results leave the conditional outputless;
    one result is returned directly; multiple results use a generated bundle
    and remap to the enclosing bindings.
 4. Apply definite assignment and early-return continuation rules to every path
@@ -193,9 +180,9 @@ cases and the optional default:
 
 The exact common result-schema and per-field REF adaptation requirements from
 [forwarding an existing binding](control-flow.md#forwarding-an-existing-binding)
-also apply. Underlying type compatibility must not hide mismatched native
-bundle fields. If the public native API cannot express a required adaptation,
-the compiler must reject that lowering until the support exists.
+also apply. Underlying type compatibility must not hide mismatched result
+fields. An implementation unable to preserve a required adaptation must
+reject it.
 
 Explicit branch arguments still obey the native callable signature rules;
 forming a union of captures does not permit passing arbitrary arguments to a

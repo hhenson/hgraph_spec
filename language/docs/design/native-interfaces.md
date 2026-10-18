@@ -35,7 +35,7 @@ A native implementation of this helper computes `lhs & rhs`. Its temporal
 caller retains responsibility for activation and publication; the helper adds
 no node or tick.
 
-Acceptance: preserve the reasoned/Python/C++/Rust bitwise traces in
+Acceptance: preserve the required bitwise traces in
 [stdlib cases](../../../compiler/stdlib/cases.json), including missing and duplicate ticks.
 Compile-fail cases cover wrong argument/result types, temporal-to-scalar
 binding, missing members and borrowed-view escape. Keep generated interface
@@ -71,7 +71,7 @@ An unnamed shared interface may accompany named parts.
 
 `native const fn` remains a value helper. Its selected body may request logger
 or clock but cannot declare node lifecycle, output or scheduler ownership.
-C++ and Rust parts may request different services. After selection, requirements
+Selected target parts may request different services. After selection, requirements
 silently propagate through value-helper callers, transitively and without
 duplicates. Observable behaviour remains the shared function's obligation.
 Unavailable services are checking errors.
@@ -79,7 +79,7 @@ Unavailable services are checking errors.
 `out` denotes the declared temporal result, not another output. Constructed
 nodes own their output, scheduler and lifecycle; graph-construction callers do
 not borrow those capabilities. Nested nodes follow engine activation/teardown.
-Native constructors/destructors and Rust `Drop` do not replace start/stop.
+Native construction and destruction do not replace semantic start/stop.
 
 Selected injectables must be available at the call site. A temporal graph or
 node contract cannot use a scalar value-call ABI merely because payload types

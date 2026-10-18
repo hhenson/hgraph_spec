@@ -30,7 +30,7 @@ Status: agreed design. HGL comments use `#` or `/* ... */` (see below).
 | `a * b` | `mul_` | Multiplication. |
 | `a / b` | `div_` | Numeric true division; `i64 / i64` produces `f64`. |
 | `a // b` | `floordiv_` | Floor quotient; `i64 // i64` produces `i64`. |
-| `a % b` | `mod_` | Floor-based modulo, not C++ truncating remainder. |
+| `a % b` | `mod_` | Floor-based modulo. |
 | `-a` | `neg_` | Unary negation is a separate operator. |
 | `!a` | `not_` | Boolean negation. |
 | `a == b` | `eq_` | Equality. |
@@ -143,8 +143,8 @@ values, not just a mathematical analogy:
   identities and reordering. There is no unconditional floating-point
   associativity declaration or implicit “fast math” permission.
 - Floating `min`/`max` cannot inherit total-order laws when NaNs and signed-zero
-  selection are observable. Custom native/Python scalar operators inherit no
-  laws merely because C++ supplies an overloaded operator.
+  selection are observable. Custom scalar operators require their own
+  domain-specific laws; native overloading supplies no automatic guarantee.
 
 Scalar comparisons follow [NaN comparisons](nan-comparisons.md), including
 self-inequality and unordered comparisons when either operand is NaN.
@@ -187,15 +187,11 @@ Constant folding, graph wiring, and node evaluation follow this same rule.
 
 Native scalar lifting wraps a precise function signature as a time-series
 candidate. A graph expression wires that candidate; node code evaluates its
-scalar operation. See the [paired HGL/C++ examples](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/operator-cpp-mappings.md).
+scalar operation.
 
-The executable [operator module](https://github.com/hhenson/hgraph_std/blob/main/hgl/hgraph/operators.hgl) declares
-the 16 arithmetic/comparison/Boolean hooks (including floor division),
-delegates implementations to production native candidates, and materializes
-the supported primitive combinations. The native-call requirements therefore
-belong to those delegating `impl fn` candidates, not the public contracts. Its
-`hgraph.operators.*` identities are parallel migration contracts, not
-replacements for the native system identities.
+Native-call requirements belong to the delegating `impl fn` candidates,
+not the public operator contracts. The `hgraph.operators.*` identities are
+parallel migration contracts, not replacements for system identities.
 The existing `getitem_`/`getattr_` projections are not redeclared as scalar binary
 arithmetic. Broader temporal, collection, and downstream scalar domains remain
 in the native registry until their HGL materializations are covered.

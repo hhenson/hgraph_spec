@@ -191,15 +191,14 @@ current payload: it wires the conversion. A call by itself neither changes
 the function's phase nor creates an extra node inside a `when` handler.
 `str` remains the string type in annotations such as `-> str`.
 
-This is Python-style call spelling, not a blanket agreement on Python's
-formatting, encoding arguments, implicit conversions, or custom `__str__`
-methods. The enum member-name rule is unchanged. Existing reference opacity and
-`signal` payload restrictions also remain: conversion is not an escape from
-them. See the [HGL/C++ mappings](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/enum-cpp-mappings.md#conversion-in-nodes-and-graphs).
+The conversion accepts one value. Additional formatting or encoding arguments,
+implicit conversions and custom conversion hooks are not specified. Enum
+conversion returns the member name. Reference opacity and `signal` payload
+restrictions still apply.
 
 ## Temporal values
 
-The temporal scalars are hgraph's RFC 0002 core types. `date` and `time` are
+The core temporal scalars describe civil values, instants and elapsed time. `date` and `time` are
 civil values, `datetime` is an instant on the UTC timeline, `duration` is
 elapsed time in microseconds with no month or year component, and
 `civil_datetime` is a wall-clock reading that means a moment only once a zone
@@ -1386,7 +1385,7 @@ predicate rules above are unchanged; see
 
 Before executable code generation, the language must define `i64` overflow,
 division by zero, Unicode normalization, and runtime scalar
-error behavior independently of C++ debug or release settings.
+error behavior independently of target build settings.
 For `f64`, comparisons involving NaN are false except `!=`, which is true;
 see [NaN comparisons](../design/nan-comparisons.md). NaN collection-key
 equality remains outside the admitted key profile.

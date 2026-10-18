@@ -27,8 +27,8 @@ schedule clears startup events too. Events at the restart time are delivered
 in that cycle; restarting after a saved deadline is refused. This recovery
 contract covers simulation; wall-clock recovery remains open.
 
-`SingleShotScheduler` is best effort. Its schedules are neither stored nor
-recovered; its normal `start` behaviour is unchanged.
+The one-shot `alarm` is best effort. Its schedules are neither stored nor
+recovered; `start` runs again and may re-arm it after restoration.
 
 A finite schedule preserves its emission count and deadlines across recovery.
 A three-tick schedule restored after one emission has two remaining, at the
@@ -36,13 +36,13 @@ original deadlines. This holds for immediate and delayed first emissions,
 restoration before the first emission and exhausted budgets. A completed
 schedule does not restart when the graph starts again.
 
-The native time-series-delay overloads also retain their progress. A fresh
-`start` input still resets their emission budget and re-bases the grid. Scalar configuration participates in
-checkpoint compatibility, so changing a delay or budget requires a new run.
+Schedules with time-series delay inputs also retain their progress. A fresh
+`start` input resets their emission budget and re-bases the grid. Scalar
+configuration participates in checkpoint compatibility, so changing a delay
+or budget requires a new run.
 
-Generated HGL scheduler sources receive an explicit checkpoint contract only
-when their runtime state consists of endpoints and pending alarms. Sources
-with caches, clock injection, or logger injection remain refused. This does
-not implement general native-resource recovery. Wall-clock recovery remains
-outside the simulation-only component contract; `SingleShotScheduler` retains
-its best-effort exception.
+The scheduler-source checkpoint contract covers only sources whose runtime
+state consists of endpoints and pending alarms. Checkpointing sources with
+caches, clock injection or logger injection remains rejected. General resource
+recovery and wall-clock recovery remain outside this simulation-only contract.
+The one-shot `alarm` retains its best-effort exception.

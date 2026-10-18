@@ -93,7 +93,7 @@
         "WIR-23",
         "WIR-24"
       ],
-      "note": "Settles point 6. Both runtimes register a wider candidate (WV-6); expectations follow this ruling."
+      "note": "Settles point 6; expectations follow this ruling."
     },
     {
       "date": "2026-09-26",
@@ -103,7 +103,7 @@
       "rules": [
         "WIR-22"
       ],
-      "note": "A declared optional parameter may be absent from a candidate. The C++ declaration cleanup and the registration check follow (WV-6)."
+      "note": "A declared optional parameter may be absent from a candidate."
     },
     {
       "date": "2026-09-26",

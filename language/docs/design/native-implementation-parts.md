@@ -47,14 +47,14 @@ native fn filter(value: i64, const limit: i64) -> i64 {
 - `start;` and `stop;` require `when;`. Hooks are unique and are not bodies.
   A value implementation cannot declare lifecycle hooks, `out` or `scheduler`.
 - Node lifecycle follows engine activation and teardown, including nested
-  scopes. Hooks are not C++ constructors/destructors or Rust `Drop`.
+  scopes. Native construction and destruction do not replace these hooks.
 - A call inside `when` creates no implicit child node. Explicit borrowed-TS
   helper syntax and temporal provider execution remain separate ABI work.
 
 ## Acceptance cases
 
-These are compiler contracts, not new tick semantics. The existing matching
-reasoned/Python/C++ helper and clock traces remain the runtime oracle.
+These cases specify binding behavior. Helpers and clock observations must
+preserve their independently specified runtime traces.
 
 | Source/selection | Expected result |
 | --- | --- |
@@ -63,7 +63,7 @@ reasoned/Python/C++ helper and clock traces remain the runtime oracle.
 | Matching `{ when; }` | One temporal node implementation |
 | Matching `{ start; when; stop; }` | Node with start and stop binding requirements |
 | Matching value implementation with logger | One value callable; callers silently acquire logger |
-| Select C++ logger part or Rust empty part | Same signature; selected requirements differ |
+| Select a logger-requiring part or a part without that request | Same signature; selected requirements differ |
 | Reverse part order | Same selected callable and requirements |
 | Changed type, constness or complete canonical result type | No matching declaration; reject |
 | Two implementations or two identical declarations | Reject, never another overload |

@@ -287,20 +287,16 @@ Rules
 Deferred
 --------
 
-- **Serial forms.** hgraph has a binary form and a JSON form, registered per
-  atomic type. They are needed for recording, replay and distribution, and
-  go with those.
+- **Serial forms.** Binary and text forms needed for recording, replay and
+  distribution require separate contracts.
 - **Physical representation of mutable values and copies.** Storage layout,
   physical sharing and copy elision are implementation choices provided
   that mutability, access authority and independent retention obey
   VAL-1, VAL-16 and VAL-17.
-- **Cyclic buffer and queue.** hgraph has both as value kinds. They exist to
-  implement windows (TSW) — they are the changing store behind one, not
-  values a graph passes around — and so are an implementation's concern.
-- **Shared and owned handles** to struct values. hgraph uses a shared handle
-  to avoid copying large values, and an owned one-pointer handle as the way a
-  struct holds a field of its own type. Both are mechanisms: VAL-18 is the
-  concept the second one serves.
+- **Cyclic buffer and queue.** Storage behind windows (TSW) is an
+  implementation concern, distinct from values a graph passes around.
+- **Shared and owned handles** to struct values are representation choices
+  that must preserve independent retention and recursive fields (VAL-17–18).
 - **Values belonging to a language bridge**, such as an arbitrary Python
   object. They are **any**-kind values whose capabilities the bridge
   supplies.

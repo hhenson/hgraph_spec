@@ -133,8 +133,8 @@ answers.
 - a temporal use of a recursive struct has the finite bundle shape of rule 3
   across independent implementations;
 - construction, equality, hashing and a three-deep value round-trip inside
-  the graph in the parity corpus, observed through scalar `eval` results,
-  with identical ticks from direct wiring and generated C++;
+  a graph, observed through scalar `eval` results with identical ticks across
+  independent implementations;
 - a module descriptor carrying a recursive struct is written, validated by
   `hgl check` without loading code, and imported by a second module
   (`examples/struct-imports/`, ADR 0013 slice 8: the edge's mandatory

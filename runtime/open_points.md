@@ -41,7 +41,7 @@ them.
 | 13 | When is an owned bundle valid | TS 1 | Output stays valid after its last field invalidates; a non-peered input does not |
 | 14 | The delta of a whole value | TS 7 | Scalar and bounded structural publication deltas are specified, with ordinary `delta<T>` storage; excluded publication/state transitions remain separate |
 | 15 | Writing the output in start | Injectables 1 | Nothing needs it; the rule to change is INJ-8 |
-| 16 | `lag` on HGL's clock | Injectables 2 | A language extension; lands in hgraph first |
+| 16 | `lag` on HGL's clock | Injectables 2 | A language extension; remains open |
 | 17 | Integer overflow, division, NaN | Scalar 1 | hgraph's arithmetic table is the reference until HGL settles it |
 | 18 | Strings | Scalar 2 | Ordering, indexing, length, normalisation undefined in HGL |
 | 19 | An unknown enum integer | Scalar 3 | Number fallback (hgraph) or rejection (HGL); a runtime receiving one from outside needs one answer |

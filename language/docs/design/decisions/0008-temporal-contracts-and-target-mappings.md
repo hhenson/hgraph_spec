@@ -65,7 +65,7 @@ for adding that qualifier to every parameter. A source configured entirely by
 fixed values can still tick, so an all-`const` signature is not evidence that
 the function is non-temporal.
 
-### HGL example and C++ expectation
+### Value helper example
 
 The following uses `const fn`:
 
@@ -79,12 +79,6 @@ fn scaled(value: f64, const factor: f64) -> f64 {
     }
 }
 ```
-
-The expected C++ shape is a plain value helper called by the containing node's
-evaluation hook, not another node. Illustrative lowering, not current emitter
-output:
-
-[Native example 1](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/decisions/0008-temporal-contracts-and-target-mappings.md#example-1)
 
 For this single-input example, the node's activation/readiness policy supplies
 the handler's modified/valid admission. `scale` neither schedules evaluation

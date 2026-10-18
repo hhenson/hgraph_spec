@@ -404,8 +404,8 @@ variables, not on the enclosing function's return annotation. An outputless
 function can still compose a value-producing conditional and connect its
 result to a sink.
 
-The runnable [conditional-sinks.hgl](../../examples/conditional-sinks.hgl)
-example exercises this wiring model in both compiler backends.
+The [conditional-sinks.hgl](../../examples/conditional-sinks.hgl) example
+illustrates this wiring model.
 
 ## Branch signatures
 
@@ -484,12 +484,8 @@ cannot pass a union of all branch arguments to each branch and silently drop
 those that do not match; it must preserve each branch's argument binding.
 
 These lambdas and their boundary signatures are generated internally. This
-agreement does not require new source-level closure syntax. The initial
-implementation gives both generated branches one consistent explicit temporal
-signature formed from the stable first-use union. Unused branch parameters are
-marked in generated C++, and hgraph's switch boundary binds the same slots to
-both branches. Scalar specialization and the more selective native
-capture-boundary form remain later work.
+agreement does not require new source-level closure syntax. Scalar
+specialization and more selective capture boundaries remain open.
 
 If the conditional exports no result or escaping variable, its generated
 branch signatures are outputless. Preserve their sink wiring through the

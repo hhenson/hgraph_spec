@@ -17,7 +17,7 @@ constructs describes graph composition.
 | --- | --- | --- |
 | Graph, over a supported wiring-time iterable | Scalar values known during wiring. | Composes nodes using those values. |
 | Graph, over a fixed temporal structure | Child time-series connections. | Composes nodes connected to each child. |
-| Graph, over a dynamic map or list, with independent iterations | Per-member time-series connections in a generated child graph. | Describes one child graph per key or index through native mapping. |
+| Graph, over a dynamic map or list, with independent iterations | Per-member time-series connections in a generated child graph. | Describes one child graph per key or index. |
 | Node evaluation | Current child views or scalar elements. | Processes values within that evaluation. |
 
 The iterator must be meaningful in that phase. This agreement does not make
@@ -37,17 +37,15 @@ operator resolution sees their concrete schemas.
 
 Generated `_1`, `_2`, ... field names are not part of this model. They are
 never returned from `keys` or `items` and are not serialized in an HGL module
-descriptor. Runtime-node traversal uses the same source model over hgraph's
-existing `Args<>`/TSL and `Kwargs<>`/TSB input views. Positional `items` converts
-the private one-based field numbering to a zero-based HGL `i64` index.
+descriptor. Runtime-node traversal uses the same source model. Positional
+`items` supplies a zero-based HGL `i64` index.
 
 The agreed enum-type forms `keys(Mode)`, `values(Mode)`, and `elements(Mode)`
 produce immutable fixed-size scalar lists of known constants. A graph loop
 over such a list visits scalar values during wiring, not temporal child
 connections. The list can also be bound, indexed, and reused; unlike a runtime
 collection iterator, it has no evaluation-local borrowed lifetime. This is
-agreed source behavior awaiting enum/compiler support, not an expansion of
-dynamic graph-loop lowering. See [enum enumeration](type-extensions.md#enumerating-members).
+agreed source behavior and does not expand dynamic graph-loop forms. See [enum enumeration](type-extensions.md#enumerating-members).
 
 ## Elements for lists and sets
 
@@ -85,10 +83,6 @@ current payload. No sample value needs to exist during wiring. Source value
 ticks subsequently reach those sinks through their fixed connections; they do
 not cause the graph function to iterate again.
 
-An illustrative native realization is recorded in the audit:
-
-[Native example 1](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/iteration.md#example-1)
-
 An implementation could expand a fixed traversal into one connection per child.
 This preserves index order and does not make the graph body run on later ticks.
 
@@ -123,23 +117,17 @@ fn count_added_elements(symbols: set<str>) -> i64 {
 }
 ```
 
-An illustrative C++ mapping uses the existing public added-member range:
-
-[Native example 2](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/iteration.md#example-2)
-
 Adding two members yields `2`; a later removal-only tick yields `0`; no input
-tick produces no output tick. The loop counts scalar members in the native
-delta range, without imposing set order or wiring a child graph per member.
-The count is evaluation-local, not persistent state or a graph reduction.
-These C++ illustrations can be syntax-checked independently of HGL support;
-they are not new native graph execution tests.
+tick produces no output tick. The loop counts added scalar members without
+imposing set order or wiring a child graph per member. The count is
+evaluation-local, not persistent state or a graph reduction.
 
 ## Dynamic structures: independent bodies first
 
 Maps and non-fixed-size lists do not provide a fixed set of child connections
 that a graph loop can enumerate during wiring. For independent bodies, the
-initial design lowers the loop through the native map machinery: one child
-graph per map key or dynamic-list index, with membership controlling child
+design uses one child graph per map key or dynamic-list index, with membership
+controlling child
 lifetime. The graph function does not traverse current payloads on each tick.
 
 ```hgl
@@ -153,7 +141,7 @@ fn observe(book: map<str, f64>, offset: f64) {
 The generated child accepts the current member's time-series connection and
 the shared `offset` connection. Lexical capture analysis preserves temporal
 input types and REF access boundaries, as with generated conditional branches.
-Here the body is outputless, so the lowering uses a sink map. The runnable
+Here the body is outputless. The
 [dynamic-collection-iteration.hgl](../../examples/dynamic-collection-iteration.hgl)
 example covers `values`/`items` over maps and `elements`/`items` over
 unbounded lists.
@@ -165,7 +153,7 @@ be silently promoted to a time series.
 Map keys determine child identity. Dynamic lists use index identity, not the
 identity of a stored value. Updating an existing member does not recreate its
 child; membership removal or list truncation stops the affected children using
-the native lifetime protocol. Surviving children retain their own node state.
+the nested-graph lifetime rules. Surviving children retain their own node state.
 Ownership, binding and scheduling follow the runtime's
 [nested graph rules](../../../runtime/graph.md).
 

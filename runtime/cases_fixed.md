@@ -8,7 +8,7 @@ Peering belongs to each input: an assembled parent can contain a peered child
 and an assembled child. A whole-output REF can change to child references;
 the input must follow that change without changing its declared shape.
 
-The initial expectations are in [reasoned.json](validation/fixed/reasoned.json).
+The expected snapshots are in [reasoned.json](validation/fixed/reasoned.json).
 Snapshot cases observe value, delta, validity, modification and time through
 the collection levels. Fixed input snapshots include peering; TSD-owned and
 retired subtrees omit it. The four graph-boundary cases record scalar output

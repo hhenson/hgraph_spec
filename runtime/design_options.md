@@ -4,8 +4,7 @@ Status: recorded 2026-09-30 (owner direction). Nothing here is a rule.
 
 A rule says what a test can observe. A design option is a way of meeting the
 rules that an implementation may take or leave, recorded so that the
-reasoning behind hgraph's choices is not lost and so that a new
-implementation can weigh the same trade-offs. Where a rule fixes a minimum
+reasoning and trade-offs can be considered by different implementations. Where a rule fixes a minimum
 (the earliest a removal may be reclaimed, GRF-25), an option describes what
 an implementation may do beyond it. An option never changes an observation;
 if it would, it is a rule and belongs in a chapter.
@@ -17,8 +16,8 @@ Each option names the rules it serves, what it buys, and what it costs.
 Rules served: GRF-25, TS-11, TS-23, TS-32.
 
 The minimum is that a removed thing stays readable to the end of its cycle
-and is reclaimed no earlier than the start of the next. hgraph goes further
-and reclaims lazily: a removed dictionary child, a truncated list tail or a
+and is reclaimed no earlier than the start of the next. One option is lazy
+reclamation: a removed dictionary child, a truncated list tail or a
 window's evicted value is left in place until the collection is next
 touched, and the physical erase happens then. Deltas are read through
 *modified*, so nothing needs sweeping at the cycle boundary (TS chapter, "A
@@ -38,8 +37,8 @@ Rules served: GRF-23, GRF-25, GRF-2.
 
 A switch that replaces its branch stops the old graph and starts a new one.
 The minimum lets the old graph be disposed of any time after the cycle.
-hgraph keeps the old branch until the next switch, and an implementation may
-go further and hold two fully built address spaces, A and B, alternating
+An implementation may retain the old branch until the next switch, or hold
+two fully built address spaces, A and B, alternating
 between them: the outgoing branch stays intact while the incoming one is
 built, and a switch back reuses what is already there.
 
@@ -58,8 +57,8 @@ Rules served: TS-27, TS-3, TS-26.
 
 A non-peered collection input derives its validity, modification and time
 from its children. It may recompute them on every read, or maintain them
-from child events. hgraph maintains them: a child notification updates the
-parent's change time, and a read costs nothing beyond a field.
+from child events. In the latter design, a child notification updates the
+parent's change time, and a read uses the cached observation.
 
 - Buys: reads that do not scan children; an assembled parent with thousands
   of children reads as cheaply as a scalar.
@@ -73,9 +72,8 @@ parent's change time, and a read costs nothing beyond a field.
 Rules served: TS-27.
 
 The alternative to an assembled input is one node that builds the
-collection and owns an output, to which every consumer binds. hgraph folds
-the assembly into the consumer when there is one consumer, and may share a
-node when there are several.
+collection and owns an output, to which every consumer binds. Assembly can
+be folded into one consumer or shared through a node for several consumers.
 
 - Buys, for the fold: no extra node, no extra output, no copy of the
   children's values.
@@ -89,9 +87,8 @@ node when there are several.
 Rules served: NOD-25, INJ-4.
 
 A node that only ever asks to be woken keeps nothing between evaluations.
-hgraph gives such a node no scheduler storage at all: the alarm is a view
-over the graph's schedule, constructed on demand, and the node's memory
-holds no request.
+One option gives the node no scheduler storage: the alarm is a view over
+the graph's schedule, constructed on demand, and the node holds no request.
 
 - Buys: the smallest possible source node; nothing to record or restore.
 - Costs: nothing to cancel, query or tag; a source that later needs any of
@@ -102,9 +99,8 @@ holds no request.
 Rules served: GRF-10, GRF-24.
 
 A child graph's boundary inputs are bound directly to the outputs the
-owner's inputs are bound to, with nothing in between. hgraph compiles the
-child against placeholders for those inputs and binds them at instantiation,
-rather than inserting a forwarding node.
+owner's inputs are bound to, with nothing in between. One option uses
+placeholders bound at child instantiation, rather than forwarding nodes.
 
 - Buys: a child reads the real producer; a tick reaches it with no extra hop
   and no copy.
@@ -117,9 +113,8 @@ rather than inserting a forwarding node.
 Rules served: TS-23, GRF-25.
 
 Where storage is reused, a saved reference to something removed must not
-find the newcomer. hgraph guards reuse with an invalidation subscription;
-the Rust store stamps each slot with a generation that a reference carries
-and checks.
+find the newcomer. One option stamps each slot with a generation carried and
+checked by its references.
 
 - Buys: a reference check is a comparison; reuse is free.
 - Costs: a generation is one more word per slot and per reference, and it
