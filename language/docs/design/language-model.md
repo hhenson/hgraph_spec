@@ -716,11 +716,9 @@ for the reconstruction contract.
 `inject` is a comma-separated function-level declaration of approved runtime
 capabilities. It does not add caller-visible parameters. `out` is a special
 injectable whose type comes from the function result and permits the runtime
-body to inspect or incrementally update its output. Other injectables, such as
-`logger`, `clock`, `scheduler` and `alarm`, map to their hgraph selector
-contracts (`LoggerView`, `EvaluationClockView`, `NodeScheduler`,
-`SingleShotScheduler`; ADR 0010 fixes the clock property and scheduler function
-surfaces, [ADR 0015](decisions/0015-pull-sources.md) the alarm's).
+body to inspect or incrementally update its output. Other injectables provide
+logging, clock observations and scheduling. ADR 0010 specifies the clock and
+scheduler surfaces; [ADR 0015](decisions/0015-pull-sources.md) specifies `alarm`.
 
 `start` and `stop` execute once at node startup and teardown. State storage and
 injected capabilities are runtime-owned; `stop` expresses semantic
