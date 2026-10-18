@@ -115,4 +115,4 @@ node, sink, source, or service. That implementation category is not part of
 ordinary call syntax.
 
 External threads, callbacks, queues, I/O, resource ownership, and push
-adaptors remain C++ extension responsibilities.
+adaptors remain native extension responsibilities.

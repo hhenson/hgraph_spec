@@ -16,7 +16,7 @@ are agreed, 2026-09-06. Members are
 constant switch case values. Duplicate resolved switch cases are rejected;
 covering all declared members establishes exhaustiveness, while partial
 switches remain permitted with the existing no-match failure. String conversion
-uses the agreed Python-style `str(value)` spelling. Remaining conversion details and native
+uses `str(value)`. Remaining conversion details and native
 mapping are still open.
 
 The agreed declaration form is:
@@ -62,13 +62,12 @@ enum Direction {
 }
 ```
 
-The assigned numbers are `-1`, `0`, and `1`. The
-[range and overflow examples](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/enum-cpp-mappings.md#signed-range-and-overflow)
-also cover both endpoints, a reset after the maximum, and rejected values.
+The assigned numbers are `-1`, `0`, and `1`. Range checks cover both endpoints,
+a reset after the maximum, and rejected values.
 The frontend must admit the complete signed minimum literal without first
 requiring its positive decimal magnitude to fit in `i64`. Validate the
-resolved signed number and each required automatic increment before native
-emission; do not inherit C++ literal or overflow behavior accidentally.
+resolved signed number and each required automatic increment against the
+source number domain.
 
 This fixes the source enum number domain, not the physical native ABI or a
 new backing-type annotation. It does not settle overflow for unrelated runtime
@@ -77,24 +76,20 @@ integer arithmetic or native enum import mapping.
 Stringification returns the declared member name without a type prefix or
 numeric value: `Mode::first` becomes `"first"`, `Mode::second` becomes
 `"second"`, and `Mode::third` becomes `"third"`. Rejecting numeric aliases keeps
-that name unambiguous within an enum. The source call uses Python-style
-`str(value)`:
+that name unambiguous within an enum. The source call is `str(value)`:
 
 ```hgl
 const first_mode_name: str = str(Mode::first)
 ```
 
-This produces the constant string `"first"`. The spelling follows Python;
-it does not change the agreed enum representation to Python's qualified enum
-display or require Python execution. `str` remains the string type name in
-type positions and is the conversion operation in this expression position.
+This produces the constant string `"first"`. `str` is the string type name in
+type positions and the conversion operation in expression position.
 See [string conversion](../user-guide/types-and-expressions.md#string-conversion)
 for constant, node, and temporal graph use.
 
-[Numbered source examples and C++ mappings](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/enum-cpp-mappings.md)
-show explicit values, automatic values starting at zero, stringification,
-and duplicate-number errors. The positive and intentionally invalid HGL
-declarations are also in the [standard-library design corpus](https://github.com/hhenson/hgraph/blob/main/language/stdlib/README.md#enum-values).
+The [standard-library design corpus](../../stdlib/examples/enum-values.hgl)
+covers explicit and automatic values and member-name conversion; its invalid
+fixtures cover duplicate numbers and out-of-range values.
 
 Enums should let source give names to the values used by a selector and its
 cases, rather than relying on unexplained integers or strings. Their members
@@ -150,10 +145,7 @@ selector, not an error while converting that selector.
 
 This settles integer/string conversion through `Mode(...)`, not a general
 type-constructor API, additional argument forms, or the handling of an
-already-typed native enum value arriving through an import boundary. The
-[paired HGL/C++ conversion examples](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/enum-cpp-mappings.md#checked-conversion-into-an-enum)
-include successful lookups and rejected constants. Compiler support remains
-separate work.
+already-typed native enum value arriving through an import boundary.
 
 ### Enumerating members
 
@@ -186,7 +178,7 @@ The native constant-storage representation remains an implementation choice.
 All three views iterate in declaration order, not numeric or alphabetical
 order. Explicit numbering does not reorder members. The views remain aligned:
 each position exposes the name, assigned number, or typed instance of the same
-declared member. The [out-of-order numbering example](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/enum-cpp-mappings.md#declaration-order-enumeration)
+declared member. The [out-of-order numbering example](../../stdlib/examples/enum-enumeration-order.hgl)
 makes this distinction explicit.
 
 `elements` is also the agreed element-iteration spelling for lists and sets;
@@ -195,7 +187,6 @@ not add `elements` for maps or bundles. Enum-type calls return the constant
 lists above; collection-value calls retain their own phase and borrowed-view
 rules. This agreement covers the one-argument enum-type forms and does not
 introduce a new dynamic `for` lowering or change temporal collection traversal.
-Compiler support for enum enumeration remains separate work.
 
 ### Switch checks
 
@@ -207,8 +198,7 @@ permitted, with a supplied default handling unmatched members and no-match
 failure otherwise. Generated dispatch retains that failure path even for
 exhaustive coverage. These rules apply equally to node and graph forms and
 do not replace definite-assignment checks on successful branches. See
-[switch coverage](switch.md#duplicate-cases-and-enum-coverage) and the
-[paired HGL/C++ examples](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/enum-switch-cpp-mappings.md).
+[switch coverage](switch.md#duplicate-cases-and-enum-coverage).
 
 ### Remaining enum decisions
 

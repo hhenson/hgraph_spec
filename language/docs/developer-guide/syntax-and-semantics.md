@@ -661,12 +661,8 @@ time in a named zone with no date and hence no offset, because the offset of
 TZDB name; TZDB links are not canonicalized, so `US/Eastern` and
 `America/New_York` are two distinct values.
 
-`zoned_time` is not part of RFC 0002. It is the language's one hgraph-side
-addition to the temporal types: a core scalar (`CivilTime` plus `ZoneId`,
-registered name `zoned_time`) with the resolution operations listed below, a
-JSON form of the time followed by the bracketed zone, and a Python wrapper.
-It is tracked with the other hgraph-side requirements in the roadmap until an
-RFC promotes it.
+`zoned_time` is a core scalar with the resolution operations listed below.
+Its text encoding combines the time with a bracketed zone name.
 
 The remaining RFC 0002 types, the calendar period and the ranges, are library
 scalars rather than core vocabulary. They stay reachable under their
@@ -743,7 +739,7 @@ occur when the value is constructed:
   diagnostic); the
   same shape with no offset is a `civil_datetime`, a different type, so
   `const t: datetime = @2026-09-03T09:30` is a `type` diagnostic rather than
-  a value silently read as UTC, and Python's naive-means-UTC convention never
+  a value silently read as UTC, and an implicit naive-means-UTC convention never
   enters the language;
 - a `zoned_datetime` literal carries both an offset and a zone; the offset
   fixes the instant, and the zone is retained with it, so a repeated local
@@ -835,7 +831,7 @@ time-zone provider and therefore never folds at compile time.
 | --- | --- | --- |
 | `datetime + duration`, `duration + datetime`, `datetime - duration` | `datetime` | checked overflow |
 | `datetime - datetime` | `duration` | checked overflow |
-| `date + duration`, `date - duration` | `date` | uses the duration's floor-based whole-day component, as Python `date` arithmetic and hgraph's operators do: `d + 36h` is `d + 1d`, `d + -1us` is `d - 1d`, and subtraction removes that day count, so `d - 1us` is `d` and `d - -36h` is `d + 2d` |
+| `date + duration`, `date - duration` | `date` | uses the duration's floor-based whole-day component, `d + 36h` is `d + 1d`, `d + -1us` is `d - 1d`, and subtraction removes that day count, so `d - 1us` is `d` and `d - -36h` is `d + 2d` |
 | `date - date` | `duration` | a whole number of days |
 | `date + time` | `civil_datetime` | combines the fields |
 | `civil_datetime + duration`, `civil_datetime - duration` | `civil_datetime` | checked overflow, no zone involved |
@@ -865,19 +861,19 @@ and a permitted spelling is easy to add later and hard to withdraw. A
 selects a duration window, as the type section describes.
 
 Overflow in a constant expression is a compile-time diagnostic. Overflow at
-runtime raises through hgraph's checked temporal arithmetic; the language's
-runtime scalar error behaviour is an open question shared with the numeric
+runtime arithmetic is checked; the language's runtime scalar error behaviour
+is an open question shared with the numeric
 types.
 
 Field accessors (`year`, `month`, `day`, `weekday`, `hour`, `minute`,
 `second`, `microsecond`, `days`, `seconds`, `total_seconds`), `abs`, the
 rounding functions (`temporal_floor`, `temporal_ceil`, `temporal_round`), and
 the zone operations are ordinary standard-library functions resolved like any
-other call, not syntax. The zone operations are hgraph's:
+other call, not syntax. The zone operations are:
 `at_zone(datetime, timezone) -> zoned_datetime`,
 `resolve(civil_datetime, timezone, ambiguous:, nonexistent:) -> zoned_datetime`
-(hgraph's `resolve_civil`, with the same policy enumerations), and, as a
-roadmap ask, `resolve(date, zoned_time, ambiguous:, nonexistent:)`,
+with explicit ambiguity and nonexistence policies; the proposed overload
+`resolve(date, zoned_time, ambiguous:, nonexistent:)`;
 `convert_zone(zoned_datetime, timezone)`, `to_instant(zoned_datetime)`,
 `to_civil(zoned_datetime)`, `same_instant`, and the accessors `zone_of`,
 `offset_of` (a `duration`), `date_of`, and `time_of`. Calendar-period
@@ -1470,7 +1466,7 @@ See [Mixed results](../design/control-flow.md#expression-results-and-escaping-as
 The agreed [explicit switch design](../design/switch.md) extends dispatch to
 both function phases without making switch a runtime-classification trigger.
 Validate the selector's phase and key type first. Node-style dispatch must
-lower to native C++ control flow; temporal graph dispatch uses native `switch_`
+remain local to the node's evaluation; temporal graph dispatch selects a child
 with the same capture, result-schema, REF adaptation, and continuation analysis
 as temporal `if`, applied to every case and the optional default. A wiring-time
 selector chooses composition directly.
@@ -1554,12 +1550,12 @@ metadata, including enum member names, and the existing validity, reference, and
 `signal` restrictions. Conversion itself does not classify a function as a
 runtime node. See [String conversion](../user-guide/types-and-expressions.md#string-conversion).
 
-This agreement covers the one-value Python-style spelling, not Python's
-additional `str` forms or an unrestricted guarantee of Python formatting.
+This agreement covers one-value conversion. Additional argument forms and
+formatting policies remain unspecified.
 The enum result remains its member name. In particular, do not assume native
 `str_` and every native `convert`-to-string overload have identical formatting
 for all scalar types; bind the source contract to the appropriate native
-operation. No compiler or runtime implementation is changed by this record.
+operation.
 
 `bytes` is reserved as a scalar type and admitted as the constructor call head
 `bytes()` or `bytes(ordinary_i64_list)`. Check zero or one positional argument
@@ -1895,8 +1891,7 @@ invalidation across multiple handlers sharing an output remains open; the
 ordered-handler policy below does not settle that question. See
 [authoring guidance](../user-guide/functions.md#invalidation-and-notification-subscriptions).
 
-The compiler may consume these calls while deriving node input policies, so
-they need not remain as runtime calls in generated C++. `valid(value)` tests
+These selectors define node input policies. `valid(value)` tests
 the top-level endpoint even when the endpoint is structural or a collection;
 `all_valid(value)` additionally checks each immediate live child of a TSD,
 TSB or TSL for `valid`, not for its own `all_valid`. Removed dictionary keys

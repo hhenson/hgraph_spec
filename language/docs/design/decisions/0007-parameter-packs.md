@@ -43,13 +43,11 @@ call is not resolvable.
 
 Candidate ordering remains owned by hgraph's operator resolver. The intended
 specificity is fixed arity before a homogeneous pack before a heterogeneous
-positional pack. HGL emits `In`/`VarIn`/`VarKwIn` selectors and does not
-reimplement native overload ranking.
+positional pack. Pack syntax does not introduce a separate ranking policy.
 
 ## Source views
 
-The positional heterogeneous view behaves as `tuple<...>` even if generated
-C++ uses a private bundle representation:
+The positional heterogeneous view behaves as `tuple<...>`:
 
 ```hgl
 for value in elements(values) { ... }
@@ -71,33 +69,25 @@ heterogeneous member retains its concrete schema.
 
 ## Runtime-node lowering
 
-Runtime packs use hgraph's existing structural node inputs; HGL does not define
-a second aggregate ABI:
+Runtime packs preserve their source views:
 
-| HGL parameter | Generated C++ node input | HGL source view |
-| --- | --- | --- |
-| `values: ...T` | `In<"values", Args<S>>` where `S` is the temporal schema for `T` | fixed homogeneous list |
-| `values: ...Ts` | `In<"values", Kwargs<...>>` with private `_1`, `_2`, ... fields | heterogeneous tuple |
-| `values: ...{Fields}` | `In<"values", Kwargs<...>>` with the supplied field names | heterogeneous bundle |
+| HGL parameter | HGL source view |
+| --- | --- |
+| `values: ...T` | fixed homogeneous list |
+| `values: ...Ts` | heterogeneous tuple |
+| `values: ...{Fields}` | heterogeneous bundle |
 
-`Args` is resolved by hgraph as a fixed `TSL` and `Kwargs` as an unnamed TSB.
-The existing `TSLInputView` and `TSBInputView` own runtime traversal, child
-validity and modification metadata, and evaluation-local borrowing. The HGL
-compiler is responsible only for lowering to those selectors and preserving the
-source abstraction. In particular, positional `items(values)` returns a
-zero-based `i64` index even though its private C++ field is numbered from `_1`.
+Traversal preserves child validity, modification metadata and evaluation-local
+borrowing. Positional `items(values)` returns a zero-based `i64` index.
 
 A runtime function currently accepts one aggregate pack input. A composition
 function may combine positional and named packs, but spelling both on the same
-runtime function is diagnosed before C++ emission until the native static-node
-ABI can bind two independent aggregate inputs.
+runtime function is rejected. Extending that admission remains open.
 
 An empty runtime pack whose schema is otherwise resolved must be constructed
 with that resolved aggregate schema; it cannot infer its schema from children.
-This requires the core runtime to represent a fixed-empty `TSL` separately from
-an unbounded `TSL`: the unbounded extent uses hgraph's original `-1` sentinel,
-leaving zero as an ordinary fixed extent. Runtime-node pack lowering is
-available because the core contract preserves this distinction.
+A fixed-empty list is distinct from an unbounded list; zero is an ordinary
+fixed extent.
 
 ## Cardinality
 
@@ -155,8 +145,8 @@ compile-time reflection:
 [Native example 1](https://github.com/hhenson/hgraph_spec_audit/blob/main/examples/documentation/language/docs/design/decisions/0007-parameter-packs.md#example-1)
 
 `schema` is not a materialized HGL value. It is a native-parameter-only,
-immutable borrowed handle which lowers directly to each existing C++ child
-endpoint's `TSValueTypeMetaData`. The view preserves the pack's tuple or bundle
+immutable borrowed handle to a child's type metadata. The view preserves the
+pack's tuple or bundle
 shape: positional views support `elements` and `items`; named views support
 `keys`, `values`, and `items`. Schema views do not accept value predicates.
 Neither a view nor one of its handles may be stored, returned, captured, used
