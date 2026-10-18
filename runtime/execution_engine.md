@@ -360,8 +360,7 @@ them it includes, and none of them changes a required observation.
   engine's obligations: never backwards, and never past work that is due.
 - **Observers.** Before-and-after notifications for graph and node start,
   evaluation and stop, one set per run, seeing nested graphs too. Tracing,
-  profiling and diagnostics are built on them. Evaluation and stop pair every
-  *before* with an *after* even on failure; start does not.
+  profiling and diagnostics are built on them.
 - **One-shot cycle callbacks.** Work registered to run once, just before or
   just after the current cycle; drained until none remain.
 - **Run logger.** Which logger a run uses, and that nested graphs share it.
@@ -390,7 +389,7 @@ Points to settle
      run still started; mandatory cleanup follows when inspection ends.
    - It exists for **inspection**. Stop hooks close resources and unbind
      edges; after them, the state that explains the failure is gone. With
-     *false*, a debugger, a test or an exception handler can look at live
+     *report, then stop*, a debugger, a test or an exception handler can look at live
      values and the schedule as they were when the node failed.
    - What it **cannot** change: the stop is mandatory in both cases (ENG-10
      holds), no further cycle runs, and no tick differs. A graph cannot
