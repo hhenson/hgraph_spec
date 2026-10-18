@@ -18,6 +18,7 @@ reasoned traces and accepted decisions. No Python, C++ or Rust code lives here.
 - [Live map key connections](language/docs/design/map-key-connections.md)
 - [Runtime model](runtime/overview.md) and [conformance method](runtime/conformance.md)
 - [HGL compiler conformance](compiler/conformance.md)
+- [Base layer: kernel module and conformance pack](language/docs/design/base-layer.md) (proposed)
 - [Wiring](wiring/wiring.md): how every front end describes a graph
 - [Library contracts](library/README.md): what standard library operators publish
 - [Historical reference](historical/README.md)
