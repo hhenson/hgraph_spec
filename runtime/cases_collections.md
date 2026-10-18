@@ -1,8 +1,7 @@
 # Collection cases
 
-Status: mixed. QUOTE-HISTORY, MEMBERSHIP-INDEPENDENT and same-cycle restoration
-have [executed evidence and variations](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation.md). Other cases remain
-proposed unless separately identified.
+Status: cases other than QUOTE-HISTORY, MEMBERSHIP-INDEPENDENT and
+SAME-CYCLE-RESTORE remain proposed unless separately identified.
 
 ## VALIDITY-IMMEDIATE — TS-9
 
@@ -65,8 +64,7 @@ the ask's own time, repeated removal reads, and a fresh ask at 60.
 Insert a key with an invalid child: the key is added. Publishing or invalidating
 that child later neither adds nor removes the key. Removing the key does.
 Replay needs both membership changes and published-value deltas (TS-5).
-[Evidence](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/evidence.md) names the C++ surfaces. This case extends beyond
-QUOTE-HISTORY.
+This case extends beyond QUOTE-HISTORY.
 
 ## SAME-CYCLE-RESTORE — TS-11
 
@@ -74,4 +72,4 @@ Publish X=7 at 0. At 1 remove X, inspect the removed child twice, then restore
 X without publishing a value. Both removed reads give 7 with child time 0;
 restoration returns that value and time. The final added and removed sets are
 empty. The dictionary has still ticked. Remove at 2 and insert X=9 at 3:
-this is a new child. See the `restore` input and observations in the evidence.
+this is a new child.

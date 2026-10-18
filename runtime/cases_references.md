@@ -1,6 +1,6 @@
 # Reference cases
 
-Status: validated expectations with recorded variations; see [results](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation.md).
+Status: expected reference observations.
 
 Times below are cycles from `MIN_ST`. `—` means no publication, not an empty
 reference. Observe after producers and routing have evaluated. A clock input
@@ -50,10 +50,6 @@ At 3 the withdrawal delta remains readable despite invalidity. The input has
 no current children; removed children remain inspectable for that cycle.
 Do not gate a withdrawal delta on `valid`.
 
-These expectations are accepted observation by observation: Python supports
-the complete removal delta; C++ supports invalidity on withdrawal. Neither
-implementation's complete withdrawal row currently conforms.
-
 ## REF-EXPIRES — TS-11 and TS-23
 
 Publish X=7 at 0. Save a reference to X's child in a separate node. Remove X at
@@ -64,9 +60,6 @@ A data input following the saved reference sees 7 through cycle 2, then nil
 from 3 onwards. It never sees 9. The removed-child view is readable at 2 and
 absent at 3. Keeping the reference does not extend the endpoint's lifetime.
 
-The expiry rule was confirmed by the user on 2026-09-21. Python raises when
-the expired reference is used; C++ retains 7 at 3 and expires it at 4.
-Both are variations, not alternative permitted results.
+The expiry rule was confirmed by the user on 2026-09-21.
 
-The saved-reference case does not prove allocator slot reuse or generation
-wrap handling. Those need storage tests when the Rust realization exists.
+Allocator slot reuse and generation wrap handling are outside this case's scope.
