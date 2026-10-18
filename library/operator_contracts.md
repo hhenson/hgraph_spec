@@ -3,12 +3,9 @@ Library operator contracts
 
 Status: draft, 2026-09-24; moved from the runtime chapters to the library on
 2026-09-30 (owner), provisionally: the standard library's specification is
-its own project ([README](README.md)). Derived while triaging the open
-parity issues; covers the operator families those issues exercised. The
-rest of the library remains open (OPEN-10, OPEN-11 in
+its own project ([README](README.md)). This chapter covers the
+operator families below. The rest of the library remains open (OPEN-10, OPEN-11 in
 [Beyond the runtime core](../runtime/boundaries.md)).
-[Parity validation](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/validation/parity/README.md) records each derivation
-against the Python 0.5.41 and C++ observations.
 
 "Operator" in this document means a **library operator**: one of the
 operators the standard library provides, such as `union` or `format_`. A
@@ -34,14 +31,13 @@ A contract may name inputs that the operator reads while they are invalid.
 It must then say what an invalid input contributes. `union` names every
 operand: the empty set is its identity and gathering is its purpose, so an
 invalid operand contributes nothing. `format_` with `__strict__` false
-names its arguments. `mean` over a dictionary names its whole input: Python
-0.5.41 defines it as `default(div_(sum_, len_), NaN)`, so a dictionary that
-has never ticked has a NaN mean. Its `sum_`, `min_` and `max_` name nothing
-and publish nothing.
+names its arguments. `mean` over a dictionary names its whole input and
+produces NaN for a dictionary that has never ticked. `sum_`, `min_` and
+`max_` name no invalid input and publish nothing.
 
 A non-peered fixed collection is valid while any child is valid. An aggregate
 over a fixed list is therefore admitted once one element is valid, and reads
-the valid elements only (the accepted valid-subset reduce, issue #95).
+the valid elements only (the accepted valid-subset reduction).
 
 An operator never changes what it reads. Reading a view that an output
 derives from itself, such as a key set's emptiness, must not make that
@@ -50,7 +46,7 @@ output, or its owner, tick (NOD-5, NOD-21, TS-21).
 An operator that **derives** a value may elide an unchanged recomputation.
 An operator that **forwards** a value, routing one input's ticks to its
 output, publishes every tick it forwards, equal or not: the tick is the news
-(ruling 2026-07-17, enforced 2026-09-15; `roadmap.rst`).
+(ruling 2026-07-17).
 
 
 Set operators
@@ -69,9 +65,7 @@ spellings `|`, `&`, `-` and `^`, act on TSS values and on TSD key sets.
 The first admitted evaluation publishes the result even when it is empty:
 an admitted result is a value, and valid does not mean non-empty (TS-1;
 owner ruling 2026-09-24). After that a change that nets to nothing does not
-tick. Both runtimes already do this for sets. Python 0.5.41 does it for
-`difference` and `intersection` of dictionaries, but not for their `^` and
-`|`, which it builds on `map_`.
+tick.
 
 A member entering the result, or a TSD child whose forwarding operand changes
 because another operand lost the key, takes the new operand's current value.
@@ -79,12 +73,8 @@ That is a derived change: an equal value is not published again, unless
 the new operand's child also ticked in this cycle, which is forwarded.
 
 `union`, `intersection` and `symmetric_difference` fold pairwise over any
-number of operands; `difference` takes exactly two. Python 0.5.41 cannot
-fold intersection or symmetric difference: it has no zero for the fold. It
-rejects three TSS operands at wiring, and three TSD operands to symmetric
-difference never publish. The fold is an accepted superset
-(`parity_matrix.rst`). Over dictionaries a fold whose intermediate result is
-empty also depends on point to settle 1.
+number of operands; `difference` takes exactly two. An empty intermediate
+dictionary result follows the first-admitted-result rule (OP-5).
 
 
 Formatting and sinks
@@ -137,24 +127,19 @@ This contract does not specify the separate `disjoint=True` optimization.
 Text
 ----
 
-`str_` gives Python's `str` of the value. A string at the top level is its
-own text. Inside a container a string is written as Python's `repr` writes
-it: quoted as Python chooses, with the backslash, quote and every character
-that Python's `str.isprintable` rejects escaped. `\t`, `\n` and `\r` are
-named; other characters below U+0100 are `\xNN`; others below U+10000 are
-`\uNNNN`, and the rest `\UNNNNNNNN`. A map or a set is unordered, so its
-text lists its members in no specified order: Python writes insertion order,
-the C++ runtime storage order (ruling 2026-09-24). Printability follows the Unicode version
-the implementation records; a character whose category differs
-between Unicode versions may render differently under another Python.
+String conversion follows the [HGL conversion contract](../language/docs/user-guide/types-and-expressions.md#string-conversion).
+A top-level string is its own text. Members of a set or map appear in no
+specified order.
+
+`repr` is not part of the standard; implementations may provide it as an
+extension. Container string quoting and escaping rules remain open.
 
 
 Numbers
 -------
 
 `ln` of zero is negative infinity and of a negative number is NaN: the IEEE
-results. Python 0.5.41 raises `ValueError` from `math.log`. Accepted
-deviation (`parity_matrix.rst`).
+results.
 
 
 Partitioned dictionaries
@@ -173,14 +158,7 @@ in one cycle is unspecified.
   keys removed (TS-19); an input bound through one of the references unbinds
   (TS-15), and a dictionary input reports the key removed.
 - Removing a partition costs the keys that partition owns, never the size of
-  the output (guardrail iv, `CLAUDE.md`).
-
-Python 0.5.41 keeps a removed partition's keys. Each holds a reference that
-designates nothing from the next engine cycle (TS-23), so a consumer bound
-through it unbinds without a tick (TS-15) while the key stays in the
-dictionary; a nested dictionary child reports its elements removed instead of
-its key. Accepted deviation (`parity_matrix.rst`).
-
+  the output.
 
 Recording
 ---------
@@ -236,9 +214,9 @@ Rules
   over any number of operands; `difference` takes exactly two.
 - **OP-8** `format_` with `__strict__` true, and `print_`, `log_` and the
   formatting `assert_`, produce nothing until every argument is valid.
-- **OP-9** `str_` of a container renders each string as Python's `repr`,
-  escaping every character `str.isprintable` rejects. The members of a map or
-  a set appear in no specified order.
+- **OP-9** The members of a map or a set appear in no specified order in text.
+  Container string quoting and escaping remain open. `repr` is an
+  implementation-specific extension, outside the standard.
 - **OP-10** `ln` of a non-positive float is `-inf` for zero and NaN below zero.
 - **OP-11** A recording exists from its recording node's start; one that
   recorded no tick is empty, not absent.
@@ -272,16 +250,14 @@ Points to settle
    validity means having a value, and an admitted result has one; the four
    set operators should not differ by how they are built; and without it
    `symmetric_difference(a, b, c)` never publishes when `a` and `b` cancel,
-   although its value is well defined (#978). Both runtimes already
-   publish the empty first result for sets.
+   although its value is well defined.
 2. **The order of a map's text.** Settled 2026-09-24 by the owner: a map is
    an unordered map and provides no ordering guarantee, so the order of its
-   text is unspecified (Scalar types, Text; OP-9). Python writes insertion
-   order and the C++ runtime storage order; both conform. A set has no order
-   either (VAL-8) and is treated the same way.
-3. **The emptiness of an invalid set.** `is_empty` of a never-ticked set is
-   `True` in both runtimes. OP-1 would publish nothing. Both runtimes agree,
-   no parity issue depends on it, and nothing here changes it.
+   text is unspecified (Scalar types, Text; OP-9). A set has no order either
+   (VAL-8) and is treated the same way.
+3. **The emptiness of an invalid set.** Whether `is_empty` should return
+   `True` for an invalid set as an explicit exception, or follow OP-1, remains
+   for separate discussion.
 
 
 Implementation source references are recorded in the
