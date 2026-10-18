@@ -3,9 +3,9 @@
 Status: accepted contract, 2026-10-10. These are expected traces for OP-13,
 not implementation algorithms.
 
-Each table starts a fresh ordinary dictionary merge. Inputs A, B, C and D
-are ordered left to right and hold `TSD[str, TS[int]]`. Times are consecutive
-engine cycles. Unless labelled as state observations, input and output cells are **deltas**,
+Unless stated otherwise, each table starts a fresh ordinary dictionary merge.
+Inputs A, B, C and D are ordered left to right and hold `TSD[str, TS[int]]`.
+Times are consecutive engine cycles. Unless labelled as state observations, input and output cells are **deltas**,
 not complete dictionary values: `k:1` publishes the value 1 at key k, `k:R` removes k, and `none`
 means no publication. Observe after producers and merge have evaluated.
 
@@ -90,6 +90,25 @@ At 0 no source has supplied a value. At 1 each key is selected separately,
 so both publications reach the output. At 2 and 3 no input still holds the
 removed key; the output removes it. Removing the last output key is a
 removal delta, not silence and not an empty-dictionary publication.
+
+## MERGE-ALL-INVALID: OP-1, OP-13
+
+Merge two scalar streams A and B. Observe output validity as well as value;
+invalidation is a notification, not a value tick.
+
+| t | A event | B event | Output state after evaluation |
+|---|---|---|---|
+| 0 | Never valid | Never valid | Invalid |
+| 1 | Publish 1 | Publish 2 | Valid, value 1 (leftmost tie) |
+| 2 | Invalidate | None | Valid, value 2 (fallback) |
+| 3 | None | Invalidate | Invalid; value 2 is not retained |
+| 4 | Publish 3 | None | Valid, value 3 |
+
+For dictionary merge, start with A holding live `k:1` and B holding the same
+live key with an invalid child. Invalidating A's child leaves both source
+children invalid: output `k` becomes invalid, while its membership and the
+parent's validity remain unchanged. Publishing `k:2` on B validates the output
+child again without adding the key again.
 
 ## MERGE-INVALID-CHILD: TS-19, OP-13
 
