@@ -369,8 +369,8 @@ Beside the runtime, and not part of it:
 
 | Specification | File | State |
 |---|---|---|
-| Wiring | [../wiring/wiring.md](../wiring/wiring.md) | first draft; type resolution validated |
-| Library operator contracts | [../library/operator_contracts.md](../library/operator_contracts.md) | draft, parity-derived families; a provisional home |
+| Wiring | [../wiring/wiring.md](../wiring/wiring.md) | draft |
+| Library operator contracts | [../library/operator_contracts.md](../library/operator_contracts.md) | draft; a provisional home |
 
 Cases and supporting notes:
 

@@ -148,7 +148,7 @@ same contract as `value * 2` without requiring addition. `hgl check` evaluates
 requirements it can decide while checking and verifies that the required
 operator is available. Cases needing native
 nominal-struct metadata, arbitrary constant predicates, or source candidate
-ranking remain explicitly deferred or fail closed as described in the roadmap.
+ranking remain deferred or fail closed under the source requirements.
 Requirements are never tested per tick.
 
 ## Anonymous functions
