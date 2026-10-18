@@ -114,9 +114,8 @@ placeholders bound at child instantiation, rather than forwarding nodes.
 Rules served: TS-23, GRF-25.
 
 Where storage is reused, a saved reference to something removed must not
-find the newcomer. An implementation can guard reuse with invalidation
-subscriptions or stamp each slot with a generation carried and checked by
-its references.
+find the newcomer. One option stamps each slot with a generation carried and
+checked by its references.
 
 - Buys: a reference check is a comparison; reuse is free.
 - Costs: a generation is one more word per slot and per reference, and it
