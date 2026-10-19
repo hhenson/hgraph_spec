@@ -41,8 +41,10 @@ there is no separate kernel module.
 `std` may contribute additional implementation candidates for operators declared
 in `core`. Those candidates implement the same nominal operator, preserving its
 `core` identity and applicable contract. They may extend supported domains or
-provide optimizations without redeclaring the operator in `std`.
-Candidate selection follows the ordinary resolution rules.
+provide more-specific implementations without redeclaring the operator in
+`std`. Candidate selection follows the ordinary resolution rules (WIR-16):
+`std` candidates receive no override priority, and equally ranked applicable
+candidates remain ambiguous.
 
 ## Fixed symbol-to-name mapping
 

@@ -865,8 +865,11 @@ runtime arithmetic is checked; the language's runtime scalar error behaviour
 is an open question shared with the numeric
 types.
 
+`abs` names the `core.abs` operator and follows ordinary operator-call
+resolution.
+
 Field accessors (`year`, `month`, `day`, `weekday`, `hour`, `minute`,
-`second`, `microsecond`, `days`, `seconds`, `total_seconds`), `abs`, the
+`second`, `microsecond`, `days`, `seconds`, `total_seconds`), the
 rounding functions (`temporal_floor`, `temporal_ceil`, `temporal_round`), and
 the zone operations are ordinary standard-library functions resolved like any
 other call, not syntax. The zone operations are:
