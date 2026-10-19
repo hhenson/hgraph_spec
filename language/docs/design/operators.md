@@ -190,11 +190,8 @@ candidate. A graph expression wires that candidate; node code evaluates its
 scalar operation.
 
 Native-call requirements belong to the delegating `impl fn` candidates,
-not the public operator contracts. The `hgraph.operators.*` identities are
-parallel migration contracts, not replacements for system identities.
-The existing `getitem_`/`getattr_` projections are not redeclared as scalar binary
-arithmetic. Broader temporal, collection, and downstream scalar domains remain
-in the native registry until their HGL materializations are covered.
+not the public operator contracts. The existing `getitem_`/`getattr_` projections
+are not redeclared as scalar binary arithmetic.
 
 ## Native scalar requirements
 
