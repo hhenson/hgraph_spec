@@ -133,8 +133,8 @@ arguments. Being native does not determine the role.
 The call context first constrains candidate eligibility. Selection must retain
 the operator identity, concrete type domain, signature, and applicable
 constraints; it must not depend on a coincidentally equal name or rediscover
-an overload on each tick. The existing hgraph resolver remains the owner of
-temporal candidate matching/ranking. Extending the model to value candidates
+an overload on each tick. Shared resolution rules govern temporal candidate
+matching and ranking. Extending the model to value candidates
 must preserve its shared matching rules, not add an independent dispatcher.
 
 The [fixed symbol-to-name mapping](../operators.md#fixed-symbol-to-name-mapping)

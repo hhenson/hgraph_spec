@@ -20,7 +20,7 @@ specified behavior also belong with the specification.
 - [Runtime model](runtime/overview.md) and [conformance method](runtime/conformance.md)
 - [HGL compiler conformance](compiler/conformance.md)
 - [Wiring](wiring/wiring.md): how every front end describes a graph
-- [Library contracts](library/README.md): what standard library operators publish
+- [Operator behavior contracts](library/README.md): what operators publish
 - [Historical reference](historical/README.md)
 
 [hgraph_spec_audit](https://github.com/hhenson/hgraph_spec_audit) owns executable

@@ -2586,7 +2586,7 @@ phase: runtime collection iterator cannot be stored in 'saved'
 type: predicate for 'items' must accept (key, value) and return bool
 module: hgraph.analytics does not export 'rolling_mean'
 module: function 'validate_price' is internal to market.pricing
-module: 'export impl fn add_' is invalid; the implementation is public through core::add_
+module: 'export impl fn add_' is invalid; the implementation is public through core.add_
 module: 'impl fn valeu' has no operator named 'valeu' in scope
 name: 'fn value' conflicts with operator market.pricing::value; declare 'impl fn value' or rename it
 module: operator 'value' is imported unqualified from both market.pricing and risk.pricing

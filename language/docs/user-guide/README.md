@@ -3,7 +3,7 @@
 HGL is a temporal programming language for computations over values that
 evolve through time. This guide describes it from an author's point of view:
 how functions and types look, how change and validity affect computation, and
-how source calls reach hgraph.
+how source calls select implementations.
 
 > This guide describes the language, independently of a compiler or runtime.
 > Agreed syntax and unresolved design questions are distinguished below.

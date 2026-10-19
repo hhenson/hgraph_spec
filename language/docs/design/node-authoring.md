@@ -5,7 +5,9 @@ Status: native binding contract.
 Author library behaviour in HGL. Guards, state, scheduling and writes remain
 in the language; selected native helpers supply target-specific operations.
 
-A temporal operator can call a scalar native helper:
+A temporal operator can call a scalar native helper. This fragment assumes a
+`bit_and` operator declaration and a native helper module aliased as `native`
+are already in scope:
 
 ```hgl
 impl fn bit_and(lhs: i64, rhs: i64) -> i64 {

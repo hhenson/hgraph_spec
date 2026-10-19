@@ -32,8 +32,8 @@ delimits a block comment. `//` means floor division.
 declared value type is a two-element tuple, and `atomic<...>` says the complete
 tuple arrives and ticks as one endpoint.
 
-`window` is marked `const`, so it is an ordinary `i64` available while hgraph
-constructs the function. It cannot change from tick to tick.
+`window` is marked `const`, so it is an ordinary `i64` available during graph
+construction. It cannot change from tick to tick.
 
 The return type `f64` is temporal. Source type syntax describes the value and
 structural shape; it does not require an outer `ts<...>` wrapper.

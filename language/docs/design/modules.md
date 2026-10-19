@@ -4,7 +4,7 @@ Status: accepted module boundary.
 
 ## Boundary
 
-Hgraph and its native extensions provide the capabilities from which language
+`core` and extension packages provide the capabilities from which language
 programs compose applications. A language module is a typed, enumerable view
 of one such package. It is not a general foreign-function interface.
 
@@ -17,12 +17,15 @@ The [core operator policy](operators.md#core-operators-and-the-standard-library)
 defines the inclusion criteria and every engine's baseline obligations.
 Analytics, persistence, Kafka, web, fabric, and downstream packages remain optional.
 
+Native helpers used by core implementations belong in `core.native`.
+Additional helpers needed by the standard library belong in `std.native`.
+
 ## Module contents
 
 A native package that supports the language supplies a descriptor containing:
 
 - canonical language module name and version;
-- compatible hgraph SDK and descriptor-format versions;
+- compatible target-runtime and descriptor-format versions;
 - automatically public nominal operator contracts, explicitly exported exact
   functions, exported concrete and abstract struct declarations, and exported
   native atomic type bindings;
@@ -116,6 +119,9 @@ directory nor infers a missing file. The complete decision, including source
 mapping and artifact naming, is [ADR 0006](decisions/0006-multi-file-module-parts.md).
 
 ## Import and build resolution
+
+The analytics examples below use a provisional module name; the final
+placement of analytics remains open.
 
 Selective imports introduce declarations as unqualified local names:
 
