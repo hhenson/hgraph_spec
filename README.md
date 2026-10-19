@@ -1,7 +1,8 @@
 # hgraph_spec
 
 The public HGL language and runtime specification: rules, HGL examples,
-reasoned traces and accepted decisions. No Python, C++ or Rust code lives here.
+reasoned traces and accepted decisions. The core and tests that validate
+specified behavior also belong with the specification.
 
 - [Default expression binding scope](language/docs/design/default-binding-scope.md)
 - [Language model](language/docs/design/language-model.md)
@@ -20,12 +21,14 @@ reasoned traces and accepted decisions. No Python, C++ or Rust code lives here.
 - [HGL compiler conformance](compiler/conformance.md)
 - [Base layer: kernel module and conformance pack](language/docs/design/base-layer.md) (proposed)
 - [Wiring](wiring/wiring.md): how every front end describes a graph
-- [Library contracts](library/README.md): what standard library operators publish
+- [Operator behavior contracts](library/README.md): what operators publish
 - [Historical reference](historical/README.md)
 
 [hgraph_spec_audit](https://github.com/hhenson/hgraph_spec_audit) owns executable
-Python/C++ probes, experiments and measured results. Accepted expected traces
-stay here; observations never silently replace them.
+implementation probes, experiments and measured results. It records rule
+origins, the agreed extraction process and implementation conformance. Additional
+rules come from the project owner. The specification states the resulting
+contract; observations never silently replace it.
 [hgraph_std](https://github.com/hhenson/hgraph_std) owns portable HGL library code.
 [hgraph](https://github.com/hhenson/hgraph) owns the C++ compiler/runtime and
 native providers. The Rust compiler/runtime implementation remains private.
@@ -34,8 +37,7 @@ Rules state observable behavior independently of a compiler or runtime.
 Non-normative explanations may describe how an implementation could satisfy a
 rule; they must not require particular source files, internal passes, native
 symbols or layouts. Implementation status, source references, build recipes
-and test locations belong in [audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes)
+and implementation-specific test locations belong in [audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes)
 or the implementation repository. Agreed rules and open design questions stay
 here; lack of implementation support does not change either. Sources and extraction revisions are recorded in
-[PROVENANCE.json](PROVENANCE.json). This repository is a source/data package;
-it has no importable Python package or native implementation.
+[PROVENANCE.json](PROVENANCE.json).

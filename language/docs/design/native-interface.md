@@ -244,10 +244,11 @@ fn smooth(value: f64, const window: i64) -> f64 {
 
 An imported overload family uses the same call syntax. Here `len` is a direct
 native view operation, while a public temporal `len_` operator can call it from
-its runtime implementation:
+its runtime implementation. This fragment assumes the `len_` operator
+declaration is already in scope:
 
 ```hgl
-use hgraph.native as native
+use core.native as native
 
 impl fn len_<T, const size: i64>(value: list<T, size>) -> i64 {
     when {
@@ -266,7 +267,7 @@ Payload-erased behavior uses the same direct-call model without a generic
 overload family:
 
 ```hgl
-use hgraph.native as native
+use core.native as native
 
 fn observe(value: signal) -> datetime {
     when {

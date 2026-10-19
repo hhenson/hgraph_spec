@@ -105,7 +105,7 @@ of reading its retained storage. `valid(at(value, key))` can inspect the child
 without reading its payload, but the key/index must still exist.
 
 ```hgl
-use hgraph.native as native
+use core.native as native
 
 fn evicted(value: rolling<i64, 3, 1>) -> i64 {
     when {

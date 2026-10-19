@@ -421,8 +421,9 @@ behaviour ([Conformance](conformance.md)) and are not yet specified.
 How this specification is written
 ---------------------------------
 
-These are intended rules. Proposals and implementation gaps are marked in
-[Evidence](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/evidence.md); the written cases do not certify a runtime.
+This specification states the contract. Proposals are marked here; rule
+origins and implementation conformance are recorded in
+[audit](https://github.com/hhenson/hgraph_spec_audit). Written cases do not certify a runtime.
 
 **Concept first.** The specification starts from the concept and is refined
 only as far as working behaviour requires. A facility no concept here yet
@@ -462,12 +463,10 @@ management and the spelling of an API are out. Names are the concept's, not
 an API's; where HGL already names a concept (`valid`, `modified`,
 `scheduler`), that name is used.
 
-**Which hgraph.** The C++ runtime's design rulings win. The Python
-implementation holds the original design intent and is used to disambiguate
-where the C++ documents are silent or unclear. hgraph's older specification
-chapters describe the Python-era runtime and are used for framing only. The
-known disagreements are listed in
-[evidence and compatibility record](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/evidence.md).
+**Specification and evidence.** The rules apply independently of an
+implementation. Their extraction history and implementation agreements or
+differences belong in the
+[audit record](https://github.com/hhenson/hgraph_spec_audit/blob/main/runtime/evidence.md).
 
 
 Vocabulary

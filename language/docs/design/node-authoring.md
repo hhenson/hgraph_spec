@@ -5,7 +5,9 @@ Status: native binding contract.
 Author library behaviour in HGL. Guards, state, scheduling and writes remain
 in the language; selected native helpers supply target-specific operations.
 
-A temporal operator can call a scalar native helper:
+A temporal operator can call a scalar native helper. This fragment assumes a
+`bit_and` operator declaration and a native helper module aliased as `native`
+are already in scope:
 
 ```hgl
 impl fn bit_and(lhs: i64, rhs: i64) -> i64 {
@@ -19,9 +21,9 @@ receives two values; it cannot schedule, publish or retain an input view.
 ## Binding contract
 
 - **NAT-1:** Select by canonical module/declaration identity, full signature and
-  role. `native const fn hgraph.native.bit_and(i64,i64)->i64` is a value helper;
-  `hgraph.operators.bit_and` is a temporal operator. Neither substitutes for
-  the other. Resolve candidates in the checker, retain the selection in IR.
+  role. A `native const fn` value helper and a temporal `fn` with the same
+  payload signature do not substitute for each other. Resolve candidates in
+  the checker, retain the selection in IR.
 - **NAT-2:** Derive binding checks from the shared HGL contract. Keep native
   implementations and their dependencies in the provider's library build.
   Select the provider once, without a separately authored function-symbol map.
