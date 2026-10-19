@@ -1007,7 +1007,7 @@ ordinary name resolution. It proves that the operation used by a generic body
 is valid for the admitted substitution:
 
 ```hgl
-use hgraph.std::{add_}
+use hgraph::{add_}
 
 fn double<U>(value: U) -> U
 requires add_(U, U) -> U
@@ -2586,7 +2586,7 @@ phase: runtime collection iterator cannot be stored in 'saved'
 type: predicate for 'items' must accept (key, value) and return bool
 module: hgraph.analytics does not export 'rolling_mean'
 module: function 'validate_price' is internal to market.pricing
-module: 'export impl fn add' is invalid; the implementation is public through hgraph.std::add
+module: 'export impl fn add_' is invalid; the implementation is public through hgraph::add_
 module: 'impl fn valeu' has no operator named 'valeu' in scope
 name: 'fn value' conflicts with operator market.pricing::value; declare 'impl fn value' or rename it
 module: operator 'value' is imported unqualified from both market.pricing and risk.pricing

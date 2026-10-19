@@ -53,7 +53,7 @@ assembled.
 `use` can import an explicit set of public declarations into the local scope:
 
 ```hgl
-use hgraph.std::{if_then_else}
+use std::{if_then_else}
 use hgraph.analytics::{rolling_mean, zscore}
 ```
 

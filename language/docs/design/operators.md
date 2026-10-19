@@ -21,6 +21,26 @@ Status: agreed design. HGL comments use `#` or `/* ... */` (see below).
 - Missing metadata means **no guarantee**. A declaration is not a proof of a
   law for every implementation or every numerical policy.
 
+## Core operators and the standard library
+
+Core operator declarations belong directly in `hgraph`. This level is reserved
+for core operators. Standard-library operators belong in `std`.
+
+The core includes every operator required by language syntax, such as `+`
+mapping to `hgraph.add_`. It also includes essential named operations, such as
+`abs`, that are broadly needed to write reasonably complex programs. Keep this
+set small: inclusion must justify requiring every engine to provide a baseline
+implementation. Other operators belong in `std`;
+usefulness alone does not make an operator core.
+
+Every engine must provide a baseline implementation in `hgraph.kernel` for
+every core operator, covering the execution roles and type domains required by
+that operator's contract. `hgraph.kernel` contains their implementation
+candidates, with no operator declarations of its own. A candidate implements
+the operator declared in `hgraph`; it does not create another operator identity
+in the kernel. Additional candidates may extend supported domains or provide
+optimizations while preserving the applicable contract.
+
 ## Fixed symbol-to-name mapping
 
 | HGL expression | System operator | Notes |
@@ -57,7 +77,7 @@ this iteration; their native named operators remain separate library inventory
 work.
 
 A local function named `add_` does not change `a + b`. Explicit named calls
-still follow normal local/import lookup. System symbols resolve the native
+still follow normal local/import lookup. System symbols resolve the core operator
 identity, not the nearest function with a matching short name.
 
 ## Execution role and native implementations

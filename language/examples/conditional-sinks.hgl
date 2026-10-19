@@ -3,7 +3,7 @@
 
 module examples.conditional_sinks
 
-use hgraph.std::{debug_print}
+use std::{debug_print}
 
 export fn observe(enabled: bool, value: f64) {
     if enabled {

@@ -126,7 +126,7 @@ value and becomes all-valid at five values, while retaining at most twenty.
 Generic declarations may carry compile-time requirements:
 
 ```hgl
-use hgraph.std::{add_}
+use hgraph::{add_}
 
 operator choose_number<U>(lhs: U, rhs: U) -> U
 requires U in {f64, i64}

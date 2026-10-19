@@ -8,10 +8,14 @@ Hgraph and its native extensions provide the capabilities from which language
 programs compose applications. A language module is a typed, enumerable view
 of one such package. It is not a general foreign-function interface.
 
-The compiler has one mandatory module for the hgraph kernel. Its implicit
-prelude supplies canonical types, temporal-shape mappings, `atomic<T>`, and the
-standard operator bindings used by expression syntax. Analytics, persistence,
-Kafka, web, fabric, and downstream packages remain optional.
+The compiler loads core operator declarations from `hgraph` and their required
+baseline implementations from `hgraph.kernel`. The kernel contributes
+implementation candidates, not operator declarations. The implicit prelude
+supplies canonical types, temporal-shape mappings, `atomic<T>`, and the core
+operator bindings used by expression syntax. Standard-library operators belong
+in `std`; the [core operator policy](operators.md#core-operators-and-the-standard-library)
+defines the inclusion criteria and every engine's kernel obligations.
+Analytics, persistence, Kafka, web, fabric, and downstream packages remain optional.
 
 ## Module contents
 
@@ -97,7 +101,7 @@ A module may be authored across several files without creating additional
 nominal modules:
 
 ```hgl
-module hgraph.std part arithmetic
+module std part arithmetic
 ```
 
 Every file in an assembled set names the same module and a unique part. The

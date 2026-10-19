@@ -318,7 +318,7 @@ Requirements may also state that a nominal operator must be callable for the
 substitution:
 
 ```hgl
-use hgraph.std::{add_}
+use hgraph::{add_}
 
 fn double<U>(value: U) -> U
 requires add_(U, U) -> U
