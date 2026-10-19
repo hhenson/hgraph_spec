@@ -21,7 +21,7 @@ call selects it.
 
 Core operators are declared in `hgraph`, with baseline implementations required
 from every engine in `hgraph.kernel`. Standard-library operators belong in
-`std`; see the [core operator policy](../language/docs/design/operators.md#core-operators-and-the-standard-library).
+`hgraph.std`; see the [core operator policy](../language/docs/design/operators.md#core-operators-and-the-standard-library).
 This directory records behavior contracts; a contract's placement here does
 not decide whether its operator belongs to the core or the standard library.
 

@@ -270,7 +270,7 @@ offset from the start of the run; a `datetime` key is an absolute instant and
 fixes the run's start:
 
 ```hgl
-use std::{mean}
+use hgraph.std::{mean}
 
 fn recent_mean(price: rolling<f64, 5m>) -> f64 => mean(price)   # provisional timed replay
 
@@ -293,7 +293,7 @@ output, if any, is the run's output:
 ```hgl
 module examples.app
 
-use std::{schedule}
+use hgraph.std::{schedule}
 
 export fn heartbeat(const every: duration = 1s) -> datetime =>
     last_modified(schedule(every))

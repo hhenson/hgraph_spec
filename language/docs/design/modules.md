@@ -13,7 +13,7 @@ baseline implementations from `hgraph.kernel`. The kernel contributes
 implementation candidates, not operator declarations. The implicit prelude
 supplies canonical types, temporal-shape mappings, `atomic<T>`, and the core
 operator bindings used by expression syntax. Standard-library operators belong
-in `std`; the [core operator policy](operators.md#core-operators-and-the-standard-library)
+in `hgraph.std`; the [core operator policy](operators.md#core-operators-and-the-standard-library)
 defines the inclusion criteria and every engine's kernel obligations.
 Analytics, persistence, Kafka, web, fabric, and downstream packages remain optional.
 
@@ -101,7 +101,7 @@ A module may be authored across several files without creating additional
 nominal modules:
 
 ```hgl
-module std part arithmetic
+module hgraph.std part arithmetic
 ```
 
 Every file in an assembled set names the same module and a unique part. The

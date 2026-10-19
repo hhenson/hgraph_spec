@@ -1,7 +1,7 @@
 # Standard-library constant to diagnostic sink
 
 [The graph](../../language/examples/stdlib-const-debug.hgl) imports `const` and
-`debug_print` from `std`. It uses their HGL implementations, with only
+`debug_print` from `hgraph.std`. It uses their HGL implementations, with only
 scalar formatting and printing supplied by a target's native part.
 
 `const(42)` arms `alarm` at start. Its plain `when` publishes once in the first

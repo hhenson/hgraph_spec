@@ -3,7 +3,7 @@
 
 module examples.fixed_list_iteration
 
-use std::{null_sink}
+use hgraph.std::{null_sink}
 
 export fn observe(samples: list<f64, 3>) {
     for sample in elements(samples) {

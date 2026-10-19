@@ -3,7 +3,7 @@
 
 module examples.conditional_early_return
 
-use std::{null_sink}
+use hgraph.std::{null_sink}
 
 export fn choose(condition: bool, x: i64, y: i64) -> i64 {
     if condition {

@@ -24,13 +24,13 @@ Status: agreed design. HGL comments use `#` or `/* ... */` (see below).
 ## Core operators and the standard library
 
 Core operator declarations belong directly in `hgraph`. This level is reserved
-for core operators. Standard-library operators belong in `std`.
+for core operators. Standard-library operators belong in `hgraph.std`.
 
 The core includes every operator required by language syntax, such as `+`
 mapping to `hgraph.add_`. It also includes essential named operations, such as
 `abs`, that are broadly needed to write reasonably complex programs. Keep this
 set small: inclusion must justify requiring every engine to provide a baseline
-implementation. Other operators belong in `std`;
+implementation. Other operators belong in `hgraph.std`;
 usefulness alone does not make an operator core.
 
 Every engine must provide a baseline implementation in `hgraph.kernel` for

@@ -3,7 +3,7 @@
 module examples.runtime_choice
 
 use hgraph.analytics::{rolling_mean}
-use std::{if_then_else}
+use hgraph.std::{if_then_else}
 
 fn maybe_smooth(
     price: f64,

@@ -2,7 +2,7 @@
 
 module examples.structural_types
 
-use std::{map}
+use hgraph.std::{map}
 
 export struct Quote {
     bid: f64

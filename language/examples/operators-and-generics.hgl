@@ -2,7 +2,7 @@
 
 module examples.operators_and_generics
 
-use std::{mean}
+use hgraph.std::{mean}
 
 operator summarize<
     T,
