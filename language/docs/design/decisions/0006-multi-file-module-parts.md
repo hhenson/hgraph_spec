@@ -16,7 +16,7 @@ identities, and registration lifecycles for one library.
 A source file may give its contribution to a module an explicit part name:
 
 ```hgl
-module hgraph.std part arithmetic
+module std part arithmetic
 ```
 
 A multi-file compilation lists one anchor file and one or more additional

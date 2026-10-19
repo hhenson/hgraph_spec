@@ -865,8 +865,11 @@ runtime arithmetic is checked; the language's runtime scalar error behaviour
 is an open question shared with the numeric
 types.
 
+`abs` names the `core.abs` operator and follows ordinary operator-call
+resolution.
+
 Field accessors (`year`, `month`, `day`, `weekday`, `hour`, `minute`,
-`second`, `microsecond`, `days`, `seconds`, `total_seconds`), `abs`, the
+`second`, `microsecond`, `days`, `seconds`, `total_seconds`), the
 rounding functions (`temporal_floor`, `temporal_ceil`, `temporal_round`), and
 the zone operations are ordinary standard-library functions resolved like any
 other call, not syntax. The zone operations are:
@@ -1007,7 +1010,7 @@ ordinary name resolution. It proves that the operation used by a generic body
 is valid for the admitted substitution:
 
 ```hgl
-use hgraph.std::{add_}
+use core::{add_}
 
 fn double<U>(value: U) -> U
 requires add_(U, U) -> U
@@ -2586,7 +2589,7 @@ phase: runtime collection iterator cannot be stored in 'saved'
 type: predicate for 'items' must accept (key, value) and return bool
 module: hgraph.analytics does not export 'rolling_mean'
 module: function 'validate_price' is internal to market.pricing
-module: 'export impl fn add' is invalid; the implementation is public through hgraph.std::add
+module: 'export impl fn add_' is invalid; the implementation is public through core.add_
 module: 'impl fn valeu' has no operator named 'valeu' in scope
 name: 'fn value' conflicts with operator market.pricing::value; declare 'impl fn value' or rename it
 module: operator 'value' is imported unqualified from both market.pricing and risk.pricing

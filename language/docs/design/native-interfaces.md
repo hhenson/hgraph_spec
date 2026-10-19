@@ -27,7 +27,7 @@ per-function symbol manifest.
 The scalar contract for the initial port is:
 
 ```hgl
-module hgraph.native
+module core.native
 native const fn bit_and(lhs: i64, rhs: i64) -> i64
 ```
 

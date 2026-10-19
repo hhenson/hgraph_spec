@@ -1,6 +1,6 @@
 # Modules and tools
 
-Modules make hgraph and extension capabilities available without exposing a
+Modules make core and extension capabilities available without exposing a
 general native foreign-function interface.
 
 ## Declaring a module
@@ -48,12 +48,15 @@ must list the complete part set explicitly. A single file may carry a `part`
 label while being checked in isolation; the label matters only when files are
 assembled.
 
+The analytics module name used in these examples is provisional; its final
+placement remains open.
+
 ## Importing declarations
 
 `use` can import an explicit set of public declarations into the local scope:
 
 ```hgl
-use hgraph.std::{if_then_else}
+use std::{if_then_else}
 use hgraph.analytics::{rolling_mean, zscore}
 ```
 
@@ -75,10 +78,19 @@ this public declaration surface.
 There are no wildcard imports or re-exports. In particular, an implementation
 module does not create a second import path for an operator defined elsewhere.
 Canonical scalar and container types, temporal-shape rules, `atomic<T>`, and
-expression operator bindings come from the implicit hgraph prelude. Exported
+expression operator bindings come from the implicit prelude. Exported
 nominal structs and their abstract-family relationships follow their defining
 modules and are imported like other public declarations. Everything else must
 be imported, reached through a module alias, or declared locally.
+
+`core` owns the core operator declarations and the baseline implementations
+required from every engine. `std` provides standard-library operators and may
+add candidates for operators declared in `core`. Such an operator is still
+imported from `core`; an implementation in `std` creates no second import path
+or operator identity. Candidate discovery follows the
+[package dependency closure](../design/modules.md#candidate-universe-and-provider-discovery),
+independently of lexical imports. The [core operator policy](../design/operators.md#core-operators-and-the-standard-library)
+defines which operators belong in the required core.
 
 An exported generic struct exposes one nominal family, not a separate export
 for every possible specialization. Downstream code applies that family with a
@@ -95,16 +107,19 @@ Native implementation parts obey the [shared binding contract](../design/native-
 
 ## Core utility functions
 
-The `hgraph.native` module provides `len` and `is_empty` for `str`,
+Native helpers for core implementations live in `core.native`; additional
+standard-library helpers live in `std.native`.
+
+The `core.native` module provides `len` and `is_empty` for `str`,
 fixed and unbounded lists, sets, maps, and tick-count rolling windows. It also provides `valid`, `all_valid`, `modified`,
 `last_modified`, `bound`, and `active` for every standard time-series shape.
-Additional string and window queries live in parts of the same module; see
-the [native inventory](https://github.com/hhenson/hgraph/blob/main/language/stdlib/hgl/hgraph/README.md). Value operations keep
+Additional string and window queries follow the
+[native query contracts](../design/native-surface-proposal.md). Value operations keep
 ordinary HGL spelling rather than exposing the underlying representation.
 An HGL library imports the module normally:
 
 ```hgl
-use hgraph.native as native
+use core.native as native
 
 fn list_size<T, const size: i64>(value: list<T, size>) -> i64 {
     when {
@@ -113,11 +128,10 @@ fn list_size<T, const size: i64>(value: list<T, size>) -> i64 {
 }
 ```
 
-The native library must be included in the package that runs the program.
-For build configuration, see the
-[package-authoring guide](https://github.com/hhenson/hgraph/blob/main/language/docs/developer-guide/native-modules-and-packages.md#building-a-package).
-The [module inventory](https://github.com/hhenson/hgraph/blob/main/language/stdlib/hgl/hgraph/README.md) lists available
-functions and current type restrictions.
+The native provider must be included in the program's
+[package dependency closure](../design/modules.md#candidate-universe-and-provider-discovery).
+The [native interface contract](../design/native-interface.md) defines view and
+borrowing requirements.
 
 ## Operator identity and implementation binding
 

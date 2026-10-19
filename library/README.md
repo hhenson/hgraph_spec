@@ -11,13 +11,19 @@ which it means:
 | Term | Meaning | Specified in |
 |---|---|---|
 | **operator** (wiring) | a name that stands for several implementations and is resolved to one of them at each call | [wiring](../wiring/wiring.md), Part 3 |
-| **library operator** | one of the operators a standard library provides — `add_`, `union`, `format_`, `default` — and what it publishes as a function of its inputs | [operator contracts](operator_contracts.md) |
+| **operator behavior** | what an operator publishes as a function of its inputs | [operator contracts](operator_contracts.md) |
 
-A call to a library operator is resolved by the wiring rules like any
+A call to an operator is resolved by the wiring rules like any
 other call; what the selected implementation then publishes is its
 contract, stated in terms of the runtime rules. The two never overlap: wiring
 does not say what an operator computes, and a contract does not say how a
 call selects it.
+
+`core` owns core operator declarations and the baseline implementations required
+from every engine. Standard-library operators belong in `std`, which may also
+extend operators declared in `core`; see the [core operator policy](../language/docs/design/operators.md#core-operators-and-the-standard-library).
+This directory records behavior contracts; a contract's placement here does
+not decide whether its operator belongs to the core or the standard library.
 
 - [operator_contracts.md](operator_contracts.md): admission and nil, set
   operators, formatting and sinks, text, numbers, partitioned dictionaries,

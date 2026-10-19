@@ -3,6 +3,10 @@
 These HGL files describe language behaviour. The entries below explain what
 each example demonstrates. Named `test` blocks express expected results and
 can be run with `hgl test`.
+
+Analytics imports use a provisional module name; their final placement remains
+open.
+
 [Source-rejection examples](reject/README.md) use ordinary `hgl test`;
 annotations isolate expected source errors alongside executable tests.
 

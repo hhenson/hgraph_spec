@@ -174,7 +174,7 @@ boundaries.
 | Nested output receives two different child writes in one evaluation | One accumulated delta under the existing output rules |
 
 Derive runtime observations before execution and apply the existing
-[conformance acceptance policy](../../../../runtime/conformance.md#accepting-an-expectation).
+[conformance expectations](../../../../runtime/conformance.md#accepting-an-expectation).
 Check values, ticks, effects and owner identity. Source diagnostics and native
 binding checks are separate from runtime trace conformance.
 
