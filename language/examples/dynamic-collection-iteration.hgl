@@ -3,7 +3,7 @@
 
 module examples.dynamic_collection_iteration
 
-use hgraph.std::{null_sink}
+use std::{null_sink}
 
 export fn observe_values(book: map<str, f64>, offset: f64) {
     for value in values(book) {

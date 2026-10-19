@@ -19,9 +19,9 @@ contract, stated in terms of the runtime rules. The two never overlap: wiring
 does not say what an operator computes, and a contract does not say how a
 call selects it.
 
-Core operators are declared in `hgraph`, with baseline implementations required
-from every engine in `hgraph.kernel`. Standard-library operators belong in
-`hgraph.std`; see the [core operator policy](../language/docs/design/operators.md#core-operators-and-the-standard-library).
+`core` owns core operator declarations and the baseline implementations required
+from every engine. Standard-library operators belong in `std`, which may also
+extend operators declared in `core`; see the [core operator policy](../language/docs/design/operators.md#core-operators-and-the-standard-library).
 This directory records behavior contracts; a contract's placement here does
 not decide whether its operator belongs to the core or the standard library.
 

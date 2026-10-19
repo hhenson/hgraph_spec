@@ -270,7 +270,7 @@ offset from the start of the run; a `datetime` key is an absolute instant and
 fixes the run's start:
 
 ```hgl
-use hgraph.std::{mean}
+use std::{mean}
 
 fn recent_mean(price: rolling<f64, 5m>) -> f64 => mean(price)   # provisional timed replay
 
@@ -293,7 +293,7 @@ output, if any, is the run's output:
 ```hgl
 module examples.app
 
-use hgraph.std::{schedule}
+use std::{schedule}
 
 export fn heartbeat(const every: duration = 1s) -> datetime =>
     last_modified(schedule(every))
@@ -371,7 +371,7 @@ session, `:help` the commands, and `:quit` leaves.
 On a terminal the prompt is an editable line: the arrow keys move and recall
 earlier inputs, history persists across sessions in `~/.hgl_history` (or the
 file named by `HGL_HISTORY`), and tab completes the `:` commands, the
-declaration keywords, the kernel modules, and every name the session has
+declaration keywords, the core module, and every name the session has
 declared or bound. Piped input (`hgl repl < session.hgl`) reads plain lines,
 so scripts behave as before; `HGL_NO_LINE_EDITING=1` forces that mode on a
 terminal too.

@@ -1,7 +1,7 @@
 # hgraph_spec
 
 The public HGL language and runtime specification: rules, HGL examples,
-reasoned traces and accepted decisions. The kernel and tests that validate
+reasoned traces and accepted decisions. The core and tests that validate
 specified behavior also belong with the specification.
 
 - [Default expression binding scope](language/docs/design/default-binding-scope.md)

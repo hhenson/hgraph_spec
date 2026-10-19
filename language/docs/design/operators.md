@@ -23,23 +23,26 @@ Status: agreed design. HGL comments use `#` or `/* ... */` (see below).
 
 ## Core operators and the standard library
 
-Core operator declarations belong directly in `hgraph`. This level is reserved
-for core operators. Standard-library operators belong in `hgraph.std`.
+`core` owns the core operator declarations and their baseline implementations.
+Standard-library operators belong in `std`.
 
 The core includes every operator required by language syntax, such as `+`
-mapping to `hgraph.add_`. It also includes essential named operations, such as
+mapping to `core.add_`. It also includes essential named operations, such as
 `abs`, that are broadly needed to write reasonably complex programs. Keep this
 set small: inclusion must justify requiring every engine to provide a baseline
-implementation. Other operators belong in `hgraph.std`;
-usefulness alone does not make an operator core.
+implementation. Other operators belong in `std`; usefulness alone does not
+make an operator core.
 
-Every engine must provide a baseline implementation in `hgraph.kernel` for
-every core operator, covering the execution roles and type domains required by
-that operator's contract. `hgraph.kernel` contains their implementation
-candidates, with no operator declarations of its own. A candidate implements
-the operator declared in `hgraph`; it does not create another operator identity
-in the kernel. Additional candidates may extend supported domains or provide
-optimizations while preserving the applicable contract.
+Every engine must provide a baseline implementation in `core` for every core
+operator, covering the execution roles and type domains required by that
+operator's contract. Declarations and implementations share the `core` module;
+there is no separate kernel module.
+
+`std` may contribute additional implementation candidates for operators declared
+in `core`. Those candidates implement the same nominal operator, preserving its
+`core` identity and applicable contract. They may extend supported domains or
+provide optimizations without redeclaring the operator in `std`.
+Candidate selection follows the ordinary resolution rules.
 
 ## Fixed symbol-to-name mapping
 

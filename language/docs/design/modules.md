@@ -8,13 +8,13 @@ Hgraph and its native extensions provide the capabilities from which language
 programs compose applications. A language module is a typed, enumerable view
 of one such package. It is not a general foreign-function interface.
 
-The compiler loads core operator declarations from `hgraph` and their required
-baseline implementations from `hgraph.kernel`. The kernel contributes
-implementation candidates, not operator declarations. The implicit prelude
-supplies canonical types, temporal-shape mappings, `atomic<T>`, and the core
-operator bindings used by expression syntax. Standard-library operators belong
-in `hgraph.std`; the [core operator policy](operators.md#core-operators-and-the-standard-library)
-defines the inclusion criteria and every engine's kernel obligations.
+The compiler loads the required `core` module, which owns core operator
+declarations and their baseline implementations. The implicit prelude supplies
+canonical types, temporal-shape mappings, `atomic<T>`, and the core operator
+bindings used by expression syntax. Standard-library operators belong in `std`,
+which may also contribute implementations of operators declared in `core`.
+The [core operator policy](operators.md#core-operators-and-the-standard-library)
+defines the inclusion criteria and every engine's baseline obligations.
 Analytics, persistence, Kafka, web, fabric, and downstream packages remain optional.
 
 ## Module contents
@@ -44,8 +44,8 @@ lifecycle. Their phase, effect, ownership, and safety requirements are defined
 in [Native interface](native-interface.md). They do not introduce a second
 foreign-function or package mechanism.
 
-The kernel descriptor additionally maps language operator tokens such as `+`
-and `==` to public hgraph operator contracts. This is a syntax binding into the
+The core descriptor additionally maps language operator tokens such as `+`
+and `==` to public `core` operator contracts. This is a syntax binding into the
 same registry, not a compiler-owned implementation.
 
 The descriptor contains declarations and build metadata, not executable user
@@ -101,7 +101,7 @@ A module may be authored across several files without creating additional
 nominal modules:
 
 ```hgl
-module hgraph.std part arithmetic
+module std part arithmetic
 ```
 
 Every file in an assembled set names the same module and a unique part. The
@@ -243,7 +243,7 @@ contains every implementation contributed by:
 
 - the source modules assigned to the current package target;
 - every module in the locked transitive package dependency closure;
-- the hgraph kernel and selected native extension packages.
+- `core` and selected native extension packages.
 
 This universe is not the import graph. Imports control lexical name visibility;
 the package and target graph controls implementation participation. A module
