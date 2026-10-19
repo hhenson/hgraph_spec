@@ -2,64 +2,69 @@
 
 Status: proposed, 2026-10-18.
 
-This record defines the base layer: the language plus the mandatory kernel
-module, `hgraph.kernel`. It also defines the conformance pack, the spec's
+This record defines the base layer: the language plus the mandatory core
+module, `core`. It also defines the conformance pack, the spec's
 executable cases, which are written against the base layer only.
 
-**Decision** (owner, 2026-10-18):
+**Agreed constraints:**
 - Conformance tests do not depend on the standard library.
 - The base layer is the core language, its testing framework, and the minimal
   functionality the standard library needs from below.
-- The standard library builds on the base layer.
-- The kernel module is named `hgraph.kernel`.
+- The standard library, `std`, builds on the base layer and may add candidates
+  for core operators while preserving their identities and contracts.
+- `core` owns both operator declarations and required baseline implementations.
+  Core implementation helpers live in `core.native`; additional helpers needed
+  by `std` live in `std.native`.
 - A conformance test needs to know only the behaviour an operator expression
   must have, not which candidate is selected. Overloads must stay stable for
   the expressions the tests write (§3, BASE-16).
 - A conformance run loads no library: not the standard library, and not any
   other (BASE-12).
 
-**Decision** (owner, 2026-10-18, conformance):
+**Agreed conformance constraints:**
 - Shared fixtures are shared. No copies are kept in step by a lint.
-- The kernel's conformance tests form one module, `hgraph.conformance`,
+- The core's conformance tests form one module, `conformance`,
   assembled from parts, so its fixtures and tests share one flat namespace.
 - The fixtures are that module's public declarations. A separate conformance
   module imports the ones it needs.
 - The module exists only for conformance. No runtime ships or links it; only a
   conformance run supplies it.
-- Rejection cases form a second module, `hgraph.conformance.rejections`.
+- Rejection cases form a second module, `conformance.rejections`.
 
-Everything else here is proposed.
+The remaining additions in this record are proposed. Existing rules retain
+their current status.
 
 ## Layers
 
 | Layer | Contains | Specified by | Realised by |
 |---|---|---|---|
 | Language | Grammar, types, phases, the test language | [Syntax and semantics](../developer-guide/syntax-and-semantics.md) and the design records | Each compiler |
-| Kernel module `hgraph.kernel` | Prelude, injectables, system operators, language-form realisation, eval support, test host | This record | Each implementation. hgraph_spec `kernel/` holds a reference realisation in HGL |
-| Standard library | `hgraph.std`, `hgraph.operators`, `hgraph.native` | [Library contracts](../../../library/README.md) and hgraph_std | hgraph_std HGL, plus a native provider for each target |
-| Conformance pack | The spec's executable cases, as the module `hgraph.conformance` | `conformance/README.md` | hgraph_spec `conformance/` |
+| Core module `core` | Core operator declarations and baseline implementations; proposed prelude, injectables, language-form realisation, eval support and test host | [Core operator policy](operators.md#core-operators-and-the-standard-library) and this record | Each engine; a reference realisation in hgraph_spec `core/` is proposed |
+| Standard library `std` | Its own operator declarations and additional candidates for core operators | [Library contracts](../../../library/README.md) and hgraph_std | Portable HGL plus selected native providers |
+| Conformance pack | The spec's executable cases, as the module `conformance` | `conformance/README.md` | hgraph_spec `conformance/` |
 
-The **base layer** is the language plus the kernel. Library HGL is written
+The **base layer** is the language plus the core. Library HGL is written
 against the base layer only. Library *native* parts may use runtime
 facilities directly: that is how the nested-graph APIs and view helpers exist.
 
-## The kernel module
+## The core module
 
-`hgraph.kernel` is the "one mandatory module for the hgraph kernel"
-([modules.md](modules.md), Boundary), made explicit. It is not a second
-module:
-- A single mandatory module is already the rule.
-- Eval needs replay and record wherever a test can be written. A separate
-  harness module would be mandatory in all but name.
-- Parts ([ADR 0006](decisions/0006-multi-file-module-parts.md)) and native
-  implementation parts
-  ([ADR 0014](decisions/0014-native-implementation-interfaces.md)) already
-  combine portable and native code in one module.
+`core` is the mandatory module of the
+[module boundary](modules.md#boundary). It owns both the core operator
+declarations and their required baseline implementations. Core implementation
+helpers live in `core.native`; additional standard-library helpers live in
+`std.native`. A selected core helper provider is part of core's implementation
+dependency closure and introduces no dependency on `std`.
+
+Eval support and language-form realisation below remain proposed. Module parts
+([ADR 0006](decisions/0006-multi-file-module-parts.md)) and native implementation
+parts ([ADR 0014](decisions/0014-native-implementation-interfaces.md)) let their
+portable and native declarations share one module identity.
 
 | Surface | Reached by | Contents |
 |---|---|---|
 | Prelude | Unqualified lookup, step 5 only | §1 |
-| Public interface | `use hgraph.kernel::{...}` or a module alias | The 16 system operator contracts; `TimedValue`, `replay` and `record` (§5) |
+| Public interface | `use core::{...}` or a module alias | Core operator contracts, including essential named operations; proposed `TimedValue`, `replay` and `record` (§5) |
 | Token binding | Expression syntax | The 18 identities of the [fixed mapping](operators.md#fixed-symbol-to-name-mapping) |
 
 Source cannot name how a language form is realised, nor which replay and record
@@ -81,8 +86,8 @@ realisation eval wires. Neither is a surface.
 
 The value-level `len` covers `str`, `bytes`, and ordinary lists, sets and maps.
 
-These stay in the library's `hgraph.native`, because only library bodies use
-them:
+The following helpers remain outside the proposed prelude and are reached
+through `core.native`, following the [native helper contract](../user-guide/modules-and-tools.md#core-utility-functions):
 - `bound` and `active`;
 - `is_empty`;
 - `len` and `is_empty` on temporal views;
@@ -90,15 +95,17 @@ them:
 - `schemas`;
 - the window metadata.
 
+Additional helpers needed only by `std` belong in `std.native`.
+
 Name resolution, in order:
 1. The reserved intrinsics `scheduled`, `passivate` and `activate` are not
    identifiers and cannot be shadowed
    ([ADR 0010](decisions/0010-lifecycle-capabilities.md)).
-2. Lookup steps 1–4 shadow every other prelude name (existing).
-3. A direct capability receiver selects the capability meaning, even when a
+2. A direct capability receiver selects the capability meaning, even when a
    library name with the same spelling is imported (existing,
    [capability function syntax](capability-function-syntax.md)). The
-   receivers are `alarm`, `scheduler`, `global_state` and `out`.
+   receivers are `alarm`, `scheduler`, `logger`, `global_state` and `out`.
+3. Lookup steps 1–4 shadow every other prelude name (existing).
 4. Any remaining choice is made by context:
    - inside `requires` or in a body;
    - the containing phase, for the metadata names;
@@ -119,10 +126,14 @@ levels, and scheduler tags. None of them is base until it has one.
 
 ### 3. System operators
 
-The kernel declares the sixteen system operators below. They keep the
-signatures the standard library declares today, so existing named calls still
-bind. `and_`, `or_` and `not_` also constrain their operands to `bool`
-(proposed; see **Logical operators**).
+The sixteen declarations below cover the syntax-bound arithmetic, comparison
+and Boolean operators. `and_`, `or_` and `not_` constrain their operands to
+`bool` (proposed; see **Logical operators**).
+
+This is not the complete core inventory. The [core operator policy](operators.md#core-operators-and-the-standard-library)
+also includes essential named operations such as `core.abs`. Its required
+roles and domains still need a detailed contract (open point 18); this proposal
+does not assign it to `std`.
 
 ```hgl
 operator add_<L, R, O>(lhs: L, rhs: R) -> O
@@ -166,29 +177,29 @@ operator not_<T>(ts: T) -> bool
 requires T == bool
 ```
 
-`getitem_` and `getattr_` are kernel identities with no source declaration.
+`getitem_` and `getattr_` are core identities with no source declaration.
 
 Each implementation binds these identities to its own native operators: the
 target binding of [modules.md](modules.md), Nominal operator binding.
 Declaring them creates no new runtime operator. The candidates an
-implementation designates for the domains below are the kernel's
-**realisation**. The kernel descriptor names them, so `hgl check` and a native
+implementation designates for the domains below are the core's
+**realisation**. The core descriptor names them, so `hgl check` and a native
 build see the same realisation ([modules.md](modules.md), Candidate universe
 and provider discovery).
 
-The kernel fixes the behaviour of these identities over the domains below, not
-their candidate set (owner, 2026-10-18). Implementations and libraries may add
+The core fixes the behaviour of these identities over the domains below, not
+their candidate set. Implementations and libraries may add
 candidates: more domains, native nodes, and HGL `impl fn` declarations of an
-imported kernel identity ([modules.md](modules.md), Nominal operator binding).
+imported core identity ([modules.md](modules.md), Nominal operator binding).
 Every candidate comes from HGL's closed universe: the target's modules, its
-locked dependency closure, the kernel and the selected native packages. A
+locked dependency closure, the core and the selected native packages. A
 candidate outside the target's declared packages, such as an overload a host
 registers at run time, is outside it ([modules.md](modules.md), Candidate
 universe and provider discovery). A conformance run loads no library
 (BASE-12), so the candidates a case meets are the realisation and the pack's
 own declarations.
 
-**Kernel-domain calls.** A kernel-domain call is a call to a kernel identity,
+**Core-domain calls.** A core-domain call is a call to a core identity,
 by token or by name, that:
 - supplies the operands of a row below and no other argument;
 - has operand types that the row covers.
@@ -198,19 +209,19 @@ signatures, so a generic candidate stays live outside the domains.
 - At value level, an operand is an ordinary value of the row's type.
 - In composition, an operand is a time series whose payload is one atomic
   value of the row's type, a reference to one (WIR-6, WIR-8), or a constant
-  lifted to one. Structural temporal operands are outside the kernel domains:
+  lifted to one. Structural temporal operands are outside the core domains:
   non-atomic lists, structs, maps and sets, and windows.
-- Every use of a mapped token is a call of its kernel identity, whatever
+- Every use of a mapped token is a call of its core identity, whatever
   `requires` clause is active. [Operators](operators.md) already says a local
   function named `add_` does not change `a + b`.
 - A call that passes an extra argument, such as an explicit tolerance
-  (WIR-22), is not a kernel-domain call.
+  (WIR-22), is not a core-domain call.
 
 **Roles.**
 
 | Role | Requirement |
 |---|---|
-| Value level | Native-required, over the domains below. The spec has no form for value-level candidates yet ([operators](operators.md), Execution role and native implementations; [ADR 0008](decisions/0008-temporal-contracts-and-target-mappings.md), Operators and native implementations), so node evaluation and folding use the kernel's own operations |
+| Value level | Native-required, over the domains below. The spec has no form for value-level candidates yet ([operators](operators.md), Execution role and native implementations; [ADR 0008](decisions/0008-temporal-contracts-and-target-mappings.md), Operators and native implementations), so node evaluation and folding use the core's own operations |
 | Composition | One node per call, equivalent to `when valid(lhs, rhs) { return f(lhs, rhs) }`, or `when valid(ts)` for a unary identity. The exception is a row that says otherwise |
 | Constant folding | Value-level evaluation at compile time, except where a row forbids it |
 
@@ -234,13 +245,14 @@ composition another way, such as a native node, if the call's behaviour (see
 **Stability**) is the same.
 
 OP-1 (invalidity) and OP-3 (no input mutation) move from
-[operator contracts](../../../library/operator_contracts.md) and become kernel
-rules. OP-9 governs the text that `str(x)` produces.
+[operator contracts](../../../library/operator_contracts.md) and become core
+rules. String conversion follows the [HGL conversion contract](../user-guide/types-and-expressions.md#string-conversion);
+OP-9 leaves map and set member order unspecified.
 
 Where a row admits several roles, they give the same result for the same
 operands. [Syntax and semantics](../developer-guide/syntax-and-semantics.md)
 (Arithmetic and comparison) and [operators](operators.md) already require
-this of the temporal and floor rows. The kernel extends it to every row
+this of the temporal and floor rows. The core extends it to every row
 (proposed).
 
 **Domains.**
@@ -262,10 +274,10 @@ this of the temporal and floor rows. The kernel extends it to every row
 | `getitem_`, `getattr_` | Projection that is not structural, of an atomic tuple, list, struct or map payload | Composition. At value level the type's own rules apply, such as LOOKUP-1–4 for maps |
 | `getitem_`, `getattr_` | A map key giving `ref<V>`; projection beneath a REF | Composition. These follow WIR-5, MAP-CONN-1–4 and TS-16, not the lifted node: the REF ticks only on a changed designation |
 
-**Equality.** Equality is exact. A kernel-domain `==` is true only for equal
+**Equality.** Equality is exact. A core-domain `==` is true only for equal
 values, with NaN as [NaN comparisons](nan-comparisons.md) says, and `!=` is
 its negation (proposed; REF-EQ-1 already says so for references). No
-kernel-domain call applies a tolerance, whichever candidate realises it. A
+core-domain call applies a tolerance, whichever candidate realises it. A
 tolerant comparison is a named operator with its own parameter, such as the
 standard library's `eq_epsilon`.
 
@@ -273,7 +285,7 @@ Comparisons between `i64` and `f64` are not a row (open point 12). Pack cases
 do not use them.
 
 **Result type** (proposed). The row fixes the result type. For a
-kernel-domain call, an expected type does not request another one: it binds
+core-domain call, an expected type does not request another one: it binds
 no result parameter, unlike an ordinary call
 ([type extensions](type-extensions.md); WIR-12). Ordinary conversion, such as
 `i64`-to-`f64` widening, then applies at the destination
@@ -291,15 +303,15 @@ no result parameter, unlike an ordinary call
   ([operators](operators.md); [language model](language-model.md); open
   point 14). Pack cases avoid them.
 
-**Stability.** *(Decision, owner, 2026-10-18.)* A conformance case asserts the
+**Stability.** *(Agreed.)* A conformance case asserts the
 behaviour an operator expression must have, never which candidate is
 selected. Overloads must not change that behaviour for the expressions the
 tests write.
 
-The kernel makes this precise (proposed). In a conformance run no candidate
-changes the behaviour of a kernel-domain call: the realisation gives it,
+The core makes this precise (proposed). In a conformance run no candidate
+changes the behaviour of a core-domain call: the realisation gives it,
 whatever candidates it holds beyond the table, and the pack's own candidates
-stay off kernel rows (Pack check). That behaviour is:
+stay off core rows (Pack check). That behaviour is:
 - its output trace: values, deltas, ticks, modification times and validity
   ([runtime conformance](../../../runtime/conformance.md));
 - its result type;
@@ -322,21 +334,23 @@ call's behaviour:
   ([ADR 0008](decisions/0008-temporal-contracts-and-target-mappings.md),
   Target boundary).
 
-So the trace compared for a kernel-domain call is its output, not what runs
-inside it. For a kernel identity, the "operator selection" in ADR 0008's
+So the trace compared for a core-domain call is its output, not what runs
+inside it. For a core identity, the "operator selection" in ADR 0008's
 acceptance list means selecting this behaviour.
 
 **The realisation.** It has exactly one most specific candidate for every
-kernel-domain call, and the kernel descriptor names it. A tie inside it is the
+core-domain call, and the core descriptor names it. A tie inside it is the
 implementation's nonconformance, not a permitted rejection.
 
 **Library candidates.** A conformance run loads no library, so no library
-candidate reaches a case. Whether a library's candidates may change a
-kernel-domain call in a program that loads the library is cross-module
-coherence, which [modules.md](modules.md) leaves open. This record does not
-settle it (open point 15).
+candidate reaches a case. In a program that loads `std`, its candidates retain
+the operator's core identity and applicable contract. Ordinary matching and
+specificity apply: library membership adds no override priority, and equally
+ranked applicable candidates are ambiguous (WIR-16). Further cross-module
+coherence rules remain open; this record adds no replacement mechanism
+(open point 15).
 
-**Not kernel calls.** These spellings are language forms with their own rules.
+**Not core calls.** These spellings are language forms with their own rules.
 They are never resolved among candidates, and no candidate changes them:
 - the harness comparison `eval(...) == [...]`
   ([syntax and semantics](../developer-guide/syntax-and-semantics.md);
@@ -347,12 +361,12 @@ They are never resolved among candidates, and no candidate changes them:
   clause ([syntax and semantics](../developer-guide/syntax-and-semantics.md));
 - a structural projection (WIR-5).
 
-**Outside the kernel domains.** An implementation or library may give an
+**Outside the core domains.** An implementation or library may give an
 operator expression outside the table a meaning, or none. The pack asserts
 neither acceptance nor rejection of such an expression, with one exception.
 When a case's own part declares a type and a concrete candidate over it, WIR-18
 selects that candidate whatever else the universe holds, so the case may assert
-its result. The rejected rows above are kernel-domain calls, not extensions: no
+its result. The rejected rows above are core-domain calls, not extensions: no
 candidate makes them accepted.
 
 **Logical operators** (proposed). `and_`, `or_` and `not_` admit only `bool`,
@@ -437,7 +451,7 @@ result.
   child's next scheduled time schedules its owner, and each enclosing owner in
   turn (GRF-22).
 - **MAP-7 Name.** `map` is a prelude name. A declaration named `map` in a
-  module shadows it there (§1, step 2). No module re-exports the kernel's
+  module shadows it there (§1, step 3). No module re-exports the core's
   `map`.
 
 For the structured test dump (§6), a call inside the anonymous function is a
@@ -449,13 +463,13 @@ result.
 
 ### 5. Eval support
 
-The kernel declares
+The core declares
 `export struct TimedValue<T> { time: datetime; value: delta<T> }` and the
 replay and record contracts of
 [ordinary replay and record](../../../library/ordinary_replay_record.md),
-together with OP-11. Those contracts move from `library/` to kernel status.
+together with OP-11. Those contracts move from `library/` to core status.
 
-- **Binding.** Eval binds the kernel's own replay and record realisation.
+- **Binding.** Eval binds the core's own replay and record realisation.
   - Another module may add candidates to them. Eval does not choose among
     candidates, so an added candidate is never what eval wires. A direct
     call resolves normally
@@ -468,15 +482,15 @@ together with OP-11. Those contracts move from `library/` to kernel status.
 - **Borrowing.** `var recording = get(global_state, key)` is a writable borrow,
   so `push` lands in the store ([value mutability](value-mutability.md)). This
   is required behaviour, not an optimisation.
-- **Reference realisation.** hgraph_spec `kernel/` holds `TimedValue`, `replay`
-  and `record` in HGL. The bodies are the standard library's existing HGL
-  bodies, unchanged. An implementation may substitute a native realisation
-  that passes the kernel cases.
+- **Reference realisation** (proposed). hgraph_spec `core/` will hold
+  `TimedValue`, `replay` and `record` in HGL. The portable source bodies will be
+  relocated without semantic changes. An implementation may substitute a native realisation
+  that passes the core cases.
 - **Closure.** A reference body uses only:
   - the language;
   - prelude names;
   - injectables;
-  - kernel declarations.
+  - core declarations and their selected `core.native` helpers.
 
   A body that needs anything else first amends this record.
 
@@ -485,7 +499,7 @@ together with OP-11. Those contracts move from `library/` to kernel status.
 | Facility | Contract |
 |---|---|
 | Eval driver | EVAL-1–6; [recorder keys](eval-recorder-keys.md); dense materialisation; timed sequences |
-| `assert` | Takes a wiring-time `bool`. A failure reports the first differing cycle. Harness equality is not a kernel call: it is exact, compares presence first and follows the harness rules of each shape ([syntax and semantics](../developer-guide/syntax-and-semantics.md)). No candidate changes it |
+| `assert` | Takes a wiring-time `bool`. A failure reports the first differing cycle. Harness equality is not a core call: it is exact, compares presence first and follows the harness rules of each shape ([syntax and semantics](../developer-guide/syntax-and-semantics.md)). No candidate changes it |
 | `assert raises` | [Execution-error assertions](execution-error-assertions.md); the [error catalogue](error-catalogue.md) |
 | `# expect-error` | [Source-rejection tests](compile-rejection-fixtures.md), including owner isolation |
 | Test scopes and attributes | One nestable `test [attributes] { ... }` scope, which holds helpers, nested scopes and statements. `assert [attributes] ...` has the same form. The attributes are `case: ID`, `rules: ID, ...` and `scenario: "text"`. They are checked and inherited downwards: `case` is set once per branch, `rules` accumulate, and `scenario` extends the path. A test name is optional. Every scope, attributed or not and in any part, joins the module-wide test scope: a scope groups source and is not a namespace ([testing and running](../user-guide/testing-and-running.md)). A case › scenario path is unique in the module. Inside an unnamed scope, the owner of an `# expect-error` is the innermost scope that sets `case` or adds a `scenario` |
@@ -495,19 +509,19 @@ together with OP-11. Those contracts move from `library/` to kernel status.
 ## Conformance pack
 
 - **Location.** The pack lives in hgraph_spec `conformance/`, versioned with
-  the kernel. A conformance claim names one hgraph_spec revision.
-- **One module.** *(Decision, owner, 2026-10-18.)* The pack's tests form one
-  module, `hgraph.conformance`, assembled from parts
+  the core. A conformance claim names one hgraph_spec revision.
+- **One module.** *(Agreed.)* The pack's tests form one
+  module, `conformance`, assembled from parts
   ([ADR 0006](decisions/0006-multi-file-module-parts.md); [modules.md](modules.md),
   Source module parts). Its parts share one declaration scope and one test
   scope, in any order
   ([testing and running](../user-guide/testing-and-running.md);
   [syntax and semantics](../developer-guide/syntax-and-semantics.md)), so a
   part uses a fixture without importing it. The module is not
-  `hgraph.kernel`, so its tests see only the kernel's public interface and the
+  `core`, so its tests see only the core's public interface and the
   prelude. **Separate modules** lists the cases kept out of it.
-  - **Test-only.** *(Decision.)* The module exists only for conformance. No
-    implementation ships, registers or links `hgraph.conformance` or a module
+  - **Test-only.** *(Agreed.)* The module exists only for conformance. No
+    implementation ships, registers or links `conformance` or a module
     named under it. Only a conformance run supplies them, so an import of one
     anywhere else is unresolved (`module.unresolved`).
   - `conformance/conformance.hgl` is the module's one unnamed file
@@ -530,9 +544,7 @@ together with OP-11. Those contracts move from `library/` to kernel status.
     as a pinned or dense copy of a case, is not a pack file. An
     implementation that cannot check a part yet lists it in its profile, and
     a profile that lists a fixture part lists every part that uses it.
-- **Fixtures.** *(Decision, owner, 2026-10-18: shared fixtures are shared, no
-  copies are kept in step by a lint, and the fixtures are the module's public
-  declarations.)* A fixture is a function that two or more case parts, or a
+- **Fixtures.** *(Agreed.)* A fixture is a function that two or more case parts, or a
   separate module, use. It is declared once, as an `export fn` at module level
   of a fixture part, and never copied. A helper that one case part uses stays
   in that part's test context
@@ -601,12 +613,12 @@ together with OP-11. Those contracts move from `library/` to kernel status.
     names a native fixture. The full assembly always includes them.
 - **Separate modules.** Three kinds of case are not parts of the pack module.
   Each is listed in `pack.json` with its partners and runs alone. A name under
-  `hgraph.conformance.` groups listings only, and gives no access to the pack
+  `conformance.` groups listings only, and gives no access to the pack
   module's private declarations
   ([ADR 0006](decisions/0006-multi-file-module-parts.md)).
   - Rejection cases (`# expect-error`) form one module,
-    `hgraph.conformance.rejections`, assembled from parts in the same way
-    *(Decision, owner, 2026-10-18)*. In the pack module, a boundary that an
+    `conformance.rejections`, assembled from parts in the same way
+    *(Agreed.)*. In the pack module, a boundary that an
     implementation's syntax recovery cannot isolate, or a malformed
     annotation, would fail admission for every case
     ([source-rejection tests](compile-rejection-fixtures.md)). Each rejection
@@ -618,26 +630,27 @@ together with OP-11. Those contracts move from `library/` to kernel status.
     Their partner is the pack module built from `conformance.hgl` and
     `fixtures_native`.
   - A shadowing case is its own module, because a declaration named like a
-    prelude name shadows it in every part (§1, step 2; MAP-7).
+    prelude name shadows it in every part (§1, step 3; MAP-7).
 
-  A separate module imports the fixtures it uses from `hgraph.conformance`. Its
+  A separate module imports the fixtures it uses from `conformance`. Its
   partner is the pack module built from `conformance.hgl` and the fixture parts
   that declare them. The harness controls in `compiler/negative_testing/` fail
   by design and stay there
   ([negative-testing conformance](../../../compiler/negative_testing/README.md)).
-- **Dependency.** A pack file imports only `hgraph.kernel`, and a separate
-  module also `hgraph.conformance`. In the pack module only `conformance.hgl`
+- **Dependency.** A pack file imports only `core`, and a separate
+  module also `conformance`. In the pack module only `conformance.hgl`
   has a `use` line. Imports join the whole module's scope
   ([ADR 0006](decisions/0006-multi-file-module-parts.md)), so a `use` in one
   part would serve the others silently. There are two exemptions:
   - a `use` owned by an `# expect-error`
     ([invalid-import.hgl](../../examples/reject/invalid-import.hgl));
   - a separate module's import of another partner that `pack.json` lists.
-- **Runs.** *(Decision, owner, 2026-10-18: a conformance run loads no
-  library.)* A pack run supplies only `hgraph.kernel`, the files `pack.json`
+- **Runs.** *(Agreed: no library dependency.)* A pack run supplies only `core`, the files `pack.json`
   lists for that run and the pack's own native provider. It supplies no
   library source, descriptor or provider, so a green run proves that the pack
-  does not need the library. No other run supplies `hgraph.conformance`.
+  does not need the library. Any `core.native` provider selected by core is
+  included as part of core's declared implementation dependencies. No other
+  run supplies `conformance`.
   - **Full assembly.** Required. A conformance claim runs `conformance.hgl`
     with every part, in one process per implementation, and names the parts
     its profile excludes. Only the whole set shows duplicate names
@@ -647,7 +660,7 @@ together with OP-11. Those contracts move from `library/` to kernel status.
     ([ADR 0006](decisions/0006-multi-file-module-parts.md)), so this is a
     conforming build, and it serves triage.
   - **Separate modules.** Each runs alone, with its partners.
-- **Imports.** An import resolves only against the kernel and the modules the
+- **Imports.** An import resolves only against the core and the modules the
   run supplies.
   - Resolving it against anything else, such as a machine-wide registry, does
     not conform ([modules.md](modules.md), Candidate universe and provider
@@ -663,11 +676,11 @@ together with OP-11. Those contracts move from `library/` to kernel status.
   - an import outside the Dependency rule, or a `use` line in a part;
   - a case part that names another case part's declaration;
   - an `export` outside a fixture part;
-  - an `impl fn` of a kernel identity with no operand of a type its own part
+  - an `impl fn` of a core identity with no operand of a type its own part
     declares. The parts share one scope, so such a candidate would reach every
-    part's kernel-domain calls;
+    part's core-domain calls;
   - a declaration, other than an `impl fn`, that takes a prelude name (§1), a
-    kernel public name or a fixture's name. The language lets it shadow
+    core public name or a fixture's name. The language lets it shadow
     ([syntax and semantics](../developer-guide/syntax-and-semantics.md),
     Scopes and name lookup), and the pack does not;
   - two functions that are equal up to renaming the declaration, its
@@ -688,24 +701,26 @@ together with OP-11. Those contracts move from `library/` to kernel status.
     page is complete.
   - The Fixtures page indexes the fixture parts, with links to the cases that
     use each fixture. Anchors are canonical identities, such as
-    `hgraph.conformance::pass_through` (proposed), so they survive moving a
+    `conformance.pass_through` (proposed), so they survive moving a
     declaration between parts
     ([ADR 0006](decisions/0006-multi-file-module-parts.md)).
   - The documenter renders a page for every part `pack.json` lists. A part
     that the documenting implementation cannot check is shown from its source
     and marked as not checked.
-- **Operator cases.** A case on a kernel identity asserts behaviour only
+- **Operator cases.** A case on a core identity asserts behaviour only
   (BASE-16, BASE-17).
   - It never asserts a candidate label, which implementation ran, the node
     identity in an error's context (ERROR-2) or an error's message.
-  - It asserts nothing outside the kernel domains, except a result over a type
+  - It asserts nothing outside the core domains, except a result over a type
     its own part declares with a concrete candidate (BASE-18). The type and its
     `impl fn` are production declarations of the pack module, because a test
     context admits no operator implementation
     ([syntax and semantics](../developer-guide/syntax-and-semantics.md)), so
     their names are unique across the pack.
-  - It makes each kernel-domain assertion twice, once with the token and once
-    with the named call: `a + b` and `add_(a, b)`.
+  - Where an identity has both a token and a public named declaration, it
+    makes each assertion through both: `a + b` and `add_(a, b)`. Projection
+    identities without source declarations are tested through their language
+    forms; their public named interface remains open (open point 3).
   - WIRE-SPECIFICITY and WIRE-FAILURES observe selection, but only on an
     operator the case declares itself, so they stay valid.
 - **Discriminating cases.** Operands that tell realisations apart are required:
@@ -759,51 +774,51 @@ together with OP-11. Those contracts move from `library/` to kernel status.
 
 ## The standard library on the base
 
-- **Imports.** Library HGL imports kernel declarations and never redeclares
+- **Imports.** Library HGL imports core declarations and never redeclares
   them. There is no re-export.
 - **Operator candidates.** The library's `impl fn` candidates for the token
-  operators then implement the kernel identities.
-  - Those that duplicate a kernel row add nothing once the kernel realises it,
+  operators then implement the core identities.
+  - Those that duplicate a core row add nothing once the core realises it,
     and an identical duplicate ties with the realisation (WIR-16), so the
     library drops them: the arithmetic and same-type comparison
     instantiations, and `and_`, `or_` and `not_` on `bool`.
-  - A tolerant `eq_` on `f64` would make `==` tolerant in any program that
-    loads the library. The library drops it, and tolerance stays with
-    `eq_epsilon`, which takes an explicit parameter.
+  - A tolerant `eq_` on `f64` does not satisfy the proposed core-domain
+    equality contract. Tolerance stays with `eq_epsilon`, which takes an
+    explicit parameter.
   - Truthy `and_`, `or_` and `not_` on `i64`, `f64` and `str` cannot implement
-    the `bool`-only kernel identities (§3). The library moves them to a
+    the `bool`-only core identities (§3). The library moves them to a
     separately named operator or drops them.
   - The mixed `i64`/`f64` comparisons, and a tolerant mixed `eq_`, wait on
     open point 12.
-- **What the library keeps:**
-  - every `hgraph.std` contract;
-  - the named `hgraph.operators` operators, `abs_` to `substr`;
-  - the `hgraph.native` helpers, including `bound`, `active`, `is_empty`,
-    temporal `len` and the windows;
-  - `pass_through`, `null_sink`, `nothing`, `const` and `tick_count`, as
-    library operators.
+- **Library-owned declarations.** `std` declares operators outside the agreed
+  core inventory. Essential named operators such as `core.abs` keep their
+  declaration in `core`; `std` may extend them through additional candidates.
+  Core helpers belong in `core.native`; additional standard-library helpers
+  belong in `std.native`. This proposal leaves `pass_through`, `null_sink`,
+  `nothing`, `const` and `tick_count` as library operators. Classification of
+  the remaining named inventory follows the core inclusion criteria.
 - **Provided by no layer yet:** `map_`, `switch_`, `reduce`, `mesh_`,
   `try_except`, `no_key` and `if_then_else`. Spec examples that import them
   are excluded by name from runs without the library until a layer declares
   them.
-- **Higher-order `map`.** One-collection `map(...)` is a kernel prelude form
+- **Higher-order `map`.** One-collection `map(...)` is a core prelude form
   (§1, §4), so the library neither declares nor re-exports it. The library
   declares no `map` and needs no change. The two-collection examples
   ([language tour](../user-guide/language-tour.md),
   [structural-types.hgl](../../examples/structural-types.hgl)) wait for open
   point 8. Until then `structural-types.hgl` keeps its
-  `use hgraph.std::{map}` and stays excluded by name. The explicit `map_`
+  `use std::{map}` and stays excluded by name. The explicit `map_`
   operator, with its key parameter and `no_key`, stays in no layer.
 - **Tests.** Library tests that test the language or runtime, and use the
   library only for fixtures, move to the conformance pack. Tests of replay
-  and record become kernel cases. Tests of library contracts stay with the
+  and record become core cases. Tests of library contracts stay with the
   library. The library's token tests move to the pack, and its tolerance
   test of `eq_` moves to `eq_epsilon`, whose default `1e-10` gives the same
   results.
 
 ## Prerequisites (doc-first)
 
-The kernel's closure rests on records that are still proposed:
+The core's closure rests on records that are still proposed:
 - [ADR 0015](decisions/0015-pull-sources.md);
 - [ADR 0016](decisions/0016-eval-scalar-buffer-capabilities.md);
 - [ordinary list values](ordinary-list-values.md);
@@ -829,22 +844,22 @@ Accept them first, or accept them with this record as ADR 0017.
    - one sentence in [runtime overview](../../../runtime/overview.md),
      [node](../../../runtime/node.md) and
      [graph](../../../runtime/graph.md) ("What a nested node may do"): the
-     kernel's language forms (§4), `map(...)` among them, are realised by
+     core's language forms (§4), `map(...)` among them, are realised by
      nested nodes too, and the runtime still specifies only their components;
-   - `kernel/`;
+   - `core/`;
    - the `conformance/` skeleton and its README;
    - these amendments to accepted text, in the same change (proposed):
      - [type extensions](type-extensions.md): the expected result of a
-       kernel-domain call binds no result parameter;
+       core-domain call binds no result parameter;
      - [runtime conformance](../../../runtime/conformance.md): the trace of a
-       kernel-domain call is its output, not the nodes that realise it;
+       core-domain call is its output, not the nodes that realise it;
      - [ADR 0008](decisions/0008-temporal-contracts-and-target-mappings.md),
-       Target boundary: for a kernel identity, operator selection is accepted
+       Target boundary: for a core identity, operator selection is accepted
        on the call's behaviour;
      - [operators](operators.md), Signatures, lifting, and implementation:
-       the 16 system identities are kernel contracts (§3);
+       the 16 system identities are core contracts (§3);
      - [operator contracts](../../../library/operator_contracts.md): OP-1 and
-       OP-3 move to the kernel.
+       OP-3 move to the core.
 
    Leave stubs wherever another repository reads a moved file, such as
    `compiler/stdlib`.
@@ -853,7 +868,7 @@ Accept them first, or accept them with this record as ADR 0017.
      `pack.json`, its README and the pack check. The fixtures are `export fn`
      declarations at module level of their parts.
    - Each library test file that moves to the pack changes its header to
-     `module hgraph.conformance part X` and gains a documentation comment.
+     `module conformance part X` and gains a documentation comment.
      Each helper it copied becomes a call of the shared fixture, and a list
      constant whose type a parameter gives becomes a literal.
    - A moving test that imports a library module waits until the base layer
@@ -863,17 +878,18 @@ Implementation work is tracked outside this repository.
 
 ## Rules
 
-- **BASE-1** *(Decision.)* A conformance test depends only on the language and
-  `hgraph.kernel`.
-- **BASE-2** *(Decision.)* The mandatory kernel module is `hgraph.kernel`. No
-  other module is mandatory. It is supplied without an import or a build
-  request.
-- **BASE-3** The kernel has three surfaces: the prelude, the public interface
+- **BASE-1** *(Agreed.)* A conformance test depends only on the language and
+  `core`.
+- **BASE-2** *(Agreed.)* The mandatory public core module is `core`. It is
+  supplied without an import or a build request. Its declared implementation
+  dependencies may include a selected `core.native` provider; they require no
+  standard library or other application library.
+- **BASE-3** The core has three surfaces: the prelude, the public interface
   and token binding.
 - **BASE-4** The prelude is exactly the table in §1, resolved in the order §1
   gives.
-- **BASE-5** System operators are kernel identities, declared as §3 gives and
-  bound per target. Declaring them creates no runtime operator. The kernel
+- **BASE-5** System operators are core identities, declared as §3 gives and
+  bound per target. Declaring them creates no runtime operator. The core
   fixes their behaviour over the §3 domains, not their candidate set. The
   value level is native-required. Composition is one node per call with ADR
   0008's selections and its validity requirement written out: it invalidates
@@ -885,54 +901,56 @@ Implementation work is tracked outside this repository.
 - **BASE-6** A language form's observable contract is its language rule. The
   four facilities in §4 are native-required.
 - **BASE-7** The six injectables are available in every admitted phase.
-- **BASE-8** Eval wires the kernel's own replay and record and builds
+- **BASE-8** Eval wires the core's own replay and record and builds
   `TimedValue` lists. No module can change what eval wires.
-- **BASE-9** `kernel/` is a reference realisation. Native substitution that
-  passes the kernel cases conforms. A reference body is closed over the
-  language, the prelude, the injectables and kernel declarations.
+- **BASE-9** `core/` is a reference realisation. Native substitution that
+  passes the core cases conforms. A reference body is closed over the
+  language, the prelude, the injectables, core declarations and their selected
+  `core.native` helpers.
 - **BASE-10** The test host provides everything in §6.
-- **BASE-11** An import resolves only against the kernel and the modules the
+- **BASE-11** An import resolves only against the core and the modules the
   run supplies.
-- **BASE-12** *(Decision.)* A conformance run loads no library. A pack run
-  supplies only `hgraph.kernel`, the files `conformance/pack.json` lists for it
-  and the pack's own native provider, and no other run supplies
-  `hgraph.conformance`. The rest is proposed. A pack file imports only
-  `hgraph.kernel`, and a separate module also `hgraph.conformance`, except for
+- **BASE-12** *(Agreed.)* A conformance run loads no library. A pack run
+  supplies only `core`, the files `conformance/pack.json` lists for it
+  and the pack's own native provider. Any selected `core.native` provider is
+  part of core's declared implementation dependencies. No other run supplies
+  `conformance`. The rest is proposed. A pack file imports only
+  `core`, and a separate module also `conformance`, except for
   a `use` owned by an `# expect-error` and an import of another partner that
   `pack.json` lists.
-- **BASE-13** *(Decision.)* The kernel's conformance tests form one module,
-  `hgraph.conformance`, assembled from the parts `pack.json` lists. It is
+- **BASE-13** *(Agreed.)* The core's conformance tests form one module,
+  `conformance`, assembled from the parts `pack.json` lists. It is
   test-only: no runtime ships or links it. A fixture that two or more case
   parts or a separate module use is declared once, exported from a fixture
   part, and never copied. Rejection cases form a second module,
-  `hgraph.conformance.rejections`, which imports the fixtures it uses. The rest
+  `conformance.rejections`, which imports the fixtures it uses. The rest
   is proposed. Names are unique across the module, no two functions in it are
   equal up to renaming, and a case part names no other case part's
   declarations. Cases about more than one module and shadowing cases are
   modules of their own. A conformance claim runs the full assembly.
 - **BASE-14** A case that needs an observation with no HGL spelling is
   host-level.
-- **BASE-15** *(Decision.)* The library builds on the base. Its HGL imports the
-  kernel and never redeclares it. Its native parts may use runtime facilities.
-- **BASE-16** *(Decision.)* A conformance case asserts the behaviour an
+- **BASE-15** *(Agreed.)* The library builds on the base. Its HGL imports the
+  core and never redeclares it. Its native parts may use runtime facilities.
+- **BASE-16** *(Agreed.)* A conformance case asserts the behaviour an
   operator expression must have, never which candidate is selected. Overloads
   must not change that behaviour for the expressions the tests write.
 - **BASE-17** In a conformance run, no candidate changes the behaviour of a
-  kernel-domain call. That behaviour is its output trace (values, deltas,
+  core-domain call. That behaviour is its output trace (values, deltas,
   ticks, modification times and validity), its result type, its folded value,
   whether it is accepted, and a failure's catalogued code and phase. The nodes
   that realise the call are not part of that behaviour. Every use of a mapped
-  token is a call of its kernel identity, whatever `requires` clause is active.
+  token is a call of its core identity, whatever `requires` clause is active.
   The realisation has exactly one most specific candidate for every
-  kernel-domain call, and the kernel descriptor names it.
+  core-domain call, and the core descriptor names it.
 - **BASE-18** The harness comparison, presence tests against `null`, `requires`
-  predicates and structural projections are not kernel calls, and no candidate
-  changes them. Outside the kernel domains, an implementation or library may
+  predicates and structural projections are not core calls, and no candidate
+  changes them. Outside the core domains, an implementation or library may
   accept or reject an operator expression, and the pack asserts neither. The
   exception is a result over a type that the case's own part declares with a
-  concrete candidate. The rejected rows of §3 are kernel-domain calls and stay
+  concrete candidate. The rejected rows of §3 are core-domain calls and stay
   rejected.
-- **BASE-19** `map(...)` is a kernel prelude form: the keyed child graph with a
+- **BASE-19** `map(...)` is a core prelude form: the keyed child graph with a
   result. MAP-1–MAP-7 are its contract. No module re-exports it, and a module's
   own declaration named `map` shadows it there.
 
@@ -940,12 +958,12 @@ Implementation work is tracked outside this repository.
 
 Closed points keep their numbers, because the text above cites them.
 
-1. **Kernel candidate set.** *Closed.* It is a lower bound (owner ruling,
-   2026-10-18): the kernel fixes behaviour over its domains, not a candidate
+1. **Core candidate set.** *Closed.* It is a lower bound: the core fixes
+   behaviour over its domains, not a candidate
    set (BASE-16, BASE-17). Implementations and libraries may add candidates
    within HGL's candidate universe ([modules.md](modules.md)). Overloads a
    host registers at run time are outside that universe. An implementation
-   need not hide its candidates outside the kernel domains. It must still
+   need not hide its candidates outside the core domains. It must still
    reject the combinations the language rejects, such as `2 * cooldown` and
    `duration // duration` for tokens
    ([syntax and semantics](../developer-guide/syntax-and-semantics.md),
@@ -961,10 +979,10 @@ Closed points keep their numbers, because the text above cites them.
    [ordinary replay and record](../../../library/ordinary_replay_record.md)).
    This needs no `export fn` status.
 3. **`getitem_` and `getattr_`.** The lower bound settles extensibility.
-   Candidates outside the kernel's projection rows are allowed. One question
+   Candidates outside the core's projection rows are allowed. One question
    remains: whether they get source declarations and join the public
    interface.
-4. **Truthiness candidates.** *Closed.* They leave the kernel identities
+4. **Truthiness candidates.** *Closed.* They leave the core identities
    (proposed). `and_`, `or_` and `not_` constrain their operands to `bool`, so
    a candidate on another type is rejected at registration (WIR-23, WIR-24).
    As a result:
@@ -998,7 +1016,7 @@ Closed points keep their numbers, because the text above cites them.
     host-level.
 11. **The tolerant `f64` `eq_` test.** *Closed.* The library's tolerance test
     of `eq_` retargets to `eq_epsilon`, whose default 1e-10 gives the same
-    results. The named `eq_` on `f64` is a kernel-domain call and must be
+    results. The named `eq_` on `f64` is a core-domain call and must be
     exact, so the library drops its tolerant `f64` candidate. Its tolerant
     mixed candidates move to open point 12.
 12. **Mixed numeric comparisons.** Comparisons between `i64` and `f64` are not
@@ -1010,14 +1028,14 @@ Closed points keep their numbers, because the text above cites them.
     "Values of different types are not equal"
     ([scalar types](../../../runtime/scalar_types.md)) and "`1` and `1.0`
     are not equal" ([scalar cases](../../../runtime/cases_scalar.md)). Until
-    this is decided, mixed comparisons are not kernel-domain calls and pack
+    this is decided, mixed comparisons are not core-domain calls and pack
     cases avoid them.
-13. **Tolerant `f64` equality in a realisation.** §3 requires a kernel-domain
+13. **Tolerant `f64` equality in a realisation.** §3 requires a core-domain
     `==` on `f64` to be exact in every role, and `!=` to be its negation. A
     realisation whose composition `==` is tolerant must become exact for
-    kernel-domain calls without adding a second operator. A call that passes
+    core-domain calls without adding a second operator. A call that passes
     an explicit tolerance, such as `eq_(a, b, epsilon: e)`, is not a
-    kernel-domain call (WIR-22) and may stay tolerant.
+    core-domain call (WIR-22) and may stay tolerant.
 14. **Codes and phases for operator failures.** The `operator` category has no
     source code, and arithmetic failures have no execution code
     ([error catalogue](error-catalogue.md)). A zero divisor and `i64` overflow
@@ -1036,15 +1054,22 @@ Closed points keep their numbers, because the text above cites them.
     constant expression stays a compile-time diagnostic
     ([syntax and semantics](../developer-guide/syntax-and-semantics.md))
     unless this point amends it.
-15. **Kernel coherence.** *Closed* (owner, 2026-10-18). A conformance run loads
-    no library, so no library candidate can change a case, and the pack keeps
-    its own candidates off kernel rows (Pack check). Whether a library's
-    candidates may change kernel-domain calls in a program that loads it is
-    cross-module coherence ([modules.md](modules.md)), outside this record.
-16. **Rejection cases.** *Closed* (owner, 2026-10-18). They form the second
-    module `hgraph.conformance.rejections`, which imports any fixture it needs
-    from `hgraph.conformance`.
+15. **Core coherence.** *Closed for conformance isolation.* A conformance run
+    loads no library, so no library candidate can change a case, and the pack
+    keeps its own candidates off core rows (Pack check). A program that loads
+    `std` uses ordinary matching and specificity, preserving the selected core
+    operator's applicable contract; library membership gives no override
+    priority. Further cross-module coherence remains outside this record.
+16. **Rejection cases.** *Closed.* They form the second
+    module `conformance.rejections`, which imports any fixture it needs
+    from `conformance`.
 17. **Exported `const fn` fixtures.** `export const fn` has no accepted
     spelling ([functions](../user-guide/functions.md)). The pack's parts share
     a `const fn` fixture without exporting it, so only a separate module that
     needs one waits for the spelling.
+
+18. **Essential named core operators.** `core.abs` is part of the agreed core
+    vocabulary. Its mandatory type domains, execution roles and boundary
+    failures still need a detailed contract before conformance cases can
+    claim coverage. The sixteen declarations in §3 are not an exhaustive
+    core inventory.

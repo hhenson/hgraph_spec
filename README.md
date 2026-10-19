@@ -19,7 +19,7 @@ specified behavior also belong with the specification.
 - [Live map key connections](language/docs/design/map-key-connections.md)
 - [Runtime model](runtime/overview.md) and [conformance method](runtime/conformance.md)
 - [HGL compiler conformance](compiler/conformance.md)
-- [Base layer: kernel module and conformance pack](language/docs/design/base-layer.md) (proposed)
+- [Base layer: core module and conformance pack](language/docs/design/base-layer.md) (proposed)
 - [Wiring](wiring/wiring.md): how every front end describes a graph
 - [Operator behavior contracts](library/README.md): what operators publish
 - [Historical reference](historical/README.md)
