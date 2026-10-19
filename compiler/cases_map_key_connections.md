@@ -5,7 +5,7 @@ TS-11/14/16/17/23 and [LOOKUP-1–4](../language/docs/design/nullable-map-lookup
 use ordinary map publication deltas and graph-wired references. `_` in an
 output trace is no publication; an empty REF is a valid designation value.
 This document claims no target execution. The initial V profile has no REF
-leaves, including below an outer `ref<map<K,V>>`.
+leaves, including below an outer `ref<dict<K,V>>`.
 
 Observe after producers and selection evaluate. Select X initially; A is its
 first child, B its later replacement, and C the Y child. Hold A in a separate
@@ -38,7 +38,7 @@ maintain selection without requiring the key to republish at 1, 4 or 6.
 | Additional case | Required result |
 |---|---|
 | Valid key before the map's first publication | Publish a valid, modified empty REF; the ordinary follower is invalid/unmodified. Repeated absence is silent, and later arrival with silent key selects and samples the child. |
-| Select a key through `ref<map<K,V>>` in graph composition | Compose WIR-5 with live selection; parent-map retargeting reselects the child for the held key, including equal-valued targets, missing membership and a silent key. |
+| Select a key through `ref<dict<K,V>>` in graph composition | Compose WIR-5 with live selection; parent-map retargeting reselects the child for the held key, including equal-valued targets, missing membership and a silent key. |
 | A present selected child is invalid | Membership stays true; designate that child and apply TS-14/17's invalid-target observations. Do not publish empty REF. |
 | Selected child becomes invalid, then valid again without removal | Keep membership and designation unchanged; propagate ordinary invalidation/revalidation under existing input rules, without a REF tick. |
 | Switch X to a different live Y that holds the same 7 | REF ticks and the ordinary consumer samples 7 again; equal payloads do not equate target identities. A repeated Y key is silent. |

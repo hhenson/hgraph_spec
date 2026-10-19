@@ -5,13 +5,13 @@ module examples.dynamic_collection_iteration
 
 use std::{null_sink}
 
-export fn observe_values(book: map<str, f64>, offset: f64) {
+export fn observe_values(book: dict<str, f64>, offset: f64) {
     for value in values(book) {
         null_sink(value + offset)
     }
 }
 
-export fn observe_items(book: map<str, f64>, offset: f64) {
+export fn observe_items(book: dict<str, f64>, offset: f64) {
     for key, value in items(book) {
         # `key` identifies this child and is available to graph expressions.
         null_sink(value + offset)

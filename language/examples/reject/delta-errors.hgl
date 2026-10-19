@@ -37,13 +37,13 @@ const fn require_delta_shape<T>(value: T) -> i64 {
 const fn rejected_signal(value: delta<signal>) -> i64 => 0
 
 # expect-error(shape, "delta.unsupported_shape")
-const fn rejected_delta_as_shape(value: delta<delta<map<i64, i64>>>) -> i64 => 0
+const fn rejected_delta_as_shape(value: delta<delta<dict<i64, i64>>>) -> i64 => 0
 
 # expect-error(shape, "delta.unsupported_shape")
-const fn rejected_atomic_delta_payload(value: delta<atomic<delta<map<i64, i64>>>>) -> i64 => 0
+const fn rejected_atomic_delta_payload(value: delta<atomic<delta<dict<i64, i64>>>>) -> i64 => 0
 
 # expect-error(shape, "delta.unsupported_shape")
-const fn rejected_collection_key(value: delta<map<list<i64>, i64>>) -> i64 => 0
+const fn rejected_collection_key(value: delta<dict<list<i64>, i64>>) -> i64 => 0
 
 test wrong_bool_delta {
     # expect-error(type, "delta.type_mismatch")
@@ -165,7 +165,7 @@ test generic_delta_field_replacement {
 
 test unsupported_specialized_delta_shape {
     # Empty delta data is legal to store; using its type as a shape is not.
-    let source: delta<map<i64, i64>> = delta<map<i64, i64>>()
+    let source: delta<dict<i64, i64>> = delta<dict<i64, i64>>()
     # expect-error(shape, "delta.unsupported_shape")
     let result = require_delta_shape(source)
 }
@@ -202,7 +202,7 @@ test tuple_positions {
 
 test map_key_type {
     # expect-error(type, "delta.type_mismatch")
-    let value: delta<map<str, i64>> = delta<map<i64, i64>>(upsert: [1: 2])
+    let value: delta<dict<str, i64>> = delta<dict<i64, i64>>(upsert: [1: 2])
 }
 
 test set_member_type {
@@ -221,7 +221,7 @@ test nominal_argument {
 }
 
 test nested_child_identity {
-    let value = delta<map<i64, Quote>>(upsert: [
+    let value = delta<dict<i64, Quote>>(upsert: [
         # expect-error(type, "delta.type_mismatch")
         1: delta<OtherQuote>(bid: 2)
     ])
@@ -239,12 +239,12 @@ test nested_scalar_type {
 
 test held_to_delta {
     # expect-error(type, "delta.type_mismatch")
-    let value: delta<map<i64, i64>> = map<i64, i64>(items: [1: 2])
+    let value: delta<dict<i64, i64>> = dict<i64, i64>(items: [1: 2])
 }
 
 test delta_to_held {
     # expect-error(type, "delta.type_mismatch")
-    let value: map<i64, i64> = delta<map<i64, i64>>(upsert: [1: 2])
+    let value: dict<i64, i64> = delta<dict<i64, i64>>(upsert: [1: 2])
 }
 
 test timed_field_shape {
@@ -324,7 +324,7 @@ test atomic_set_payload {
 
 test atomic_map_payload {
     # expect-error(type, "delta.type_mismatch")
-    let value: delta<atomic<map<str, i64>>> = map<i64, i64>(items: [1: 2])
+    let value: delta<atomic<dict<str, i64>>> = dict<i64, i64>(items: [1: 2])
 }
 
 test rolling_payload {
@@ -377,12 +377,12 @@ test wrong_member_type {
 
 test wrong_key_type {
     # expect-error(type, "delta.entry_type")
-    let value = delta<map<i64, i64>>(upsert: ["wrong": 1])
+    let value = delta<dict<i64, i64>>(upsert: ["wrong": 1])
 }
 
 test wrong_remove_key_type {
     # expect-error(type, "delta.entry_type")
-    let value = delta<map<i64, i64>>(remove: ["wrong"])
+    let value = delta<dict<i64, i64>>(remove: ["wrong"])
 }
 
 test wrong_index_type {
@@ -392,7 +392,7 @@ test wrong_index_type {
 
 test wrong_composite_key_identity {
     # expect-error(type, "delta.entry_type")
-    let value = delta<map<Quote, i64>>(upsert: [OtherQuote(bid: 1): 2])
+    let value = delta<dict<Quote, i64>>(upsert: [OtherQuote(bid: 1): 2])
 }
 
 test duplicate_set_member {
@@ -401,7 +401,7 @@ test duplicate_set_member {
 }
 
 test duplicate_map_key {
-    let value = delta<map<i64, i64>>(upsert: [
+    let value = delta<dict<i64, i64>>(upsert: [
         1: 2,
         # expect-error(type, "delta.duplicate_entry")
         1: 3
@@ -410,7 +410,7 @@ test duplicate_map_key {
 
 test duplicate_map_removal {
     # expect-error(type, "delta.duplicate_entry")
-    let value = delta<map<i64, i64>>(remove: [1, 1])
+    let value = delta<dict<i64, i64>>(remove: [1, 1])
 }
 
 test duplicate_fixed_index {
@@ -425,7 +425,7 @@ test duplicate_growing_removal {
 
 test duplicate_composite_key {
     # expect-error(type, "delta.duplicate_entry")
-    let value = delta<map<Quote, i64>>(upsert: [Quote(bid: 1): 2, Quote(bid: 1): 3])
+    let value = delta<dict<Quote, i64>>(upsert: [Quote(bid: 1): 2, Quote(bid: 1): 3])
 }
 
 test negative_growing_index {
@@ -463,12 +463,12 @@ test set_reverse_overlap {
 
 test map_overlap {
     # expect-error(type, "delta.overlap")
-    let value = delta<map<i64, i64>>(upsert: [1: 2], remove: [1])
+    let value = delta<dict<i64, i64>>(upsert: [1: 2], remove: [1])
 }
 
 test map_reverse_overlap {
     # expect-error(type, "delta.overlap")
-    let value = delta<map<i64, i64>>(remove: [1], upsert: [1: 2])
+    let value = delta<dict<i64, i64>>(remove: [1], upsert: [1: 2])
 }
 
 test nonconstant_member {
@@ -480,7 +480,7 @@ test nonconstant_member {
 test nonconstant_key {
     var position: i64 = 0
     # expect-error(type, "delta.entry_constant")
-    let value = delta<map<i64, i64>>(upsert: [position: 1])
+    let value = delta<dict<i64, i64>>(upsert: [position: 1])
 }
 
 test nonconstant_index {

@@ -11,7 +11,7 @@ fn forward_empty_delta<T>(value: T) -> T {
     when { return delta_value(value) }
 }
 fn empty_delta_set(value: set<i64>) -> set<i64> => forward_empty_delta(value)
-fn empty_delta_map(value: map<i64, i64>) -> map<i64, i64> => forward_empty_delta(value)
+fn empty_delta_map(value: dict<i64, i64>) -> dict<i64, i64> => forward_empty_delta(value)
 fn empty_delta_fixed(value: list<i64, 2>) -> list<i64, 2> => forward_empty_delta(value)
 fn empty_delta_growing(value: list<i64>) -> list<i64> => forward_empty_delta(value)
 fn empty_delta_tuple(value: tuple<i64, bool>) -> tuple<i64, bool> => forward_empty_delta(value)
@@ -31,7 +31,7 @@ test empty_sparse_application {
     ]) == [
         delta<set<i64>>(), _, delta<set<i64>>(added: [1]), _, _
     ]
-    assert eval(empty_delta_map, value: [delta<map<i64, i64>>(), delta<map<i64, i64>>()]) == [delta<map<i64, i64>>(), _]
+    assert eval(empty_delta_map, value: [delta<dict<i64, i64>>(), delta<dict<i64, i64>>()]) == [delta<dict<i64, i64>>(), _]
     assert eval(empty_delta_fixed, value: [delta<list<i64, 2>>(), delta<list<i64, 2>>()]) == [delta<list<i64, 2>>(), _]
     assert eval(empty_delta_growing, value: [delta<list<i64>>(), delta<list<i64>>()]) == [delta<list<i64>>(), _]
     assert eval(empty_delta_tuple, value: [
@@ -78,7 +78,7 @@ test nonempty_membership_errors_after_empty {
         eval(empty_delta_set, value: [delta<set<i64>>(), delta<set<i64>>(removed: [1])])
     }
     assert raises("eval.input_delta_profile") {
-        eval(empty_delta_map, value: [delta<map<i64, i64>>(), delta<map<i64, i64>>(remove: [1])])
+        eval(empty_delta_map, value: [delta<dict<i64, i64>>(), delta<dict<i64, i64>>(remove: [1])])
     }
     assert raises("eval.input_delta_profile") {
         eval(empty_delta_growing, value: [delta<list<i64>>(), delta<list<i64>>(items: [1: 7])])

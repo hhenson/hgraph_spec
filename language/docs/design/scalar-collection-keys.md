@@ -1,6 +1,6 @@
 # Scalar collection keys and members
 
-Extend the existing structural publication profile to `set<K>` and `map<K, S>`,
+Extend the existing structural publication profile to `set<K>` and `dict<K, S>`,
 where K is any admitted built-in scalar or declared enum and S is any admitted
 publication shape. This includes bytes under [BYTE-1–6](bytes-values.md), with
 exact content equality/hash. For `f64`, this extension covers non-NaN values, including

@@ -1,15 +1,15 @@
 module examples.reject_nullable_map_lookup
 
-const fn unchecked(book: map<str, i64>, key: str) -> i64 {
+const fn unchecked(book: dict<str, i64>, key: str) -> i64 {
     let price = get(book, key)
     # expect-error(type, "nullable.required_presence")
     return price + 1
 }
-const fn wrong_default(book: map<str, i64>, key: str) -> i64 {
+const fn wrong_default(book: dict<str, i64>, key: str) -> i64 {
     # expect-error(type, "lookup.default_type")
     return get(book, key, default: "missing")
 }
-const fn repeated_read(book: map<str, i64>, key: str) -> i64 {
+const fn repeated_read(book: dict<str, i64>, key: str) -> i64 {
     let price = get(book, key)
     if price == null { return 0 }
     let second = get(book, key)
@@ -17,6 +17,6 @@ const fn repeated_read(book: map<str, i64>, key: str) -> i64 {
     return second
 }
 test surviving_lookup_control {
-    let value = get(map<str, i64>(items: ["X": 7]), "X")
+    let value = get(dict<str, i64>(items: ["X": 7]), "X")
     if value != null { assert value == 7 }
 }

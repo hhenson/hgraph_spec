@@ -111,7 +111,7 @@ fn sibling_continues(value: i64) -> i64 {
     consume_error(seen.error)
     unrelated(value)
 }
-fn per_key(book: map<str, i64>) {
+fn per_key(book: dict<str, i64>) {
     for key, value in items(book) {
         let seen = capture(required, value)
         consume_value(seen.value)
@@ -119,7 +119,7 @@ fn per_key(book: map<str, i64>) {
     }
 }
 fn fails_start(value: i64) -> i64 {
-    start { at(map<str, i64>(items: []), "X") }
+    start { at(dict<str, i64>(items: []), "X") }
     when { return value }
 }
 fn captured_start(value: i64) -> i64 {
@@ -148,10 +148,10 @@ test capture_retains_events_and_continues {
     assert eval(preserved_writes, value: [7, -1, 8, -1]) == [107, -1, 108, -1]
     assert eval(sibling_continues, value: [7, -1, 8, -1]) == [107, 99, 108, 99]
     eval(per_key, book: [
-        delta<map<str, i64>>(upsert: ["A": -1, "B": 7]),
-        delta<map<str, i64>>(upsert: ["A": 8, "B": 9]),
-        delta<map<str, i64>>(remove: ["A"]),
-        delta<map<str, i64>>(upsert: ["A": -1])
+        delta<dict<str, i64>>(upsert: ["A": -1, "B": 7]),
+        delta<dict<str, i64>>(upsert: ["A": 8, "B": 9]),
+        delta<dict<str, i64>>(remove: ["A"]),
+        delta<dict<str, i64>>(upsert: ["A": -1])
     ])
     assert raises("value.missing_key") { eval(captured_start, value: [1]) }
 }

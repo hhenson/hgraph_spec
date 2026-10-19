@@ -88,7 +88,7 @@ for declared validity constraints and manual checks.
 | **TSB** | a `struct`, a tuple | A bundle of named time-series, each ticking on its own. A tuple is a bundle with positions for names |
 | **TSL** | `list<T, n>`, `list<T>` | A list of time-series: a fixed number of them, or a list that grows and shrinks at its end |
 | **TSS** | `set<T>` | A set of scalar values, with what was added and removed |
-| **TSD** | `map<K, V>` | A dictionary from scalar keys to time-series, whose keys come and go while the graph runs |
+| **TSD** | `dict<K, V>` | A dictionary from scalar keys to time-series, whose keys come and go while the graph runs |
 | **TSW** | `rolling<T, size>` | A window over the most recent values of one scalar: the last *n* ticks (a **tick window**), or the last span of time (a **duration window**) |
 | **REF** | — | A reference to another time-series: a value that says *which* time-series, not what it holds |
 | **SIGNAL** | `signal` | A tick with no payload |

@@ -5,7 +5,7 @@ with the same generic delta pass-through as existing collections.
 
 | Case | Required result |
 |---|---|
-| Each admitted scalar K and declared enum as `set<K>` and `map<K, i64>` | Accept canonical nonempty add/upsert/remove traces with silence and retain exact K. |
+| Each admitted scalar K and declared enum as `set<K>` and `dict<K, i64>` | Accept canonical nonempty add/upsert/remove traces with silence and retain exact K. |
 | Keyed scalar child publishes the same value twice | Retain two publications at that key. |
 | Reorder set members or map entries in the expected delta | Equal harness delta; iteration order is not identity. |
 | Distinct enum types or integer substitute at an enum key | Reject exact-type mismatch. |

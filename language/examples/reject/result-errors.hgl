@@ -21,7 +21,7 @@ fn wrong_handler_error(value: result<i64, str>) -> i64 {
         return value?
     }
 }
-const fn nullable_operand(book: map<str, i64>) -> result<i64, error> {
+const fn nullable_operand(book: dict<str, i64>) -> result<i64, error> {
     let item = get(book, "X")
     # expect-error(type, "result.propagation_type")
     return ok(item?)

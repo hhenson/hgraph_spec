@@ -1,7 +1,7 @@
 # Atomic set and map publications
 
 Extend the finite atomic payload grammar with ordinary `set<K>` and
-`map<K, V>`. K uses the [scalar-key contract](scalar-collection-keys.md) and its
+`dict<K, V>`. K uses the [scalar-key contract](scalar-collection-keys.md) and its
 [finite composite-key extension](composite-collection-keys.md),
 including its non-NaN f64 boundary; V recursively uses the admitted finite
 ordinary payload grammar, including these sets/maps. Existing struct-field rules remain, including
@@ -14,9 +14,9 @@ Construct complete ordinary values with these exact typed forms:
 
 ```hgl
 set<str>(items: ["alpha", "beta"])
-map<str, list<i64>>(items: ["alpha": [1, 2], "beta": []])
+dict<str, list<i64>>(items: ["alpha": [1, 2], "beta": []])
 set<str>(items: [])
-map<str, i64>(items: [])
+dict<str, i64>(items: [])
 ```
 
 `items` is the sole required named argument. This is ordinary construction,
@@ -46,7 +46,7 @@ This adds construction and owning replacement, not new element mutation APIs.
 
 ## Complete publication and capture
 
-For `atomic<set<K>>` and `atomic<map<K, V>>`, the delta is the complete ordinary
+For `atomic<set<K>>` and `atomic<dict<K, V>>`, the delta is the complete ordinary
 set/map. Publication replaces the held value; it does not apply membership
 operations, merge keys or recursively patch map values. Omitting an old key
 removes it from the complete snapshot. An empty set/map is present data,

@@ -43,7 +43,7 @@ test complete_value_and_delta_have_distinct_child_validity {
     assert eval(delta_validity, step: [1, 2, 3], a: [full, _, _], b: [partial, partial, _]) == [true, true, true]
 }
 
-fn select_map(step: i64, a: map<i64, i64>, b: map<i64, i64>) -> map<i64, i64> {
+fn select_map(step: i64, a: dict<i64, i64>, b: dict<i64, i64>) -> dict<i64, i64> {
     when modified(step) && valid(step, a, b) {
         if step == 1 {
             let copy = a
@@ -54,7 +54,7 @@ fn select_map(step: i64, a: map<i64, i64>, b: map<i64, i64>) -> map<i64, i64> {
         }
     }
 }
-fn select_map_delta(step: i64, a: map<i64, i64>, b: map<i64, i64>) -> map<i64, i64> {
+fn select_map_delta(step: i64, a: dict<i64, i64>, b: dict<i64, i64>) -> dict<i64, i64> {
     when modified(step) && valid(step, a, b) {
         if step == 1 {
             if modified(a) { return delta_value(a) }
@@ -63,7 +63,7 @@ fn select_map_delta(step: i64, a: map<i64, i64>, b: map<i64, i64>) -> map<i64, i
         }
     }
 }
-fn invalidating_map(step: i64) -> map<i64, i64> {
+fn invalidating_map(step: i64) -> dict<i64, i64> {
     inject out
     when {
         if step == 1 {
@@ -72,26 +72,26 @@ fn invalidating_map(step: i64) -> map<i64, i64> {
         } else if step == 2 { invalidate(out, 8) }
     }
 }
-fn has_second(step: i64, watched: map<i64, i64>) -> bool {
+fn has_second(step: i64, watched: dict<i64, i64>) -> bool {
     when modified(step) && valid(step, watched) { return contains(watched, 8) }
 }
-fn map_validity(step: i64, watched: map<i64, i64>) -> bool {
+fn map_validity(step: i64, watched: dict<i64, i64>) -> bool {
     when modified(step) && valid(step) { return all_valid(watched) }
 }
-fn copied_membership(step: i64, a: map<i64, i64>, b: map<i64, i64>) -> bool =>
+fn copied_membership(step: i64, a: dict<i64, i64>, b: dict<i64, i64>) -> bool =>
     has_second(step, select_map(step, a, b))
-fn delta_membership(step: i64, a: map<i64, i64>, b: map<i64, i64>) -> bool =>
+fn delta_membership(step: i64, a: dict<i64, i64>, b: dict<i64, i64>) -> bool =>
     has_second(step, select_map_delta(step, a, b))
-fn copied_invalid_membership(step: i64, a: map<i64, i64>, b_step: i64) -> bool =>
+fn copied_invalid_membership(step: i64, a: dict<i64, i64>, b_step: i64) -> bool =>
     has_second(step, select_map(step, a, invalidating_map(b_step)))
-fn copied_map_validity(step: i64, a: map<i64, i64>, b_step: i64) -> bool =>
+fn copied_map_validity(step: i64, a: dict<i64, i64>, b_step: i64) -> bool =>
     map_validity(step, select_map(step, a, invalidating_map(b_step)))
-fn delta_map_validity(step: i64, a: map<i64, i64>, b_step: i64) -> bool =>
+fn delta_map_validity(step: i64, a: dict<i64, i64>, b_step: i64) -> bool =>
     map_validity(step, select_map_delta(step, a, invalidating_map(b_step)))
 
 test complete_map_copy_reconciles_membership_and_child_validity {
-    let full = delta<map<i64, i64>>(upsert: [7: 10, 8: 20])
-    let only_first = delta<map<i64, i64>>(upsert: [7: 30])
+    let full = delta<dict<i64, i64>>(upsert: [7: 10, 8: 20])
+    let only_first = delta<dict<i64, i64>>(upsert: [7: 30])
     # B never had key 8, so switching to B must remove it without a removal delta.
     assert eval(copied_membership, step: [1, 2, 3], a: [full, _, _], b: [only_first, _, _]) == [true, false, false]
     assert eval(delta_membership, step: [1, 2, 3], a: [full, _, _], b: [only_first, _, _]) == [true, true, true]

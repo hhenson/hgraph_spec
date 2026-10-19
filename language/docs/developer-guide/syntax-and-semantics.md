@@ -135,12 +135,15 @@ type-constructor call rule. It is provisional too: `str` is not an expression
 start in the current grammar, so `str(x)` is `parse: expected an expression,
 found 'str'`.
 
-`atomic`, `tuple`, `list`, `set`, `map`, `rolling`, `result`, and `error` are contextual type
-keywords, and `unbounded` is a contextual constant in a list-size position.
+`atomic`, `tuple`, `list`, `set`, `dict`, `rolling`, `result`, and `error` are
+contextual type keywords, and `unbounded` is a contextual constant in a
+list-size position.
 Outside a type position, the same spelling can resolve to a function,
-as in `map(values, fn(value) => value * 2.0)`. `in` is contextual: it is the
-separator of a `for` statement, the membership relation in a `requires`
-clause, and an ordinary identifier elsewhere. `out` and the names of other
+as in `list(1, 2)`. `dict<K, V>` denotes a keyed container;
+`map(fn(value) => value * 2.0, values)` denotes a mapping operation.
+`in` is contextual: it is the separator of a `for` statement, the membership
+relation in a `requires` clause, and an ordinary identifier elsewhere.
+`out` and the names of other
 injectables are contextual names resolved only by an `inject` declaration.
 `struct` is both a declaration keyword and the corresponding constraint
 category. `delta` is contextual: `delta<T>` is the ordinary publication-delta
@@ -459,7 +462,7 @@ type            = scalar_type
                 | tuple_type
                 | list_type
                 | set_type
-                | map_type
+                | dict_type
                 | rolling_type
                 | ref_type
                 | signal_type
@@ -471,7 +474,7 @@ value_type      = scalar_type
                 | value_tuple_type
                 | value_list_type
                 | set_type
-                | value_map_type
+                | value_dict_type
                 | named_type;
 delta_type      = "delta", "<", type, ">";
 result_type     = "result", "<", value_type, ",", value_type, ">";
@@ -489,7 +492,7 @@ tuple_type      = "tuple", "<", type, { ",", type }, ">";
 list_type       = "list", "<", type, [ ",", size_expression ], ">";
 size_expression = const_expression | "unbounded";
 set_type        = "set", "<", value_type, ">";
-map_type        = "map", "<", value_type, ",", type, ">";
+dict_type       = "dict", "<", value_type, ",", type, ">";
 rolling_type    = "rolling", "<", value_type, ",",
                   const_expression,
                   [ ",", const_expression ], ">";
@@ -499,7 +502,7 @@ value_tuple_type = "tuple", "<", value_type,
                    { ",", value_type }, ">";
 value_list_type = "list", "<", value_type,
                   [ ",", size_expression ], ">";
-value_map_type  = "map", "<", value_type, ",", value_type, ">";
+value_dict_type  = "dict", "<", value_type, ",", value_type, ">";
 ```
 
 Types carry no mutability qualifier. Prefixing an input or time-series type
@@ -541,7 +544,7 @@ values remain expressible because a container's element is itself
 temporalized:
 
 ```hgl
-map<str, atomic<tuple<f64, f64>>>
+dict<str, atomic<tuple<f64, f64>>>
 ```
 
 `value_type` excludes `atomic`, `rolling`, `ref`, and `signal` and is used for `const`
@@ -1737,7 +1740,7 @@ temporalize(list<T, n>)
 temporalize(set<T>)
     = set-valued hgraph endpoint carrying canonical T members
 
-temporalize(map<K, V>)
+temporalize(dict<K, V>)
     = keyed temporal map with canonical key K
       and temporalize(V) values
 
@@ -1785,7 +1788,7 @@ an explicit graph projection.
 An `atomic` marker nested in a struct or container stops expansion only at that
 point. In the canonical scalar projection the marker contributes the canonical
 value of its payload, not another wrapper. This is why
-`map<str, atomic<Quote>>` becomes a temporal map of atomic Quote snapshots while
+`dict<str, atomic<Quote>>` becomes a temporal map of atomic Quote snapshots while
 the same field inside a scalar struct remains a canonical map of Quote values.
 
 Optionality and constructor defaults are separate source metadata rather than
@@ -2200,7 +2203,7 @@ valid mutation targets or contexts.
 | --- | --- |
 | Any output type | `invalidate(out)` |
 | `set<T>` | `insert(out, value)`, `upsert(out, value)`, `remove(out, value)`, `discard(out, value)`, `clear(out)` |
-| `map<K, V>` | `insert(out, key, value)`, `update(out, key, value)`, `upsert(out, key, value)`, `remove(out, key)`, `discard(out, key)`, `invalidate(out, key)`, `clear(out)` |
+| `dict<K, V>` | `insert(out, key, value)`, `update(out, key, value)`, `upsert(out, key, value)`, `remove(out, key)`, `discard(out, key)`, `invalidate(out, key)`, `clear(out)` |
 | `list<V, unbounded>` | `push(out, value)`, `pop(out)`, `invalidate(out, index)`, `clear(out)` |
 | `list<V, size>` | `invalidate(out, index)` |
 

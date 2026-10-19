@@ -193,7 +193,7 @@ In an ordinary `fn`, an unmodified parameter is temporal:
 
 ```hgl
 price: f64
-positions: map<str, f64>
+positions: dict<str, f64>
 tob: atomic<tuple<f64, f64>>
 ```
 
@@ -202,7 +202,7 @@ A `const` parameter is a wiring-time value:
 ```hgl
 const window: i64 = 20
 const enabled: bool
-const settings: map<str, f64>
+const settings: dict<str, f64>
 ```
 
 `const` and `atomic` are orthogonal:
@@ -523,7 +523,7 @@ imports, and qualified operator calls.
 An anonymous function uses the same keyword:
 
 ```hgl
-map(values, fn(value) => value * 2.0)
+map(fn(value) => value * 2.0, values)
 ```
 
 Types may be explicit when context cannot determine them:
@@ -1243,7 +1243,7 @@ Collection outputs support typed functional mutations. The first argument is
 always the injected output:
 
 ```hgl
-fn latest_by_key(key: str, value: f64) -> map<str, f64> {
+fn latest_by_key(key: str, value: f64) -> dict<str, f64> {
     inject out
 
     when modified(value) && valid(key, value) {

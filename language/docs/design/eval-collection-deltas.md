@@ -41,7 +41,7 @@ fn pass_through<T>(value: T) -> T {
 
 A present input slot supplies a contextual `delta<T>` for its exact
 parameter shape. For example,
-`delta<map<i64, i64>>(upsert: [1: 11])` supplies that sparse update, not a
+`delta<dict<i64, i64>>(upsert: [1: 11])` supplies that sparse update, not a
 complete map or other keys from earlier slots. `delta_value(v)` reads the
 current publication from a live endpoint. The [nullable indexing rules](nullable-replay-indexing.md)
 require presence before a nullable element's payload can be used. Ordinary
@@ -92,18 +92,18 @@ comparison rules. An omitted child differs from a present equal scalar
 publication. Structural equality must not fill omissions from held values.
 
 ```hgl
-fn forward_map(value: map<i64, i64>) -> map<i64, i64> => pass_through(value)
+fn forward_map(value: dict<i64, i64>) -> dict<i64, i64> => pass_through(value)
 
 test sparse_map_publications {
     assert eval(forward_map, value: [
-        delta<map<i64, i64>>(upsert: [1: 10, 2: 20]),
-        delta<map<i64, i64>>(upsert: [1: 11]),
-        delta<map<i64, i64>>(remove: [2]),
+        delta<dict<i64, i64>>(upsert: [1: 10, 2: 20]),
+        delta<dict<i64, i64>>(upsert: [1: 11]),
+        delta<dict<i64, i64>>(remove: [2]),
         _
     ]) == [
-        delta<map<i64, i64>>(upsert: [1: 10, 2: 20]),
-        delta<map<i64, i64>>(upsert: [1: 11]),
-        delta<map<i64, i64>>(remove: [2]),
+        delta<dict<i64, i64>>(upsert: [1: 10, 2: 20]),
+        delta<dict<i64, i64>>(upsert: [1: 11]),
+        delta<dict<i64, i64>>(remove: [2]),
         _
     ]
     assert eval(forward_map, value: [_, _, _]) == [_, _, _]

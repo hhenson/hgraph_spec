@@ -3,12 +3,12 @@
 Status: accepted, 2026-10-16.
 
 `book[key]` selects a connection during graph composition when `book` is a
-non-atomic `map<K, V>`. It does not perform ordinary dictionary value lookup.
+non-atomic `dict<K, V>`. It does not perform ordinary dictionary value lookup.
 
 | Context | Result | Absent key |
 |---|---|---|
-| Graph selection from non-atomic `map<K, V>` | `ref<V>` designating a child | Publish empty REF. |
-| Ordinary map value or `atomic<map<K, V>>` payload: `book[key]`, `at(book, key)` | Current ordinary V | `value.missing_key` failure. |
+| Graph selection from non-atomic `dict<K, V>` | `ref<V>` designating a child | Publish empty REF. |
+| Ordinary map value or `atomic<dict<K, V>>` payload: `book[key]`, `at(book, key)` | Current ordinary V | `value.missing_key` failure. |
 | Ordinary/atomic map value: `get(book, key)` | Guarded nullable local | Successful `null`. |
 | Ordinary/atomic map value: `get(book, key, default: fallback)` | Ordinary V for an exact-V non-null fallback | The fallback. |
 
@@ -38,12 +38,12 @@ non-atomic `map<K, V>`. It does not perform ordinary dictionary value lookup.
    republish its selected value. A key change from one absent key to another
    repeats the equal empty designation.
 
-Graph selection below `ref<map<K, V>>` composes with existing WIR-5
+Graph selection below `ref<dict<K, V>>` composes with existing WIR-5
 reference-backed access: a changed outer map designation reselects the held
 key in that map. It does not permit node evaluation to read beneath REF.
 
 This initial selection profile covers V with no REF leaves. Existing
-`map<K, ref<T>>` and structural REF type formation and binding remain valid;
+`dict<K, ref<T>>` and structural REF type formation and binding remain valid;
 this scope is not a new type-formation prohibition. Reference-to-reference
 identity still follows the runtime's flattening rule. Selection of REF-valued
 or REF-containing children, including an unpublished inner REF, remains a

@@ -4,7 +4,7 @@
     {
       "date": "2026-09-24",
       "issue": "#847",
-      "question": "debug_print over a map_-shaped TSD[str, REF[TS[int]]] printed reference tokens and missed value ticks. Should a generic parameter ever bind a reference?",
+      "question": "debug_print over a keyed TSD[str, REF[TS[int]]] printed reference tokens and missed value ticks. Should a generic parameter ever bind a reference?",
       "ruling": "WHENEVER resolving a generic, we de-reference everything. If the code depends on REF it must express that.",
       "rules": [
         "WIR-7",
@@ -63,8 +63,8 @@
     {
       "date": "2026-09-26",
       "issue": null,
-      "question": "Does HGL's map<K, ref<V>> carry an outer reference?",
-      "ruling": "map<K, ref<V>> gets a map containing ref values.",
+      "question": "Does HGL's dict<K, ref<V>> carry an outer reference?",
+      "ruling": "dict<K, ref<V>> gets a map containing ref values.",
       "rules": [
         "WIR-14"
       ],

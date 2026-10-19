@@ -457,7 +457,7 @@ A stopped graph is never started again.
 
 #### What a nested node may do
 
-This is the operation set the library builds on. `map_`, `switch_`,
+This is the operation set the library builds on. `map`, `switch_`,
 `reduce`, `mesh_` and `try_except` are written against it; none of them
 needs anything the list does not give (a construct that did would be asking
 for a missing runtime component, not a node). An owner may, from its own

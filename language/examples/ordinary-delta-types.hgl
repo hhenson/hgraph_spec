@@ -36,23 +36,23 @@ impl fn record<T>(ts: T, const key: str) {
 
 # Generic implementation templates contribute candidates only when requested.
 # Request the concrete map and atomic-list shapes used below.
-instantiate replay<map<i64, i64>>, record<map<i64, i64>>
+instantiate replay<dict<i64, i64>>, record<dict<i64, i64>>
 instantiate replay<atomic<list<i64>>>, record<atomic<list<i64>>>
 
 fn pass_through<T>(value: T) -> T {
     when { return delta_value(value) }
 }
 
-const fn map_values() -> list<TimedValue<map<i64, i64>>> {
-    var values: list<TimedValue<map<i64, i64>>> = []
-    var update: delta<map<i64, i64>> = delta<map<i64, i64>>(upsert: [1: 10, 2: 20])
-    push(values, TimedValue<map<i64, i64>>(
+const fn map_values() -> list<TimedValue<dict<i64, i64>>> {
+    var values: list<TimedValue<dict<i64, i64>>> = []
+    var update: delta<dict<i64, i64>> = delta<dict<i64, i64>>(upsert: [1: 10, 2: 20])
+    push(values, TimedValue<dict<i64, i64>>(
         time: @1970-01-01T00:00:00.000001Z,
         value: update
     ))
     # Replace the owned delta; the earlier timed entry still owns both updates.
-    update = delta<map<i64, i64>>(upsert: [1: 11])
-    push(values, TimedValue<map<i64, i64>>(
+    update = delta<dict<i64, i64>>(upsert: [1: 11])
+    push(values, TimedValue<dict<i64, i64>>(
         time: @1970-01-01T00:00:00.000003Z,
         value: update
     ))
@@ -61,13 +61,13 @@ const fn map_values() -> list<TimedValue<map<i64, i64>>> {
 
 fn consume(tick: i64) { when { } }
 
-fn replay_map(tick: i64) -> map<i64, i64> {
+fn replay_map(tick: i64) -> dict<i64, i64> {
     consume(tick)
     # Infer T from TimedValue's map argument; its field holds the map delta.
     pass_through(replay(map_values()))
 }
 
-fn capture_map(value: map<i64, i64>) {
+fn capture_map(value: dict<i64, i64>) {
     record(value, "map-recording")
 }
 
@@ -92,8 +92,8 @@ fn capture_atomic(value: atomic<list<i64>>) {
 }
 
 const fn store_empty_data() -> i64 {
-    let empty: delta<map<i64, i64>> = delta<map<i64, i64>>()
-    var values: list<delta<map<i64, i64>>> = []
+    let empty: delta<dict<i64, i64>> = delta<dict<i64, i64>>()
+    var values: list<delta<dict<i64, i64>>> = []
     push(values, empty)
     # One stored value. This does not apply an empty event to an endpoint.
     return len(values)
@@ -104,17 +104,17 @@ test ordinary_deltas {
     # The second changes only key 1; key 2 is absent from that publication.
     # The four-slot input horizon preserves both silent result positions.
     assert eval(replay_map, tick: [1, 1, 1, 1]) == [
-        delta<map<i64, i64>>(upsert: [1: 10, 2: 20]),
+        delta<dict<i64, i64>>(upsert: [1: 10, 2: 20]),
         _,
-        delta<map<i64, i64>>(upsert: [1: 11]),
+        delta<dict<i64, i64>>(upsert: [1: 11]),
         _
     ]
     assert store_empty_data() == 1
     # An outputless capture initializes its recording and retains both deltas,
     # including the nonempty removal; successful eval returns no output trace.
     eval(capture_map, value: [
-        delta<map<i64, i64>>(upsert: [1: 10, 2: 20]),
-        delta<map<i64, i64>>(remove: [2])
+        delta<dict<i64, i64>>(upsert: [1: 10, 2: 20]),
+        delta<dict<i64, i64>>(remove: [2])
     ])
 }
 

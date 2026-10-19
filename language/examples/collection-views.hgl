@@ -2,11 +2,11 @@
 
 module examples.collection_views
 
-fn active_symbols(book: map<str, f64>) -> set<str> =>
+fn active_symbols(book: dict<str, f64>) -> set<str> =>
     key_set(book)
 
 fn count_recent(
-    book: map<str, f64>,
+    book: dict<str, f64>,
     const some_time: datetime = @2026-01-01T00:00Z
 ) -> i64 {
     inject logger
@@ -27,7 +27,7 @@ fn count_recent(
     }
 }
 
-fn audit_book(book: map<str, f64>) {
+fn audit_book(book: dict<str, f64>) {
     inject logger
 
     when modified(book) && valid(book) {

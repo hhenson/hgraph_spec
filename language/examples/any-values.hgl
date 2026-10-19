@@ -32,7 +32,7 @@ test {
         assert any(any()) == any()
     }
     test boxed_missing_order_is_an_execution_failure {
-        let value: any = any(map<i64, i64>(items: [1: 2]))
+        let value: any = any(dict<i64, i64>(items: [1: 2]))
         # A map has no order capability; boxing does not manufacture one.
         assert raises("value.capability") { assert value < value }
     }
