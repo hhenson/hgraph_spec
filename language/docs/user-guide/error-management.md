@@ -4,7 +4,7 @@ Safe dictionary lookup returns absence as `null`. Bind it with `let` and prove
 presence before using its value:
 
 ```hgl
-const fn price_or_zero(book: map<str, i64>, key: str) -> i64 {
+const fn price_or_zero(book: dict<str, i64>, key: str) -> i64 {
     let price = get(book, key)
     if price == null { return 0 }
     return price

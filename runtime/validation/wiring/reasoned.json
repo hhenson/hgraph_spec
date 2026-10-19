@@ -4,7 +4,7 @@
     "source": {
       "expected": "TSD[str,REF[TS[int]]]",
       "rules": [],
-      "derivation": "Premise: tsl_to_tsd publishes a reference per key (a map_-shaped output)."
+      "derivation": "Premise: tsl_to_tsd publishes a reference per key (a keyed output)."
     },
     "bound": {
       "expected": "TSD[str,TS[int]]",

@@ -254,8 +254,9 @@ duration`, or `datetime + datetime`. Field accessors such as `year`, `hour`,
 
 ## Recursive temporalization
 
-Canonical containers and structured values become structural time-series
-shapes recursively:
+`dict<K, V>` is the keyed container type; `map(...)` is the mapping
+operation. Canonical containers and structured values become structural
+time-series shapes recursively:
 
 | Source type | Temporal interpretation |
 | --- | --- |
@@ -266,7 +267,7 @@ shapes recursively:
 | `list<f64>` | Unbounded structural list of temporal `f64` values |
 | `list<f64, 3>` | Structural list of exactly three temporal `f64` values |
 | `set<str>` | Set-valued time series of `str` members |
-| `map<str, f64>` | Keyed temporal map from `str` to temporal `f64` |
+| `dict<str, f64>` | Keyed temporal dictionary from `str` to temporal `f64` |
 | `rolling<f64, 20, 5>` | Rolling window of at most 20 `f64` values, valid from 5 values |
 | `rolling<f64, 5m>` | Rolling window of the last five minutes of `f64` values |
 | an HGL-declared structured value type | Structural bundle whose fields are temporal |
@@ -288,10 +289,10 @@ become time series. This differs from an HGL-declared struct, whose temporal
 form is a bundle of fields.
 
 `ref<T>` describes a reference to the temporal shape of `T`. For example,
-`ref<map<i64, str>>` refers to a time-varying map from integers to strings. Reference wrappers
+`ref<dict<i64, str>>` refers to a time-varying map from integers to strings. Reference wrappers
 are ignored when checking underlying type compatibility, including within
 structures, but their representation and access semantics are preserved.
-Invalid placements remain invalid: `map<ref<i64>, str>` is an error because
+Invalid placements remain invalid: `dict<ref<i64>, str>` is an error because
 map keys cannot be references.
 
 The user or component designer specifies `ref` to express an intention to
@@ -332,7 +333,7 @@ index changes and selected-reference rebinding. See the
 
 The executable form is in
 [`examples/reference-routing.hgl`](../../examples/reference-routing.hgl). The
-`map<K, ref<V>>` is a map containing references, `TSD[K, REF[V]]`, with no
+`dict<K, ref<V>>` is a map containing references, `TSD[K, REF[V]]`, with no
 reference around the map. The compiler rejects nested `ref<ref<T>>` rather
 than normalizing it implicitly.
 
@@ -721,8 +722,8 @@ Temporalization is recursive unless an `atomic` marker stops it. For example:
 ```hgl
 struct Book {
     best: Quote
-    quotes: map<str, Quote>
-    snapshots: map<str, atomic<Quote>>
+    quotes: dict<str, Quote>
+    snapshots: dict<str, atomic<Quote>>
     configuration: atomic<BookConfig>
 }
 ```
@@ -982,8 +983,8 @@ include them.
 | --- | --- |
 | `atomic<tuple<f64, f64>>` | One endpoint carrying a complete tuple |
 | `atomic<set<str>>` | One endpoint carrying a complete set snapshot |
-| `atomic<map<str, f64>>` | One endpoint carrying a complete map snapshot |
-| `map<str, atomic<tuple<f64, f64>>>` | Keyed temporal map whose values are atomic tuples |
+| `atomic<dict<str, f64>>` | One endpoint carrying a complete map snapshot |
+| `dict<str, atomic<tuple<f64, f64>>>` | Keyed temporal map whose values are atomic tuples |
 
 For example:
 
@@ -1007,7 +1008,7 @@ A `const` parameter is never temporal, so its canonical type is used directly:
 
 ```hgl
 const window: i64
-const labels: map<str, str>
+const labels: dict<str, str>
 ```
 
 Defaults are constant expressions and cannot depend on a temporal parameter:
@@ -1222,7 +1223,7 @@ index order. See
 deferred reduction option.
 
 ```hgl
-fn observe(book: map<str, f64>, offset: f64) {
+fn observe(book: dict<str, f64>, offset: f64) {
     for value in values(book) {
         debug_print("adjusted", value + offset)
     }
@@ -1244,7 +1245,7 @@ key-set view.
 an existing child's value does not modify the key set. For example:
 
 ```hgl
-fn membership_changed(book: map<str, f64>) -> bool {
+fn membership_changed(book: dict<str, f64>) -> bool {
     when modified(key_set(book)) { return true }
 }
 ```
@@ -1275,7 +1276,7 @@ and out-of-range indices are strict access errors. They do not fabricate
 default values. `contains` checks membership, not child validity. Graph
 connection selection is separate from these payload reads.
 
-In graph composition, `book[key]` on a non-atomic `map<K, V>` selects a
+In graph composition, `book[key]` on a non-atomic `dict<K, V>` selects a
 `ref<V>` connection. An absent key publishes an empty REF; later arrival
 selects its child even while the key is silent, and removal clears the
 connection. Ordinary consumers follow that child. A separately held old

@@ -261,13 +261,13 @@ capture rule leaves the author's variable declaration unchanged; see
 For example:
 
 ```text
-ref<map<i64, str>> -> REF[TSD[int, TS[str]]]
+ref<dict<i64, str>> -> REF[TSD[int, TS[str]]]
 ```
 
 Reference wrappers do not participate in underlying type compatibility:
 
 ```text
-ref<map<i64, str>> ~ map<i64, str>
+ref<dict<i64, str>> ~ dict<i64, str>
 ```
 
 The same compatibility principle applies within a type's structure. The
@@ -277,7 +277,7 @@ from its endpoint representation or grant a node access through it.
 Type formation is checked separately. A map key cannot be a reference:
 
 ```text
-map<ref<i64>, str> -> error
+dict<ref<i64>, str> -> error
 ```
 
 Ignoring REF for compatibility does not make an invalid type formation legal.
@@ -413,7 +413,7 @@ its payload while wiring or permit a node to traverse its opaque REF input.
 See [source examples](../../examples/reference-wiring-projections.hgl) and
 [compiler cases](../../../compiler/cases_reference_wiring_projections.md).
 
-Graph key selection `book[key]` from a non-atomic `map<K, V>` likewise returns
+Graph key selection `book[key]` from a non-atomic `dict<K, V>` likewise returns
 a `ref<V>` connection. Missing membership produces an empty REF; arrival and
 removal maintain the connection even with a silent key input. This differs
 from strict ordinary/atomic map value lookup. See the
@@ -458,7 +458,7 @@ A map whose values are references is a map containing reference values
 (owner ruling 2026-09-26; runtime spec Wiring, point to settle 4):
 
 ```text
-map<i64, ref<str>> -> TSD[int, REF[TS[str]]]
+dict<i64, ref<str>> -> TSD[int, REF[TS[str]]]
 ```
 
 There is no reference around the map itself. The mapping first recorded

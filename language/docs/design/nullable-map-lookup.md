@@ -4,7 +4,7 @@ Status: accepted, 2026-10-14.
 
 1. **LOOKUP-1 — Values.** During ordinary value evaluation, including
    value functions, node handlers and test bodies, ordinary dictionary values
-   and `atomic<map<K, V>>` payloads use point-in-time value
+   and `atomic<dict<K, V>>` payloads use point-in-time value
    lookup. `m[key]` and `at(m, key)` return the present ordinary V and fail with
    `value.missing_key` on absence. Executed calls preserve that code through
    graph propagation; required constant evaluation rejects a missing key.
@@ -34,7 +34,7 @@ Status: accepted, 2026-10-14.
    present invalid borrowed temporal child remains open.
 
 ```hgl
-const fn price_or_zero(book: map<str, i64>, key: str) -> i64 {
+const fn price_or_zero(book: dict<str, i64>, key: str) -> i64 {
     let price = get(book, key)
     if price == null { return 0 }
     return price

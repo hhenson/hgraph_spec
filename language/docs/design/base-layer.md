@@ -417,12 +417,12 @@ result type depends on a callable argument. It is the keyed child graph with a
 result.
 
 - **MAP-1 Form.** `map(fn(p) => body, c)`, in graph composition. `c` is a
-  non-atomic temporal `map<K, V>`. The first argument is an anonymous
+  non-atomic temporal `dict<K, V>`. The first argument is an anonymous
   function, and `map` is the context that fills its types
   ([syntax and semantics](../developer-guide/syntax-and-semantics.md),
   Anonymous functions): `p` has type V, and a written annotation must equal
   V. The result type R is the written `-> R`, or else the type of the body.
-  The result is `map<K, R>`. An outputless body is refused: that is `for`.
+  The result is `dict<K, R>`. An outputless body is refused: that is `for`.
 - **MAP-2 Membership.** There is one child per key of `c`. A key is a member
   of the result from its child's creation until that child stops, whatever
   the validity of the child's output (TS-19, MAP-CONN-2). Creation adds the
@@ -797,7 +797,7 @@ together with OP-11. Those contracts move from `library/` to core status.
   belong in `std.native`. This proposal leaves `pass_through`, `null_sink`,
   `nothing`, `const` and `tick_count` as library operators. Classification of
   the remaining named inventory follows the core inclusion criteria.
-- **Provided by no layer yet:** `map_`, `switch_`, `reduce`, `mesh_`,
+- **Provided by no layer yet:** `switch_`, `reduce`, `mesh_`,
   `try_except`, `no_key` and `if_then_else`. Spec examples that import them
   are excluded by name from runs without the library until a layer declares
   them.
@@ -807,8 +807,8 @@ together with OP-11. Those contracts move from `library/` to core status.
   ([language tour](../user-guide/language-tour.md),
   [structural-types.hgl](../../examples/structural-types.hgl)) wait for open
   point 8. Until then `structural-types.hgl` keeps its
-  `use std::{map}` and stays excluded by name. The explicit `map_`
-  operator, with its key parameter and `no_key`, stays in no layer.
+  `use std::{map}` and stays excluded by name. Additional mapping forms,
+  including a key parameter and `no_key`, remain open under point 8.
 - **Tests.** Library tests that test the language or runtime, and use the
   library only for fixtures, move to the conformance pack. Tests of replay
   and record become core cases. Tests of library contracts stay with the

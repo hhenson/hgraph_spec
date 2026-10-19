@@ -10,7 +10,7 @@ In an ordinary value context, the annotation names the delta type and the
 parenthesized form constructs a value of that type:
 
 ```hgl
-let update: delta<map<i64, i64>> = delta<map<i64, i64>>(upsert: [1: 10])
+let update: delta<dict<i64, i64>> = delta<dict<i64, i64>>(upsert: [1: 10])
 let scalar: delta<i64> = 7
 ```
 
@@ -40,8 +40,8 @@ its empty delta applies under [EMPTY-1](../language/docs/design/empty-delta-vali
 
 ## DELTA-INFER — symbolic formation and matching
 
-A typed empty `list<TimedValue<map<i64, i64>>>` passed to generic
-replay fixes T to `map<i64, i64>`, despite having no payload from which to
+A typed empty `list<TimedValue<dict<i64, i64>>>` passed to generic
+replay fixes T to `dict<i64, i64>`, despite having no payload from which to
 infer anything. Scalar timed i64 data fixes T to i64. Matching actual
 `delta<Quote<i64>>` binds that complete nominal specialization, not an
 anonymous set of matching fields. Repeated incompatible bindings fail.
@@ -56,7 +56,7 @@ before start, without runtime type-name lookup or type tests.
 
 Timed entries below use `TimedValue<T>` for the original temporal shape T;
 their value field has type `delta<T>`. Thus a timed map publication uses
-`TimedValue<map<i64, i64>>`, not a TimedValue parameterized by a structural
+`TimedValue<dict<i64, i64>>`, not a TimedValue parameterized by a structural
 delta type. `TimedValue<i64>` still contains an ordinary i64 payload.
 
 A complete held map cannot initialize that timed map's value field. A delta

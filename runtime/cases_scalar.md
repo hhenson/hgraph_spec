@@ -30,11 +30,11 @@ admitted in either direction.
 | `(i64, str)` | yes | yes | yes |
 | `list<f64>` | yes | yes | yes |
 | `set<i64>` | yes | yes | no |
-| `map<str, i64>` | yes | yes | no |
-| `map<str, list<f64>>` | yes | yes | no |
+| `dict<str, i64>` | yes | yes | no |
+| `dict<str, list<f64>>` | yes | yes | no |
 | `any` | claimed | claimed | claimed |
 
-A `set<map<str, i64>>` is a type: a map has hash. A `TSS` of a type without
+A `set<dict<str, i64>>` is a type: a map has hash. A `TSS` of a type without
 hash, and a `TSD` keyed by one, are refused when the type is formed. Asking
 an `any` holding a set for its order fails at that point (VAL-11).
 

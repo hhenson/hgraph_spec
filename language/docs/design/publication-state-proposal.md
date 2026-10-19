@@ -22,7 +22,7 @@ Publication recording/replay therefore cannot promise full-state reconstruction.
 Drive observations with an independent clock-step input:
 
 ```hgl
-fn observe_valid(step: i64, watched: map<i64, i64>) -> bool {
+fn observe_valid(step: i64, watched: dict<i64, i64>) -> bool {
     when modified(step) && valid(step) {
         return valid(watched)
     }

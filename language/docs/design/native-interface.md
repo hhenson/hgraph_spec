@@ -200,7 +200,7 @@ The first native-value interface is intentionally narrow at its HGL boundary:
 - value arguments and results are canonical scalar values, complete
   `result<T,error>` envelopes with admitted ordinary payloads, or an opaque
   state value declared by the same module;
-- collection arguments may use generic `list`, `set`, `map`, or `rolling`
+- collection arguments may use generic `list`, `set`, `dict`, or `rolling`
   patterns only when the parameter explicitly requests `input-view` access;
 - the complete input-only `signal` pattern may request `input-view` access and
   receives a payload-free input view; it is rejected as a value parameter, nested

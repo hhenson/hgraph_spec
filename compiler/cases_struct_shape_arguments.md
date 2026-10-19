@@ -5,8 +5,8 @@ Use Publication, Batch and Mixed from that contract.
 
 | Case | Required result |
 |---|---|
-| `Publication<map<i64, i64>>` | Ordinary field has exact `delta<map<i64, i64>>` type. |
-| `Batch<map<i64, i64>>` | Forwarded delta-formation requirement is satisfied. |
+| `Publication<dict<i64, i64>>` | Ordinary field has exact `delta<dict<i64, i64>>` type. |
+| `Batch<dict<i64, i64>>` | Forwarded delta-formation requirement is satisfied. |
 | T appears only under an admitted `delta<T>` | Accept T even if it is outside `value_type`. |
 | That T is forwarded through Batch or a generic parent | Preserve the same requirement; no blanket value-type restriction. |
 | The same T also initializes an ordinary T field, as in Mixed | Reject if T is outside `value_type`. |

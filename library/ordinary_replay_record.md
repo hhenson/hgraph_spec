@@ -36,8 +36,8 @@ type relationships; no new inference, conversion or generic-call syntax is
 needed. A fixed-size ordinary list is not implicitly converted to this type.
 
 T names the originating temporal shape, not an already-derived payload type.
-For example, the value field of `TimedValue<map<i64, i64>>` has exact ordinary
-type `delta<map<i64, i64>>`, while that of `TimedValue<i64>` is i64 by scalar
+For example, the value field of `TimedValue<dict<i64, i64>>` has exact ordinary
+type `delta<dict<i64, i64>>`, while that of `TimedValue<i64>` is i64 by scalar
 reduction. This replaces the former payload-type parameter convention; there
 is no compatibility alias or second TimedValue definition. The field's
 `delta<T>` formation requirement restricts T to the admitted profile.

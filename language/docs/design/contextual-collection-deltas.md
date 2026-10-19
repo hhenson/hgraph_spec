@@ -19,7 +19,7 @@ finite temporal shapes T:
 - fixed `list<S, N>`, with a constant nonnegative size N;
 - growing `list<S>` under the [net growing-list contract](growing-list-publications.md);
 - positional `tuple<S0, ...>` and fully applied concrete nominal structs;
-- `map<K, S>` for those same scalar keys;
+- `dict<K, S>` for those same scalar keys;
 - exact rolling shapes under the [arrival delta contract](rolling-publications.md).
 
 Every child S or struct field must recursively have one of these shapes.
@@ -72,8 +72,8 @@ omission and no-default behavior. Add these shape-specific forms:
 | Fixed list | `delta<list<i64, 3>>(items: [0: 10, 2: 30])` |
 | Positional bundle | `delta<tuple<i64, str>>(items: [1: "ask"])` |
 | Named bundle | `delta<Quote>(bid: 1)` |
-| Map | `delta<map<i64, i64>>(upsert: [7: 10], remove: [9])` |
-| Recursive child | `delta<map<i64, Quote>>(upsert: [7: delta<Quote>(bid: 1)])` |
+| Map | `delta<dict<i64, i64>>(upsert: [7: 10], remove: [9])` |
+| Recursive child | `delta<dict<i64, Quote>>(upsert: [7: delta<Quote>(bid: 1)])` |
 
 All arguments are named. Set arguments are `added` and `removed`; fixed
 list/tuple has `items`; map has `upsert` and `remove`. Omitted arguments
@@ -142,7 +142,7 @@ mutation functions. The existing strict `insert`/`update`/`remove` and tolerant
 `upsert`/`discard` APIs keep their separate preconditions and behavior.
 
 For example, after a map holds key 7 with inner keys 1 and 2, applying
-`delta<map<i64, map<i64, i64>>>(upsert: [7: delta<map<i64, i64>>(upsert: [1: 11])])`
+`delta<dict<i64, dict<i64, i64>>>(upsert: [7: delta<dict<i64, i64>>(upsert: [1: 11])])`
 publishes only the path through 7 and 1. Inner key 2 retains its held value
 and is absent from the new publication delta.
 

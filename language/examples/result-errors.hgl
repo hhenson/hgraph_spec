@@ -1,21 +1,21 @@
 module examples.result_errors
 
-const fn price(book: map<str, i64>, key: str) -> result<i64, error> {
+const fn price(book: dict<str, i64>, key: str) -> result<i64, error> {
     let item = get(book, key)
     if item == null {
         return err(error(code: "value.missing_key", message: "missing price"))
     }
     return ok(item)
 }
-const fn doubled(book: map<str, i64>, key: str) -> result<i64, error> {
+const fn doubled(book: dict<str, i64>, key: str) -> result<i64, error> {
     let item = price(book, key)?
     return ok(item * 2)
 }
-const fn propagate_before_strict(book: map<str, i64>, key: str) -> result<i64, error> {
+const fn propagate_before_strict(book: dict<str, i64>, key: str) -> result<i64, error> {
     let item = price(book, key)?
-    return ok(item + at(map<str, i64>(items: []), "unreachable-on-Err"))
+    return ok(item + at(dict<str, i64>(items: []), "unreachable-on-Err"))
 }
-const fn recovered(book: map<str, i64>, key: str) -> i64 {
+const fn recovered(book: dict<str, i64>, key: str) -> i64 {
     let outcome = price(book, key)
     if is_err(outcome) { return 0 }
     return outcome.value
@@ -24,10 +24,10 @@ const fn diagnostic(outcome: result<i64, error>) -> str {
     if is_err(outcome) { return outcome.error.message }
     return "ok"
 }
-fn required(book: atomic<map<str, i64>>, key: str) -> i64 {
+fn required(book: atomic<dict<str, i64>>, key: str) -> i64 {
     when { return price(book, key)? }
 }
-fn outcome(book: atomic<map<str, i64>>, key: str) -> result<i64, error> {
+fn outcome(book: atomic<dict<str, i64>>, key: str) -> result<i64, error> {
     when { return price(book, key) }
 }
 fn graph_is_failure(value: result<i64, error>) -> bool => is_err(value)
@@ -39,8 +39,8 @@ fn alias_error(value: atomic<error>) -> error {
 }
 
 test tagged_results_and_propagation {
-    let full = map<str, i64>(items: ["X": 10])
-    let empty = map<str, i64>(items: [])
+    let full = dict<str, i64>(items: ["X": 10])
+    let empty = dict<str, i64>(items: [])
     let success: result<i64, error> = ok(20)
     let failure: result<i64, error> =
         err(error(code: "value.missing_key", message: "missing price"))

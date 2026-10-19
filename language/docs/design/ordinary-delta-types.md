@@ -93,7 +93,7 @@ Matching replay's list fixes T directly from the TimedValue argument, even
 when the list is empty. When an ordinary TimedValue constructor infers T from
 its supplied value field, the `delta<T>` relationship above still applies.
 The nominal type is TimedValue applied to the originating shape: a map sample
-is `TimedValue<map<i64, i64>>`, with a `delta<map<i64, i64>>` payload.
+is `TimedValue<dict<i64, i64>>`, with a `delta<dict<i64, i64>>` payload.
 This changes the former payload-type parameter convention without adding a
 compatibility alias. A structural delta type is not itself an admitted T.
 

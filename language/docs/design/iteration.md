@@ -131,7 +131,7 @@ controlling child
 lifetime. The graph function does not traverse current payloads on each tick.
 
 ```hgl
-fn observe(book: map<str, f64>, offset: f64) {
+fn observe(book: dict<str, f64>, offset: f64) {
     for value in values(book) {
         debug_print("adjusted", value + offset)
     }
@@ -173,7 +173,7 @@ intended extension, not support in the initial implementation. For example,
 the following records a candidate shape that is initially unsupported:
 
 ```hgl
-fn total(samples: map<str, f64>, factor: f64) -> f64 {
+fn total(samples: dict<str, f64>, factor: f64) -> f64 {
     var result: f64 = 0.0
     for value in values(samples) {
         result = result + value * factor

@@ -127,7 +127,7 @@ In an ordinary temporal `fn`, an unmodified parameter is temporal:
 
 ```hgl
 price: f64
-positions: map<str, f64>
+positions: dict<str, f64>
 tob: atomic<tuple<f64, f64>>
 ```
 
@@ -135,7 +135,7 @@ A `const` parameter is a wiring-time value:
 
 ```hgl
 const window: i64 = 20
-const settings: map<str, str>
+const settings: dict<str, str>
 ```
 
 Ordinary temporal `fn` results are temporal unless the function is outputless.
@@ -555,9 +555,9 @@ atomic<tuple<f64, f64>>           # one tuple-valued endpoint
 list<f64>                         # unbounded temporal list
 list<f64, 3>                      # exactly three temporal elements
 
-map<str, f64>                     # keyed temporal map
-atomic<map<str, f64>>             # stream of complete map snapshots
-map<str, atomic<tuple<f64, f64>>> # keyed atomic tuple values
+dict<str, f64>                     # keyed temporal map
+atomic<dict<str, f64>>             # stream of complete map snapshots
+dict<str, atomic<tuple<f64, f64>>> # keyed atomic tuple values
 
 set<str>                          # set-valued time series
 atomic<set<str>>                  # stream of complete set snapshots

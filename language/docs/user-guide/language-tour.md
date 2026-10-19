@@ -157,9 +157,9 @@ The same `fn` keyword introduces a concise anonymous function:
 
 ```hgl
 fn notionals(
-    prices: map<str, f64>,
-    quantities: map<str, i64>
-) -> map<str, f64> =>
+    prices: dict<str, f64>,
+    quantities: dict<str, i64>
+) -> dict<str, f64> =>
     map(
         fn(price, quantity) => price * quantity,
         prices,
