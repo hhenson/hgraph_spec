@@ -416,8 +416,8 @@ module can declare it. Like `capture` (CAPTURE-1), it is a prelude form whose
 result type depends on a callable argument. It is the keyed child graph with a
 result.
 
-- **MAP-1 Form.** `map(c, fn(p) => body)`, in graph composition. `c` is a
-  non-atomic temporal `map<K, V>`. The second argument is an anonymous
+- **MAP-1 Form.** `map(fn(p) => body, c)`, in graph composition. `c` is a
+  non-atomic temporal `map<K, V>`. The first argument is an anonymous
   function, and `map` is the context that fills its types
   ([syntax and semantics](../developer-guide/syntax-and-semantics.md),
   Anonymous functions): `p` has type V, and a written annotation must equal
@@ -1009,7 +1009,7 @@ Closed points keep their numbers, because the text above cites them.
      this;
    - a key parameter for the child;
    - list collections;
-   - a named-function argument, `map(xs, child)`;
+   - a named-function argument, `map(child, xs)`;
    - a `for` with a result, as sugar for `map(...)` under the same rules.
 9. **Source-only eval.** An eval with an end bound would retire `consume`.
 10. **Host observations.** Whether they become test-host contracts or stay

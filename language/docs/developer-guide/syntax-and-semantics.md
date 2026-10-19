@@ -138,7 +138,7 @@ found 'str'`.
 `atomic`, `tuple`, `list`, `set`, `map`, `rolling`, `result`, and `error` are contextual type
 keywords, and `unbounded` is a contextual constant in a list-size position.
 Outside a type position, the same spelling can resolve to a function,
-as in `map(values, fn(value) => value * 2.0)`. `in` is contextual: it is the
+as in `map(fn(value) => value * 2.0, values)`. `in` is contextual: it is the
 separator of a `for` statement, the membership relation in a `requires`
 clause, and an ordinary identifier elsewhere. `out` and the names of other
 injectables are contextual names resolved only by an `inject` declaration.

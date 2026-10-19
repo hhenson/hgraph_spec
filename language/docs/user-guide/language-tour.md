@@ -161,9 +161,9 @@ fn notionals(
     quantities: map<str, i64>
 ) -> map<str, f64> =>
     map(
+        fn(price, quantity) => price * quantity,
         prices,
-        quantities,
-        fn(price, quantity) => price * quantity
+        quantities
     )
 ```
 

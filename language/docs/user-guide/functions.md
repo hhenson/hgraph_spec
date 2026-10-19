@@ -523,7 +523,7 @@ imports, and qualified operator calls.
 An anonymous function uses the same keyword:
 
 ```hgl
-map(values, fn(value) => value * 2.0)
+map(fn(value) => value * 2.0, values)
 ```
 
 Types may be explicit when context cannot determine them:
