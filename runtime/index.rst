@@ -33,6 +33,7 @@ The runtime begins where wiring ends: at the builder boundary.
    cases_nested
    cases_fixed
    cases_sources
+   cases_kafka_recovery
    cases_engine
    cases_injectables
    cases_scalar
