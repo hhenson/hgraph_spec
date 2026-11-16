@@ -63,3 +63,27 @@ absent at 3. Keeping the reference does not extend the endpoint's lifetime.
 The expiry rule was confirmed by the user on 2026-09-21.
 
 Allocator slot reuse and generation wrap handling are outside this case's scope.
+
+## REF-MAPPED-SHARED — TS-1, TS-6, TS-14 and TS-19
+
+A map has children `a`, `b` and `c`. Each selects an element from one shared
+dictionary and counts evaluations of a consumer of that element. Initially
+`a` and `c` select `x`, while `b` selects `y`. The dictionary is passed whole
+at the map boundary; the selection happens while wiring each child graph.
+
+| t | Lookup or map change | Shared publication | Consumer count deltas |
+|---|---|---|---|
+| 0 | create a:x, b:y, c:x | x:1, y:2, z:3 | a:1, b:1, c:1 |
+| 1 | — | x:4 | a:2, c:2 |
+| 2 | — | z:5 | — |
+| 3 | a selects y | — | a:3 |
+| 4 | remove c | — | c:R |
+| 5 | — | x:6 | — |
+| 6 | create c:x | — | c:1 |
+
+At 3 the changed selection samples the current value of `y`. At 6 the new
+child samples `x` and starts a fresh counter. At 2 and 5 no selected consumer
+evaluates. For value-only updates of existing keys, increasing the number
+of unrelated mapped consumers must not add notification or child-selection
+work. A consumer of the whole dictionary remains affected by every update;
+source lifetime and membership notifications remain observable.

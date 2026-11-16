@@ -62,6 +62,15 @@ node. A passive input is just as readable, and keeps track of what it has
 seen, but wakes nothing. A structural input wakes its node when members come
 and go and not when their values tick (see Node, NOD-28).
 
+Selecting `shared[key]` while wiring a mapped graph observes the selected
+element, not every value in `shared`. Passing the dictionary whole at the
+map boundary does not change that subscription. For an existing element of
+a stable dictionary, notification and mapped-child selection should visit
+the affected consumers, including whole-value consumers, without visiting
+unrelated mapped keys. Initialization, membership changes and source
+replacement can require wider work. See **REF-MAPPED-SHARED** in
+[Reference cases](cases_references.md).
+
 ### Notification
 
 A time-series **notifies** whoever is watching it when its state changes.
