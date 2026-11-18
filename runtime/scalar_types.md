@@ -69,6 +69,17 @@ Concept
 | **set** | Distinct values of one type, in no order |
 | **map** | Distinct keys of one type, each with a value of another |
 | **any** | An owning typed value or nil; HGL construction and publications follow [ANY-1–5](../language/docs/design/any-values.md) |
+| **optional** | A value of `T` or explicit null, with a presence query and checked payload access |
+
+### Nullable values
+
+`Optional<T>` is distinct from `T` and from a one-element tuple. A live value
+may hold a payload or explicit null. That presence state is separate from
+time-series validity: publishing null is a valid tick; silence publishes
+nothing. See [nullable time-series cases](cases_nullable.md).
+
+Read-only payload access may borrow storage. Retaining the nullable value
+must preserve its presence and payload independently of later source writes.
 
 ### Value access and storage
 

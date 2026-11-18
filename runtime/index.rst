@@ -23,6 +23,7 @@ The runtime begins where wiring ends: at the builder boundary.
    conformance
    open_points
    design_options
+   cases_nullable
    cases_atomic
    cases_collections
    cases_empty_delta_validity

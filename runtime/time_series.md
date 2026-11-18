@@ -402,6 +402,7 @@ graph runs is held to it too.
 |---|---|
 | any type X | X |
 | SIGNAL | any type |
+| `TS<Optional<T>>` | `TS<T>` or `REF<TS<T>>`; exact payload type, read-only widening |
 | REF of X | X, or REF of X |
 | X | REF of X: the input follows the reference |
 | a bundle | a bundle with the same fields, each field admitting the other's; names pair fields, order does not matter; when both bundles are named the names must be equal, and an unnamed bundle matches a named one by its fields |
@@ -412,6 +413,10 @@ graph runs is held to it too.
 
 The rule applies at every depth: a bundle field that is a reference stays a
 reference, and a field that is a bundle is matched by the bundle row.
+Nullable widening is an exception to recursive admission: it applies only
+to an individual TS endpoint. The reverse, `TS<Optional<T>>` to `TS<T>`, is
+rejected. Exact overload matches take precedence over nullable widening.
+
 Nothing else is admitted; in particular no scalar conversion happens at a
 binding, and a fixed list never binds to a growing one.
 
@@ -574,6 +579,16 @@ Rules
   write is not a tick. A truncated element is readable for the rest of the
   cycle and comes back, with its value and time, if the list grows over its
   position again in that cycle; from the next cycle it is gone (GRF-25).
+
+- **TS-33** A `TS<Optional<T>>` publication is either a payload or explicit
+  null. Both make it valid and modified and notify consumers. Silence retains
+  its state without modification; invalidation makes it invalid and unmodified.
+  Repeated null publications on distinct cycles each tick.
+- **TS-34** A `TS<T>` bound to `TS<Optional<T>>` preserves the producer's
+  validity, modification time and notifications. Every valid value is present;
+  invalidity never becomes a null publication. Captured recordings own their
+  values and survive later writes, invalidation and producer destruction.
+  See [nullable cases](cases_nullable.md).
 
 
 Deferred
