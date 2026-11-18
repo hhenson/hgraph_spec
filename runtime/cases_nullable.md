@@ -48,10 +48,19 @@ value, and subsequent source ticks remain visible.
 
 ## NULLABLE-RETENTION
 
-Record the producer directly. Publications `[5, null, absent, 7]` remain those
-four observations after the last write and graph teardown. A plain producer
-recorded through nullable widening similarly retains `[5, absent, 7, 11]`.
-Repeat with a composite payload: later writes must not alter earlier fields.
-An empty recording remains empty; no null publication is invented.
+Wire `commands -> produce -> record`. Let command position `i` occur at
+`t_i = t_0 + i * step`. The recorder appends only publications;
+[dense eval materialization](../library/ordinary_replay_record.md) supplies
+silent positions through the stated final timestamp.
+
+| Producer | Commands | Recorded entries | Dense eval result | Final timestamp |
+|---|---|---|---|---|
+| Nullable | `[5, 0, -1, -2, 7]` | `[(t_0, 5), (t_1, null), (t_4, 7)]` | `[5, null, absent, absent, 7]` | `t_4` |
+| Plain, widened to nullable | `[5, -1, 7, 11]` | `[(t_0, 5), (t_2, 7), (t_3, 11)]` | `[5, absent, 7, 11]` | `t_3` |
+
+Earlier recorded payloads and presence states survive the later writes and
+graph teardown. Repeat with a composite payload: later writes must not alter
+earlier fields. An empty recording remains empty; no null publication is
+invented.
 
 Physical layout and timestamp packing are not specified here.
