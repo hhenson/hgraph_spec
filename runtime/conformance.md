@@ -55,7 +55,7 @@ implementation to provide a source-language generator facility.
 ## Cases
 
 - [Nullable values](cases_nullable.md): null ticks, borrowed widening, silence, invalidation/recovery and retained captures.
-- [Atomic](cases_atomic.md): first tick, idle cycles, equal publications and repeated reads.
+- [Atomic](cases_atomic.md): first tick, idle cycles, equal publications, repeated reads and scalar invalidation.
 - [Empty sparse delta application](cases_empty_delta_validity.md): first validity, repeated silence, nested targets and complete-payload controls.
 - [Collections](cases_collections.md): validity, membership, deltas and per-level time.
 - [Windows](cases_windows.md): tick and duration windows, eviction, the minimum.

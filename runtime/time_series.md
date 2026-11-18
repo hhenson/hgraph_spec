@@ -24,6 +24,7 @@ or add child-change, sampling and binding observations (TS-7, TS-14–TS-15).
 | **last modified time** | The evaluation time of its latest tick; *never* if it has not ticked, or has been invalidated |
 | **valid** | It has a value: its last modified time is not *never* |
 | **modified** | It ticked in this cycle: its last modified time equals the evaluation time. Nothing else makes it modified |
+| **invalidated** | An owned scalar was cleared in this cycle and ends invalid. A directly bound scalar input observes the same transition (TS-7) |
 | **all valid** | For a collection: it is valid and so is each of its immediate children. One level; never recursive |
 
 A **tick** is a modification. Reading the value of a time-series that is not
@@ -481,6 +482,12 @@ Rules
   input, the affected child view and parent record the current change time
   and read modified; the invalid child's value and delta remain nil.
   If the whole input becomes invalid, TS-26 clears those observations.
+  On an owned scalar or its directly bound input, `invalidated` is true
+  when an effective clear in the current cycle leaves it invalid. Both
+  `modified` and `valid` are false on that observation. Clearing an
+  already-invalid value does not refresh the observation. A passive input
+  sees a coincident clear if its node wakes independently. See the
+  [scalar invalidation trace](cases_atomic.md#atomic-invalidation).
 - **TS-8** A passive input never schedules its node. Making an input active
   or passive does not change what it reads, and never itself schedules the
   node — not even when its source has already ticked in the cycle.
