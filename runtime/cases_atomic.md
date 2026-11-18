@@ -1,6 +1,7 @@
 # Atomic cases
 
-Status: proposed. Covers TS-1, TS-2 and TS-3.
+Status: the retention and zero cases are proposed for TS-1, TS-2 and TS-3.
+The scalar invalidation case records the agreed TS-7 observation.
 
 ## ATOMIC-RETENTION
 
@@ -38,9 +39,23 @@ Start fresh at offset 0, publish 0, then begin at offset 1:
 
 Neither zero is `never`. The [layout](layout_example.md) has its own encoding.
 
-## Invalidation
+## ATOMIC-INVALIDATION
 
-TS-7, outside these cases, resets the stamp to `never`: invalid, unmodified,
-yet notifying. The parent is stamped as changed. Record notification and
-admission separately; an invalid required input can prevent evaluation.
-Sampled inputs and keyed withdrawal need separate cases.
+TS-7. Start with an owned scalar and a directly bound input. Observe after
+the producer finishes each cycle. An independent probe makes every row
+readable even if the input is passive.
+
+| Cycle | Producer action | Valid | Modified | Invalidated | Last modified |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Clear before the first value | false | false | false | never |
+| 2 | Publish 7 | true | true | false | 2 |
+| 3 | Clear | false | false | true | never |
+| 4 | Idle | false | false | false | never |
+| 5 | Clear again | false | false | false | never |
+| 6 | Publish 8 then clear | false | false | true | never |
+| 7 | Publish 9 | true | true | false | 7 |
+| 8 | Clear then publish 10 | true | true | false | 8 |
+
+At cycle 3 an active input can wake its node on the clear. A passive input
+can read the same transition on an independent wake that cycle. A probe
+that first wakes at cycle 4 sees an invalid value and `invalidated == false`.

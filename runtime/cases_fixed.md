@@ -28,8 +28,10 @@ starting at zero. An idle delta is nil; an invalid scalar reads nil.
 
 An assembled input may cache state driven by child events; it need not scan
 children on each read. It replaces an assembly node, usually for one consumer.
-A child invalidation records the current time while the structure stays valid;
-losing its last valid child resets every local observation time to *never*.
+A scalar child that loses its value reports invalidated and unmodified with
+last modified time *never*. Its still-valid assembled parent reports modified
+at the clear time. Losing its last valid child resets the parent's local
+observation time to *never*.
 
 The additional cases cover nested REF targets, heterogeneous bundle fields,
 fixed collections inside TSD and TSD inside fixed collections, and aggregate
