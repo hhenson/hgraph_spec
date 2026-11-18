@@ -67,9 +67,16 @@ element, not every value in `shared`. Passing the dictionary whole at the
 map boundary does not change that subscription. For an existing element of
 a stable dictionary, notification and mapped-child selection should visit
 the affected consumers, including whole-value consumers, without visiting
-unrelated mapped keys. Initialization, membership changes and source
-replacement can require wider work. See **REF-MAPPED-SHARED** in
+unrelated mapped keys. Membership changes notify the affected key lookups.
+Initialization and source replacement can require wider work. See
+**REF-MAPPED-SHARED** in
 [Reference cases](cases_references.md).
+
+A lookup of one dictionary key observes that key's membership, including while
+absent. Inserting or removing another key does not notify the lookup. Changing
+the selected key or replacing the dictionary source may change its reference;
+value ticks reach consumers through the selected child. See
+**REF-KEYED-LOOKUP** in [Reference cases](cases_references.md).
 
 ### Notification
 
@@ -589,6 +596,12 @@ Rules
   invalidity never becomes a null publication. Captured recordings own their
   values and survive later writes, invalidation and producer destruction.
   See [nullable cases](cases_nullable.md).
+- **TS-35** A single-key dictionary lookup subscribes to the selected key's
+  membership. Other keys neither notify it nor require visiting its subscription.
+  The subscription includes absent keys and survives source replacement. Each
+  changed key can notify its own watchers once in a cycle, even after another
+  key already notified the dictionary. Selected child value ticks, pending
+  reference binding and source lifetime observations remain observable.
 
 
 Deferred

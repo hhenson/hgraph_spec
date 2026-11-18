@@ -87,3 +87,24 @@ evaluates. For value-only updates of existing keys, increasing the number
 of unrelated mapped consumers must not add notification or child-selection
 work. A consumer of the whole dictionary remains affected by every update;
 source lifetime and membership notifications remain observable.
+
+
+## REF-KEYED-LOOKUP — TS-6, TS-14, TS-19 and TS-35
+
+Two lookups select `d["x"]` and `d["y"]`; both keys initially are absent.
+The counts below are membership notifications to the lookup nodes. Their
+consumers follow the selected children for value ticks.
+
+| t | Dictionary change | x lookup notifications | y lookup notifications |
+|---|---|---|---|
+| 0 | insert z:1 | 0 | 0 |
+| 1 | insert x:2, then y:3 in the same evaluation | 1 | 1 |
+| 2 | update x:4 | 0 | 0 |
+| 3 | remove x | 1 | 0 |
+| 4 | reinsert x:5 | 1 | 0 |
+| 5 | remove z | 0 | 0 |
+
+The consumer of `x` receives 2, 4, withdrawal, then 5 at times 1–4. Increasing
+unrelated lookups must not increase notification work for a single key change.
+Changing a selection detaches the old membership subscription. Replacing the
+whole dictionary can notify all selected keys; stopping a lookup detaches it.
