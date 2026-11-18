@@ -952,7 +952,7 @@
   },
   {
     "id": "assembled-change-time",
-    "date": "2026-09-22",
+    "date": "2026-11-18",
     "authority": "User ruling",
     "rules": [
       "TS-1",
@@ -961,13 +961,13 @@
       "TS-26",
       "TS-27"
     ],
-    "rationale": "While the assembled structure stays valid, retain the child-change time and modification observation, including invalidation; idle reads retain that time. When the whole structure becomes invalid, reset its cached observation state and descendants to never/unmodified.",
+    "rationale": "While the assembled parent remains valid it retains the time of a child clear. The cleared scalar has no publication time and reads unmodified. Losing the last valid child resets the parent's observation time. The scalar observation refines the September 22 parent rule.",
     "assertions": [
       {"case": "tsl_assembled", "path": "/ticks/4/modified", "expected": true},
       {"case": "tsl_assembled", "path": "/ticks/4/last", "expected": 4},
       {"case": "tsl_assembled", "path": "/ticks/4/delta", "expected": {}},
-      {"case": "tsl_assembled", "path": "/ticks/4/children/0/modified", "expected": true},
-      {"case": "tsl_assembled", "path": "/ticks/4/children/0/last", "expected": 4},
+      {"case": "tsl_assembled", "path": "/ticks/4/children/0/modified", "expected": false},
+      {"case": "tsl_assembled", "path": "/ticks/4/children/0/last", "expected": "never"},
       {"case": "tsl_assembled", "path": "/ticks/5/modified", "expected": false},
       {"case": "tsl_assembled", "path": "/ticks/5/last", "expected": "never"},
       {"case": "tsl_assembled", "path": "/ticks/5/delta", "expected": null},
@@ -990,8 +990,8 @@
       {"case": "tsb_assembled", "path": "/ticks/4/modified", "expected": true},
       {"case": "tsb_assembled", "path": "/ticks/4/last", "expected": 4},
       {"case": "tsb_assembled", "path": "/ticks/4/delta", "expected": {}},
-      {"case": "tsb_assembled", "path": "/ticks/4/children/left/modified", "expected": true},
-      {"case": "tsb_assembled", "path": "/ticks/4/children/left/last", "expected": 4},
+      {"case": "tsb_assembled", "path": "/ticks/4/children/left/modified", "expected": false},
+      {"case": "tsb_assembled", "path": "/ticks/4/children/left/last", "expected": "never"},
       {"case": "tsb_assembled", "path": "/ticks/5/modified", "expected": false},
       {"case": "tsb_assembled", "path": "/ticks/5/last", "expected": "never"},
       {"case": "tsb_assembled", "path": "/ticks/5/delta", "expected": null},
@@ -1014,17 +1014,17 @@
       {"case": "tsl_latest_invalid", "path": "/ticks/2/modified", "expected": true},
       {"case": "tsl_latest_invalid", "path": "/ticks/2/last", "expected": 2},
       {"case": "tsl_latest_invalid", "path": "/ticks/2/delta", "expected": {}},
-      {"case": "tsl_latest_invalid", "path": "/ticks/2/children/1/modified", "expected": true},
-      {"case": "tsl_latest_invalid", "path": "/ticks/2/children/1/last", "expected": 2},
+      {"case": "tsl_latest_invalid", "path": "/ticks/2/children/1/modified", "expected": false},
+      {"case": "tsl_latest_invalid", "path": "/ticks/2/children/1/last", "expected": "never"},
       {"case": "tsl_latest_invalid", "path": "/ticks/3/last", "expected": 2},
-      {"case": "tsl_latest_invalid", "path": "/ticks/3/children/1/last", "expected": 2},
+      {"case": "tsl_latest_invalid", "path": "/ticks/3/children/1/last", "expected": "never"},
       {"case": "tsb_latest_invalid", "path": "/ticks/2/modified", "expected": true},
       {"case": "tsb_latest_invalid", "path": "/ticks/2/last", "expected": 2},
       {"case": "tsb_latest_invalid", "path": "/ticks/2/delta", "expected": {}},
-      {"case": "tsb_latest_invalid", "path": "/ticks/2/children/right/modified", "expected": true},
-      {"case": "tsb_latest_invalid", "path": "/ticks/2/children/right/last", "expected": 2},
+      {"case": "tsb_latest_invalid", "path": "/ticks/2/children/right/modified", "expected": false},
+      {"case": "tsb_latest_invalid", "path": "/ticks/2/children/right/last", "expected": "never"},
       {"case": "tsb_latest_invalid", "path": "/ticks/3/last", "expected": 2},
-      {"case": "tsb_latest_invalid", "path": "/ticks/3/children/right/last", "expected": 2}
+      {"case": "tsb_latest_invalid", "path": "/ticks/3/children/right/last", "expected": "never"}
     ]
   }
 ]

@@ -173,8 +173,9 @@ State
 A **non-peered** fixed input is valid when any child is valid, and all valid
 when itself and every child are valid. While it remains valid, child ticks
 and invalidations update its change time; modified means that time is now.
-An invalidated child's input view also records that change, with nil value
-and delta. Idle reads retain the change time, not an older sibling's time.
+A directly bound scalar child reports its own clear. Its value and delta are
+nil, its last modified time is *never*, and it reads unmodified. An idle
+read of the assembled parent retains the parent's change time.
 
 When the whole structure becomes invalid, its time and descendant observation
 state reset to *never*, unmodified. Binding to an invalid target also clears
@@ -479,8 +480,8 @@ Rules
   Several notifications still cause only one node evaluation (GRF-16).
 - **TS-7** Output invalidation notifies, resets its time to *never*, and is
   not a tick. Its owned parent reads modified. In a still-valid assembled
-  input, the affected child view and parent record the current change time
-  and read modified; the invalid child's value and delta remain nil.
+  input, the parent records the current change time and reads modified.
+  The cleared child's value and delta are nil.
   If the whole input becomes invalid, TS-26 clears those observations.
   On an owned scalar or its directly bound input, `invalidated` is true
   when an effective clear in the current cycle leaves it invalid. Both
