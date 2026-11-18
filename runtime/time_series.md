@@ -68,7 +68,8 @@ map boundary does not change that subscription. For an existing element of
 a stable dictionary, notification and mapped-child selection should visit
 the affected consumers, including whole-value consumers, without visiting
 unrelated mapped keys. Membership changes notify the affected key lookups.
-Initialization and source replacement can require wider work. See **REF-MAPPED-SHARED** in
+Initialization and source replacement can require wider work. See
+**REF-MAPPED-SHARED** in
 [Reference cases](cases_references.md).
 
 A lookup of one dictionary key observes that key's membership, including while
@@ -595,14 +596,23 @@ Rules
   invalidity never becomes a null publication. Captured recordings own their
   values and survive later writes, invalidation and producer destruction.
   See [nullable cases](cases_nullable.md).
-
-
 - **TS-35** A single-key dictionary lookup subscribes to the selected key's
   membership. Other keys neither notify it nor require visiting its subscription.
   The subscription includes absent keys and survives source replacement. Each
   changed key can notify its own watchers once in a cycle, even after another
   key already notified the dictionary. Selected child value ticks, pending
   reference binding and source lifetime observations remain observable.
+
+
+Deferred
+--------
+
+- **Clearing a window**, and windows that evict on a timer rather than on
+  arrival (hgraph RFCs 0006 and 0007, neither accepted). Optional if
+  provided.
+- **How reference binding is carried out.** Only what an input observes is
+  specified here; the binding mechanism is an implementation choice.
+- **Choices of representation** for an output's value.
 
 
 Points to settle
@@ -642,14 +652,3 @@ Sources
 
 Source provenance is recorded in [extraction](extraction.md) and the
 [audit notes](https://github.com/hhenson/hgraph_spec_audit/tree/main/docs/implementation-notes).
-
-
-Deferred
---------
-
-- **Clearing a window**, and windows that evict on a timer rather than on
-  arrival (hgraph RFCs 0006 and 0007, neither accepted). Optional if
-  provided.
-- **How reference binding is carried out.** Only what an input observes is
-  specified here; the binding mechanism is an implementation choice.
-- **Choices of representation** for an output's value.
