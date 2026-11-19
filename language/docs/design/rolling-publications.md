@@ -39,8 +39,10 @@ context. No size or kind is inferred from data length, payload or timestamp.
 Tick windows retain at most Max arrivals, oldest first, evicting the oldest
 on a new arrival when full. Duration windows evict values whose age at the
 new arrival time is greater than Max, then retain the new arrival. A value
-exactly Max old stays. Eviction only occurs on arrival; idle time alone does
-not change the retained window or schedule a tick.
+exactly Max old stays. A live owned duration window also publishes when its oldest
+arrival first exceeds Max during source silence. The runtime’s
+[window cases](../../../runtime/cases_windows.md) give the exact times.
+Replay preserves the events present in each recording.
 
 `all_valid` describes the currently retained window, not a sticky historical
 milestone or elapsed time since graph start. A tick window is ready when its
