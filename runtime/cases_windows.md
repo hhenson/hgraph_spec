@@ -178,9 +178,64 @@ an empty sample list. A reader still observes the release.
 A tick window of size 2. Writing 4 then 4 gives values `4, 4`, two ticks and
 two incremental deltas each with `added=[4]`.
 
+## WINDOW-DURABLE-REPLAY — TS-30, TS-37
+
+A live window of span 2 µs and minimum zero takes 7 at t=0 and 8 at t=3.
+Reset it at t=7. Close the recording, then replay it into a new graph.
+
+| t | Recorded publication | Replayed history | Visible in a replay starting at 3 |
+|---|---|---|---|
+| 0 | add 7 | [7@0] | — |
+| 2 | — | [7@0] | — |
+| 3 | remove 7@0, add 8 | [8@3] | remove 7@0, add 8 |
+| 5 | — | [8@3] | — |
+| 6 | remove 8@3 | [] | remove 8@3 |
+| 7 | clear | [] | clear |
+
+The last two rows both leave an empty window. A downstream reader can
+distinguish the departure from the explicit clear. A whole-window
+replacement carrying [4@0, 4@0, 4@1] retains all three observations in
+order. A later replacement carrying [] publishes an empty window.
+
+## WINDOW-CHECKPOINT-RESUME — TS-31, TS-36, TS-38
+
+An owned window of span 2 µs takes 7 at t=0 and 2 at t=1. Save the
+checkpoint after t=1. Each resume below starts a fresh execution with the
+same checkpoint and no further input. Compare it with the uninterrupted run.
+
+| Evaluation time | Uninterrupted | Resume at 2 | Resume at 3 | Resume at 5 |
+|---|---|---|---|---|
+| 2 | — | — | — | — |
+| 3 | remove 7@0 | remove 7@0 | remove 7@0 | — |
+| 4 | remove 2@1 | remove 2@1 | remove 2@1 | — |
+| 5 | — | — | — | remove 7@0, 2@1 |
+| 6 | — | — | — | — |
+
+The resume at 2 retains both original samples silently. With minimum 2 µs
+they are still warming up. With minimum zero the same history is already
+ready. At 3, consumers see [2@1] after the first departure. At 5, a late
+resume removes both overdue samples together before consumers read the
+window. Restoring a valid, empty window preserves its validity and produces
+no departure. Restoring a never-valid window preserves its invalidity.
+
+## WINDOW-RECORDED-INPUT-RECOVERY — TS-30, TS-39
+
+A component recorded arrivals 7 at t=0, 2 at t=1 and 4 at t=2. Its
+window spans 4 µs. Recover the component input at t=2 in two fresh runs.
+
+| Live input at t=2 | Only publication at restart | History seen by the component |
+|---|---|---|
+| — | replace with [7@0, 2@1, 4@2] | [7@0, 2@1, 4@2] |
+| add 9 | add 9 | [7@0, 2@1, 9@2] |
+
+If the first live edit removes a previously recorded sample, its removal
+identifies that sample by its original arrival time. If the recording
+ends with a valid, empty window and the live input is quiet, recovery
+publishes a replacement with [].
+
 ## Scope
 
 The scheduled cases cover owned outputs at fixed paths, including fixed
 bundle fields and list positions inside nested graph instances. Registration
-of window children inserted into a growing list or dictionary and durable
-checkpoint recovery have their own implementation stages.
+of window children inserted into a growing list or dictionary is covered by a
+later lifecycle stage.

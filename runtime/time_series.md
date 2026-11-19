@@ -659,6 +659,33 @@ Rules
   See the
   [scheduled window traces](cases_windows.md#window-duration--ts-30-ts-31-ts-36).
 
+- **TS-37** A durable window recording replays each publication at its
+  recorded evaluation time. Incremental records preserve the clear flag,
+  arrival, and ordered removals with original timestamps. Whole-window
+  replacements preserve the ordered sample times, including duplicate
+  samples and empty replacements. A legacy scalar row is an arrival at
+  the row time and prunes on arrival. Gaps remain silent. When replay
+  starts partway through a recording, earlier rows can establish the
+  window state silently. The first visible event retains its recorded delta.
+  See [durable replay](cases_windows.md#window-durable-replay--ts-30-ts-37).
+
+- **TS-38** A checkpoint of a live, owned duration window preserves
+  validity and ordered samples with their original times. Restoring it
+  is silent. Future departures follow the same deadlines as uninterrupted
+  execution. At the first resumed evaluation, the owner publishes all samples
+  already due together, oldest first, before its consumers evaluate. A valid
+  empty or never-valid restored window has no pending departure.
+  See [checkpoint resume](cases_windows.md#window-checkpoint-resume--ts-31-ts-36-ts-38).
+
+- **TS-39** A component recovering a window input from its recording
+  preserves the times of the retained samples. If the live input is quiet
+  at restart, the component receives one whole-window replacement through
+  the restart time, including an empty history if the recorded window was
+  valid and empty. If the live input publishes at restart, the component
+  receives that edit once against the history strictly before restart. The
+  live edit takes precedence over a recorded edit at the same instant.
+  See [recovery from recorded input](cases_windows.md#window-recorded-input-recovery--ts-30-ts-39).
+
 Deferred
 --------
 
