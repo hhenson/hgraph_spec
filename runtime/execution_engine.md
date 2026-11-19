@@ -251,6 +251,9 @@ sequenceDiagram
         G->>P: evaluate
         P-->>N: outputs notify, scheduling bound nodes for now
     end
+    opt any owned duration window is due
+        G->>G: expire every due window across this root
+    end
     loop each node, in rank order
         opt scheduled for now
             G->>N: evaluate
@@ -267,6 +270,12 @@ graph to evaluate, and read its next scheduled time. The scan itself is
 specified in Graph. What matters here is that push sources hold the lowest
 ranks and so are evaluated before everything else: an outside event enters
 the graph at the top of the cycle that admits it.
+
+For live duration windows the root also considers the earliest outstanding
+window departure when selecting its next time. In the cycle above, due
+windows publish after push sources and before ordinary consumers. A nested
+window wakes its parent and local consumers in that same evaluation.
+See [window rule TS-36](time_series.md#windows).
 
 A graph owned by a node is evaluated inside that node's evaluation, at the
 same evaluation time. It has no push sources, and where the engine reads the

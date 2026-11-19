@@ -301,8 +301,11 @@ element type V. The held window is read separately, oldest first.
 
 A full tick window evicts its oldest sample on a push. A duration window
 prunes samples strictly older than its maximum span when admitting a value.
-A sample exactly that old stays. In this stage, elapsed time alone produces
-no departure tick. An explicit removal can publish with `added` empty.
+A sample exactly that old stays. In a live graph, an owned duration window
+at a fixed output path schedules the first evaluation instant at which
+the oldest sample exceeds the span. At that time it publishes all due
+removals, even while its producer is silent. A standalone window prunes
+when explicitly mutated.
 
 A clear followed by one push in the same evaluation publishes one delta.
 If an eviction already removed a prefix in that evaluation, the delta
@@ -645,12 +648,22 @@ Rules
   key already notified the dictionary. Selected child value ticks, pending
   reference binding and source lifetime observations remain observable.
 
+- **TS-36** Each live duration window at a fixed owned output path shares its
+  root graph’s expiry service. A sample arriving at t in a window of span d
+  leaves at the first representable instant after t + d. At a shared deadline
+  each window publishes its own due samples. A producer arrival or reset on
+  that cycle coalesces into one publication per window. Empty windows and
+  stopped owners contribute no deadline. Forwarding follows the owner.
+  A window replayed from a recording follows the recorded times. An operator
+  that delays or selects window events controls when its output publishes.
+  See the
+  [scheduled window traces](cases_windows.md#window-duration--ts-30-ts-31-ts-36).
 
 Deferred
 --------
 
-- **Scheduled duration-window expiry.** The mutation and delta rules above
-  apply before the graph schedules departures in response to elapsed time.
+- **Dynamic duration-window children.** Attachment and detachment for new
+  dictionary entries and growing-list positions are a later lifecycle stage.
 - **How reference binding is carried out.** Only what an input observes is
   specified here; the binding mechanism is an implementation choice.
 - **Choices of representation** for an output's value.
