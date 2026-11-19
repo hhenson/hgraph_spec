@@ -275,6 +275,10 @@ For live duration windows the root also considers the earliest outstanding
 window departure when selecting its next time. In the cycle above, due
 windows publish after push sources and before ordinary consumers. A nested
 window wakes its parent and local consumers in that same evaluation.
+Removing its enclosing collection entry or stopping that child graph
+withdraws the pending departure. Wall-clock lateness preserves each
+already scheduled logical deadline. See the
+[late real-time trace](cases_windows.md#window-late-realtime--ts-30-ts-36-ts-40).
 See [window rule TS-36](time_series.md#windows).
 
 A graph owned by a node is evaluated inside that node's evaluation, at the

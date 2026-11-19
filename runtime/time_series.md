@@ -648,8 +648,8 @@ Rules
   key already notified the dictionary. Selected child value ticks, pending
   reference binding and source lifetime observations remain observable.
 
-- **TS-36** Each live duration window at a fixed owned output path shares its
-  root graph’s expiry service. A sample arriving at t in a window of span d
+- **TS-36** Each live, owned duration window shares its root graph’s expiry
+  service, including a window beneath a dictionary key or growing list position. A sample arriving at t in a window of span d
   leaves at the first representable instant after t + d. At a shared deadline
   each window publishes its own due samples. A producer arrival or reset on
   that cycle coalesces into one publication per window. Empty windows and
@@ -686,11 +686,19 @@ Rules
   live edit takes precedence over a recorded edit at the same instant.
   See [recovery from recorded input](cases_windows.md#window-recorded-input-recovery--ts-30-ts-39).
 
+- **TS-40** A duration window under a live dictionary key or growing list
+  position follows TS-36, including through nested collections and bundles.
+  Removing that key or position cancels its pending departures. A removed
+  child is still readable for the collection's normal removal interval.
+  If the collection restores the same child within the cycle, its retained
+  samples resume their original deadlines. A fresh child at that coordinate
+  starts with its own history. Stopping the owning graph cancels all of its
+  descendants' departures. A recorded or forwarded output follows its
+  producer's timing. See [dynamic window lifetimes](cases_windows.md#window-slot-lifetime--ts-36-ts-40).
+
 Deferred
 --------
 
-- **Dynamic duration-window children.** Attachment and detachment for new
-  dictionary entries and growing-list positions are a later lifecycle stage.
 - **How reference binding is carried out.** Only what an input observes is
   specified here; the binding mechanism is an implementation choice.
 - **Choices of representation** for an output's value.
