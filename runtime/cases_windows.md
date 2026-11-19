@@ -233,9 +233,53 @@ identifies that sample by its original arrival time. If the recording
 ends with a valid, empty window and the live input is quiet, recovery
 publishes a replacement with [].
 
-## Scope
+## WINDOW-SLOT-LIFETIME — TS-36, TS-40
 
-The scheduled cases cover owned outputs at fixed paths, including fixed
-bundle fields and list positions inside nested graph instances. Registration
-of window children inserted into a growing list or dictionary is covered by a
-later lifecycle stage.
+A dictionary holds live windows of span 2 µs. Each column shows the
+publication at that key. Read the state after the action in the same cycle.
+
+| t | Action | A | B |
+|---|---|---|---|
+| 0 | append A=7 and B=11 | add 7 | add 11 |
+| 1 | remove key A | key removed, held [7@0] readable | — |
+| 2 | recreate A and append 9 | add 9 | — |
+| 3 | — | — | remove 11@0 |
+| 4 | — | — | — |
+| 5 | — | remove 9@2 | — |
+
+The departure scheduled by A's first owner at 3 is cancelled. Removing
+an outer key or stopping a mapped graph that holds A cancels the same
+pending work. B's independent departure still runs at 3.
+
+## WINDOW-SLOT-REVIVAL — TS-32, TS-36, TS-40
+
+A growing list has two positions. Its window at index 1 holds 4@0 and
+has a span of 2 µs. Compare the following independent runs.
+
+| Action | First observation after removal | Departure from index 1 |
+|---|---|---|
+| At 1 shrink to length 1, then grow to 2 in the same cycle | the restored position holds [4@0] | remove 4@0 at 3 |
+| At 1 shrink to length 1, then grow to 2 at 2 and append 7 | the fresh position holds [7@2] | remove 7@2 at 5 |
+
+A removed position remains readable for the normal list removal interval.
+An empty position contributes no deadline. A window nested beneath both a
+key and a position follows the same rules at either boundary.
+
+## WINDOW-LATE-REALTIME — TS-30, TS-36, TS-40
+
+A duration window under a live key accepts 7 at t=0 and 2 at t=1. Its
+span is 2 µs. The real-time executor is already behind wall time when
+it processes the scheduled work. All times in the table are graph
+evaluation times.
+
+| t | Publication | Held samples |
+|---|---|---|
+| 0 | add 7 | [7@0] |
+| 1 | add 2 | [7@0, 2@1] |
+| 2 | — | [7@0, 2@1] |
+| 3 | remove 7@0 | [2@1] |
+| 4 | remove 2@1 | [] |
+
+The executor services each pending logical deadline in order. A checkpoint
+first resumed after both deadlines has a different trace, as specified in
+[checkpoint resume](#window-checkpoint-resume--ts-31-ts-36-ts-38).
