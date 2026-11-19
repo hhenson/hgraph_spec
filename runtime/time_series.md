@@ -202,7 +202,7 @@ stateDiagram-v2
 | TSL, growing | The elements, by position | As for a fixed list, plus the new length on a size change; removed indices include the dropped tail (TS-32) | Every element valid |
 | TSS | The set | The elements **added** and the elements **removed** | Same as valid |
 | TSD | The live keys, each with its child's value — nil where the child is not yet valid | The keys **removed**, and the modified keys each with its child's delta. Which keys were **added** in this cycle is asked of the dictionary; it is not a separate part of the delta | Every live key's child valid. Removed keys do not count |
-| TSW | The values in the window, oldest first, each with the time it arrived | The value that arrived in this cycle. The value it evicted, if any, is readable beside it as the **removed value** | The window holds its minimum: enough ticks, or enough span |
+| TSW | The values in the window, oldest first, each with the time it arrived | An incremental delta with clear, addition and timestamped removals, or a timestamped whole-window replacement (TS-30) | The window holds its minimum: enough ticks, or enough span |
 | REF | The reference | The reference | Same as valid |
 | SIGNAL | True | True | Same as valid |
 
@@ -290,23 +290,53 @@ holds the values that arrived within the last span of time. Each has a
 **minimum**: a number of values, or a span, below which the window is not
 yet *all valid*.
 
-- A value arrives when the window's node writes one; that is the window's
-  tick, and its delta.
-- Arrival evicts. A full tick window drops its oldest value to make room; a
-  duration window drops every value older than the span, measured from the
-  arriving value's time. What a cycle evicted is readable in that cycle as
-  the window's removed value, and only then. Eviction happens on arrival and
-  at no other time: a duration window whose values are ageing does not tick
-  or shrink until something arrives.
-- A window is **valid** from its first value. **All valid** tests the
-  currently retained window: minimum count for tick windows, or oldest-to-newest
-  arrival span for duration windows. A new arrival after a gap can evict older
-  values and make a positive duration minimum unready again; validity remains.
-  A zero duration minimum is ready from the first value.
-- Reading the window gives its values oldest first, and their times.
+An incremental **window delta** describes one modification of a window with
+element type V. The held window is read separately, oldest first.
 
-Clearing a window, and evicting on a timer rather than on arrival, are not
-part of the window (Deferred).
+| Field | Meaning |
+|---|---|
+| `cleared` | True when the window was explicitly cleared, including when it was already empty. |
+| `added` | Zero or one V. Applying the addition stamps it with the receiving evaluation time. Equal additions remain distinct arrivals. |
+| `removed` | An ordered sequence of samples `{value: V, time: arrival time}`. It contains every eviction and every sample discarded by a clear, oldest first. Equal values and equal timestamps retain their multiplicity. |
+
+A full tick window evicts its oldest sample on a push. A duration window
+prunes samples strictly older than its maximum span when admitting a value.
+A sample exactly that old stays. In this stage, elapsed time alone produces
+no departure tick. An explicit removal can publish with `added` empty.
+
+A clear followed by one push in the same evaluation publishes one delta.
+If an eviction already removed a prefix in that evaluation, the delta
+includes that prefix followed by the samples the clear discarded. The
+new value remains in the window. Clearing an empty window still publishes.
+An idle read has no current delta. Capturing a delta retains its samples
+independently of later window mutations.
+
+For an incremental mutation the Python `delta_value` compatibility observation
+gives the arriving value,
+or `None` when there is no arrival. The singular `removed_value` gives the
+last value evicted by overflow or expiry in this cycle when
+`has_removed_value` is true. A clear alone sets no singular removal. The
+ordered `removed` samples in the incremental delta include the clear.
+
+Whole-window assignment publishes a **replacement** containing the complete
+ordered sequence of timestamped samples. Applying it discards the preceding
+state and preserves every supplied value and time, including duplicates.
+An empty replacement installs an empty state. A Python sequence assigned as
+the whole window gives each supplied value the evaluation time of the
+assignment. Its existing scalar observation can show the most recent sample.
+The zero-or-one addition rule applies to incremental mutations.
+
+A legacy scalar recording represents an arrival at its recorded time.
+Replay preserves its recorded events. For example, a gap in that recording
+does not acquire an intermediate removal tick. A structured capture
+preserves clear-only and removal-only events and the times of removed samples.
+
+A nonempty window is **all valid** when its current count or the span
+from its oldest to newest arrival meets its minimum. An explicit zero
+duration minimum is satisfied by the first sample. An omitted minimum
+equals the maximum. A clear leaves a valid, empty window that is not
+all valid.
+
 - A dictionary's **key set** is itself a time-series, a TSS, that can be
   bound to on its own. It ticks when keys come and go and not when their
   values change.
@@ -507,8 +537,8 @@ Rules
   Peering describes its active binding, not the retained removal record.
 - **TS-12** A growing list shrinks only from its end. Clearing an in-range
   position preserves its index and the length of the list.
-- **TS-13** A window is valid from its first value, and all valid once it
-  holds its minimum.
+- **TS-13** A window is valid from its first arrival or explicit clear.
+  Its current retained values determine all-valid (TS-31).
 - **TS-14** A plain bind causes no notification. A sampled valid target reads
   modified in its cycle: a scalar's delta is its value; a collection reports
   valid children's sampled deltas. An invalid target and its invalid
@@ -577,15 +607,18 @@ Rules
 - **TS-29** An input is bound to an output only when the table under "What
   may bind to what" admits the pair, at every depth. There is no conversion
   at a binding.
-- **TS-30** A window ticks when a value arrives; its delta is that value.
-  Arrival is the only cause of eviction: a full tick window drops its oldest
-  value, a duration window drops the values older than its span from the
-  arriving value's time. What a cycle evicted is readable in that cycle only,
-  as the removed value.
-- **TS-31** A window is valid from its first value. All-valid tests its current
-  retained count or oldest-to-newest arrival span against the minimum; it is
-  not sticky. Arrival after a gap can make a positive duration minimum unready
-  again. Zero duration minimum is ready from the first value.
+- **TS-30** An incremental window delta reports its clear flag, zero or one
+  addition, and every removed sample with its original arrival time, in
+  order. A whole-window replacement supplies the complete ordered sequence
+  of timestamped samples. A clear and push in one evaluation are one modification. Clearing
+  an empty window also ticks. A tick window evicts on overflow. On an
+  arrival, a duration window evicts samples strictly older than its span.
+  See the [window cases](cases_windows.md).
+- **TS-31** A window is valid after its first arrival or explicit clear.
+  All-valid requires a nonempty window whose current count or oldest-to-newest
+  arrival span reaches the minimum. It can become false after eviction or
+  clear. An explicit zero duration minimum is ready on the first sample.
+  An omitted minimum equals the maximum.
 - **TS-32** Fixed and growing lists report the net change each cycle.
   `modified` maps indices to child deltas. `removed` names indices that
   lost their value, including every position in a truncated tail.
@@ -616,9 +649,8 @@ Rules
 Deferred
 --------
 
-- **Clearing a window**, and windows that evict on a timer rather than on
-  arrival (hgraph RFCs 0006 and 0007, neither accepted). Optional if
-  provided.
+- **Scheduled duration-window expiry.** The mutation and delta rules above
+  apply before the graph schedules departures in response to elapsed time.
 - **How reference binding is carried out.** Only what an input observes is
   specified here; the binding mechanism is an implementation choice.
 - **Choices of representation** for an output's value.
