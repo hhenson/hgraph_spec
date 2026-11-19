@@ -296,7 +296,7 @@ element type V. The held window is read separately, oldest first.
 | Field | Meaning |
 |---|---|
 | `cleared` | True when the window was explicitly cleared, including when it was already empty. |
-| `added` | Zero or one V. A push contributes one value, including a value equal to an earlier one. |
+| `added` | Zero or one V. Applying the addition stamps it with the receiving evaluation time. Equal additions remain distinct arrivals. |
 | `removed` | An ordered sequence of samples `{value: V, time: arrival time}`. It contains every eviction and every sample discarded by a clear, oldest first. Equal values and equal timestamps retain their multiplicity. |
 
 A full tick window evicts its oldest sample on a push. A duration window

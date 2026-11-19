@@ -95,6 +95,13 @@ there. A recording containing a clear-only or removal-only delta reproduces
 that modification when replayed. A removed sample keeps its original
 arrival time.
 
+For a delayed application, seed two capacity-one windows with [10@1].
+At t=3 the sender pushes 20, capturing `added=[20]`, `removed=[10@1]`.
+Apply that delta to the receiver at t=8. The sender holds [20@3], the
+receiver holds [20@8], and the removed sample still reads 10@1. In a
+separate run, applying a whole-state snapshot of the sender at t=8 gives
+[20@3].
+
 ## WINDOW-EQUAL-VALUE — TS-30
 
 A tick window of size 2. Writing 4 then 4 gives values `4, 4`, two ticks and
