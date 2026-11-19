@@ -696,6 +696,16 @@ Rules
   descendants' departures. A recorded or forwarded output follows its
   producer's timing. See [dynamic window lifetimes](cases_windows.md#window-slot-lifetime--ts-36-ts-40).
 
+- **TS-41** A graph-owned window's removals belong to the root evaluation
+  time that published them. An observer may read the values and original
+  sample times after that step returns, including after another step at the
+  same time. The inspection interval ends when the root accepts a later
+  evaluation time or the caller explicitly releases the completed step.
+  These boundaries also apply to fixed-count overflow, clear and replay.
+  Reclamation publishes no tick. An owned copy of the delta remains readable
+  after release or graph destruction.
+  See [completed-step inspection](cases_windows.md#window-completed-step--ts-41).
+
 Deferred
 --------
 
