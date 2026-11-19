@@ -10,14 +10,18 @@ Windows remain inherently temporal and cannot become ordinary atomic payloads.
 
 ## Arrival delta
 
+This language profile describes arrivals. Runtime consumers can also
+observe clears and ordered removals through the [window mutation
+contract](../../../runtime/time_series.md#windows).
+
 `delta<rolling<V, Max, Min>>` is exactly V, the value arriving this cycle.
 It is not the held window, a sparse collection patch, an evicted value, or a
 list of values/timestamps. Construct it through ordinary V expressions; no
 rolling-delta constructor is introduced. Owning `TimedValue` and recording
 entries independently retain V under existing copy rules.
 
-Use the unchanged generic body `when { return delta_value(value) }`. Valid and
-modified prove an arrival is present; `all_valid` is not required. A window is
+For an arrival-only input, `when { return delta_value(value) }` forwards
+each arrival, including before the minimum is reached. A window is
 valid from its first arrival even while its minimum is not satisfied. Returning
 that arrival publishes it to the pass-through's own same-shaped output, which
 independently derives its window using the output publication time. A direct
