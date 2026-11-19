@@ -198,8 +198,8 @@ stateDiagram-v2
 |---|---|---|---|
 | TS | The scalar | The same scalar | Same as valid |
 | TSB | Every declared field, with nil for an invalid child | The valid modified fields, by name, each with its own delta | Every field valid |
-| TSL, fixed | The elements, by position | The valid modified elements, by position, each with its own delta | Every element valid |
-| TSL, growing | The elements, by position | Positions removed from the end, and the modified elements by position; a position that joined is a modified position. Never both added and removed positions in one cycle | Every element valid |
+| TSL, fixed | The elements, by position | Modified children by index and indices that lost their value (TS-32) | Every element valid |
+| TSL, growing | The elements, by position | As for a fixed list, plus the new length on a size change; removed indices include the dropped tail (TS-32) | Every element valid |
 | TSS | The set | The elements **added** and the elements **removed** | Same as valid |
 | TSD | The live keys, each with its child's value — nil where the child is not yet valid | The keys **removed**, and the modified keys each with its child's delta. Which keys were **added** in this cycle is asked of the dictionary; it is not a separate part of the delta | Every live key's child valid. Removed keys do not count |
 | TSW | The values in the window, oldest first, each with the time it arrived | The value that arrived in this cycle. The value it evicted, if any, is readable beside it as the **removed value** | The window holds its minimum: enough ticks, or enough span |
@@ -278,8 +278,7 @@ times reset to *never* instead (TS-26).
   brings the same elements back, with their values and times. Growth and
   truncation in one cycle net out: a list that goes from five to three to
   four elements reports positions from four removed and position three
-  modified, and applying that delta in order — truncate to the lowest
-  removed position, then apply the modified positions — reproduces the
+  modified, and applying that delta in order — set the reported length, then apply the modified positions — reproduces the
   result. The list's own tick is the net change; a cycle in which it grew and
   shrank back to the same size with no element written is not a tick.
 
@@ -506,8 +505,8 @@ Rules
   children too; removing one does not destroy its independently owned target.
   A retained compound view includes descendant values and timestamps.
   Peering describes its active binding, not the retained removal record.
-- **TS-12** A growing list shrinks only from its end, and never reports
-  positions both added and removed in one cycle.
+- **TS-12** A growing list shrinks only from its end. Clearing an in-range
+  position preserves its index and the length of the list.
 - **TS-13** A window is valid from its first value, and all valid once it
   holds its minimum.
 - **TS-14** A plain bind causes no notification. A sampled valid target reads
@@ -587,13 +586,15 @@ Rules
   retained count or oldest-to-newest arrival span against the minimum; it is
   not sticky. Arrival after a gap can make a positive duration minimum unready
   again. Zero duration minimum is ready from the first value.
-- **TS-32** A growing list's delta is the net of the cycle: positions
-  removed from the end and positions modified, including those that joined.
-  Applying it truncates to the lowest removed position and then applies the
-  modified positions. Growing and shrinking back to the same size without a
-  write is not a tick. A truncated element is readable for the rest of the
-  cycle and comes back, with its value and time, if the list grows over its
-  position again in that cycle; from the next cycle it is gone (GRF-25).
+- **TS-32** Fixed and growing lists report the net change each cycle.
+  `modified` maps indices to child deltas. `removed` names indices that
+  lost their value, including every position in a truncated tail.
+  `size_modified` holds the new length only when it differs from the
+  previous cycle. A fixed list has no size change.
+  Applying a smaller size alone truncates the list. Clearing an in-range
+  position invalidates its child and preserves the other positions.
+  A truncated child remains readable through the end of the cycle and
+  returns with its value and time if restored during that cycle (GRF-25).
 
 - **TS-33** A `TS<Optional<T>>` publication is either a payload or explicit
   null. Both make it valid and modified and notify consumers. Silence retains

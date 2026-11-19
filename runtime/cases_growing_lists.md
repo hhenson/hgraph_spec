@@ -1,7 +1,6 @@
 # Growing list cases
 
-Status: proposed 2026-09-30, reasoned from TS-12, TS-32 and GRF-25 and from
-hgraph's RFC 0031; not yet run. Times are cycles from the run start.
+Times are cycles from the run start. LIST-INPUT remains proposed.
 
 ## LIST-GROW-SHRINK — TS-12, TS-32
 
@@ -9,18 +8,17 @@ A growing `TSL<TS<i64>>` output, initially invalid. The node writes
 positions in the cycles shown; a write to a position past the end grows the
 list to include it.
 
-| t | Action | Value | Delta: removed positions | Delta: modified positions | Valid | Modified |
-|---|---|---|---|---|---|---|
-| 0 | write 0 = 10, 1 = 11 | 10, 11 | — | 0: 10, 1: 11 | true | true |
-| 1 | — | 10, 11 | — | — | true | false |
-| 2 | write 2 = 12 | 10, 11, 12 | — | 2: 12 | true | true |
-| 3 | truncate to 1 | 10 | 1, 2 | — | true | true |
-| 4 | truncate to 1 again | 10 | — | — | true | false |
-| 5 | write 1 = 20 | 10, 20 | — | 1: 20 | true | true |
+| t | Action | Value | Delta: removed positions | Delta: modified positions | New size | Valid | Modified |
+|---|---|---|---|---|---|---|---|
+| 0 | write 0 = 10, 1 = 11 | 10, 11 | — | 0: 10, 1: 11 | 2 | true | true |
+| 1 | — | 10, 11 | — | — | — | true | false |
+| 2 | write 2 = 12 | 10, 11, 12 | — | 2: 12 | 3 | true | true |
+| 3 | truncate to 1 | 10 | 1, 2 | — | 1 | true | true |
+| 4 | truncate to 1 again | 10 | — | — | — | true | false |
+| 5 | write 1 = 20 | 10, 20 | — | 1: 20 | 2 | true | true |
 
-A position that joins is a modified position with its whole value as delta.
-Removed positions are contiguous from the end. Truncating to the current
-size is not a tick.
+Truncating to the current size is silent. A shrink reports every dropped
+index. Clearing a live position preserves the length.
 
 ## LIST-RETAIN — TS-32, GRF-25
 
@@ -42,9 +40,29 @@ is reading nothing, and a new element at that position is fresh.
 From `10, 11, 12, 13, 14` (five elements): truncate to 3, then write
 position 3 = 40 in the same cycle. Value `10, 11, 12, 40`; delta removed
 `4`, modified `3: 40`. Applying the delta to a copy of the previous value —
-truncate to the lowest removed position, then apply the modified positions —
-gives the same four elements. Position 3's new element is fresh, not the
-retained 13.
+set the length to 4, then apply the modified positions —
+gives the same four elements. The write replaces the retained value at position 3.
+
+## LIST-CLEAR-RESIZE — TS-32
+
+| Cycle | Producer writes | Live values | Modified | Removed | New size |
+|---|---|---|---|---|---|
+| 0 | publish three values | 10, 20, 30 | 0: 10, 1: 20, 2: 30 | — | 3 |
+| 1 | clear position 1 | 10, invalid, 30 | — | 1 | — |
+| 2 | resize to 1 | 10 | — | 1, 2 | 1 |
+| 3 | resize to 3 | 10, invalid, invalid | — | — | 3 |
+| 4 | write positions 1 and 2 | 10, 20, 31 | 1: 20, 2: 31 | — | — |
+| 5 | resize to 0 | empty | — | 0, 1, 2 | 0 |
+
+Growing from length 1 to 3 and writing both new values in one cycle reports
+size 3 and both positions in the modified map. A bounded list of length 3
+has the same clear at cycle 1. Its length is fixed.
+Replaying each captured delta reproduces the same values, removals, and sizes.
+
+In the Python API, a bounded list exposes cycle 1 as the plain dictionary
+`{1: REMOVE}`. A growing list exposes a `TSLDelta` on every tick. At cycle
+1 it carries `removed={1}` and `size_modified=None`. At cycle 3 it carries
+`size_modified=3` and empty positional changes.
 
 ## LIST-INPUT — TS-14, TS-15, TS-32
 
