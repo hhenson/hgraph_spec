@@ -26,6 +26,7 @@ admitted in either direction.
 | Type | equality | hash | order |
 |---|---|---|---|
 | `i64`, `str`, `date` | yes | yes | yes |
+| `tenor` | yes | yes | no |
 | an enum | yes | yes | by member integer |
 | `(i64, str)` | yes | yes | yes |
 | `list<f64>` | yes | yes | yes |
@@ -47,6 +48,21 @@ an `any` holding a set for its order fails at that point (VAL-11).
 - An optional field left unset equals another unset field, and orders
   before any set value.
 - Values of different types are never equal: `1` and `1.0` are not equal.
+
+## SCALAR-TENOR — VAL-7
+
+A source publishes one whole tenor per cycle. A relay copies each input to
+its output. The recording contains these four ticks in order.
+
+| Cycle | Source and recorded value |
+|---|---|
+| 1 | Calendar, zero months and zero days |
+| 2 | Calendar, zero months and zero days |
+| 3 | Business, zero business days |
+| 4 | Calendar, −9223372036854775808 months and 9223372036854775807 days |
+
+The first two values are equal and hash equally. The third has a different
+form. One calendar month differs from thirty calendar days.
 
 ## SCALAR-STRUCT — VAL-12, VAL-14, VAL-18
 

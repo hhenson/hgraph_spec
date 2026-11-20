@@ -187,3 +187,21 @@ X without publishing a value. Both removed reads give 7 with child time 0;
 restoration returns that value and time. The final added and removed sets are
 empty. The dictionary has still ticked. Remove at 2 and insert X=9 at 3:
 this is a new child.
+
+
+## Direct collection clear
+
+This agreed trace applies to a TSS or TSD input wired directly to its owning output,
+and to a SIGNAL reading that output (TS-7, TS-8, TS-18). A passive input
+can observe every row when an independent clock schedules its node.
+
+| Cycle | Producer action | Source and direct input valid | Source and direct input modified | Active input receives a notification |
+|---|---|---|---|---|
+| 1 | Publish a member | true | true | yes |
+| 2 | Invalidate the whole collection | false | false | yes |
+| 3 | Clear it again | false | false | no |
+| 4 | Publish another member | true | true | yes |
+| 5 | Idle | true | false | no |
+
+A separate REF that explicitly withdraws the keyed binding exposes its
+retained removals under TS-15.

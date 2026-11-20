@@ -39,5 +39,6 @@ inputs across switch/map boundaries with timers and fresh child state.
 
 Whole invalidation clears every level (TS-26). Whole-to-child rebinding preserves
 unchanged targets (TS-25). Invalid targets contribute no sample time or delta
-(TS-14). Valid TSB values retain all fields, including nil children (TS-24);
-equal REF designations cause no additional tick (TS-16).
+(TS-14). Valid TSB values retain all fields, including nil children (TS-24). In the four
+fixed whole- and child-REF probes, the repeat at cycle 2 leaves the REF idle
+and its followed children keep their observation times (TS-16).

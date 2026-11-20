@@ -52,6 +52,7 @@ Concept
 | `time` | A time of day, with no zone |
 | `datetime` | An instant on the UTC timeline, to the microsecond. The type of evaluation time |
 | `duration` | A length of time, in microseconds |
+| `tenor` | A calendar adjustment given by signed 64-bit months and days, or by signed 64-bit business days |
 | `civil_datetime` | A date and time of day as read from a wall clock, with no zone and therefore not an instant |
 | `timezone` | A named time zone |
 | `zoned_datetime` | An instant together with its zone and the offset that zone gave it |
@@ -209,6 +210,9 @@ operations are optional, and a type either has each or does not:
 The [Boolean and zone scalar capability index](../language/docs/design/bool-scalar-capabilities.md)
 records bool equality/hash/total order and the existing zone equality/hash
 without order.
+
+A tenor has equality and hash. Two tenors are equal when their forms and all
+counts in that form agree. Calendar adjustment policy belongs to the caller.
 
 A composite has a capability when its parts allow it:
 

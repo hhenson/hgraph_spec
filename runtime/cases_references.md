@@ -133,6 +133,18 @@ If A holds 1 and B holds 10, writing A and then B in one evaluation gives
 the scalar reader 10 once. A later tick from A is silent and a later tick
 of 11 from B reaches the reader.
 
+A Python producer returns the same reference to A on four consecutive
+evaluations. A publishes 1 at cycle 0 and 2 at cycle 2. On hgraph 0.9.8
+the active REF reader observes four publications. The ordinary reader
+observes 1 at cycle 0 and 2 at cycle 2. With the same producer assigning
+`_output.value = a.value` instead, the REF reader observes only cycle 0 and
+the ordinary reader observes the same two values.
+
+A relay copies a selector's current REF value once. At cycle 0 the selector
+holds A, whose value is 1. At cycle 1 the selector selects B, whose value is
+10, while A publishes 2. At cycle 2 A publishes 3 and B publishes 11. The
+relay stays idle after cycle 0 and its scalar reader observes 1, 2, 3.
+
 ## REF-LIST-POSITION — TS-16, TS-17 and TS-25
 
 A holds the pair (3, −3) and B holds (10, −10). A selector initially

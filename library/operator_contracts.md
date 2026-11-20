@@ -58,6 +58,21 @@ An operator that **forwards** a value, routing one input's ticks to its
 output, publishes every tick it forwards, equal or not: the tick is the news
 (ruling 2026-07-17).
 
+Scalar map lookup and the scalar-container reductions `min_`, `max_`, `sum_`
+and `mean` may take a default. A missing map key
+or an empty container selects the default when it has a value. If the map
+contains the key, or the container is nonempty, clearing the default alone
+leaves the result in place. For a one-element integer tuple containing the
+lookup result, `min_`, `max_` and `sum_` publish the same trace. The mean
+publishes those values as floats.
+
+| Cycle | Map publication | Default | Lookup publication for key `x` |
+|---|---|---|---|
+| 1 | `{x: 5}` | `8` | `5` |
+| 2 | — | clear | — |
+| 3 | `{x: 5}` | — | `5` |
+| 4 | `{x: 6}` | — | `6` |
+
 
 Set operators
 -------------
@@ -172,12 +187,66 @@ in one cycle is unspecified.
 - Removing a partition costs the keys that partition owns, never the size of
   the output.
 
+Dynamic schedules
+-----------------
+
+For a schedule with a time-series delay and optional time-series start,
+a new start publication re-anchors the schedule and restarts its tick
+budget. Clearing the start between alarms leaves the pending alarm and
+remaining budget intact. If the clear coincides with a due alarm, the
+schedule consumes that alarm once and continues at its delay.
+
+With an initial five-microsecond delay, start at offset zero and four
+permitted ticks, clearing start at offset two yields ticks at offsets
+5, 10, 15 and 20 microseconds. Clearing at the first alarm yields the
+same trace. Publishing a fresh start of two microseconds at offset two
+instead yields ticks at 7, 12, 17 and 22 microseconds.
+
+Window resets
+-------------
+
+A count-based or duration-based `to_window` clears its samples when
+`modified(reset)` is true. It clears before adding a simultaneous price.
+A direct set or dictionary clear wakes the node with an unmodified reset
+input (TS-7, TS-18). The window retains its samples on that wake.
+
+Start with prices 10 and 20 in a window with room for all three prices and
+no expirations during the trace.
+
+| Reset action | Price in the same cycle | Window event | Next price | Next window event |
+|---|---|---|---|---|
+| Invalidate the reset collection | — | — | 30 | [10, 20, 30] |
+| Invalidate the reset collection | 30 | [10, 20, 30] | — | — |
+| Publish the reset collection | — | [] | 30 | [30] |
+| Publish the reset collection | 30 | [30] | — | — |
+
+A valid empty publication also resets the window when it modifies the reset input.
+
+
 Recording
 ---------
 
 A recording exists from the moment its recording node starts. A recorded
 time-series that never ticks leaves an empty recording, which is distinct
 from no recording at all; replaying it publishes nothing.
+
+For record/replay comparison, a wake that finds both operands invalid adds
+zero comparisons, zero mismatches and zero recorded comparison rows.
+A valid value on just one side is a mismatch, including when the other
+side is explicitly cleared. When both sides hold values, comparison on
+a publication still uses their current values, including equal repeated
+publications.
+
+| Left operand | Right operand | Comparison result |
+|---|---|---|
+| Publish 7 | Publish 7 | Match |
+| Clear | Clear | No comparison |
+| Clear again | Clear again | No comparison |
+| Publish 7 | Publish 7 | Match |
+| Clear | Hold 7 | Mismatch |
+
+The first four steps produce two comparisons and zero mismatches for two
+independently driven operands or one stream connected to both inputs.
 
 The language's [eval form](../language/docs/design/eval-operator-composition.md)
 wires replay source operators and a record sink operator, owns their typed
@@ -255,6 +324,11 @@ Rules
   the whole output when all input dictionaries are invalid. Adding a key makes
   the parent valid, with an invalid child until a value is selected; the last
   input's removal removes the output key.
+- **OP-14** For scalar map `getitem_` and scalar-container `min_`, `max_`,
+  `sum_` and `mean`,
+  invalidating an unused default alone produces no publication. A simultaneous
+  map, lookup key or container publication is processed normally, including
+  an equal repeat.
 
 A TSD delta holding a nested dictionary includes the inner dictionary's delta:
 its valid modified children only. An invalid inner child contributes nothing,
