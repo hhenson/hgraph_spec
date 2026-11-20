@@ -104,6 +104,9 @@ its parent tick. The child reports empty positional changes and no new
 length. As a control, apply an explicit empty sparse edit to the already
 valid child. It stays quiet. An unrelated sibling can tick on that step
 without changing the child's observation.
+If the recording contains an explicit tick for the parent with no child
+entries, replay ticks the parent alone. Applying an empty sparse patch
+as a new write to that valid parent remains silent.
 
 ## LIST-INDEX-EXTENT — TS-12, TS-32
 
