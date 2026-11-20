@@ -38,36 +38,25 @@ producer so it can distinguish a tick with an empty delta from silence.
 | Step | Producer operation | Held members | Modified | Membership delta |
 |---|---|---|---|---|
 | 1 | Publish the whole set containing A | A | true | added A |
-| 2 | Publish the same whole set | A | true | empty |
+| 2 | Publish the same whole set | A | false | no tick |
 | 3 | Apply an empty membership delta | A | false | no tick |
 | 4 | Publish the whole empty set | empty | true | removed A |
-| 5 | Publish the whole empty set again | empty | true | empty |
+| 5 | Publish the whole empty set again | empty | false | no tick |
 
-Each publication advances the last modified time. On step 3 that time stays
-at step 2. In Python, a `frozenset` result supplies the whole value and
-`set_delta()` supplies the sparse control. These are producer writes;
-derived set operators decide when to write under their own contracts.
+The last modified time is step 1 at steps 2 and 3, and step 4 at step 5.
+An empty first write initializes the set. In Python a `frozenset` supplies
+the whole value and `set_delta()` supplies a sparse update.
 
-Repeat steps 1–3 with the set in a bundle field, a dictionary entry or a
-list position. Start each replay from an invalid set. Observe the child
-with an independent clock.
+Repeat the trace with the set in a bundle field, dictionary entry or list
+position. In-memory recording and replay preserve the child's publications
+at steps 1 and 4. A sibling publication at step 2 leaves the set quiet.
 
-| Replay input | Step 1 | Step 2 | Step 3 |
-|---|---|---|---|
-| In-memory recording of observed publications | Child ticks, adds A | Child ticks, empty delta | Child stays quiet |
-| Ordinary timed delta values extracted from those publications | Child ticks, adds A | Child stays quiet | Child stays quiet |
-
-The in-memory recorder captures which endpoint published in each cycle.
-At step 2 its record identifies the child even though membership did not
-change. If a sibling ticks and wakes the observer at step 3, the recorded
-parent entry then names only that sibling. An explicit parent publication
-with no child entries wakes the parent alone.
-
-The [ordinary replay operator](../library/ordinary_replay_record.md) takes
-timed delta values. Applying the step 2 empty membership delta to the
-already valid child leaves its previous modification time intact under
-[EMPTY-2 and EMPTY-3](../language/docs/design/empty-delta-validity.md).
-When the whole producer stays quiet, its recording has no entry for that step.
+A separate recording can contain a genuine publication with an empty
+membership delta, as when a producer adds and removes a new member in the
+same evaluation (SET-DELTA). In-memory replay reproduces that tick at its
+recorded time. The [ordinary replay operator](../library/ordinary_replay_record.md)
+applies timed delta values. An empty membership delta applied to a valid set
+stays quiet under [EMPTY-2 and EMPTY-3](../language/docs/design/empty-delta-validity.md).
 
 ## COLLECTION-INVALIDATE-AND-REWRITE
 
