@@ -98,15 +98,23 @@ give the same validity and positional changes. TS-26 separately describes
 an input assembled from its children.
 
 Repeat steps 3 and 4 with the growing list at position 0 of an outer
-fixed list. Record the producer, then replay those two observations into
-a fresh run with the same starting state. On both steps, position 0 and
-its parent tick. The child reports empty positional changes and no new
-length. As a control, apply an explicit empty sparse edit to the already
-valid child. It stays quiet. An unrelated sibling can tick on that step
-without changing the child's observation.
-If the recording contains an explicit tick for the parent with no child
-entries, replay ticks the parent alone. Applying an empty sparse patch
-as a new write to that valid parent remains silent.
+fixed list. At the start of each replay, position 0 already holds a valid
+empty list. An independent clock observes the parent and position 0.
+
+| Replay input | Step 3 | Step 4 |
+|---|---|---|
+| In-memory recording that identifies position 0 as having published | Parent and position 0 tick | Parent and position 0 tick |
+| Ordinary timed deltas carrying the same empty positional changes | Both stay quiet | Both stay quiet |
+
+In the in-memory recording, each child publication has empty positional
+changes and no new length. A parent entry naming only a sibling leaves
+position 0 quiet. An explicit parent publication with no child entries
+wakes the parent alone.
+
+The [ordinary replay operator](../library/ordinary_replay_record.md) applies
+the supplied delta values. Applying an empty sparse edit to a valid
+position leaves the child and parent quiet under
+[EMPTY-2 and EMPTY-3](../language/docs/design/empty-delta-validity.md).
 
 ## LIST-INDEX-EXTENT — TS-12, TS-32
 
