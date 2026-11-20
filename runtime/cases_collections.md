@@ -48,6 +48,12 @@ at step 2. In Python, a `frozenset` result supplies the whole value and
 `set_delta()` supplies the sparse control. These are producer writes;
 derived set operators decide when to write under their own contracts.
 
+The same observations apply to a set held in a bundle field, a dictionary
+entry or a list position. Record and replay steps 1–3 and inspect the
+child. Its first delta adds A, its second tick has an empty delta, and
+it stays quiet on the third step. A sibling that ticks on the third step
+can wake the observer without making the set appear modified.
+
 ## COLLECTION-INVALIDATE-AND-REWRITE
 
 On successive steps, establish each owned output, invalidate the whole
