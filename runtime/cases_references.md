@@ -146,8 +146,7 @@ A holds the pair (3, −3) and B holds (10, −10). A selector initially
 designates B and switches to A at cycle 2. A router receives the whole-list
 reference as a list of reference inputs. Its index input selects position 1
 once, at cycle 0. A second observer counts changes to the designation at
-position 0, either projected directly, inside a graph taking a list parameter,
-or by inspecting the first child of a whole list of reference inputs.
+position 0, either projected directly or inside a graph taking a list parameter.
 
 | Cycle | Selected list | Other publication | Value from saved position 1 | Designation count, direct or through parameter |
 |---|---|---|---|---|
