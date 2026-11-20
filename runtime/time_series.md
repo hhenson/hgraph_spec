@@ -350,7 +350,7 @@ all valid.
 |---|---|---|
 | **bind** | The output's state, as it is, including the output's own last modified time. If the output ticked two cycles ago the input reads valid and not modified | None |
 | **bind, sampled** | A valid target reads modified with its sampled delta; an invalid target reads unmodified, time *never*, and nil delta | A changed binding notifies; an active input schedules its node |
-| **unbind** | Not valid | None — except a TSS or TSD input, which ticks once to report every element or key it was showing as removed |
+| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). A scalar follower losing a valid value through its REF wakes its node (TS-17). Other unbinds are silent |
 | **rebind** | An unbind and a bind in one step. A TSS or TSD input ticks once with the difference: keys only in the old output removed, keys only in the new one added, and the children of the new one read as modified | As sampled bind |
 
 A sampled valid input reports the sampling time; its producer keeps its own
@@ -547,15 +547,24 @@ Rules
   valid children's sampled deltas. An invalid target and its invalid
   descendants read unmodified, time *never*, and no delta.
   Sampling changes input observations, never producer timestamps.
-- **TS-15** Unbinding causes no notification, except that a set or dictionary
-  input reports what it was showing as removed.
+- **TS-15** Explicitly unbinding a scalar or fixed-shape input is silent. A set or
+  dictionary input reports what it was showing as removed. TS-17 governs
+  withdrawal by a REF producer.
 - **TS-16** A REF ticks on its first publication or a changed designation,
   never on an equal repeat or because its target ticked. Equality compares
   endpoint identities and, for child references, their designation tree;
   it does not compare target values. Equal repeats cause no additional work.
+  If a producer writes several designations during its evaluation, downstream
+  nodes evaluate at most once and follow its final designation.
 - **TS-17** An input follows changes of its REF. Changed valid targets are
   sampled; unchanged fixed child bindings are preserved (TS-25).
-  An empty reference unbinds it.
+  An empty or invalidated REF unbinds it. When a scalar follower loses
+  a valid value, an active follower schedules its node once. This also applies when the new
+  designation is a live output that has never published. The follower reads
+  invalid and unmodified, with no delta and last modified time *never*.
+  Losing the binding detaches the old target. No further withdrawal is
+  reported while the follower is already invalid. See the
+  [reference withdrawal trace](cases_references.md#ref-withdrawal--ts-8-ts-16-and-ts-17).
 - **TS-18** A SIGNAL input is modified exactly when the output it is bound to
   is. Offered a REF output, it is bound to the designated output, never to
   the reference: it follows re-pointing like any ordinary input (TS-17) and
@@ -593,7 +602,12 @@ Rules
 - **TS-25** Fixed child bindings survive changes between peered and assembled
   parents. Rebinding samples only changed valid targets; unchanged targets
   retain their times and delta state. Each parent includes its valid modified
-  children's deltas. Binding an invalid target clears previous sample state.
+  children's deltas. Binding an invalid target clears previous sample state. A fixed
+  list of reference inputs can bind to a reference to the whole list. A
+  reference to a position obtained through this binding continues to follow
+  that position when the whole list is repointed. Selecting a position through
+  an ordinary graph parameter preserves the designation changes visible when
+  selecting it directly. See the [fixed list traces](cases_references.md#ref-list-position--ts-16-ts-17-and-ts-25).
 - **TS-26** Whole TSL/TSB invalidation resets the collection and every child
   to invalid, unmodified, time *never*, value nil and delta nil. This also
   clears local observations when an assembled input loses its last valid
