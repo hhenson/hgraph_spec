@@ -25,6 +25,22 @@ not at the later one, because the alarm kept nothing (NOD-25). A request
 for a past time is refused. A node that injects both the scheduler and the
 alarm is refused when the graph is described (NOD-26).
 
+## PYTHON-GENERATOR-RANGE
+
+The Python `@generator` pull source follows the [timed replay ordering cases](cases_ordinary_replay_record.md#timed-order--existing-generator-and-engine-boundaries).
+It consumes items strictly before the current evaluation time in that same
+evaluation. It publishes an item due now and schedules a future item for
+its yielded time. Each resolved time must exceed the preceding yielded time,
+including skipped items. A relative delay is resolved from the current
+evaluation time.
+
+| Row times relative to the run start | Publications (time, row number) |
+|---|---|
+| −2, −1, 0, 1 | (0, 3), (1, 4) |
+| −2, −1, 1 | (1, 3) |
+| −2, −1 | None; the iterator ends at startup. |
+| −2, −2 or −2, −3 | Ordering error at the second row. |
+
 ## SOURCE-SCHEDULER-REPLACE — NOD-12, NOD-13, NOD-14
 
 A pull source on the scheduler. In start it requests the start time. In eval
