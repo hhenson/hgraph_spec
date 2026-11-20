@@ -58,11 +58,13 @@ An operator that **forwards** a value, routing one input's ticks to its
 output, publishes every tick it forwards, equal or not: the tick is the news
 (ruling 2026-07-17).
 
-Scalar map lookup and container extrema may take a default. A missing map key
+Scalar map lookup and the scalar-container reductions `min_`, `max_`, `sum_`
+and `mean` may take a default. A missing map key
 or an empty container selects the default when it has a value. If the map
 contains the key, or the container is nonempty, clearing the default alone
-leaves the result in place. The following trace also applies to `min_` and
-`max_` on a one-element tuple containing the lookup result.
+leaves the result in place. For a one-element integer tuple containing the
+lookup result, `min_`, `max_` and `sum_` publish the same trace. The mean
+publishes those values as floats.
 
 | Cycle | Map publication | Default | Lookup publication for key `x` |
 |---|---|---|---|
@@ -322,7 +324,8 @@ Rules
   the whole output when all input dictionaries are invalid. Adding a key makes
   the parent valid, with an invalid child until a value is selected; the last
   input's removal removes the output key.
-- **OP-14** For scalar map `getitem_` and scalar-container `min_` and `max_`,
+- **OP-14** For scalar map `getitem_` and scalar-container `min_`, `max_`,
+  `sum_` and `mean`,
   invalidating an unused default alone produces no publication. A simultaneous
   map, lookup key or container publication is processed normally, including
   an equal repeat.
