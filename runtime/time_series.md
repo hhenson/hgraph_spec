@@ -501,7 +501,10 @@ Rules
   it does not fall back to an older sibling time. Invalid structures reset
   to *never*, including locally cached observations.
 - **TS-4** A child modified in a cycle means every ancestor is modified in
-  that cycle.
+  that cycle. A sparse patch on an existing dictionary key or bundle field
+  that causes no child change or membership change leaves the parent as
+  it was. Named and positional bundle patches apply the same child delta.
+  See the [sparse child cases](cases_collections.md#sparse-child-publication).
 - **TS-5** Applying an output's deltas and child-validity changes in order,
   from its last invalid state, reproduces its value. Invalidation replaces a
   fixed child's value with nil. TSD also needs membership changes:
@@ -521,6 +524,10 @@ Rules
   already-invalid value does not refresh the observation. A passive input
   sees a coincident clear if its node wakes independently. See the
   [scalar invalidation trace](cases_atomic.md#atomic-invalidation).
+  Whole-output invalidation of an owned TSD, TSS or growing TSL clears its
+  keys, members or extent respectively. A subsequent sparse write starts
+  from empty. Clearing one dictionary child preserves that key (TS-11).
+  See the [invalidation and rewrite traces](cases_collections.md#collection-invalidate-and-rewrite).
 - **TS-8** A passive input never schedules its node. Making an input active
   or passive does not change what it reads, and never itself schedules the
   node — not even when its source has already ticked in the cycle.
@@ -530,6 +537,9 @@ Rules
   requires its minimum. An empty collection passes only if itself valid.
 - **TS-10** In a set's delta, *added* and *removed* share no element. An
   element added and removed in one cycle is in neither.
+  Explicitly publishing the complete set ticks even when its members are
+  unchanged. Applying an empty membership delta initializes an invalid set
+  and is silent on a valid one. See the [whole-set trace](cases_collections.md#set-whole-and-sparse).
 - **TS-11** A key removed from a dictionary, and its child, are readable for
   the rest of that cycle. The key restored in that cycle is the same child,
   with its previous value and timestamp unless explicitly written. From the
