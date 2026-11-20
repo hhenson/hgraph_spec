@@ -131,9 +131,14 @@ clears its validity.
 
 If A holds 1 and B holds 10, writing A and then B in one evaluation gives
 the scalar reader 10 once. A later tick from A is silent and a later tick
-of 11 from B reaches the reader. If the output starts the next evaluation
-holding B, writing A followed by B keeps both the REF reader and the scalar
-reader idle in the absence of a separate input tick.
+of 11 from B reaches the reader.
+
+A Python producer returns the same reference to A on four consecutive
+evaluations. A publishes 1 at cycle 0 and 2 at cycle 2. On hgraph 0.9.8
+the active REF reader observes four publications. The ordinary reader
+observes 1 at cycle 0 and 2 at cycle 2. With the same producer assigning
+`_output.value = a.value` instead, the REF reader observes only cycle 0 and
+the ordinary reader observes the same two values.
 
 A relay copies a selector's current REF value once. At cycle 0 the selector
 holds A, whose value is 1. At cycle 1 the selector selects B, whose value is
@@ -146,8 +151,7 @@ A holds the pair (3, −3) and B holds (10, −10). A selector initially
 designates B and switches to A at cycle 2. A router receives the whole-list
 reference as a list of reference inputs. Its index input selects position 1
 once, at cycle 0. A second observer counts changes to the designation at
-position 0, either projected directly, inside a graph taking a list parameter,
-or by inspecting the first child of a whole list of reference inputs.
+position 0, either projected directly or inside a graph taking a list parameter.
 
 | Cycle | Selected list | Other publication | Value from saved position 1 | Designation count, direct or through parameter |
 |---|---|---|---|---|

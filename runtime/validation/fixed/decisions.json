@@ -116,7 +116,7 @@
     "rules": [
       "TS-16"
     ],
-    "rationale": "REF conveys designation, not a value signal. Repeating an equal reference causes no additional tick or sampling; the first publication, including empty, still ticks.",
+    "rationale": "The four fixed-collection probes record no REF tick or resampling for their equal designation at cycle 2. The first publication, including empty, still ticks.",
     "assertions": [
       {"case": "tsl_ref_whole", "path": "/ticks/2/ref_modified", "expected": false},
       {"case": "tsb_ref_whole", "path": "/ticks/2/ref_modified", "expected": false},

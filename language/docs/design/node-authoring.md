@@ -34,7 +34,8 @@ receives two values; it cannot schedule, publish or retain an input view.
   per tick. `signal` queries must also work before validity.
 - **NAT-4:** A temporal implementation owns activation, guards, state, lifecycle
   and writes. A helper call adds no node and emits no tick on its own. Keep
-  equal ordinary ticks; suppress equal REF designations under TS-16.
+  equal ordinary ticks. For a REF result, an unchanged designation keeps
+  its ordinary reader on the existing target without resampling (TS-16).
 - **NAT-5:** HGL `state` is semantic history, requiring checkpoint restoration;
   `cache` must be reconstructible. Native storage alone does not establish
   record/replay behavior. Fallible helpers preserve the declared error policy

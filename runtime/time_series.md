@@ -239,8 +239,9 @@ sequenceDiagram
 ```
 
 - An admitted publication of the value a time-series already holds is still
-  a tick: equal scalar values may carry a signal. REF is the exception; an
-  unchanged designation causes no additional tick or sampling (TS-16).
+  a tick. Equal scalar values may carry a signal. For REF, an explicit
+  publication can wake a REF reader while an unchanged designation leaves
+  the ordinary follower bound to the same target (TS-16).
   An operator may suppress an equal scalar result before publication; a
   conformance adapter must identify that boundary.
 - Further writes while already modified do not notify again; the final
@@ -386,14 +387,12 @@ one of: **empty**; a reference to **one output**; or, for a bundle or a fixed
 list, a reference **per child**. A reference to a reference is just the inner
 reference.
 
-- A REF ticks on its first publication, including empty, and on a changed
-  designation. Publishing the same designation again causes no additional
-  tick, notification or sampling: a REF routes data; it is not a signal.
-  Target-value equality is irrelevant; two outputs remain distinct targets.
-  A REF does **not** tick when its target ticks. A node holding a REF input
-  is therefore not woken by the data, only by the re-pointing — which is the
-  point: references let a node route a time-series without paying for its
-  traffic.
+- A REF ticks when first published, including empty, and when its designation
+  changes. A tick on the target alone leaves the REF idle. An explicit REF
+  publication can wake a REF reader even when the designation is equal.
+  An ordinary input following that designation keeps its binding and receives
+  the selected target's ticks. Equal payloads from two distinct outputs still
+  belong to distinct targets.
 - Node code may store a reference, pass it on, compare it and write it to a
   REF output. It may not look through it. The only way to read what a
   reference designates is to bind an input to it.
@@ -521,6 +520,11 @@ Rules
   already-invalid value does not refresh the observation. A passive input
   sees a coincident clear if its node wakes independently. See the
   [scalar invalidation trace](cases_atomic.md#atomic-invalidation).
+  A directly bound TSS, TSD or SIGNAL input observes its owned set or
+  dictionary as invalid and unmodified when the producer clears it.
+  An active input still schedules its node. A reference unbind retains
+  the keyed removal observation in TS-15. See the
+  [direct collection clear trace](cases_collections.md#direct-collection-clear).
 - **TS-8** A passive input never schedules its node. Making an input active
   or passive does not change what it reads, and never itself schedules the
   node — not even when its source has already ticked in the cycle.
@@ -560,15 +564,14 @@ Rules
 - **TS-15** Explicitly unbinding a scalar or fixed-shape input is silent. A set or
   dictionary input reports what it was showing as removed. TS-17 governs
   withdrawal by a REF producer.
-- **TS-16** A REF ticks on its first publication or a changed designation,
-  never on an equal repeat or because its target ticked. Equality compares
-  endpoint identities and, for child references, their designation tree;
-  it does not compare target values. Equal repeats cause no additional work.
-  If a producer writes several designations during its evaluation, compare its
-  final designation with the one it held on entry. Returning to that designation
-  leaves its tick time unchanged and keeps its readers idle. A node copying a
-  REF input's current value selects the endpoint named by that value. A later
-  write to the input's REF producer alone leaves the copy unchanged.
+- **TS-16** A REF ticks on its first publication and on a changed designation.
+  A target tick alone leaves the REF idle. Equality compares endpoint
+  identities and, for child references, their designation tree. Repeating a
+  designation does not rebind or resample an ordinary follower. If a producer
+  writes several designations during its evaluation, downstream nodes evaluate
+  at most once and follow its final designation. A node copying a REF input's
+  current value selects the endpoint named by that value. A later write to the
+  input's REF producer alone leaves the copy unchanged.
 - **TS-17** An input follows changes of its REF. Changed valid targets are
   sampled; unchanged fixed child bindings are preserved (TS-25).
   An empty or invalidated REF unbinds it. When a scalar follower loses
@@ -612,10 +615,7 @@ Rules
 - **TS-24** A valid TSB value contains every declared field, including nil
   for invalid children. Apply this at each valid nested bundle. Its schema
   does not shrink with validity; its delta contains only changed valid fields.
-- **TS-25** A fixed collection received whole as references to its positions
-  ticks each position whose effective designation changes when the collection
-  rebinds. A value tick on a selected element leaves the position reference
-  unmodified. Fixed child bindings survive changes between peered and assembled
+- **TS-25** Fixed child bindings survive changes between peered and assembled
   parents. Rebinding samples only changed valid targets; unchanged targets
   retain their times and delta state. Each parent includes its valid modified
   children's deltas. Binding an invalid target clears previous sample state. A fixed
