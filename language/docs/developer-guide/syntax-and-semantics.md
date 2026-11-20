@@ -617,7 +617,9 @@ list<f64, n>           # n is an in-scope const generic
 binds the argument's actual size, including `unbounded` for an unbounded list,
 so one generic `fn` can accept both forms. A fixed temporal size must be a
 positive constant expression. An endpoint of type `list<T, 0>` is rejected
-at declaration or wiring. An [ordinary value](../design/ordinary-list-values.md)
+at declaration or wiring. A [homogeneous runtime pack](../design/decisions/0007-parameter-packs.md#runtime-node-lowering)
+can still take zero arguments when its element type is known. An
+[ordinary value](../design/ordinary-list-values.md)
 can have a fixed size of zero. In a parameter position `list<T>` accepts a list of any
 size, mirroring hgraph's rule that a dynamic `TSL` pattern matches every
 concrete size; `list<T, 3>` accepts only a three-element list. The resolved
