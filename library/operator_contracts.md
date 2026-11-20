@@ -172,6 +172,27 @@ in one cycle is unspecified.
 - Removing a partition costs the keys that partition owns, never the size of
   the output.
 
+Window resets
+-------------
+
+A count-based or duration-based `to_window` clears its samples when
+`modified(reset)` is true. It clears before adding a simultaneous price.
+A direct set or dictionary clear wakes the node with an unmodified reset
+input (TS-7, TS-18). The window retains its samples on that wake.
+
+Start with prices 10 and 20 in a window with room for all three prices and
+no expirations during the trace.
+
+| Reset action | Price in the same cycle | Window event | Next price | Next window event |
+|---|---|---|---|---|
+| Invalidate the reset collection | — | — | 30 | [10, 20, 30] |
+| Invalidate the reset collection | 30 | [10, 20, 30] | — | — |
+| Publish the reset collection | — | [] | 30 | [30] |
+| Publish the reset collection | 30 | [30] | — | — |
+
+A valid empty publication also resets the window when it modifies the reset input.
+
+
 Recording
 ---------
 
