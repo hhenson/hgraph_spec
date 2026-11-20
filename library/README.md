@@ -27,7 +27,8 @@ not decide whether its operator belongs to the core or the standard library.
 
 - [operator_contracts.md](operator_contracts.md): admission and nil, set
   operators, formatting and sinks, text, numbers, partitioned dictionaries,
-  recording, merge and scalar lookup and reduction defaults (OP-1 to OP-14).
+  recording, merge, scalar lookup and reduction defaults (OP-1 to OP-14),
+  and associative list reduction.
 - [cases_merge.md](cases_merge.md): original-source fallback recency,
   same-cycle and fallback ties, equal publications, invalid-child membership,
   dictionary removals and separately nested calls.
