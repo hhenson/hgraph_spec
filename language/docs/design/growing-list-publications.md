@@ -35,8 +35,9 @@ publication is outside this profile.
 Each included child follows its own delta application rule. Omitted existing
 children retain their state. Equal scalar child publications still tick.
 An explicit empty delta follows [EMPTY-1–2](empty-delta-validity.md): it
-validates an invalid list without appending children, and is silent on a
-valid list. A tail removal down to zero is a nonempty publication:
+validates a fresh zero-length list without appending children. In a
+positive-length list it leaves child and parent validity unchanged. It is
+silent on a valid list. A tail removal down to zero is a nonempty publication:
 the root stays valid and modified that cycle, holds an empty list, and is
 all-valid because it has no live invalid children. A later append starts at 0.
 This is not whole-list invalidation.

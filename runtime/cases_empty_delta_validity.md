@@ -8,8 +8,8 @@ child validity, values and membership separately from recorded deltas.
 
 ## EMPTY-INITIAL — EMPTY-1, EMPTY-4
 
-For each admitted sparse shape, begin invalid. E denotes its explicit empty
-delta; D is a canonical nonempty update. The output receives these applications
+Begin with an invalid endpoint. For a list use a zero-length growing list
+in the first trace. E denotes its explicit empty delta; D is a canonical nonempty update. The output receives these applications
 at successive times; a pass-through applies its input delta to its own output.
 
 | Input application | Output valid | Output modified | Recorded delta |
@@ -23,30 +23,39 @@ at successive times; a pass-through applies its input delta to its own output.
 The first application initializes no children or memberships; a fixed shape's
 children remain invalid. Silent rows retain the preceding modification time
 and all state. An eval with this five-slot input returns `[E, _, D, _, _]`:
-suppressed applications do not shorten the horizon. Test sets, maps, fixed and
+suppressed applications do not shorten the horizon. Test sets, maps, zero-length
 growing lists, tuples and named structs. For admitted zero-child shapes omit D;
 first E ticks, later E is silent, and the valid empty endpoint is all-valid.
 Applying E twice within one evaluation preserves the first tick and its time.
 
+For a positive fixed list, or a growing list resized to positive length with
+no valid positions, the same five inputs give `[_, _, D, _, _]`. E keeps
+every position invalid and the parent time *never*. D writes a position,
+making the parent valid. See the [list validity trace](cases_growing_lists.md#list-empty-publication--ts-9-ts-32).
+
 ## EMPTY-NESTED — EMPTY-2
 
-Start a fixed parent with structural children invalid. Apply a patch containing only an empty delta for
-one structural child. That child and its ancestors become valid and modified;
-other children stay invalid. Record the parent patch with its explicit empty
+Start with a fixed parent whose growing-list children are unpublished.
+Target one child with an empty delta. The child and its ancestors become
+valid and modified. The other children stay invalid. Record the parent patch with its explicit empty
 child entry. Repeat it on the next cycle: no tick. An empty patch to the valid
 parent does not initialize its remaining invalid children. Target another
-invalid structural child with its own empty delta: it becomes valid and ticks
+unpublished growing-list child with its own empty delta: it becomes valid and ticks
 the parent. Also test a new map key or contiguous growing-list position whose
 structural child is initialized by E; repeats preserve membership and are silent.
+For a fixed list child of positive length, E leaves all positions invalid.
+An existing field receiving only this child edit stays quiet until a position publishes.
 Invalid removals, duplicate additions, gaps and out-of-range entries remain errors.
 
 ## EMPTY-REVALIDATE — EMPTY-1
 
 A producer establishes validity, then undergoes existing runtime invalidation.
 An independent observer sees the invalid state and time *never*. Applying E
-subsequently revalidates the endpoint with an empty tick at that cycle's time;
-children remain invalid. Repeating E is silent. This is a producer/observer
-case, not a new source spelling for whole-output invalidation.
+subsequently revalidates a zero-length growing list with an empty tick at
+that cycle's time. For a fixed list of positive length E leaves it invalid;
+a position publication revalidates it. Other structural shapes that admit
+empty initialization follow the first trace. Repeating E is silent. The
+observer reads the producer after each operation.
 
 ## EMPTY-CANCELLATION — EMPTY-3
 

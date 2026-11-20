@@ -79,25 +79,61 @@ Start with an unpublished growing list. On each step a producer performs
 the indicated operation. An independently scheduled observer reads the
 parent after the producer, including on silent steps.
 
-| Step | Operation | Length | Valid | All valid | Modified |
-|---|---|---:|---|---|---|
-| 1 | Apply a sparse update specifying length zero | 0 | true | true | true |
-| 2 | Apply the same sparse update | 0 | true | true | false |
-| 3 | Publish the whole empty list | 0 | true | true | true |
-| 4 | Publish the whole empty list again | 0 | true | true | true |
-| 5 | Resize to two without writing a position | 2 | true | false | true |
-| 6 | Write 10 and 20 | 2 | true | true | true |
-| 7 | Clear both values without resizing | 2 | true | false | true |
-| 8 | Publish the whole empty list | 0 | true | true | true |
+| Step | Operation | Length | Valid | All valid | Modified | Last modified | Public delta |
+|---|---|---:|---|---|---|---|---|
+| 0 | No publication yet | 0 | false | false | false | never | nil |
+| 1 | Apply a sparse update specifying length zero | 0 | true | true | true | 1 | Empty positional changes |
+| 2 | Apply the same sparse update | 0 | true | true | false | 1 | nil |
+| 3 | Publish the whole empty list | 0 | true | true | true | 3 | Empty positional changes |
+| 4 | Publish the whole empty list again | 0 | true | true | true | 4 | Empty positional changes |
+| 5 | Grow to two without writing a position | 2 | false | false | false | never | nil |
+| 6 | Write 10 at position 0 | 2 | true | false | true | 6 | Modified 0: 10 |
+| 7 | Write 20 at position 1 | 2 | true | true | true | 7 | Modified 1: 20 |
+| 8 | Clear position 0 | 2 | true | false | true | 8 | Removed 0 |
+| 9 | Clear position 1 | 2 | false | false | false | never | nil |
+| 10 | Apply an empty sparse edit without a size | 2 | false | false | false | never | nil |
+| 11 | Publish the whole empty list | 0 | true | true | true | 11 | Removed 0 and 1, size 0 |
+| 12 | Invalidate the whole list | 0 | false | false | false | never | nil |
+| 13 | Apply a sparse update specifying length zero | 0 | true | true | true | 13 | Empty positional changes |
 
-A whole empty list as the **first** publication has the same validity and
-tick as step 1. At steps 3 and 4 there are no changed indices or size change.
-Step 7 reports both positions as removed. Step 8 reports both dropped
-positions and new size zero. For a fixed, owned list of two, steps 6 and 7
-give the same validity and positional changes. TS-26 separately describes
-an input assembled from its children.
+The list loses validity at steps 5, 9 and 12. Its directly bound input
+observes that transition. An active input can wake its consumer at those
+steps. The public parent value and delta both read nil. Step 10 stays
+invalid. A fresh growing list resized directly from zero to two without
+writing any position also has length two and the observations of step 10.
+Its extent changed while it was already invalid.
 
-Repeat steps 3 and 4 with the growing list at position 0 of an outer
+Alternatively, follow step 9 by writing 30 at position 1. The existing
+two-position list becomes valid and partly populated, with modified
+position 1. A fresh fixed list of length two has the same validity as the
+freshly grown two-position list. Steps 6–10 and this write then give the
+same observations for both lists. Invalidate the whole fixed list after
+writing 30. The parent and both positions are invalid, unmodified, with
+time *never* and nil value and delta (TS-26). Its declared length is still
+two. A subsequent write to either position revalidates it.
+
+Publishing the whole empty list as the first action gives the observations
+of step 1. At steps 1, 3, 4 and 13 the length was already zero, so the
+delta has no size change. At step 11 both positions leave the extent even
+though their values were already invalid.
+
+Keep a growing list at length zero and inspect it on an independent clock.
+
+| Step | Operation | Valid | All valid | Modified | Last modified | Value | Public delta |
+|---|---|---|---|---|---|---|---|
+| 0 | Never published | false | false | false | never | nil | nil |
+| 1 | Publish the whole empty list `()` | true | true | true | 1 | empty list | Empty positional changes |
+| 2 | No write | true | true | false | 1 | empty list | nil |
+| 3 | Invalidate the whole list | false | false | false | never | nil | nil |
+| 4 | Publish `()` again | true | true | true | 4 | empty list | Empty positional changes |
+
+Declaring a fixed temporal list of size zero (`TSL[TS[int], Size[0]]`)
+is rejected at declaration or wiring, before the graph starts. A fixed
+list of size two with neither position valid is the positive-size control
+above. An [ordinary list value](cases_ordinary_lists.md#list-empty--type-context-and-fixedness)
+can still have a fixed empty shape.
+
+Repeat steps 3 and 4 of the first trace with the growing list at position 0 of an outer
 fixed list. At the start of each replay, position 0 already holds a valid
 empty list. An independent clock observes the parent and position 0.
 

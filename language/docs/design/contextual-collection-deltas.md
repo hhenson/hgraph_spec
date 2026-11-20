@@ -16,7 +16,7 @@ finite temporal shapes T:
 - native atomic leaves under [NVAL-1–5](native-atomic-values.md);
 - declared enum leaves under the [enum publication contract](enum-publications.md);
 - `set<K>` for the [admitted scalar keys](scalar-collection-keys.md);
-- fixed `list<S, N>`, with a constant nonnegative size N;
+- fixed `list<S, N>`, with a constant positive size N;
 - growing `list<S>` under the [net growing-list contract](growing-list-publications.md);
 - positional `tuple<S0, ...>` and fully applied concrete nominal structs;
 - `dict<K, S>` for those same scalar keys;

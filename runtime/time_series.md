@@ -103,7 +103,7 @@ for declared validity constraints and manual checks.
 |---|---|---|
 | **TS** | `f64`, `atomic<T>` | One scalar value that changes over time |
 | **TSB** | a `struct`, a tuple | A bundle of named time-series, each ticking on its own. A tuple is a bundle with positions for names |
-| **TSL** | `list<T, n>`, `list<T>` | A list of time-series: a fixed number of them, or a list that grows and shrinks at its end |
+| **TSL** | `list<T, n>`, `list<T>` | A list of time-series: a positive fixed number of positions, or a list that grows and shrinks at its end |
 | **TSS** | `set<T>` | A set of scalar values, with what was added and removed |
 | **TSD** | `dict<K, V>` | A dictionary from scalar keys to time-series, whose keys come and go while the graph runs |
 | **TSW** | `rolling<T, size>` | A window over the most recent values of one scalar: the last *n* ticks (a **tick window**), or the last span of time (a **duration window**) |
@@ -511,8 +511,8 @@ Rules
   began watching between writes. Invalidation notifies separately (TS-7).
   Several notifications still cause only one node evaluation (GRF-16).
 - **TS-7** Output invalidation notifies, resets its time to *never*, and is
-  not a tick. Its owned parent reads modified. In a still-valid assembled
-  input, the parent records the current change time and reads modified.
+  not a tick. An owned parent that stays valid reads modified. A still-valid
+  assembled input records the current change time and reads modified.
   The cleared child's value and delta are nil.
   If the whole input becomes invalid, TS-26 clears those observations.
   On an owned scalar or its directly bound input, `invalidated` is true
@@ -524,8 +524,13 @@ Rules
 - **TS-8** A passive input never schedules its node. Making an input active
   or passive does not change what it reads, and never itself schedules the
   node — not even when its source has already ticked in the cycle.
-- **TS-9** All valid implies valid. TSB, TSL and TSD additionally require
-  every immediate live child to be valid, without asking its all_valid.
+- **TS-9** A fixed or growing list of positive length is valid exactly when
+  at least one immediate position is valid. A fixed temporal list requires
+  a positive declared size. Only a growing temporal list can have length
+  zero. It starts invalid; publishing it empty makes it valid and all
+  valid. All valid implies valid. TSB,
+  TSL and TSD additionally require every immediate live child to be valid,
+  without asking its all_valid.
   Removed children do not count. TS, TSS, REF and SIGNAL use valid; TSW additionally
   requires its minimum. An empty collection passes only if itself valid.
 - **TS-10** In a set's delta, *added* and *removed* share no element. An
@@ -539,8 +544,10 @@ Rules
   A retained compound view includes descendant values and timestamps.
   Peering describes its active binding, not the retained removal record.
 - **TS-12** A growing list shrinks only from its end. Clearing an in-range
-  position preserves its index and the length of the list. An owned list
-  retains its validity when its last valued position is cleared. A runtime
+  position preserves its index and the length of the list. Clearing the last
+  valid position leaves a positive-length list invalid. Growing an empty
+  list to positive length without writing any position also leaves it
+  invalid. A subsequent position publication revalidates it. A runtime
   selection of a position outside the current extent of a growing list has
   no target. It follows that position again when it comes back into range.
 - **TS-13** A window is valid from its first arrival or explicit clear.
@@ -646,6 +653,8 @@ Rules
   previous cycle. A fixed list has no size change.
   Applying a smaller size alone truncates the list. Clearing an in-range
   position invalidates its child and preserves the other positions.
+  A list that finishes invalid has no public delta (TS-2, TS-7), even
+  when its extent changed or a position was cleared.
   A truncated child remains readable through the end of the cycle and
   returns with its value and time if restored during that cycle (GRF-25).
   Publishing a complete empty growing list ticks each time. An explicit
