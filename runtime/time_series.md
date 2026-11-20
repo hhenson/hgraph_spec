@@ -520,6 +520,11 @@ Rules
   already-invalid value does not refresh the observation. A passive input
   sees a coincident clear if its node wakes independently. See the
   [scalar invalidation trace](cases_atomic.md#atomic-invalidation).
+  A directly bound TSS, TSD or SIGNAL input observes its owned set or
+  dictionary as invalid and unmodified when the producer clears it.
+  An active input still schedules its node. A reference unbind retains
+  the keyed removal observation in TS-15. See the
+  [direct collection clear trace](cases_collections.md#direct-collection-clear).
 - **TS-8** A passive input never schedules its node. Making an input active
   or passive does not change what it reads, and never itself schedules the
   node — not even when its source has already ticked in the cycle.
