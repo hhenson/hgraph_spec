@@ -249,6 +249,12 @@ then publish 20 before the source is invalidated. The sampler publishes 10
 on the source tick and stays silent on the invalidation. If the price
 subsequently moves to 30, the next source tick samples 30.
 
+The same trace applies through a reference that continues to designate
+the same source. For example, let `chosen = if_(select, source).true`
+with `select` held true. If the producer invalidates `source`, both
+`sample(chosen, price)` and `sample(last_modified_time(chosen), price)`
+stay silent. Both sample the current price when the source next ticks.
+
 Dynamic schedules
 -----------------
 
