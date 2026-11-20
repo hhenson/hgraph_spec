@@ -554,9 +554,9 @@ Rules
   requires its minimum. An empty collection passes only if itself valid.
 - **TS-10** In a set's delta, *added* and *removed* share no element. An
   element added and removed in one cycle is in neither.
-  Explicitly publishing the complete set ticks even when its members are
-  unchanged. Applying an empty membership delta initializes an invalid set
-  and is silent on a valid one. See the [whole-set trace](cases_collections.md#set-whole-and-sparse).
+  Writing the complete set initializes an invalid set and otherwise ticks
+  only when membership changes. Applying an empty membership delta also
+  initializes an invalid set and is silent on a valid one. See the [whole-set trace](cases_collections.md#set-whole-and-sparse).
 - **TS-11** A key removed from a dictionary, and its child, are readable for
   the rest of that cycle. The key restored in that cycle is the same child,
   with its previous value and timestamp unless explicitly written or the
@@ -564,7 +564,10 @@ Rules
   next engine cycle, a key that remained removed and its child are absent
   from both live and removed observations. This applies to reference-valued
   children too; removing one does not destroy its independently owned target.
-  A retained compound view includes descendant values and timestamps.
+  Writing a complete empty dictionary initializes an invalid dictionary or
+  removes its existing keys. Repeating it on a valid empty dictionary stays
+  quiet. Explicit writes to populated scalar children can tick again with
+  the same value. A retained compound view includes descendant values and timestamps.
   Peering describes its active binding, not the retained removal record.
 - **TS-12** A growing list shrinks only from its end. Clearing an in-range
   position preserves its index and the length of the list. Clearing the last
@@ -683,10 +686,11 @@ Rules
   when its extent changed or a position was cleared.
   A truncated child remains readable through the end of the cycle and
   returns with its value and time if restored during that cycle (GRF-25).
-  Publishing a complete empty growing list ticks each time. An explicit
-  sparse update requesting length zero initializes an unpublished list,
-  but has no effect on an already valid empty list. The tick and the
-  presence of a size change are separate observations. See the
+  Writing a complete empty growing list or explicitly requesting length zero
+  initializes an unpublished list, truncates a nonempty list, and stays
+  quiet on a valid empty list. Writing the same populated scalar position
+  again ticks that position. The tick and the presence of a size change
+  are separate observations. See the
   [growing list cases](cases_growing_lists.md#list-empty-publication--ts-9-ts-32).
 
 - **TS-33** A `TS<Optional<T>>` publication is either a payload or explicit

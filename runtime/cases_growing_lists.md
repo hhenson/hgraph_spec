@@ -84,8 +84,8 @@ parent after the producer, including on silent steps.
 | 0 | No publication yet | 0 | false | false | false | never | nil |
 | 1 | Apply a sparse update specifying length zero | 0 | true | true | true | 1 | Empty positional changes |
 | 2 | Apply the same sparse update | 0 | true | true | false | 1 | nil |
-| 3 | Publish the whole empty list | 0 | true | true | true | 3 | Empty positional changes |
-| 4 | Publish the whole empty list again | 0 | true | true | true | 4 | Empty positional changes |
+| 3 | Publish the whole empty list | 0 | true | true | false | 1 | nil |
+| 4 | Publish the whole empty list again | 0 | true | true | false | 1 | nil |
 | 5 | Grow to two without writing a position | 2 | false | false | false | never | nil |
 | 6 | Write 10 at position 0 | 2 | true | false | true | 6 | Modified 0: 10 |
 | 7 | Write 20 at position 1 | 2 | true | true | true | 7 | Modified 1: 20 |
@@ -113,7 +113,7 @@ time *never* and nil value and delta (TS-26). Its declared length is still
 two. A subsequent write to either position revalidates it.
 
 Publishing the whole empty list as the first action gives the observations
-of step 1. At steps 1, 3, 4 and 13 the length was already zero, so the
+of step 1. At steps 1 and 13 the length was already zero, so the
 delta has no size change. At step 11 both positions leave the extent even
 though their values were already invalid.
 
@@ -133,23 +133,18 @@ list of size two with neither position valid is the positive-size control
 above. An [ordinary list value](cases_ordinary_lists.md#list-empty--type-context-and-fixedness)
 can still have a fixed empty shape.
 
-Repeat steps 3 and 4 of the first trace with the growing list at position 0 of an outer
-fixed list. At the start of each replay, position 0 already holds a valid
-empty list. An independent clock observes the parent and position 0.
+Repeat steps 1–4 of the first trace with the growing list at position 0 of
+an outer fixed list. In-memory recording and replay reproduce the initial
+empty publication at step 1. Position 0 stays quiet on the three repeats.
+A sibling tick leaves position 0 and its timestamp unchanged.
 
-| Replay input | Step 3 | Step 4 |
-|---|---|---|
-| In-memory recording that identifies position 0 as having published | Parent and position 0 tick | Parent and position 0 tick |
-| Ordinary timed deltas carrying the same empty positional changes | Both stay quiet | Both stay quiet |
-
-In the in-memory recording, each child publication has empty positional
-changes and no new length. A parent entry naming only a sibling leaves
-position 0 quiet. An explicit parent publication with no child entries
-wakes the parent alone.
-
-The [ordinary replay operator](../library/ordinary_replay_record.md) applies
-the supplied delta values. Applying an empty sparse edit to a valid
-position leaves the child and parent quiet under
+A recording that already identifies position 0 as having published empty
+positional changes replays that child publication, including when the
+child already holds a valid empty list. An explicit parent publication
+with no child entries wakes the parent alone. The
+[ordinary replay operator](../library/ordinary_replay_record.md) applies
+the supplied delta values. An empty sparse edit applied to an already
+valid position stays quiet under
 [EMPTY-2 and EMPTY-3](../language/docs/design/empty-delta-validity.md).
 
 ## LIST-INDEX-EXTENT — TS-12, TS-32
