@@ -386,14 +386,12 @@ one of: **empty**; a reference to **one output**; or, for a bundle or a fixed
 list, a reference **per child**. A reference to a reference is just the inner
 reference.
 
-- A REF ticks on its first publication, including empty, and on a changed
-  designation. Publishing the same designation again causes no additional
-  tick, notification or sampling: a REF routes data; it is not a signal.
-  Target-value equality is irrelevant; two outputs remain distinct targets.
-  A REF does **not** tick when its target ticks. A node holding a REF input
-  is therefore not woken by the data, only by the re-pointing — which is the
-  point: references let a node route a time-series without paying for its
-  traffic.
+- A REF ticks when first published, including empty, and when its designation
+  changes. A tick on the target alone leaves the REF idle. An explicit REF
+  publication can wake a REF reader even when the designation is equal.
+  An ordinary input following that designation keeps its binding and receives
+  the selected target's ticks. Equal payloads from two distinct outputs still
+  belong to distinct targets.
 - Node code may store a reference, pass it on, compare it and write it to a
   REF output. It may not look through it. The only way to read what a
   reference designates is to bind an input to it.
@@ -550,15 +548,14 @@ Rules
 - **TS-15** Explicitly unbinding a scalar or fixed-shape input is silent. A set or
   dictionary input reports what it was showing as removed. TS-17 governs
   withdrawal by a REF producer.
-- **TS-16** A REF ticks on its first publication or a changed designation,
-  never on an equal repeat or because its target ticked. Equality compares
-  endpoint identities and, for child references, their designation tree;
-  it does not compare target values. Equal repeats cause no additional work.
-  If a producer writes several designations during its evaluation, compare its
-  final designation with the one it held on entry. Returning to that designation
-  leaves its tick time unchanged and keeps its readers idle. A node copying a
-  REF input's current value selects the endpoint named by that value. A later
-  write to the input's REF producer alone leaves the copy unchanged.
+- **TS-16** A REF ticks on its first publication and on a changed designation.
+  A target tick alone leaves the REF idle. Equality compares endpoint
+  identities and, for child references, their designation tree. Repeating a
+  designation does not rebind or resample an ordinary follower. If a producer
+  writes several designations during its evaluation, downstream nodes evaluate
+  at most once and follow its final designation. A node copying a REF input's
+  current value selects the endpoint named by that value. A later write to the
+  input's REF producer alone leaves the copy unchanged.
 - **TS-17** An input follows changes of its REF. Changed valid targets are
   sampled; unchanged fixed child bindings are preserved (TS-25).
   An empty or invalidated REF unbinds it. When a scalar follower loses
