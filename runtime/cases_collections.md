@@ -48,11 +48,26 @@ at step 2. In Python, a `frozenset` result supplies the whole value and
 `set_delta()` supplies the sparse control. These are producer writes;
 derived set operators decide when to write under their own contracts.
 
-The same observations apply to a set held in a bundle field, a dictionary
-entry or a list position. Record and replay steps 1–3 and inspect the
-child. Its first delta adds A, its second tick has an empty delta, and
-it stays quiet on the third step. A sibling that ticks on the third step
-can wake the observer without making the set appear modified.
+Repeat steps 1–3 with the set in a bundle field, a dictionary entry or a
+list position. Start each replay from an invalid set. Observe the child
+with an independent clock.
+
+| Replay input | Step 1 | Step 2 | Step 3 |
+|---|---|---|---|
+| In-memory recording of observed publications | Child ticks, adds A | Child ticks, empty delta | Child stays quiet |
+| Ordinary timed delta values extracted from those publications | Child ticks, adds A | Child stays quiet | Child stays quiet |
+
+The in-memory recorder captures which endpoint published in each cycle.
+At step 2 its record identifies the child even though membership did not
+change. If a sibling ticks and wakes the observer at step 3, the recorded
+parent entry then names only that sibling. An explicit parent publication
+with no child entries wakes the parent alone.
+
+The [ordinary replay operator](../library/ordinary_replay_record.md) takes
+timed delta values. Applying the step 2 empty membership delta to the
+already valid child leaves its previous modification time intact under
+[EMPTY-2 and EMPTY-3](../language/docs/design/empty-delta-validity.md).
+When the whole producer stays quiet, its recording has no entry for that step.
 
 ## COLLECTION-INVALIDATE-AND-REWRITE
 
