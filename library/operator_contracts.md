@@ -170,6 +170,21 @@ again, then write position 0 = 8. The result publishes 7, 5, nothing, 5,
 and 13. If zero stays silent during the first removal, its retained value is 0
 and the second result is 0.
 
+Withdrawing the whole list returns its reduction to the initial state in
+which the list has never published. The previous positions cease contributing.
+A supplied, valid zero becomes the result and subsequent zero publications
+are forwarded, including equal ones. With an unavailable or omitted zero,
+the result is invalid. A repeated owner withdrawal is silent. A new singleton
+combines only its own value with the currently supplied zero, or forwards
+its value when zero is omitted. A valid publication later provided by a
+previously unavailable zero participates normally. The same rules hold across
+checkpoint recovery.
+
+Starting from [3, 4] and zero 0, the sum is 7. Withdrawing the owner yields
+0. Withdrawing again is silent. Two successive zero publications of 5 yield
+5 and 5. Writing 8 at position 0 yields 13. With an omitted zero, the first
+withdrawal invalidates the result and the new singleton yields 8.
+
 
 Text
 ----
