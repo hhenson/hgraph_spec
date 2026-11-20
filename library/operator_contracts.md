@@ -200,6 +200,24 @@ A recording exists from the moment its recording node starts. A recorded
 time-series that never ticks leaves an empty recording, which is distinct
 from no recording at all; replaying it publishes nothing.
 
+For record/replay comparison, a wake that finds both operands invalid adds
+zero comparisons, zero mismatches and zero recorded comparison rows.
+A valid value on just one side is a mismatch, including when the other
+side is explicitly cleared. When both sides hold values, comparison on
+a publication still uses their current values, including equal repeated
+publications.
+
+| Left operand | Right operand | Comparison result |
+|---|---|---|
+| Publish 7 | Publish 7 | Match |
+| Clear | Clear | No comparison |
+| Clear again | Clear again | No comparison |
+| Publish 7 | Publish 7 | Match |
+| Clear | Hold 7 | Mismatch |
+
+The first four steps produce two comparisons and zero mismatches for two
+independently driven operands or one stream connected to both inputs.
+
 The language's [eval form](../language/docs/design/eval-operator-composition.md)
 wires replay source operators and a record sink operator, owns their typed
 buffers and run-specific configuration, and captures owned copies of output
