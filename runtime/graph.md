@@ -510,7 +510,11 @@ of what the runtime provides for a graph that changes shape as it runs.
 - **GRF-22** The owner of a nested graph is scheduled no later than that
   graph's next scheduled time.
 - **GRF-23** A nested graph is stopped before it is disposed of, and not
-  disposed of in the cycle in which it is stopped.
+  disposed of in the cycle in which it is stopped. When a mapped growing
+  list shrinks, the owner stops each dropped position's child, including
+  when the body contains only sinks. A later cycle that restores the
+  position starts a fresh child. See the
+  [sink lifecycle trace](cases_growing_lists.md#list-map-sink--grf-18-grf-23).
 - **GRF-24** An input is bound only to an output in its own graph or in a
   graph that encloses it, or to a designation exported through an owning
   output boundary under GRF-27. Graphs owned by the same node share nothing

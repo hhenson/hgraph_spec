@@ -67,7 +67,8 @@ implementation to provide a source-language generator facility.
 - [Ordinary scalar replay and recording](cases_ordinary_replay_record.md): timed values, lifecycle and dense horizon.
 - [Ordinary delta types](cases_ordinary_delta_types.md): shape identity, generic matching, storage, construction and publication boundaries.
 - [Eval recorder keys](cases_eval_recorder_keys.md): pre-start key selection and source-state isolation.
-- [Growing lists](cases_growing_lists.md): growth, truncation, retention and resurrection.
+- [Growing lists](cases_growing_lists.md): growth, truncation, empty publications,
+  position validity, selection after shrink, and mapped sink lifetimes.
 - [Lifecycle](cases_lifecycle.md): activation, construction failure and teardown.
 - [Graph pruning](cases_graph_pruning.md): observable roots, dependencies, captures and absent lifecycle effects.
 - [References](cases_references.md): sampling, dictionary withdrawal and expiry.

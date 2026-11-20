@@ -73,6 +73,55 @@ Unbound: it reads not valid, and reports every position it was showing as
 removed once (TS-15 for dictionaries and sets is extended here to growing
 lists; the ruling is requested).
 
+## LIST-EMPTY-PUBLICATION — TS-9, TS-32
+
+Start with an unpublished growing list. On each step a producer performs
+the indicated operation. An independently scheduled observer reads the
+parent after the producer, including on silent steps.
+
+| Step | Operation | Length | Valid | All valid | Modified |
+|---|---|---:|---|---|---|
+| 1 | Apply a sparse update specifying length zero | 0 | true | true | true |
+| 2 | Apply the same sparse update | 0 | true | true | false |
+| 3 | Publish the whole empty list | 0 | true | true | true |
+| 4 | Publish the whole empty list again | 0 | true | true | true |
+| 5 | Resize to two without writing a position | 2 | true | false | true |
+| 6 | Write 10 and 20 | 2 | true | true | true |
+| 7 | Clear both values without resizing | 2 | true | false | true |
+| 8 | Publish the whole empty list | 0 | true | true | true |
+
+A whole empty list as the **first** publication has the same validity and
+tick as step 1. At steps 3 and 4 there are no changed indices or size change.
+Step 7 reports both positions as removed. Step 8 reports both dropped
+positions and new size zero. For a fixed, owned list of two, steps 6 and 7
+give the same validity and positional changes. TS-26 separately describes
+an input assembled from its children.
+
+## LIST-INDEX-EXTENT — TS-12, TS-32
+
+Wire a consumer to position 1 of a growing list and observe it after each
+producer step. Start with values 1, 2, 3. The selection reads 2. Truncate
+to length 1. The selection becomes invalid and an idle cycle leaves it
+invalid. Write 7 at position 1. The selection now reads 7. The removed
+position can still be inspected through the parent's removal observation in
+the truncation cycle. A live position selection follows the current extent.
+
+## LIST-MAP-SINK — GRF-18, GRF-23
+
+Map a sink over a growing list. Give each started child a distinct identity
+and record its position on start, evaluation and stop.
+
+| Step | Action | Lifecycle observation |
+|---|---|---|
+| 1 | Publish positions 0, 1, 2 | Three children start and observe their respective values. |
+| 2 | Truncate to length 1 | Children 1 and 2 stop once. Child 0 stays live. |
+| 3 | Append a value at position 1 | A fresh child starts there and observes the new value. |
+| 4 | Stop the run | Child 0 and the new child at 1 each stop once. |
+
+The same trace holds for a graph body that contains the sink and returns
+no output. Python graph bodies may declare `-> None` or omit the return
+annotation. The trace does not prescribe an ordering between siblings.
+
 ## Outside these cases
 
 A growing list of collections (a list of bundles) follows the same rules per

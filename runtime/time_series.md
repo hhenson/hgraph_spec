@@ -539,7 +539,10 @@ Rules
   A retained compound view includes descendant values and timestamps.
   Peering describes its active binding, not the retained removal record.
 - **TS-12** A growing list shrinks only from its end. Clearing an in-range
-  position preserves its index and the length of the list.
+  position preserves its index and the length of the list. An owned list
+  retains its validity when its last valued position is cleared. A runtime
+  selection of a position outside the current extent of a growing list has
+  no target. It follows that position again when it comes back into range.
 - **TS-13** A window is valid from its first arrival or explicit clear.
   Its current retained values determine all-valid (TS-31).
 - **TS-14** A plain bind causes no notification. A sampled valid target reads
@@ -645,6 +648,11 @@ Rules
   position invalidates its child and preserves the other positions.
   A truncated child remains readable through the end of the cycle and
   returns with its value and time if restored during that cycle (GRF-25).
+  Publishing a complete empty growing list ticks each time. An explicit
+  sparse update requesting length zero initializes an unpublished list,
+  but has no effect on an already valid empty list. The tick and the
+  presence of a size change are separate observations. See the
+  [growing list cases](cases_growing_lists.md#list-empty-publication--ts-9-ts-32).
 
 - **TS-33** A `TS<Optional<T>>` publication is either a payload or explicit
   null. Both make it valid and modified and notify consumers. Silence retains
