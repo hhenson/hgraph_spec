@@ -72,6 +72,27 @@ with removals for A and B. On the next step, invalidate the dictionary
 without rewriting it. The source is invalid and the mapped result reports
 C removed. Writing A = 4 in a later step yields only A = 14.
 
+## REMOVED-CHILD-AFTER-WHOLE-INVALIDATION
+
+Start with a dictionary of quotes. B has a valid bid of 20 and A also holds
+a quote. Perform the following operations in order in **one** producer
+evaluation. Keep the removal view when B is first removed.
+
+| Operation | Observation |
+|---|---|
+| Remove B | The retained quote still reads bid 20. |
+| Invalidate the whole dictionary | The dictionary is invalid. The previously removed quote still reads bid 20. |
+| Reinsert B with an empty quote patch | Only B is live. Its bundle is valid and its bid is invalid. |
+| Write bid 30 to B, remove B and reinsert B with an empty patch | B recovers bid 30 under ordinary same-step restoration. |
+
+Repeat with a growing list of two quotes, with bid 20 at position 1.
+Truncate to length 1, then invalidate the whole list. The retained position
+still reads bid 20. Grow back to length 2 and apply an empty quote patch at
+position 1. Position 0 is invalid; position 1 has a valid quote with an
+invalid bid. In a control run, omit whole-list invalidation between the
+truncation and the regrowth. Position 1 recovers bid 20 and its original
+bid timestamp.
+
 ## SPARSE-CHILD-PUBLICATION
 
 Use an owned dictionary of quote bundles with fields `bid` and `ask`.

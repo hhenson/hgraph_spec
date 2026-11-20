@@ -528,8 +528,11 @@ Rules
   keys, members or extent respectively. A subsequent sparse write starts
   from empty. If the producer rewrites in the same evaluation, the final
   collection delta includes withdrawals needed to bring a follower from
-  its previous state to the new value. Clearing one dictionary child
-  preserves that key (TS-11).
+  its previous state to the new value. If a dictionary key or growing-list
+  position was removed earlier in the same step, its retained value stays
+  readable until reinsertion. Reinsertion after whole-owner invalidation
+  starts the child empty. Clearing one dictionary child preserves that key
+  (TS-11).
   See the [invalidation and rewrite traces](cases_collections.md#collection-invalidate-and-rewrite).
 - **TS-8** A passive input never schedules its node. Making an input active
   or passive does not change what it reads, and never itself schedules the
@@ -545,7 +548,8 @@ Rules
   and is silent on a valid one. See the [whole-set trace](cases_collections.md#set-whole-and-sparse).
 - **TS-11** A key removed from a dictionary, and its child, are readable for
   the rest of that cycle. The key restored in that cycle is the same child,
-  with its previous value and timestamp unless explicitly written. From the
+  with its previous value and timestamp unless explicitly written or the
+  whole dictionary was invalidated in between (TS-7). From the
   next engine cycle, a key that remained removed and its child are absent
   from both live and removed observations. This applies to reference-valued
   children too; removing one does not destroy its independently owned target.
@@ -650,6 +654,7 @@ Rules
   clear. An explicit zero duration minimum is ready on the first sample.
   An omitted minimum equals the maximum.
 - **TS-32** Fixed and growing lists report the net change each cycle.
+  TS-7 governs restoring a position after whole-list invalidation.
   `modified` maps indices to child deltas. `removed` names indices that
   lost their value, including every position in a truncated tail.
   `size_modified` holds the new length only when it differs from the
