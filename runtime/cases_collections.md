@@ -64,6 +64,14 @@ time is *never*, and its value and delta are nil (TS-1, TS-2, TS-7).
 The rewrite makes it valid and modified. Compare clearing only the child
 at key B of a dictionary: B remains a member with an invalid child.
 
+Also exercise invalidation and a rewrite **in the same producer step**.
+A dictionary starts with A = 1 and B = 2. A mapped child adds 10 to each
+value. The producer invalidates the dictionary and writes C = 3 before
+returning. A downstream observer sees only C = 13 in the mapped result,
+with removals for A and B. On the next step, invalidate the dictionary
+without rewriting it. The source is invalid and the mapped result reports
+C removed. Writing A = 4 in a later step yields only A = 14.
+
 ## SPARSE-CHILD-PUBLICATION
 
 Use an owned dictionary of quote bundles with fields `bid` and `ask`.

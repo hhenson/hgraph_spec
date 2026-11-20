@@ -526,7 +526,10 @@ Rules
   [scalar invalidation trace](cases_atomic.md#atomic-invalidation).
   Whole-output invalidation of an owned TSD, TSS or growing TSL clears its
   keys, members or extent respectively. A subsequent sparse write starts
-  from empty. Clearing one dictionary child preserves that key (TS-11).
+  from empty. If the producer rewrites in the same evaluation, the final
+  collection delta includes withdrawals needed to bring a follower from
+  its previous state to the new value. Clearing one dictionary child
+  preserves that key (TS-11).
   See the [invalidation and rewrite traces](cases_collections.md#collection-invalidate-and-rewrite).
 - **TS-8** A passive input never schedules its node. Making an input active
   or passive does not change what it reads, and never itself schedules the
