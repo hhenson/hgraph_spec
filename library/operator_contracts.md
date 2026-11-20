@@ -74,6 +74,18 @@ publishes those values as floats.
 | 4 | `{x: 6}` | — | `6` |
 
 
+Scalar defaults
+---------------
+
+For scalar inputs, a reader of `default(primary, fallback)` sees the primary
+value while it is valid and the fallback value while the primary is invalid.
+The result is invalid when both inputs are invalid.
+
+Suppose the fallback publishes 3, the primary publishes 7, the primary is
+invalidated, the fallback publishes 4, and the primary recovers with 8.
+An independently clocked reader sees 3, 7, 3, 4 and 8, respectively.
+
+
 Set operators
 -------------
 
