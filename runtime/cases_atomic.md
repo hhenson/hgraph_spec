@@ -59,3 +59,9 @@ readable even if the input is passive.
 At cycle 3 an active input can wake its node on the clear. A passive input
 can read the same transition on an independent wake that cycle. A probe
 that first wakes at cycle 4 sees an invalid value and `invalidated == false`.
+
+A SIGNAL directly bound to this scalar follows the **Modified** column
+(TS-18). A node with an independent clock that samples a held price when
+that SIGNAL reads modified emits at cycles 2, 7 and 8. The clear at cycle 3
+preserves its previously sampled price. A repeated equal scalar publication
+also samples the current price.
