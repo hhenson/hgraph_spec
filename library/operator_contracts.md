@@ -237,10 +237,10 @@ in one cycle is unspecified.
 Modification timestamps
 -----------------------
 
-For a directly bound scalar source, `last_modified_time`,
+For a directly bound scalar or collection source, `last_modified_time`,
 `last_modified_date` and `last_modified_wall_clock_time` publish on each
 source value tick, including a repeated equal value. Invalidating the
-source also invalidates the derived timestamp (OP-1). An independent reader
+whole source also invalidates the derived timestamp (OP-1). An independent reader
 then observes `stamp.valid == False` and `stamp.modified == False`. The
 next source tick publishes a fresh timestamp.
 
