@@ -131,7 +131,14 @@ clears its validity.
 
 If A holds 1 and B holds 10, writing A and then B in one evaluation gives
 the scalar reader 10 once. A later tick from A is silent and a later tick
-of 11 from B reaches the reader.
+of 11 from B reaches the reader. If the output starts the next evaluation
+holding B, writing A followed by B keeps both the REF reader and the scalar
+reader idle in the absence of a separate input tick.
+
+A relay copies a selector's current REF value once. At cycle 0 the selector
+holds A, whose value is 1. At cycle 1 the selector selects B, whose value is
+10, while A publishes 2. At cycle 2 A publishes 3 and B publishes 11. The
+relay stays idle after cycle 0 and its scalar reader observes 1, 2, 3.
 
 ## REF-LIST-POSITION — TS-16, TS-17 and TS-25
 
@@ -139,7 +146,8 @@ A holds the pair (3, −3) and B holds (10, −10). A selector initially
 designates B and switches to A at cycle 2. A router receives the whole-list
 reference as a list of reference inputs. Its index input selects position 1
 once, at cycle 0. A second observer counts changes to the designation at
-position 0, either projected directly or inside a graph taking a list parameter.
+position 0, either projected directly, inside a graph taking a list parameter,
+or by inspecting the first child of a whole list of reference inputs.
 
 | Cycle | Selected list | Other publication | Value from saved position 1 | Designation count, direct or through parameter |
 |---|---|---|---|---|
