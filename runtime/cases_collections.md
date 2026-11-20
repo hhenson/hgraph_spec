@@ -77,7 +77,7 @@ this is a new child.
 
 ## Direct collection clear
 
-This trace applies to a TSS or TSD input wired directly to its owning output,
+This agreed trace applies to a TSS or TSD input wired directly to its owning output,
 and to a SIGNAL reading that output (TS-7, TS-8, TS-18). A passive input
 can observe every row when an independent clock schedules its node.
 
