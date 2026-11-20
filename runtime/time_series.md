@@ -554,8 +554,11 @@ Rules
   never on an equal repeat or because its target ticked. Equality compares
   endpoint identities and, for child references, their designation tree;
   it does not compare target values. Equal repeats cause no additional work.
-  If a producer writes several designations during its evaluation, downstream
-  nodes evaluate at most once and follow its final designation.
+  If a producer writes several designations during its evaluation, compare its
+  final designation with the one it held on entry. Returning to that designation
+  leaves its tick time unchanged and keeps its readers idle. A node copying a
+  REF input's current value selects the endpoint named by that value. A later
+  write to the input's REF producer alone leaves the copy unchanged.
 - **TS-17** An input follows changes of its REF. Changed valid targets are
   sampled; unchanged fixed child bindings are preserved (TS-25).
   An empty or invalidated REF unbinds it. When a scalar follower loses
@@ -599,7 +602,10 @@ Rules
 - **TS-24** A valid TSB value contains every declared field, including nil
   for invalid children. Apply this at each valid nested bundle. Its schema
   does not shrink with validity; its delta contains only changed valid fields.
-- **TS-25** Fixed child bindings survive changes between peered and assembled
+- **TS-25** A fixed collection received whole as references to its positions
+  ticks each position whose effective designation changes when the collection
+  rebinds. A value tick on a selected element leaves the position reference
+  unmodified. Fixed child bindings survive changes between peered and assembled
   parents. Rebinding samples only changed valid targets; unchanged targets
   retain their times and delta state. Each parent includes its valid modified
   children's deltas. Binding an invalid target clears previous sample state. A fixed
