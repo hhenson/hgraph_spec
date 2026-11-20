@@ -222,6 +222,21 @@ in one cycle is unspecified.
 - Removing a partition costs the keys that partition owns, never the size of
   the output.
 
+Modification timestamps
+-----------------------
+
+For a directly bound scalar source, `last_modified_time`,
+`last_modified_date` and `last_modified_wall_clock_time` publish on each
+source value tick, including a repeated equal value. Invalidating the
+source also invalidates the derived timestamp (OP-1). An independent reader
+then observes `stamp.valid == False` and `stamp.modified == False`. The
+next source tick publishes a fresh timestamp.
+
+For `sample(stamp, price)`, let `price` hold 10 when the source ticks,
+then publish 20 before the source is invalidated. The sampler publishes 10
+on the source tick and stays silent on the invalidation. If the price
+subsequently moves to 30, the next source tick samples 30.
+
 Dynamic schedules
 -----------------
 
