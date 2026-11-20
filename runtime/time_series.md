@@ -500,7 +500,10 @@ Rules
   it does not fall back to an older sibling time. Invalid structures reset
   to *never*, including locally cached observations.
 - **TS-4** A child modified in a cycle means every ancestor is modified in
-  that cycle.
+  that cycle. A sparse patch on an existing dictionary key or bundle field
+  that causes no child change or membership change leaves the parent as
+  it was. Named and positional bundle patches apply the same child delta.
+  See the [sparse child cases](cases_collections.md#sparse-child-publication).
 - **TS-5** Applying an output's deltas and child-validity changes in order,
   from its last invalid state, reproduces its value. Invalidation replaces a
   fixed child's value with nil. TSD also needs membership changes:
@@ -520,6 +523,16 @@ Rules
   already-invalid value does not refresh the observation. A passive input
   sees a coincident clear if its node wakes independently. See the
   [scalar invalidation trace](cases_atomic.md#atomic-invalidation).
+  Whole-output invalidation of an owned TSD, TSS or growing TSL clears its
+  keys, members or extent respectively. A subsequent sparse write starts
+  from empty. If the producer rewrites in the same evaluation, the final
+  collection delta includes withdrawals needed to bring a follower from
+  its previous state to the new value. If a dictionary key or growing-list
+  position was removed earlier in the same step, its retained value stays
+  readable until reinsertion. Reinsertion after whole-owner invalidation
+  starts the child empty. Clearing one dictionary child preserves that key
+  (TS-11).
+  See the [invalidation and rewrite traces](cases_collections.md#collection-invalidate-and-rewrite).
   A directly bound TSS, TSD or SIGNAL input observes its owned set or
   dictionary as invalid and unmodified when the producer clears it.
   An active input still schedules its node. A reference unbind retains
@@ -539,9 +552,13 @@ Rules
   requires its minimum. An empty collection passes only if itself valid.
 - **TS-10** In a set's delta, *added* and *removed* share no element. An
   element added and removed in one cycle is in neither.
+  Explicitly publishing the complete set ticks even when its members are
+  unchanged. Applying an empty membership delta initializes an invalid set
+  and is silent on a valid one. See the [whole-set trace](cases_collections.md#set-whole-and-sparse).
 - **TS-11** A key removed from a dictionary, and its child, are readable for
   the rest of that cycle. The key restored in that cycle is the same child,
-  with its previous value and timestamp unless explicitly written. From the
+  with its previous value and timestamp unless explicitly written or the
+  whole dictionary was invalidated in between (TS-7). From the
   next engine cycle, a key that remained removed and its child are absent
   from both live and removed observations. This applies to reference-valued
   children too; removing one does not destroy its independently owned target.
@@ -653,6 +670,7 @@ Rules
   clear. An explicit zero duration minimum is ready on the first sample.
   An omitted minimum equals the maximum.
 - **TS-32** Fixed and growing lists report the net change each cycle.
+  TS-7 governs restoring a position after whole-list invalidation.
   `modified` maps indices to child deltas. `removed` names indices that
   lost their value, including every position in a truncated tail.
   `size_modified` holds the new length only when it differs from the

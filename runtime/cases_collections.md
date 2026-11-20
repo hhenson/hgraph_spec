@@ -1,7 +1,9 @@
 # Collection cases
 
-Status: cases other than QUOTE-HISTORY, MEMBERSHIP-INDEPENDENT and
-SAME-CYCLE-RESTORE remain proposed unless separately identified.
+Status: QUOTE-HISTORY, MEMBERSHIP-INDEPENDENT and SAME-CYCLE-RESTORE are
+established cases. SET-WHOLE-AND-SPARSE, COLLECTION-INVALIDATE-AND-REWRITE
+and SPARSE-CHILD-PUBLICATION describe the expected observations for explicit
+producer writes. The remaining cases are proposed unless separately identified.
 
 ## VALIDITY-IMMEDIATE — TS-9
 
@@ -26,6 +28,118 @@ Start with an invalid `TSS<str>`. At 10 add A and B: value and added are
 A: value `{B,C}`, added `{C}`, removed `{A}`. Idle at 30: retain the value,
 unmodified, no delta. Repeated reads agree. In a separate cycle, adding then
 removing a new D leaves it in neither delta set; the set still ticks.
+
+## SET-WHOLE-AND-SPARSE
+
+Start with an invalid owned set. At each step a producer explicitly writes
+the indicated value or delta. A separate clock drives an observer after the
+producer so it can distinguish a tick with an empty delta from silence.
+
+| Step | Producer operation | Held members | Modified | Membership delta |
+|---|---|---|---|---|
+| 1 | Publish the whole set containing A | A | true | added A |
+| 2 | Publish the same whole set | A | true | empty |
+| 3 | Apply an empty membership delta | A | false | no tick |
+| 4 | Publish the whole empty set | empty | true | removed A |
+| 5 | Publish the whole empty set again | empty | true | empty |
+
+Each publication advances the last modified time. On step 3 that time stays
+at step 2. In Python, a `frozenset` result supplies the whole value and
+`set_delta()` supplies the sparse control. These are producer writes;
+derived set operators decide when to write under their own contracts.
+
+Repeat steps 1–3 with the set in a bundle field, a dictionary entry or a
+list position. Start each replay from an invalid set. Observe the child
+with an independent clock.
+
+| Replay input | Step 1 | Step 2 | Step 3 |
+|---|---|---|---|
+| In-memory recording of observed publications | Child ticks, adds A | Child ticks, empty delta | Child stays quiet |
+| Ordinary timed delta values extracted from those publications | Child ticks, adds A | Child stays quiet | Child stays quiet |
+
+The in-memory recorder captures which endpoint published in each cycle.
+At step 2 its record identifies the child even though membership did not
+change. If a sibling ticks and wakes the observer at step 3, the recorded
+parent entry then names only that sibling. An explicit parent publication
+with no child entries wakes the parent alone.
+
+The [ordinary replay operator](../library/ordinary_replay_record.md) takes
+timed delta values. Applying the step 2 empty membership delta to the
+already valid child leaves its previous modification time intact under
+[EMPTY-2 and EMPTY-3](../language/docs/design/empty-delta-validity.md).
+When the whole producer stays quiet, its recording has no entry for that step.
+
+## COLLECTION-INVALIDATE-AND-REWRITE
+
+On successive steps, establish each owned output, invalidate the whole
+output, then apply the sparse write below. Observe after each step.
+
+| Output | First value | Sparse write after invalidation | Recovered value |
+|---|---|---|---|
+| TSD | keys A = 1 and B = 2 | write C = 3 | only C = 3 |
+| TSS | members A and B | add C | only C |
+| Growing TSL | positions 0 = 10 and 1 = 20 | write 0 = 30 | length 1, position 0 = 30 |
+
+On the middle step the parent is invalid and unmodified, its last modified
+time is *never*, and its value and delta are nil (TS-1, TS-2, TS-7).
+The rewrite makes it valid and modified. Compare clearing only the child
+at key B of a dictionary: B remains a member with an invalid child.
+
+Also exercise invalidation and a rewrite **in the same producer step**.
+A dictionary starts with A = 1 and B = 2. A mapped child adds 10 to each
+value. The producer invalidates the dictionary and writes C = 3 before
+returning. A downstream observer sees only C = 13 in the mapped result,
+with removals for A and B. On the next step, invalidate the dictionary
+without rewriting it. The source is invalid and the mapped result reports
+C removed. Writing A = 4 in a later step yields only A = 14.
+
+## REMOVED-CHILD-AFTER-WHOLE-INVALIDATION
+
+Start with a dictionary of quotes. B has a valid bid of 20 and A also holds
+a quote. Perform the following operations in order in **one** producer
+evaluation. Keep the removal view when B is first removed.
+
+| Operation | Observation |
+|---|---|
+| Remove B | The retained quote still reads bid 20. |
+| Invalidate the whole dictionary | The dictionary is invalid. The previously removed quote still reads bid 20. |
+| Reinsert B with an empty quote patch | Only B is live. Its bundle is valid and its bid is invalid. |
+| Write bid 30 to B, remove B and reinsert B with an empty patch | B recovers bid 30 under ordinary same-step restoration. |
+
+Repeat with a growing list of two quotes, with bid 20 at position 1.
+Truncate to length 1, then invalidate the whole list. The retained position
+still reads bid 20. Grow back to length 2 and apply an empty quote patch at
+position 1. Position 0 is invalid; position 1 has a valid quote with an
+invalid bid. In a control run, omit whole-list invalidation between the
+truncation and the regrowth. Position 1 recovers bid 20 and its original
+bid timestamp.
+
+For a count or duration window as the child, start with sample 20. Remove
+the child, invalidate its owner, reinsert the child and push sample 30.
+The window now contains only 30, with its new arrival time. Its old sample
+can cause no later expiry. Observe the history while the child is removed
+and again after reinsertion to distinguish these two lifetimes.
+
+## SPARSE-CHILD-PUBLICATION
+
+Use an owned dictionary of quote bundles with fields `bid` and `ask`.
+An empty patch to a new key A makes A a member, initializes its bundle and
+ticks the dictionary. Apply the same patch again: its child and the dictionary
+are quiet. Write bid = 7 at A, then repeat the empty patch. The bid remains
+7 and both last modified times stay at the bid write. This is an instance
+of [EMPTY-NESTED](cases_empty_delta_validity.md#empty-nested--empty-2).
+
+A sparse bundle patch may identify a field by name or by its declared
+position. Each supplied field applies its own delta in both forms. Exercise
+both spellings on fresh outputs; sample the child and parent separately.
+
+| Bundle field and initial value | Named patch | Positional patch (field 1) | Observation |
+|---|---|---|---|
+| `book`, dictionary with A and B | `{"book": {"A": REMOVE_IF_EXISTS}}` | `(None, {"A": REMOVE_IF_EXISTS})` | Only B remains. Child and parent tick, and the child reports A removed. |
+| `members`, valid set containing A | `{"members": set_delta()}` | `(None, set_delta())` | A remains. Neither the child nor the parent ticks. |
+
+In these Python spellings field 0 is an ordinary scalar and is omitted by the
+patch. Its value and last modified time are preserved.
 
 ## QUOTE-HISTORY — TS-1 through TS-5, TS-9, TS-11 and TS-19
 
