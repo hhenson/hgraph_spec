@@ -108,3 +108,47 @@ The consumer of `x` receives 2, 4, withdrawal, then 5 at times 1–4. Increasing
 unrelated lookups must not increase notification work for a single key change.
 Changing a selection detaches the old membership subscription. Replacing the
 whole dictionary can notify all selected keys; stopping a lookup detaches it.
+
+## REF-WITHDRAWAL — TS-8, TS-16 and TS-17
+
+A scalar reader is active and has no validity guard. At cycle 0 it follows A.
+At cycle 1 the selector either publishes an empty reference, invalidates its
+REF output, or points to B, which has never published. Each choice produces
+the same scalar-reader trace.
+
+| Cycle | Selector | A publishes | Reader observes |
+|---|---|---|---|
+| 0 | A | 7 | 7 |
+| 1 | Withdraw | — | Invalid, unmodified, last modified time never |
+| 2 | Repeat withdrawal | — | — |
+| 3 | — | 8 | — |
+| 4 | A | — | 8 |
+
+A passive reader sees the same state if another input wakes its node.
+The three selector actions remain distinguishable on the REF itself. An empty
+reference and a reference to B are valid designations. Invalidating the REF
+clears its validity.
+
+If A holds 1 and B holds 10, writing A and then B in one evaluation gives
+the scalar reader 10 once. A later tick from A is silent and a later tick
+of 11 from B reaches the reader.
+
+## REF-LIST-POSITION — TS-16, TS-17 and TS-25
+
+A holds the pair (3, −3) and B holds (10, −10). A selector initially
+designates B and switches to A at cycle 2. A router receives the whole-list
+reference as a list of reference inputs. Its index input selects position 1
+once, at cycle 0. A second observer counts changes to the designation at
+position 0, either projected directly or inside a graph taking a list parameter.
+
+| Cycle | Selected list | Other publication | Value from saved position 1 | Designation count, direct or through parameter |
+|---|---|---|---|---|
+| 0 | B | A and B publish their initial pairs | −10 | 1 |
+| 1 | — | — | — | — |
+| 2 | A | — | −3 | 2 |
+| 3 | A again | B publishes (11, −11) | — | — |
+| 4 | — | A publishes (4, −4) | −4 | — |
+
+The router stays idle after selecting its position. The designation observer
+wakes when the position changes target. Value ticks of either list leave its
+count unchanged.
