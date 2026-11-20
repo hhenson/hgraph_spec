@@ -602,10 +602,7 @@ Rules
 - **TS-24** A valid TSB value contains every declared field, including nil
   for invalid children. Apply this at each valid nested bundle. Its schema
   does not shrink with validity; its delta contains only changed valid fields.
-- **TS-25** A fixed collection received whole as references to its positions
-  ticks each position whose effective designation changes when the collection
-  rebinds. A value tick on a selected element leaves the position reference
-  unmodified. Fixed child bindings survive changes between peered and assembled
+- **TS-25** Fixed child bindings survive changes between peered and assembled
   parents. Rebinding samples only changed valid targets; unchanged targets
   retain their times and delta state. Each parent includes its valid modified
   children's deltas. Binding an invalid target clears previous sample state. A fixed
