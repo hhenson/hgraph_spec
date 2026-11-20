@@ -58,6 +58,19 @@ An operator that **forwards** a value, routing one input's ticks to its
 output, publishes every tick it forwards, equal or not: the tick is the news
 (ruling 2026-07-17).
 
+Scalar map lookup and container extrema may take a default. A missing map key
+or an empty container selects the default when it has a value. If the map
+contains the key, or the container is nonempty, clearing the default alone
+leaves the result in place. The following trace also applies to `min_` and
+`max_` on a one-element tuple containing the lookup result.
+
+| Cycle | Map publication | Default | Lookup publication for key `x` |
+|---|---|---|---|
+| 1 | `{x: 5}` | `8` | `5` |
+| 2 | — | clear | — |
+| 3 | `{x: 5}` | — | `5` |
+| 4 | `{x: 6}` | — | `6` |
+
 
 Set operators
 -------------
@@ -309,6 +322,10 @@ Rules
   the whole output when all input dictionaries are invalid. Adding a key makes
   the parent valid, with an invalid child until a value is selected; the last
   input's removal removes the output key.
+- **OP-14** For scalar map `getitem_` and scalar-container `min_` and `max_`,
+  invalidating an unused default alone produces no publication. A simultaneous
+  map, lookup key or container publication is processed normally, including
+  an equal repeat.
 
 A TSD delta holding a nested dictionary includes the inner dictionary's delta:
 its valid modified children only. An invalid inner child contributes nothing,
