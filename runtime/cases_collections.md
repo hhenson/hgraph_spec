@@ -93,6 +93,12 @@ invalid bid. In a control run, omit whole-list invalidation between the
 truncation and the regrowth. Position 1 recovers bid 20 and its original
 bid timestamp.
 
+For a count or duration window as the child, start with sample 20. Remove
+the child, invalidate its owner, reinsert the child and push sample 30.
+The window now contains only 30, with its new arrival time. Its old sample
+can cause no later expiry. Observe the history while the child is removed
+and again after reinsertion to distinguish these two lifetimes.
+
 ## SPARSE-CHILD-PUBLICATION
 
 Use an owned dictionary of quote bundles with fields `bid` and `ask`.
