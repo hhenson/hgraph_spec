@@ -97,6 +97,14 @@ positions and new size zero. For a fixed, owned list of two, steps 6 and 7
 give the same validity and positional changes. TS-26 separately describes
 an input assembled from its children.
 
+Repeat steps 3 and 4 with the growing list at position 0 of an outer
+fixed list. Record the producer, then replay those two observations into
+a fresh run with the same starting state. On both steps, position 0 and
+its parent tick. The child reports empty positional changes and no new
+length. As a control, apply an explicit empty sparse edit to the already
+valid child. It stays quiet. An unrelated sibling can tick on that step
+without changing the child's observation.
+
 ## LIST-INDEX-EXTENT — TS-12, TS-32
 
 Wire a consumer to position 1 of a growing list and observe it after each
