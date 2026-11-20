@@ -73,7 +73,7 @@ Runtime packs preserve their source views:
 
 | HGL parameter | HGL source view |
 | --- | --- |
-| `values: ...T` | fixed homogeneous list |
+| `values: ...T` | homogeneous list of the supplied arguments, in order |
 | `values: ...Ts` | heterogeneous tuple |
 | `values: ...{Fields}` | heterogeneous bundle |
 
@@ -84,10 +84,12 @@ A runtime function currently accepts one aggregate pack input. A composition
 function may combine positional and named packs, but spelling both on the same
 runtime function is rejected. Extending that admission remains open.
 
-An empty runtime pack whose schema is otherwise resolved must be constructed
-with that resolved aggregate schema; it cannot infer its schema from children.
-A fixed-empty list is distinct from an unbounded list; zero is an ordinary
-fixed extent.
+A nonempty homogeneous runtime pack uses a fixed list of its argument count.
+At zero arguments its element type must still resolve independently. Lower
+that pack as an unwired growing list of the resolved element type: the
+argument count is zero, iteration visits no positions, and the absence of
+arguments publishes no list value. This needs no fixed-zero temporal type.
+An empty heterogeneous pack retains its resolved tuple or bundle schema.
 
 ## Cardinality
 

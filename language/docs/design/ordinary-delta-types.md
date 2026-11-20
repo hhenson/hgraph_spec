@@ -31,7 +31,7 @@ named arguments and sparse entries.
 T must have a finite shape admitted by the
 [collection publication profile](contextual-collection-deltas.md): the admitted
 scalar leaves, including [bytes](bytes-values.md), [any](any-values.md) and
-[native atomics](native-atomic-values.md); sets with admitted scalar members; fixed lists with nonnegative constant sizes;
+[native atomics](native-atomic-values.md); sets with admitted scalar members; fixed temporal lists with positive constant sizes;
 growing lists under their [net delta contract](growing-list-publications.md);
 positional tuples; fully applied concrete nominal structs; and maps with admitted scalar keys,
 with recursively admitted children. Exact rolling shapes use their

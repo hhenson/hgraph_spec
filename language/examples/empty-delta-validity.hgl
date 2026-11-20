@@ -17,7 +17,6 @@ fn empty_delta_growing(value: list<i64>) -> list<i64> => forward_empty_delta(val
 fn empty_delta_tuple(value: tuple<i64, bool>) -> tuple<i64, bool> => forward_empty_delta(value)
 fn empty_delta_pair(value: EmptyDeltaPair) -> EmptyDeltaPair => forward_empty_delta(value)
 fn empty_delta_unit(value: EmptyDeltaUnit) -> EmptyDeltaUnit => forward_empty_delta(value)
-fn empty_delta_zero(value: list<i64, 0>) -> list<i64, 0> => forward_empty_delta(value)
 fn empty_delta_atomic(value: atomic<list<i64>>) -> atomic<list<i64>> => forward_empty_delta(value)
 fn empty_delta_rolling(value: rolling<list<i64>, 2>) -> rolling<list<i64>, 2> => forward_empty_delta(value)
 fn empty_delta_int(value: i64) -> i64 => forward_empty_delta(value)
@@ -32,7 +31,9 @@ test empty_sparse_application {
         delta<set<i64>>(), _, delta<set<i64>>(added: [1]), _, _
     ]
     assert eval(empty_delta_map, value: [delta<dict<i64, i64>>(), delta<dict<i64, i64>>()]) == [delta<dict<i64, i64>>(), _]
-    assert eval(empty_delta_fixed, value: [delta<list<i64, 2>>(), delta<list<i64, 2>>()]) == [delta<list<i64, 2>>(), _]
+    assert eval(empty_delta_fixed, value: [
+        delta<list<i64, 2>>(), delta<list<i64, 2>>(), delta<list<i64, 2>>(items: [0: 10])
+    ]) == [_, _, delta<list<i64, 2>>(items: [0: 10])]
     assert eval(empty_delta_growing, value: [delta<list<i64>>(), delta<list<i64>>()]) == [delta<list<i64>>(), _]
     assert eval(empty_delta_tuple, value: [
         delta<tuple<i64, bool>>(), delta<tuple<i64, bool>>()
@@ -45,7 +46,6 @@ test empty_sparse_application {
         delta<EmptyDeltaPair>(), _
     ]
     assert eval(empty_delta_unit, value: [delta<EmptyDeltaUnit>(), delta<EmptyDeltaUnit>()]) == [delta<EmptyDeltaUnit>(), _]
-    assert eval(empty_delta_zero, value: [delta<list<i64, 0>>(), delta<list<i64, 0>>()]) == [delta<list<i64, 0>>(), _]
 }
 
 test nested_empty_sparse_application {
@@ -54,7 +54,7 @@ test nested_empty_sparse_application {
         delta<EmptyDeltaPair>(left: delta<list<i64, 2>>()),
         delta<EmptyDeltaPair>(right: 7),
         delta<EmptyDeltaPair>()
-    ]) == [delta<EmptyDeltaPair>(left: delta<list<i64, 2>>()), _, delta<EmptyDeltaPair>(right: 7), _]
+    ]) == [_, _, delta<EmptyDeltaPair>(right: 7), _]
 }
 
 test empty_complete_payload_controls {

@@ -4,7 +4,12 @@ Status: accepted, 2026-10-10.
 
 **EMPTY-1.** Applying an explicit empty sparse `delta<T>` to an invalid
 endpoint makes that endpoint valid and modified at the current evaluation
-time, with an empty delta. It initializes no child, member or key. Applying
+time, with an empty delta, except for a list whose length is positive. An
+empty sparse edit initializes no child, member or key. A positive-length
+list with no valid position therefore stays invalid and unmodified; its
+value and delta are nil and its last modified time remains *never*. A
+zero-length growing list becomes valid on its first empty publication. A
+fixed temporal list requires a positive size. Applying
 it to an already valid endpoint causes no tick and changes no value,
 validity, membership or modification time. It does not clear a tick already
 caused by an earlier operation in the same cycle.
@@ -19,7 +24,9 @@ or invalidation operation is introduced.
 **EMPTY-2.** Apply the rule recursively at each explicitly targeted child.
 A nonempty parent patch containing an empty child delta ticks when that child
 becomes valid; the parent's delta retains that present empty child entry.
-Omitted children remain unchanged. Repeating the patch when none of its
+An empty edit to a positive-length list child with no valid position keeps
+that child invalid. An existing parent receiving only that child edit stays
+quiet. Omitted children remain unchanged. Repeating the patch when none of its
 entries causes a publication is silent. Canonical membership, index and
 removal checks still apply: invalid nonempty instructions are errors, not
 empty updates. A new map or growing-list child may receive an empty structural

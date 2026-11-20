@@ -73,6 +73,110 @@ Unbound: it reads not valid, and reports every position it was showing as
 removed once (TS-15 for dictionaries and sets is extended here to growing
 lists; the ruling is requested).
 
+## LIST-EMPTY-PUBLICATION — TS-9, TS-32
+
+Start with an unpublished growing list. On each step a producer performs
+the indicated operation. An independently scheduled observer reads the
+parent after the producer, including on silent steps.
+
+| Step | Operation | Length | Valid | All valid | Modified | Last modified | Public delta |
+|---|---|---:|---|---|---|---|---|
+| 0 | No publication yet | 0 | false | false | false | never | nil |
+| 1 | Apply a sparse update specifying length zero | 0 | true | true | true | 1 | Empty positional changes |
+| 2 | Apply the same sparse update | 0 | true | true | false | 1 | nil |
+| 3 | Publish the whole empty list | 0 | true | true | true | 3 | Empty positional changes |
+| 4 | Publish the whole empty list again | 0 | true | true | true | 4 | Empty positional changes |
+| 5 | Grow to two without writing a position | 2 | false | false | false | never | nil |
+| 6 | Write 10 at position 0 | 2 | true | false | true | 6 | Modified 0: 10 |
+| 7 | Write 20 at position 1 | 2 | true | true | true | 7 | Modified 1: 20 |
+| 8 | Clear position 0 | 2 | true | false | true | 8 | Removed 0 |
+| 9 | Clear position 1 | 2 | false | false | false | never | nil |
+| 10 | Apply an empty sparse edit without a size | 2 | false | false | false | never | nil |
+| 11 | Publish the whole empty list | 0 | true | true | true | 11 | Removed 0 and 1, size 0 |
+| 12 | Invalidate the whole list | 0 | false | false | false | never | nil |
+| 13 | Apply a sparse update specifying length zero | 0 | true | true | true | 13 | Empty positional changes |
+
+The list loses validity at steps 5, 9 and 12. Its directly bound input
+observes that transition. An active input can wake its consumer at those
+steps. The public parent value and delta both read nil. Step 10 stays
+invalid. A fresh growing list resized directly from zero to two without
+writing any position also has length two and the observations of step 10.
+Its extent changed while it was already invalid.
+
+Alternatively, follow step 9 by writing 30 at position 1. The existing
+two-position list becomes valid and partly populated, with modified
+position 1. A fresh fixed list of length two has the same validity as the
+freshly grown two-position list. Steps 6–10 and this write then give the
+same observations for both lists. Invalidate the whole fixed list after
+writing 30. The parent and both positions are invalid, unmodified, with
+time *never* and nil value and delta (TS-26). Its declared length is still
+two. A subsequent write to either position revalidates it.
+
+Publishing the whole empty list as the first action gives the observations
+of step 1. At steps 1, 3, 4 and 13 the length was already zero, so the
+delta has no size change. At step 11 both positions leave the extent even
+though their values were already invalid.
+
+Keep a growing list at length zero and inspect it on an independent clock.
+
+| Step | Operation | Valid | All valid | Modified | Last modified | Value | Public delta |
+|---|---|---|---|---|---|---|---|
+| 0 | Never published | false | false | false | never | nil | nil |
+| 1 | Publish the whole empty list `()` | true | true | true | 1 | empty list | Empty positional changes |
+| 2 | No write | true | true | false | 1 | empty list | nil |
+| 3 | Invalidate the whole list | false | false | false | never | nil | nil |
+| 4 | Publish `()` again | true | true | true | 4 | empty list | Empty positional changes |
+
+Declaring a fixed temporal list of size zero (`TSL[TS[int], Size[0]]`)
+is rejected at declaration or wiring, before the graph starts. A fixed
+list of size two with neither position valid is the positive-size control
+above. An [ordinary list value](cases_ordinary_lists.md#list-empty--type-context-and-fixedness)
+can still have a fixed empty shape.
+
+Repeat steps 3 and 4 of the first trace with the growing list at position 0 of an outer
+fixed list. At the start of each replay, position 0 already holds a valid
+empty list. An independent clock observes the parent and position 0.
+
+| Replay input | Step 3 | Step 4 |
+|---|---|---|
+| In-memory recording that identifies position 0 as having published | Parent and position 0 tick | Parent and position 0 tick |
+| Ordinary timed deltas carrying the same empty positional changes | Both stay quiet | Both stay quiet |
+
+In the in-memory recording, each child publication has empty positional
+changes and no new length. A parent entry naming only a sibling leaves
+position 0 quiet. An explicit parent publication with no child entries
+wakes the parent alone.
+
+The [ordinary replay operator](../library/ordinary_replay_record.md) applies
+the supplied delta values. Applying an empty sparse edit to a valid
+position leaves the child and parent quiet under
+[EMPTY-2 and EMPTY-3](../language/docs/design/empty-delta-validity.md).
+
+## LIST-INDEX-EXTENT — TS-12, TS-32
+
+Wire a consumer to position 1 of a growing list and observe it after each
+producer step. Start with values 1, 2, 3. The selection reads 2. Truncate
+to length 1. The selection becomes invalid and an idle cycle leaves it
+invalid. Write 7 at position 1. The selection now reads 7. The removed
+position can still be inspected through the parent's removal observation in
+the truncation cycle. A live position selection follows the current extent.
+
+## LIST-MAP-SINK — GRF-18, GRF-23
+
+Map a sink over a growing list. Give each started child a distinct identity
+and record its position on start, evaluation and stop.
+
+| Step | Action | Lifecycle observation |
+|---|---|---|
+| 1 | Publish positions 0, 1, 2 | Three children start and observe their respective values. |
+| 2 | Truncate to length 1 | Children 1 and 2 stop once. Child 0 stays live. |
+| 3 | Append a value at position 1 | A fresh child starts there and observes the new value. |
+| 4 | Stop the run | Child 0 and the new child at 1 each stop once. |
+
+The same trace holds for a graph body that contains the sink and returns
+no output. Python graph bodies may declare `-> None` or omit the return
+annotation. The trace does not prescribe an ordering between siblings.
+
 ## Outside these cases
 
 A growing list of collections (a list of bundles) follows the same rules per
