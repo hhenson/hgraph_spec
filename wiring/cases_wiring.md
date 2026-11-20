@@ -289,3 +289,18 @@ bindings the runtime would.
 |---|---|
 | `ref<f64>` | `f64` |
 | `list<ref<f64>, 2>` | `list<f64, 2>` |
+
+## WIRE-SIGNED-ZERO — WIR-3
+
+Wire two calls that publish their floating scalar, and two that divide the
+same input by their floating scalar. One call in each pair takes `+0.0`
+and one takes `-0.0`. Repeat with the calls in reverse construction order,
+then with the divisor in a tuple field.
+
+| Input ticks | Configured with +0.0 | Configured with -0.0 |
+|---|---|---|
+| Constant source starts | +0.0 | -0.0 |
+| Dividend 1.0, idle, 1.0 | +∞, idle, +∞ | -∞, idle, -∞ |
+
+Both construction orders and both divisor forms give these traces.
+Ordinary floating equality still compares the two zeros equal.
