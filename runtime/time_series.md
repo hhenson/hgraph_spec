@@ -239,8 +239,9 @@ sequenceDiagram
 ```
 
 - An admitted publication of the value a time-series already holds is still
-  a tick: equal scalar values may carry a signal. REF is the exception; an
-  unchanged designation causes no additional tick or sampling (TS-16).
+  a tick. Equal scalar values may carry a signal. For REF, an explicit
+  publication can wake a REF reader while an unchanged designation leaves
+  the ordinary follower bound to the same target (TS-16).
   An operator may suppress an equal scalar result before publication; a
   conformance adapter must identify that boundary.
 - Further writes while already modified do not notify again; the final
