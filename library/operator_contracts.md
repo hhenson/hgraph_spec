@@ -151,6 +151,26 @@ This contract does not specify the separate `disjoint=True` optimization.
 [Merge cases](cases_merge.md) give the input publications and required traces.
 
 
+Associative list reduction
+--------------------------
+
+Associative reduction over a growing list uses its currently valid positions.
+With two or more positions it combines their values. With one position and a
+supplied zero it combines that value with the zero. With no live positions
+left after positional removals, it forwards the supplied zero or withdraws
+its result when zero was omitted. Positional removals retire leaves even when
+clearing the last valid child makes the list itself unmodified (TS-32).
+Repeating a removal of an already vacant position is silent. A subsequent
+write restores that position as a new operand. Restoring a checkpoint between
+these events yields the same outputs as uninterrupted execution.
+
+For addition, begin with positions 0 = 3 and 1 = 4 and zero 0. Remove both
+positions while zero publishes 5, remove position 0 again, publish zero 5
+again, then write position 0 = 8. The result publishes 7, 5, nothing, 5,
+and 13. If zero stays silent during the first removal, its retained value is 0
+and the second result is 0.
+
+
 Text
 ----
 
