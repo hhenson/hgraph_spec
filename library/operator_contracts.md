@@ -172,6 +172,21 @@ in one cycle is unspecified.
 - Removing a partition costs the keys that partition owns, never the size of
   the output.
 
+Dynamic schedules
+-----------------
+
+For a schedule with a time-series delay and optional time-series start,
+a new start publication re-anchors the schedule and restarts its tick
+budget. Clearing the start between alarms leaves the pending alarm and
+remaining budget intact. If the clear coincides with a due alarm, the
+schedule consumes that alarm once and continues at its delay.
+
+With an initial five-microsecond delay, start at offset zero and four
+permitted ticks, clearing start at offset two yields ticks at offsets
+5, 10, 15 and 20 microseconds. Clearing at the first alarm yields the
+same trace. Publishing a fresh start of two microseconds at offset two
+instead yields ticks at 7, 12, 17 and 22 microseconds.
+
 Window resets
 -------------
 
