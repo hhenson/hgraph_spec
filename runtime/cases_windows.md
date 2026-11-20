@@ -283,3 +283,25 @@ evaluation times.
 The executor services each pending logical deadline in order. A checkpoint
 first resumed after both deadlines has a different trace, as specified in
 [checkpoint resume](#window-checkpoint-resume--ts-31-ts-36-ts-38).
+
+## WINDOW-COMPLETED-STEP — TS-41
+
+A duration window of span 2 µs receives 7 at t=0. Its sample departs at
+t=3. After that step returns, the caller captures an owned delta. The two
+runs below start from this same point. Each inspection is a fresh query
+for removals at t=3.
+
+| Run | Caller action | Borrowed removals at 3 | Captured removals |
+|---|---|---|---|
+| Advance | step at 3 again | [7@0] | [7@0] |
+| Advance | try to step backwards to 2 (rejected) | [7@0] | [7@0] |
+| Advance | step at 4, with the window quiet | [] | [7@0] |
+| Release | release the completed step at 3 | [] | [7@0] |
+| Release | release again | [] | [7@0] |
+| Release | try to step at 3 again (rejected) | [] | [7@0] |
+| Release | step at 4, with the window quiet | [] | [7@0] |
+
+The window holds no samples throughout these observations. Neither
+retirement path changes its last modification time or wakes a consumer.
+Finishing a run or stopping a stepped executor preserves its last completed
+step for inspection while the owner remains alive.

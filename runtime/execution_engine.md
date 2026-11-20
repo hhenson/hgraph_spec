@@ -281,6 +281,15 @@ already scheduled logical deadline. See the
 [late real-time trace](cases_windows.md#window-late-realtime--ts-30-ts-36-ts-40).
 See [window rule TS-36](time_series.md#windows).
 
+A caller can inspect window removals after a completed step. Rejecting a
+step argument or reporting the next scheduled time leaves that inspection
+interval open. Accepting a strictly later evaluation closes it before the
+new cycle's observers run. A caller may also close it explicitly with
+`release_completed_step()`. Repeating a release is harmless. After release,
+the next evaluation must use a later time. The operation requires a completed
+evaluation and can also be used on the retained result of a successful run.
+See the [completed-step trace](cases_windows.md#window-completed-step--ts-41).
+
 A graph owned by a node is evaluated inside that node's evaluation, at the
 same evaluation time. It has no push sources, and where the engine reads the
 root graph's next scheduled time, the owning node is scheduled for its
