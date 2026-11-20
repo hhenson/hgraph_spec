@@ -533,9 +533,11 @@ Rules
   starts the child empty. Clearing one dictionary child preserves that key
   (TS-11).
   See the [invalidation and rewrite traces](cases_collections.md#collection-invalidate-and-rewrite).
-  A directly bound TSS, TSD or SIGNAL input observes its owned set or
-  dictionary as invalid and unmodified when the producer clears it.
-  An active input still schedules its node. A reference unbind retains
+  When a producer invalidates its entire owned set, dictionary, bundle or
+  window, a directly bound input of the corresponding type or SIGNAL reads
+  invalid and unmodified. An active input still schedules its node.
+  Publishing a bundle field or a window delta, including removal of samples,
+  still modifies its owner. A reference unbind retains
   the keyed removal observation in TS-15. See the
   [direct collection clear trace](cases_collections.md#direct-collection-clear).
 - **TS-8** A passive input never schedules its node. Making an input active
