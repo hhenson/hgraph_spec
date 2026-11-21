@@ -196,6 +196,14 @@ contains only its fresh contents. The neighbor retains its value throughout.
 Erasing X removes the key. A positional edit on a growing list retains its
 recorded extent, including when every position is vacant.
 
+For a retained dictionary key X containing a bundle or another dictionary,
+publish price=7 and keep=13. Withdraw price alone, leave it idle, then
+publish price=11. Independent live and replay readers see price as 7,
+invalid, invalid, 11. X stays present and valid, keep remains 13, and a
+dictionary-valued X retains its price key. A valid null, deleting a key and
+publishing no edit to a field retain their separate meanings. Reading and
+writing back the recorded change preserves the same observations.
+
 ## SAME-CYCLE-RESTORE — TS-11
 
 Publish X=7 at 0. At 1 remove X, inspect the removed child twice, then restore
