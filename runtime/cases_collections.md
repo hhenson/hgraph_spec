@@ -188,6 +188,14 @@ Earlier recordings with only value and key-removal observations retain the
 meaning of those observations. An empty edit in such a recording supplies
 no information about a child's validity.
 
+The same membership rule applies to an owned bundle, dictionary, set, fixed
+list or growing list child. Publish X and a neighboring key, clear X as a
+whole, leave it idle, then publish fresh contents at X. Live and replay retain
+X across the clear and idle step, with an invalid child. The later publication
+contains only its fresh contents. The neighbor retains its value throughout.
+Erasing X removes the key. A positional edit on a growing list retains its
+recorded extent, including when every position is vacant.
+
 ## SAME-CYCLE-RESTORE — TS-11
 
 Publish X=7 at 0. At 1 remove X, inspect the removed child twice, then restore
