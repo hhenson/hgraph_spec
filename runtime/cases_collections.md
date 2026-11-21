@@ -169,6 +169,25 @@ that child later neither adds nor removes the key. Removing the key does.
 Replay needs both membership changes and published-value deltas (TS-5).
 This case extends beyond QUOTE-HISTORY.
 
+An independent clock reads an owned dictionary of scalar integers, then
+reads its in-memory replay at the same times. Both readers see these rows.
+
+| Step | Producer action | X present | Child value | Membership change |
+|---|---|---|---|---|
+| 0 | Create X without supplying a value | yes | invalid | add X |
+| 1 | Publish 1 at X | yes | 1 | none |
+| 2 | Invalidate X's child | yes | invalid | none |
+| 3 | Idle | yes | invalid | none |
+| 4 | Publish 4 at X | yes | 4 | none |
+| 5 | Remove X | no | absent | remove X |
+| 6 | Idle | no | absent | none |
+
+Removing a key whose child has never held a value also reports its removal.
+For a nullable scalar child, publishing a null value leaves the child valid.
+Earlier recordings with only value and key-removal observations retain the
+meaning of those observations. An empty edit in such a recording supplies
+no information about a child's validity.
+
 ## SAME-CYCLE-RESTORE — TS-11
 
 Publish X=7 at 0. At 1 remove X, inspect the removed child twice, then restore
