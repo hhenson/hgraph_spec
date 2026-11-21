@@ -232,8 +232,8 @@ removals records the removed amount, leaving the retained price valid and
 empty until 11. A new reader accepts historical files and previous readers
 accept new files written with validity tracking off. With tracking enabled,
 a per-level validity column identifies an owner operation without a descendant
-key. Its false value withdraws that owner while retaining the key; a true
-key removal still erases the key. A reader of this profile must support it.
+key. Its false value withdraws that owner while retaining the key. A
+recorded key removal still erases the key. A reader of this profile must support it.
 Existing file-backed recording of leaf-field withdrawals is unchanged.
 
 ## SAME-CYCLE-RESTORE — TS-11
