@@ -30,7 +30,7 @@ A value-producing node publishes the origin stored in its configured error.
 Supply three independent errors with the same code and message. Two
 carry the same diagnostic context for node A, and the third carries a
 context for node B. The readers observe A, A and B. Wiring B first gives
-B, A and A. Equivalent configurations share one evaluation. Changing
+B, A and A. A provider that shares the equivalent A calls evaluates them once. Changing
 the code, message, presence of a code, or any provenance field preserves
 that configuration for its own reader.
 
