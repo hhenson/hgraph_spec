@@ -268,6 +268,19 @@ producer withdraws `q`'s value, the sampled result still holds 7 until
 the next signal. That signal leaves `q` present but invalid and `z` at 42.
 If the source then removes `q`, the next sample removes it too.
 
+Sampling a partially valid structure (agreed)
+---------------------------------------------
+
+On a signal tick, sampling a valid bundle or list copies the validity and
+current value of each field or position. This also applies to a bundle
+or list inside a dictionary. Between signals the sampled output holds
+its previous state.
+
+For example, a bundle holds bid 7 and ask 42. A source patch changing
+only ask to 43 leaves bid at 7. If bid is then explicitly withdrawn, the
+next sample has an invalid bid and ask 43. A later bid of 11 is visible
+at the next signal.
+
 Dynamic schedules
 -----------------
 
