@@ -204,6 +204,12 @@ dictionary-valued X retains its price key. A valid null, deleting a key and
 publishing no edit to a field retain their separate meanings. Reading and
 writing back the recorded change preserves the same observations.
 
+Repeat the price/keep case by recording to a partitioned table in a file,
+closing the writer, and replaying in a fresh run. Both field shapes retain
+the withdrawal. A row from an earlier recording that carries no explicit
+withdrawal keeps its earlier meaning. For example, two null cells alone
+cannot distinguish a withdrawn price from a withdrawn keep.
+
 ## SAME-CYCLE-RESTORE — TS-11
 
 Publish X=7 at 0. At 1 remove X, inspect the removed child twice, then restore
