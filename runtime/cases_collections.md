@@ -212,7 +212,8 @@ cannot distinguish a withdrawn price from a withdrawn keep.
 
 For three dictionary levels, publish X.price.amount=7 and X.keep.amount=13,
 withdraw the dictionary X.price itself, then publish X.price.amount=11.
-A fresh reader of the recording still finds the price key during withdrawal.
+With intermediate dictionary validity tracking enabled, a fresh reader of
+the recording still finds the price key during withdrawal.
 Its dictionary becomes invalid, the sibling stays 13, and the next price
 dictionary contains amount 11. Repeat with a valid empty price dictionary
 at the first step. It is observable as valid and empty before withdrawal.
@@ -223,6 +224,17 @@ give 7, invalid, invalid, 11. Its events are (t0, 7), (t1, invalid), (t3, 11).
 An idle cycle, another clear of the invalid price, or a change only to keep
 adds no price event. After recovery a fresh withdrawal contributes one new
 invalid event at its own graph time.
+
+Intermediate dictionary validity tracking defaults off. Omission and explicit
+off preserve the previous table schema and the independent removal policy.
+In Tick mode, omitting removals holds the previous 7 until 11. Tracking
+removals records the removed amount, leaving the retained price valid and
+empty until 11. A new reader accepts historical files and previous readers
+accept new files written with validity tracking off. With tracking enabled,
+a per-level validity column identifies an owner operation without a descendant
+key. Its false value withdraws that owner while retaining the key; a true
+key removal still erases the key. A reader of this profile must support it.
+Existing file-backed recording of leaf-field withdrawals is unchanged.
 
 ## SAME-CYCLE-RESTORE — TS-11
 
