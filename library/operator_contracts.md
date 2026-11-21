@@ -351,6 +351,21 @@ clocked on each of these events sees 7, invalid, 9, invalid. An idle cycle
 between the selection and B's first publication still reads invalid.
 
 
+Mapped child output validity (agreed)
+-------------------------------------
+
+An active `map_` or `mesh_` child can withdraw its output. The dictionary
+key or list position remains present and its value becomes invalid. A later
+publication by that child makes its value valid again. Other children retain
+their own values.
+
+For a dictionary with `q = 7` and `z = 42`, withdrawing the output at `q`,
+waiting one cycle and then publishing 11 at `q` gives an independently
+clocked reader `7, invalid, invalid, 11` at `q`. Removing `q` from the
+input dictionary removes the output key. The reader sees 42 at `z`
+throughout.
+
+
 Rules
 -----
 
