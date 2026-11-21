@@ -443,6 +443,7 @@ graph runs is held to it too.
 | any type X | X |
 | SIGNAL | any type |
 | `TS<Optional<T>>` | `TS<T>` or `REF<TS<T>>`; exact payload type, read-only widening |
+| `REF<TS<Optional<T>>>` | `TS<T>`; designates its read-only nullable view |
 | REF of X | X, or REF of X |
 | X | REF of X: the input follows the reference |
 | a bundle | a bundle with the same fields, each field admitting the other's; names pair fields, order does not matter; when both bundles are named the names must be equal, and an unnamed bundle matches a named one by its fields |
@@ -454,7 +455,8 @@ graph runs is held to it too.
 The rule applies at every depth: a bundle field that is a reference stays a
 reference, and a field that is a bundle is matched by the bundle row.
 Nullable widening is an exception to recursive admission: it applies only
-to an individual TS endpoint. The reverse, `TS<Optional<T>>` to `TS<T>`, is
+to an individual TS endpoint, including a reference designating that view.
+An existing `REF<TS<T>>` cannot be retyped as `REF<TS<Optional<T>>>`. The reverse, `TS<Optional<T>>` to `TS<T>`, is
 rejected. Exact overload matches take precedence over nullable widening.
 
 Nothing else is admitted; in particular no scalar conversion happens at a
