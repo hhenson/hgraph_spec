@@ -218,6 +218,12 @@ dictionary contains amount 11. Repeat with a valid empty price dictionary
 at the first step. It is observable as valid and empty before withdrawal.
 Neither change introduces a descendant key.
 
+When the recording preserves validity, independent reads of price at t0..t3
+give 7, invalid, invalid, 11. Its events are (t0, 7), (t1, invalid), (t3, 11).
+An idle cycle, another clear of the invalid price, or a change only to keep
+adds no price event. After recovery a fresh withdrawal contributes one new
+invalid event at its own graph time.
+
 ## SAME-CYCLE-RESTORE — TS-11
 
 Publish X=7 at 0. At 1 remove X, inspect the removed child twice, then restore
