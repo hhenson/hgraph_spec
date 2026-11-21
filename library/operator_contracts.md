@@ -281,6 +281,23 @@ only ask to 43 leaves bid at 7. If bid is then explicitly withdrawn, the
 next sample has an invalid bid and ask 43. A later bid of 11 is visible
 at the next signal.
 
+Forwarding live structural changes (agreed)
+-------------------------------------------
+
+After its skipped prefix, count-based `drop` forwards changes to each
+published field or position. The same rule applies while `take` accepts
+source ticks, while `filter_` stays open, and before `freeze` captures its
+final value. An explicit child withdrawal reaches the reader. A sparse
+patch naming only another child leaves the first child's state alone.
+In a dictionary, withdrawing a child's value leaves its key present;
+removing the key changes membership (TS-19).
+
+For example, start with bid 7 and ask 42, withdraw bid, publish ask 43,
+then publish bid 11. A reader after `drop(quote, 0)` sees `(7, 42)`,
+`(invalid, 42)`, `(invalid, 43)`, then `(11, 43)`. A later idle cycle
+holds the last quote without a tick. The skipped prefix, take limit, and
+filter or freeze condition continue to determine when changes may pass.
+
 Dynamic schedules
 -----------------
 
