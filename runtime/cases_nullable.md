@@ -46,6 +46,14 @@ A nullable producer cannot bind to a plain input. Widening cannot change the
 payload type. Reference retargeting to a valid plain source samples its current
 value, and subsequent source ticks remain visible.
 
+A `REF<TS<Optional<T>>>` input bound to a plain `TS<T>` output designates
+the same read-only nullable view. Save the designation of A, then select B.
+A reader of the selection follows B. A reader of the saved designation
+continues to follow A across writes, withdrawal and recovery. Withdrawal
+of A invalidates its value while the designation remains present. Repeated
+writes to A never change the designation. A nullable output publishing
+null remains a valid null through an exact nullable reference.
+
 ## NULLABLE-RETENTION
 
 Wire `commands -> produce -> record`. Let command position `i` occur at
