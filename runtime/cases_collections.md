@@ -210,6 +210,14 @@ the withdrawal. A row from an earlier recording that carries no explicit
 withdrawal keeps its earlier meaning. For example, two null cells alone
 cannot distinguish a withdrawn price from a withdrawn keep.
 
+For three dictionary levels, publish X.price.amount=7 and X.keep.amount=13,
+withdraw the dictionary X.price itself, then publish X.price.amount=11.
+A fresh reader of the recording still finds the price key during withdrawal.
+Its dictionary becomes invalid, the sibling stays 13, and the next price
+dictionary contains amount 11. Repeat with a valid empty price dictionary
+at the first step. It is observable as valid and empty before withdrawal.
+Neither change introduces a descendant key.
+
 ## SAME-CYCLE-RESTORE — TS-11
 
 Publish X=7 at 0. At 1 remove X, inspect the removed child twice, then restore
