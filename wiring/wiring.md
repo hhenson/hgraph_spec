@@ -193,7 +193,11 @@ flowchart TD
   Sharing a node must preserve the values each call would publish.
   An edge is admitted only when the runtime's
   binding rule admits its two types (TS-29), and a feedback edge never
-  carries a reference (TS-28).
+  carries a reference (TS-28). A node configured with a canonical error
+  can read its code, message and diagnostic context. Calls may share that
+  node when all three agree. Distinct contexts remain observable in their
+  respective calls, including inside a structured argument. Canonical
+  error value equality still compares code and message.
 - **WIR-4** A call that cannot be wired fails at that call. It is not
   repaired: wiring never substitutes another candidate, drops an argument
   or skips the call. The exception propagates out of wiring and no graph
