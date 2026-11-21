@@ -188,7 +188,10 @@ flowchart TD
 - **WIR-3** A call binds each argument to a parameter of the callee's
   signature. A port argument becomes an edge to the callee's input, or a
   projection of a port (WIR-5); a scalar argument becomes part of the
-  callee's configuration. An edge is admitted only when the runtime's
+  callee's configuration. Each call preserves the supplied scalar value,
+  including the sign of a floating zero inside a scalar or one of its members.
+  Sharing a node must preserve the values each call would publish.
+  An edge is admitted only when the runtime's
   binding rule admits its two types (TS-29), and a feedback edge never
   carries a reference (TS-28). A node configured with a canonical error
   can read its code, message and diagnostic context. Calls may share that
