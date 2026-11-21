@@ -255,6 +255,19 @@ with `select` held true. If the producer invalidates `source`, both
 `sample(chosen, price)` and `sample(last_modified_time(chosen), price)`
 stay silent. Both sample the current price when the source next ticks.
 
+Sampling a dictionary (agreed)
+------------------------------
+
+On a signal tick, `sample(signal, book)` takes the current dictionary keys
+and child values. A present key with an invalid child remains present with
+an invalid child (TS-19). A valid nullable child containing Null stays valid.
+Changes to the source between signal ticks leave the sampled result as it was.
+
+For example, sample a dictionary where `q` is 7 and `z` is 42. If the
+producer withdraws `q`'s value, the sampled result still holds 7 until
+the next signal. That signal leaves `q` present but invalid and `z` at 42.
+If the source then removes `q`, the next sample removes it too.
+
 Dynamic schedules
 -----------------
 
