@@ -297,7 +297,10 @@ pending requests it can inspect.
   evaluation time, with an optional **tag**.
 - Any number of requests may be pending. A request made with a tag replaces
   the pending request with the same tag.
-- A request can be cancelled: by tag, or the earliest, or all.
+- A request can be cancelled by tag, or the earliest pending request can be
+  cancelled, or all pending requests can be cancelled. During evaluation,
+  only times strictly after the evaluation time are pending. A wake delivered
+  now remains a reason for this evaluation, including alongside an input tick.
 - Once the node has started, a request must be for the future. During start,
   a request for the start time is allowed — this is how a source gets going.
 - Only the **earliest** pending request is written into the graph's schedule.
@@ -309,6 +312,12 @@ pending requests it can inspect.
 - In real time a request may be for a **wall-clock** time instead of an
   evaluation time. It becomes an ordinary request when the wall clock reaches
   it. In simulation a wall-clock request is refused.
+
+With wakes at +1, +3 and +5, each evaluation reports that its scheduler is
+due. The next times it reports are +3, +5 and absent. If the +1 evaluation
+cancels the earliest pending request, the next scheduler wake is +5. An
+independent input at +3 can still evaluate the node with its scheduler
+due flag false.
 
 ### Structural inputs
 
@@ -428,8 +437,10 @@ Rules
 - **NOD-10** Start does not overwrite recordable state that is already valid.
 - **NOD-11** A node whose start fails is not stopped. Every node whose start
   succeeded is stopped exactly once.
-- **NOD-12** After a node is evaluated, or scheduled but not admitted, no
-  scheduler request at or before the evaluation time remains.
+- **NOD-12** During evaluation a scheduler wake due now is observable as the
+  cause of delivery. Pending requests, the next time and cancellation of the
+  earliest request concern only future times. After a node is evaluated, or
+  scheduled but not admitted, no request at or before that time remains.
 - **NOD-13** A tagged request replaces the pending request with that tag.
 - **NOD-14** Once a node has started, its scheduler accepts only future
   times. During start it also accepts the start time.
