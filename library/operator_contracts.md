@@ -337,6 +337,20 @@ No specialized storage capability supplies it.
 
 
 
+Switch output validity (agreed)
+------------------------------
+
+After a key selects a branch, a reader of `switch_` observes that branch's
+output. If the output has never published or the branch invalidates it, the
+reader sees an invalid value. Its next publication makes the output valid.
+A newly selected branch can publish immediately using its sampled inputs.
+
+For example, branch A publishes 7 and the key then selects branch B. If B
+has no output at selection, publishes 9 later, then invalidates it, a reader
+clocked on each of these events sees 7, invalid, 9, invalid. An idle cycle
+between the selection and B's first publication still reads invalid.
+
+
 Rules
 -----
 
