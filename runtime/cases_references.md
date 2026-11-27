@@ -50,6 +50,26 @@ At 3 the withdrawal delta remains readable despite invalidity. The input has
 no current children; removed children remain inspectable for that cycle.
 Do not gate a withdrawal delta on `valid`.
 
+## REF-DICTIONARY-RETARGET — TS-14 and TS-17
+
+A selector designates a dictionary. A nested consumer follows the current
+children at keys 0 and 1. Both dictionaries publish at cycle 0. A holds
+`{0:1, 1:2}` and B holds `{0:10, 1:20, 2:30}`.
+
+| Cycle | Select | Producer changes after initialization | Current dictionary delta | Consumer deltas at keys 0, 1 |
+|---|---|---|---|---|
+| 0 | A | — | 0:1, 1:2 | 1, 2 |
+| 1 | B | — | 0:10, 1:20, 2:30 | 10, 20 |
+| 2 | A | — | 0:1, 1:2, 2:R | 1, 2 |
+| 3 | — | B removes 2 | — | — |
+| 4 | A | — | — | — |
+| 5 | B | — | 0:10, 1:20 | 10, 20 |
+| 6 | — | B writes 1:21 | 1:21 | —, 21 |
+| 7 | — | A writes 1:3 | — | — |
+
+R denotes removal. At cycle 5 the selected dictionary has the same key set
+as the previous one. Its current children are sampled in that cycle.
+
 ## REF-EXPIRES — TS-11 and TS-23
 
 Publish X=7 at 0. Save a reference to X's child in a separate node. Remove X at

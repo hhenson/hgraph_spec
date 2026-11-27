@@ -598,6 +598,9 @@ Rules
   input's REF producer alone leaves the copy unchanged.
 - **TS-17** An input follows changes of its REF. Changed valid targets are
   sampled; unchanged fixed child bindings are preserved (TS-25).
+  A new dictionary target is sampled even if it has the same keys as the
+  previous target. Consumers bound to its current children see the samples
+  in the selection cycle. See the [dictionary retarget trace](cases_references.md#ref-dictionary-retarget--ts-14-and-ts-17).
   An empty or invalidated REF unbinds it. When a scalar follower loses
   a valid value, an active follower schedules its node once. This also applies when the new
   designation is a live output that has never published. The follower reads
