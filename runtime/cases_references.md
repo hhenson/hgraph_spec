@@ -146,7 +146,7 @@ the same scalar-reader trace.
 
 A passive reader sees the same state if another input wakes its node.
 Every non-keyed reader gives the same trace: a window, a fixed or growing
-list, or a bundle, whatever its children are. At cycle 1 each wakes
+list, a bundle or a SIGNAL, whatever its children are. At cycle 1 each wakes
 once and reads invalid and unmodified, with nil value and no delta: no removed
 samples or positions and no empty replacement. Cycles 2 and 3 are silent.
 At cycle 4 each samples its target (TS-14). A set or dictionary reader

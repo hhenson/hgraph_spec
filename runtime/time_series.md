@@ -351,8 +351,8 @@ all valid.
 |---|---|---|
 | **bind** | The output's state, as it is, including the output's own last modified time. If the output ticked two cycles ago the input reads valid and not modified | None |
 | **bind, sampled** | A valid target reads modified with its sampled delta; an invalid target reads unmodified, time *never*, and nil delta, except that a set or dictionary input moved off a valid target reports its removals (TS-15, TS-17) | A changed binding notifies; an active input schedules its node |
-| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). Every other follower, whether a scalar, a window, a fixed or growing list or a bundle, that loses a valid value through its REF wakes its node and reads unmodified with no delta, whatever its children are (TS-17). Other unbinds are silent |
-| **rebind** | An unbind and a bind in one step. A TSS or TSD input that ends the cycle showing a different output from the one it showed before the cycle ticks once with the difference: keys shown before and not after removed, keys shown after and not before added, and the valid children of the output it shows after read as modified. An output it did not show before the cycle contributes no removals. Ending the cycle on the output it showed before it is not a move, and a cycle from no value to no value reports nothing (TS-15) | As sampled bind, when the output shown differs |
+| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). Every other follower, whether a scalar, a window, a fixed or growing list, a bundle or a SIGNAL, that loses a valid value through its REF or through a forwarding endpoint that stops forwarding wakes its node and reads unmodified with no delta, whatever its children are (TS-17). Other unbinds are silent |
+| **rebind** | An unbind and a bind in one step. A TSS or TSD input that ends the cycle showing a different output from the one it showed before the cycle ticks once with the difference: keys shown before and not after removed, keys shown after and not before added, and the valid children of the output it shows after read as modified. An output it did not show before the cycle contributes no removals. Ending the cycle on the output it showed before it is not a move, and a cycle from no value to no value reports nothing (TS-15) | As sampled bind, when the output shown differs and the input showed a value before the cycle or shows one after it. Otherwise none |
 
 A sampled valid input reports the sampling time; its producer keeps its own
 time. A sampled scalar's delta is its value; a collection reports its valid
@@ -392,16 +392,24 @@ An input is bound to an output, never to another input. The output may be a
 **forwarding endpoint**: an output that holds no value of its own and shows
 another output. That other output may be one a REF designates, one the
 endpoint forwards directly, or one another forwarding endpoint shows, at any
-depth. A switch's output forwarding its active branch, a reduce's output
-forwarding a combiner's, and a nested graph's output forwarding its final
-node's or what one of the graph's inputs follows are forwarding endpoints. A
+depth. For example, a switch's output forwarding its active branch, a
+reduce's output forwarding a combiner's, and a nested graph's output
+forwarding its final node's or what one of the graph's inputs follows are
+forwarding endpoints. A
 chain of them need not have a REF anywhere in it.
 
-Following the chain from an input to its end gives the one output the input
-**shows**. An input bound to an owned output shows that output. An input
-shows no value when it is unbound, when the chain ends at an empty or
-invalidated REF, or when the output it shows is invalid or has never
-published. Every rule about binding is a rule about the output shown. A
+Following the chain from an input to its end gives at most one owned
+output, the output the input **shows**. An input bound to an owned output
+shows that output. The chain may end without reaching one. An input **shows
+no value** when:
+
+- it is unbound;
+- the chain ends at a forwarding endpoint that currently forwards nothing,
+  such as a switch with no active branch;
+- the chain ends at a REF that is empty, invalidated, never published or
+  expired (TS-23); or
+- the output it shows is invalid or has never published.
+ Every rule about binding is a rule about the output shown. A
 designation change, a forwarding endpoint changing what it forwards and a
 rebind of the input itself are the same event to the follower when they
 change the output it shows. One intermediate forwarding endpoint rebinding,
@@ -418,8 +426,6 @@ chain, does not matter.
 - **Same output.** Ending the cycle on the output it showed before it is not
   a move. The follower is not sampled and reports no binding delta. If that
   output ticks in the cycle the follower observes the tick as usual (TS-16).
-  An explicit sampled bind to the output already shown is a request and
-  still samples.
 - **No value to no value.** A follower that showed no value before the cycle
   and shows none after it reports nothing, whatever it showed within the
   cycle (TS-14, TS-17).
@@ -434,7 +440,7 @@ chain, does not matter.
 
 An earlier move in the cycle may already have scheduled the follower's node.
 In the first two cases that node may still be evaluated, and it reads the
-input unmodified.
+input unmodified unless, in the first case, that output itself ticked.
 
 Sampling is how an input brought into a running graph — a new branch of a
 switch, a new key of a map — sees values that were set before it existed.
@@ -653,7 +659,8 @@ Rules
   Sampling changes input observations, never producer timestamps.
 - **TS-15** Explicitly unbinding a scalar or fixed-shape input is silent. A set or
   dictionary input reports what it was showing as removed. TS-17 governs
-  withdrawal by a REF producer.
+  withdrawal by a REF producer or by a forwarding endpoint that stops
+  forwarding.
   What a set or dictionary input was showing is what it showed before the
   cycle. Its removals are the keys it showed before the cycle and does not
   show after it. Its additions are the keys it did not show before the cycle
@@ -682,7 +689,7 @@ Rules
   that is invalid or has never published binds it to that output. In both
   cases a follower that was showing a valid value loses it, and an active
   follower schedules its node once. Every non-keyed follower, whether a
-  scalar, a window, a fixed or growing list or a bundle, then reads invalid
+  scalar, a window, a fixed or growing list, a bundle or a SIGNAL, then reads invalid
   and unmodified, with no delta and last modified time *never*, whatever
   its children are. A set or dictionary held as a child of a fixed list or
   bundle follower goes invalid with it and reports no removals.
@@ -699,15 +706,19 @@ Rules
   this rule applies to the output the input shows at the end of that chain,
   wherever along the chain the change is made and whether or not the chain
   holds a REF. A forwarding endpoint changing what it forwards moves its
-  followers as a changed designation does.
+  followers as a changed designation does, and one that stops forwarding
+  withdraws them as an empty REF does.
   A follower compares the output it showed before the cycle with the output
-  it shows after it. If they differ it reports once, however many changes
-  the cycle holds (TS-15). If they are the same output it has not moved: it
+  it shows after it. If they are the same output it has not moved: it
   is not sampled and reports nothing from binding, and still observes that
-  output's own tick (TS-16). If it showed no value before the cycle and
-  shows none after it, it reports nothing. In those two cases a node already
+  output's own tick (TS-16). This includes an explicit sampled bind or
+  rebind that leaves it on that output. If it showed no value before the
+  cycle and shows none after it, it reports nothing and is not notified,
+  even when it ends on a different invalid or unpublished output. In every
+  other case it reports once, however many changes the cycle holds (TS-15).
+  In the first two cases a node already
   scheduled by an earlier move may be evaluated and reads the input
-  unmodified. See the
+  unmodified unless, in the first case, that output itself ticked. See the
   [chained follower trace](cases_references.md#ref-chained--ts-15-ts-16-and-ts-17).
 - **TS-18** A SIGNAL input is modified exactly when the output it is bound to
   is. Offered a REF output, it is bound to the designated output, never to
