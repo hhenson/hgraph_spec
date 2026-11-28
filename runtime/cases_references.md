@@ -12,25 +12,22 @@ A and B are scalar outputs. A selector publishes a reference to A, B or empty.
 A REF input observes designation; a scalar input follows it, and so does a
 SIGNAL input (TS-18). All three start invalid.
 
-| t | A publishes | B publishes | Select | Followed value | Data modified | SIGNAL modified | REF modified |
-|---|---|---|---|---|---|---|---|
-| 0 | 7 | 20 | empty | nil | false | false | true |
-| 1 | — | — | A | 7 | true | false | true |
-| 2 | 8 | — | — | 8 | true | true | false |
-| 3 | — | 21 | B | 21 | true | true | true |
-| 4 | — | — | — | 21 | false | false | false |
-| 5 | — | — | empty | nil | false | false | true |
-| 6 | 9 | — | A | 9 | true | true | true |
-| 7 | — | — | — | 9 | false | false | false |
+| t | A publishes | B publishes | Select | Followed value | Data modified | REF modified |
+|---|---|---|---|---|---|---|
+| 0 | 7 | 20 | empty | nil | false | true |
+| 1 | — | — | A | 7 | true | true |
+| 2 | 8 | — | — | 8 | true | false |
+| 3 | — | 21 | B | 21 | true | true |
+| 4 | — | — | — | 21 | false | false |
+| 5 | — | — | empty | nil | false | true |
+| 6 | 9 | — | A | 9 | true | true |
+| 7 | — | — | — | 9 | false | false |
 
 The SIGNAL is bound to the selector's alternative output and never moves
-(TS-18). Its column is that output's modification: it is modified exactly
-when the selected output is. At 1 the alternative output comes to show A,
-which is idle: the SIGNAL is valid and unmodified and is not woken, where
-the scalar input samples. At 3 and 6 the selected output ticks in the cycle
-it is selected. An active SIGNAL wakes at 2, 3 and 6 (TS-6). At 5 the
-alternative output is invalidated: an active SIGNAL wakes once and reads
-invalid and unmodified (TS-7).
+(TS-18). It is modified exactly when that output is, so "Data modified" is
+its column too: at 1 the alternative output samples A and the SIGNAL is
+modified. At 5 the alternative output is invalidated: an active SIGNAL
+wakes once and reads invalid and unmodified (TS-7).
 
 At 1 the scalar input samples A: its delta is 7 and its observed last time is 1;
 A's own last time remains 0. At 5 the scalar input is invalid, unmodified,
@@ -166,22 +163,10 @@ or dictionary that is itself the reader does this. A bundle reader whose
 field `d` followed `{1:10}` and whose field `x` followed a scalar reads
 invalid and unmodified at cycle 1, with no delta: `d` reports no removal.
 
-A SIGNAL reader in place of the scalar reader:
-
-| Cycle | Selector | A publishes | Valid / modified |
-|---|---|---|---|
-| 0 | A | 7 | true / true |
-| 1 | Withdraw | — | false / false |
-| 2 | Repeat withdrawal | — | false / false |
-| 3 | — | 8 | false / false |
-| 4 | A | — | true / false |
-
-The SIGNAL is bound to the selector's alternative output throughout
-(TS-18); the rows are that output's validity and modification. At cycle 0
-it shows A, which ticks (TS-6). At cycle 1 it is invalidated: an active
-SIGNAL wakes once and reads invalid and unmodified (TS-7). At cycle 4 it
-comes to show A, which is idle, so the SIGNAL is valid, not modified and
-not woken. The same rows hold when A is a set or dictionary.
+A SIGNAL reader is bound to the selector's alternative output (TS-18) and
+gives the scalar reader's trace, whatever the kind of A: modified at cycle
+0, invalid and unmodified at cycle 1 with one wake (TS-7), and modified at
+cycle 4, when the alternative output samples A.
 
 The three selector actions remain distinguishable on the REF itself. An empty
 reference and a reference to B are valid designations. Invalidating the REF

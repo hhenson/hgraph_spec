@@ -400,13 +400,15 @@ forwarding its final node's or what one of the graph's inputs follows are
 forwarding endpoints. A
 chain of them need not have a REF anywhere in it.
 
-Read as an output, a forwarding endpoint is valid exactly when it shows a
-value, and modified exactly when the output it shows is modified. Coming to
-show a different output is not a modification of the endpoint: the sample
-on a move is each follower's own observation (TS-14). Ceasing to show a
-value invalidates the endpoint, which notifies and is not a tick (TS-7).
 The forwarding endpoint that dereferences a REF for an input not declared
-REF is that REF's **alternative output**.
+REF is that REF's **alternative output**. Read as an output, it reads what
+an input of its type following the REF reads. It is valid exactly when it
+shows a value. It is modified when the output it shows is modified, and
+when a re-pointing brings it to a different valid output, which it samples
+(TS-14, TS-17). When it stops showing a value it is invalidated, which
+notifies and is not a tick (TS-7): it reads invalid and unmodified. Keyed
+removals are an observation of a set or dictionary input (TS-15), not of
+the alternative output.
 
 Following the chain from an input to its end gives at most one owned
 output, the output the input **shows**. An input bound to an owned output
@@ -507,30 +509,14 @@ reading. It is how a node says "wake me when that changes; I do not care what
 it is".
 
 A SIGNAL never binds to a reference and never sees one. Offered a REF
-output, it is bound to that REF's alternative output (see Binding), once,
-for its whole lifetime. A SIGNAL never moves and never re-binds: all
-re-pointing happens inside the alternative output, and the SIGNAL is an
-ordinary directly bound input of it. So a SIGNAL does not follow, and the
-following rules of TS-17 do not apply to it.
-
-A SIGNAL is modified exactly when the alternative output is modified and
-valid exactly when it is valid (TS-18). What it observes on a re-pointing, a
-withdrawal or a producer invalidation is what the alternative output does:
-
-- When the designated output ticks, the alternative output is modified. The
-  SIGNAL is modified and an active SIGNAL wakes (TS-6). That includes a tick
-  in the cycle that re-points the REF to that output.
-- Re-pointed to a valid output that is idle, the alternative output becomes
-  valid and is not modified. The SIGNAL reads valid and unmodified and is
-  not woken.
-- When the REF is withdrawn, by an empty or invalidated REF or a move to an
-  output that is invalid or has never published, or when the designated
-  output is invalidated by its producer, the alternative output is
-  invalidated. The SIGNAL reads invalid and unmodified, with no delta, and
-  an active SIGNAL schedules its node once (TS-7). That holds whatever the
-  kind of the designated output, a set or dictionary included: keyed
-  removals are an observation of a set or dictionary input (TS-15), not of
-  the alternative output.
+output, a SIGNAL is bound for its lifetime to the alternative output that
+dereferences the reference (see Binding); it never moves. It is modified
+exactly when that output is (TS-18): when the designated output ticks, and
+when a re-point samples a valid target. When the designation is withdrawn
+the alternative output is invalidated: the SIGNAL reads invalid and
+unmodified, and an active SIGNAL wakes once (TS-7). A SIGNAL has no other
+special case: it does not follow (TS-17); it observes its alternative
+output.
 
 A generic time-series input offered a REF output is dereferenced too, and
 then follows the ordinary rules for the type it resolves to, sampling and
@@ -766,15 +752,14 @@ Rules
 - **TS-18** A SIGNAL input is modified exactly when the output it is bound to
   is, and valid exactly when that output is. Offered a REF output, it is
   bound once, for its lifetime, to the REF's alternative output, never to
-  the reference. It never re-binds, so it does not follow and TS-17 does not
-  apply to it. What it observes on a re-pointing, a withdrawal or a producer
-  invalidation is what the alternative output does (see Binding). The
-  alternative output is modified exactly when the output it shows is
-  modified, so a designation change alone does not modify the SIGNAL or
-  wake it. When the alternative output stops showing a value it is
-  invalidated: the SIGNAL reads invalid and unmodified, with no delta,
-  whatever kind of output was designated, and an active SIGNAL schedules
-  its node once (TS-7).
+  the reference. It never moves, so it does not follow and TS-17 does not
+  apply to it. It is modified exactly when the alternative output is
+  modified (see Binding): when the designated output ticks, and when a
+  re-pointing to a valid target samples it, as an input of the designated
+  type would be. When the designation is withdrawn the alternative output
+  becomes invalid, as under TS-7: the SIGNAL reads invalid and unmodified,
+  with no delta, whatever kind of output was designated, and an active
+  SIGNAL schedules its node once.
 - **TS-19** A dictionary key is *added* when it joins the dictionary, whether
   or not its child is valid, and *removed* when it leaves. A child becoming
   valid or invalid neither adds nor removes its key.
