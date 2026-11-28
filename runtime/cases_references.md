@@ -9,8 +9,8 @@ makes the observer run even when the data input is passive or invalid.
 ## REF-SAMPLE — TS-1, TS-14, TS-16, TS-17 and TS-18
 
 A and B are scalar outputs. A selector publishes a reference to A, B or empty.
-A REF input observes designation; a scalar input follows it, and so does a
-SIGNAL input (TS-18). All three start invalid.
+A REF input observes designation; a scalar input follows it, and a SIGNAL
+input observes the selector's alternative output (TS-18). All three start invalid.
 
 | t | A publishes | B publishes | Select | Followed value | Data modified | REF modified |
 |---|---|---|---|---|---|---|

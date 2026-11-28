@@ -401,14 +401,7 @@ forwarding endpoints. A
 chain of them need not have a REF anywhere in it.
 
 The forwarding endpoint that dereferences a REF for an input not declared
-REF is that REF's **alternative output**. Read as an output, it reads what
-an input of its type following the REF reads. It is valid exactly when it
-shows a value. It is modified when the output it shows is modified, and
-when a re-pointing brings it to a different valid output, which it samples
-(TS-14, TS-17). When it stops showing a value it is invalidated, which
-notifies and is not a tick (TS-7): it reads invalid and unmodified. Keyed
-removals are an observation of a set or dictionary input (TS-15), not of
-the alternative output.
+REF is that REF's **alternative output**.
 
 Following the chain from an input to its end gives at most one owned
 output, the output the input **shows**. An input bound to an owned output
@@ -457,6 +450,28 @@ follower's node.
 In the first two cases that node may still be evaluated, and it reads the
 input unmodified unless, in the first case, that output itself ticked.
 
+A forwarding endpoint read as an output follows the same cycle-boundary
+rule. This is what an input bound to it without following, a SIGNAL, reads
+(TS-18). The endpoint shows the owned output at the end of its own chain,
+or no value, as defined above.
+
+- It is valid exactly when it shows a value.
+- It is modified when the output it shows is modified, or when it ends a
+  cycle on a valid output it did not show before the cycle, which it samples
+  (TS-14). Ending the cycle on the output it showed before it is not a move
+  and is not a sample.
+- When it showed a value before the cycle and shows none after it, it is
+  invalidated: it reads invalid and unmodified and notifies once, and that
+  is not a tick (TS-7).
+- From no value to no value it does nothing.
+
+Keyed removals belong to a set or dictionary input (TS-15), not to the
+endpoint: a forwarding endpoint of a set or dictionary that is invalidated
+reads unmodified. This contract holds for every forwarding endpoint, a
+switch's, a reduce's or a nested graph's output among them, when it moves,
+makes a round trip or stops forwarding. A REF's alternative output is the
+dereferencing case.
+
 Sampling is how an input brought into a running graph — a new branch of a
 switch, a new key of a map — sees values that were set before it existed.
 
@@ -504,7 +519,8 @@ reference.
 ### SIGNAL
 
 A SIGNAL input may be bound to an output of any kind. It shows only that the
-output ticked: it reads modified when the output does, and has no value worth
+output changed: it reads modified exactly when the output it is bound to is
+modified, or when a sampled bind samples it (TS-14), and has no value worth
 reading. It is how a node says "wake me when that changes; I do not care what
 it is".
 
@@ -514,9 +530,10 @@ dereferences the reference (see Binding); it never moves. It is modified
 exactly when that output is (TS-18): when the designated output ticks, and
 when a re-point samples a valid target. When the designation is withdrawn
 the alternative output is invalidated: the SIGNAL reads invalid and
-unmodified, and an active SIGNAL wakes once (TS-7). A SIGNAL has no other
-special case: it does not follow (TS-17); it observes its alternative
-output.
+unmodified, and an active SIGNAL wakes once (TS-7). A SIGNAL bound to any
+other forwarding endpoint observes that endpoint in the same way. A SIGNAL
+has no other special case: it does not follow (TS-17); it observes the
+output it is bound to.
 
 A generic time-series input offered a REF output is dereferenced too, and
 then follows the ordinary rules for the type it resolves to, sampling and
@@ -750,15 +767,17 @@ Rules
   [chained follower trace](cases_references.md#ref-chained--ts-15-ts-16-and-ts-17)
   and the [round trip trace](cases_references.md#ref-round-trip--ts-14-ts-15-ts-16-and-ts-17).
 - **TS-18** A SIGNAL input is modified exactly when the output it is bound to
-  is, and valid exactly when that output is. Offered a REF output, it is
+  is modified, or when a sampled bind samples it (TS-14), and valid exactly
+  when that output is. Offered a REF output, it is
   bound once, for its lifetime, to the REF's alternative output, never to
   the reference. It never moves, so it does not follow and TS-17 does not
-  apply to it. It is modified exactly when the alternative output is
-  modified (see Binding): when the designated output ticks, and when a
-  re-pointing to a valid target samples it, as an input of the designated
-  type would be. When the designation is withdrawn the alternative output
+  apply to it. Bound to an alternative output or any other forwarding
+  endpoint, it observes that endpoint read as an output (see Binding): it
+  is modified when the output the endpoint shows is modified, and when the
+  endpoint ends a cycle on a valid output it did not show before the cycle
+  and samples it. When the endpoint stops showing a value it
   becomes invalid, as under TS-7: the SIGNAL reads invalid and unmodified,
-  with no delta, whatever kind of output was designated, and an active
+  with no delta, whatever kind of output it showed, and an active
   SIGNAL schedules its node once.
 - **TS-19** A dictionary key is *added* when it joins the dictionary, whether
   or not its child is valid, and *removed* when it leaves. A child becoming
