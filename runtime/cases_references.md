@@ -146,7 +146,8 @@ the same scalar-reader trace.
 
 A passive reader sees the same state if another input wakes its node.
 Every non-keyed reader gives the same trace: a window, a fixed or growing
-list, a bundle or a SIGNAL, whatever its children are. At cycle 1 each wakes
+list, or a bundle, whatever its children are. A SIGNAL reader follows TS-18
+and is not traced here. At cycle 1 each wakes
 once and reads invalid and unmodified, with nil value and no delta: no removed
 samples or positions and no empty replacement. Cycles 2 and 3 are silent.
 At cycle 4 each samples its target (TS-14). A set or dictionary reader
@@ -228,6 +229,49 @@ With any non-keyed producers in place of the dictionaries (scalars, windows,
 fixed or growing lists, or bundles, whatever their children are), the outer
 input follows REF-WITHDRAWAL: at cycles 3 and 6 an active consumer wakes once
 and reads invalid and unmodified, with no delta.
+
+## REF-ROUND-TRIP — TS-14, TS-15, TS-16 and TS-17
+
+The chain holds no REF. A, B, D1 and D2 are dictionary outputs. A holds
+`{1:10}` and B holds `{2:20}`. D1 and D2 have never published. F1 and F2 are
+forwarding outputs. An active dictionary input is bound to F2 throughout, by
+a sampled bind at cycle 0. Each cell under F1 and F2 gives what that output
+forwards at the end of the cycle; `X, then Y` means two moves in one cycle.
+
+| Cycle | F1 forwards | F2 forwards | Producer change | Delta | Added | Removed | Valid / modified |
+|---|---|---|---|---|---|---|---|
+| 0 | A | F1 | — | 1:10 | 1 | — | true / true |
+| 1 | B | A | — | — | — | — | true / false |
+| 2 | — | F1, then A | A adds 3:30 | 3:30 | 3 | — | true / true |
+| 3 | D1 | F1 | — | 1:R, 3:R | — | 1, 3 | false / true |
+| 4 | D2 | — | — | — | — | — | false / false |
+| 5 | A, then D1 | — | — | — | — | — | false / false |
+| 6 | — | — | D1 publishes 4:40 | 4:40 | 4 | — | true / true |
+| 7 | nothing | — | — | 4:R | — | 4 | false / true |
+
+At cycle 1 F1 moves to B and F2 is rebound from F1 to A. The input showed A
+before the cycle and shows A after it, so it has not moved: key 1 is not
+sampled and nothing is added or removed. F1's move may already have
+scheduled the input's node, which then reads the input unmodified. At cycle
+2 the input leaves A for B and returns while A ticks. It reads A's own
+delta, as an input bound to A alone would: key 1 is not sampled. At cycle 3
+it moves from A to D1 and reports a keyed withdrawal. At cycle 4 it moves
+from D1 to D2, from no value to no value: it is not notified and reads
+nothing. At cycle 5 it passes through A and ends on D1. It showed no value
+before the cycle and shows none after it, so it reports nothing; the move to
+A may have scheduled its node, which reads the input unmodified. At cycle 6
+it is bound through F2 and F1 to D1, so D1's first publication reaches it as
+an ordinary tick. At cycle 7 F1 stops forwarding and the input reports its
+removals, as it would for an empty REF.
+
+With a selector REF in place of F1, designating the same outputs and empty
+at cycle 7, every row is the same.
+
+With scalar outputs A = 1 and B = 2 in place of the dictionaries, where A
+publishes 3 at cycle 2 and D1 publishes 4 at cycle 6, a scalar input reads 1
+at cycle 0, unmodified at cycle 1, and 3 at cycle 2. At cycles 3 and 7 it
+wakes once and reads invalid and unmodified (REF-WITHDRAWAL). It is
+unmodified at cycles 4 and 5 and reads 4 at cycle 6.
 
 ## REF-LIST-POSITION — TS-16, TS-17 and TS-25
 
