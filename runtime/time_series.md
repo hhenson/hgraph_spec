@@ -442,7 +442,7 @@ chain, does not matter.
   (TS-15).
 
 A move from no value to no value does not itself notify. An earlier move in
-the cycle, to an output with a value, may already have scheduled the
+the cycle, to or from an output with a value, may already have scheduled the
 follower's node.
 In the first two cases that node may still be evaluated, and it reads the
 input unmodified unless, in the first case, that output itself ticked.
@@ -725,7 +725,7 @@ Rules
   different invalid or unpublished output, and a move from no value to no
   value does not notify it. In every
   other case it reports once, however many changes the cycle holds (TS-15).
-  An earlier move in the cycle, to an output with a value, may already have
+  An earlier move in the cycle, to or from an output with a value, may already have
   scheduled the follower's node. In the first two cases that node may be
   evaluated and reads the input
   unmodified unless, in the first case, that output itself ticked. See the

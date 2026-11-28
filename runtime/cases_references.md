@@ -236,7 +236,7 @@ The chain holds no REF. A, B, D1 and D2 are dictionary outputs. A holds
 `{1:10}` and B holds `{2:20}`. D1 and D2 have never published. F1 and F2 are
 forwarding outputs. An active dictionary input is bound to F2 throughout, by
 a sampled bind at cycle 0. Each cell under F1 and F2 gives what that output
-forwards at the end of the cycle; `X, then Y` means two moves in one cycle.
+forwards at the end of the cycle; `X, then Y` means two moves in one cycle; `—` means unchanged.
 
 | Cycle | F1 forwards | F2 forwards | Producer change | Delta | Added | Removed | Valid / modified |
 |---|---|---|---|---|---|---|---|
