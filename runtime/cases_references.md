@@ -145,14 +145,22 @@ the same scalar-reader trace.
 | 4 | A | — | 8 |
 
 A passive reader sees the same state if another input wakes its node.
-Every non-keyed reader gives the same trace: a window, a fixed or growing
-list, or a bundle. At cycle 1 each wakes
+Every reader with no set or dictionary in it gives the same trace: a window,
+a growing list, or a fixed list or bundle with no set or dictionary
+descendant. At cycle 1 each wakes
 once and reads invalid and unmodified, with nil value and no delta: no removed
 samples or positions and no empty replacement. Cycles 2 and 3 are silent.
 At cycle 4 each samples its target (TS-14). A set or dictionary reader
-reports its removals at cycle 1 instead (REF-DICTIONARY). So does a set or
-dictionary child of a fixed list or bundle reader: that reader is invalid
-and reads modified at cycle 1, with the child's removals as its only delta.
+reports its removals at cycle 1 instead (REF-DICTIONARY): it reads invalid
+and modified, with last modified time never. One that was showing a valid,
+empty set or dictionary reads the same, with no removed members. So does a
+set or dictionary descendant of a fixed list or bundle reader, at any depth
+beneath nested fixed lists and bundles. That reader, and every fixed list or
+bundle between it and the descendant, reads invalid and modified at cycle 1,
+with last modified time never and the descendant's removals as its only
+delta. For a bundle reader whose field `d` followed `{1:10}` and whose field
+`x` followed a scalar, the cycle 1 delta is `d: {1:R}`; `x` contributes
+nothing.
 The three selector actions remain distinguishable on the REF itself. An empty
 reference and a reference to B are valid designations. Invalidating the REF
 clears its validity.
@@ -221,10 +229,13 @@ C, which it showed before the cycle, with B, which it shows after it. A was
 never shown to it and contributes nothing. A set input following the key set reports the
 same added and removed keys.
 
-With any non-keyed producers in place of the dictionaries (scalars, windows,
-fixed or growing lists, or bundles), the outer
+With producers that hold no set or dictionary in place of the dictionaries
+(scalars, windows, growing lists, or fixed lists or bundles with no set or
+dictionary descendant), the outer
 input follows REF-WITHDRAWAL: at cycles 3 and 6 an active consumer wakes once
-and reads invalid and unmodified, with no delta.
+and reads invalid and unmodified, with no delta. With fixed lists or bundles
+that hold a dictionary, the outer input reads invalid and modified at those
+cycles, with the dictionary's removals as its only delta (TS-17).
 
 ## REF-LIST-POSITION — TS-16, TS-17 and TS-25
 

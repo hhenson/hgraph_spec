@@ -546,7 +546,7 @@ Settled here, with a detail left for the chapter that owns it.
   invalidation marks its owned parent modified (TS-7). A still-valid assembled
   input records child-change time locally; it may cache the result. A wholly
   invalid structure resets to *never* (TS-26). Sampling adds an input-side
-  observation. Keyed withdrawal may report removals while unbound or bound to an invalid target (TS-15, TS-17);
+  observation. Keyed withdrawal may report removals while unbound or bound to an invalid target, also from beneath a fixed list or bundle input (TS-15, TS-17);
   the chapter keeps
   that compatibility question explicit.
 - **Time-series: dictionaries.** *Added* and *removed* are about membership.
