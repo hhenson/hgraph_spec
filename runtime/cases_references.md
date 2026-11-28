@@ -225,8 +225,8 @@ so 2 is removed and 3 is added. Key 1 is on both sides: it is neither added
 nor removed, and is sampled at 12, the value C wrote at cycle 4 while the
 follower showed nothing. At
 cycle 10 the selector and the outer input both move. The outer input compares
-C, which it showed before the cycle, with B, which it shows after it. A was
-never shown to it and contributes nothing. A set input following the key set reports the
+C, which it showed before the cycle, with B, which it shows after it. The
+outer input shows A at neither end of cycle 10, so A contributes nothing. A set input following the key set reports the
 same added and removed keys.
 
 With producers that hold no set or dictionary in place of the dictionaries
