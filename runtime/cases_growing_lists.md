@@ -64,14 +64,15 @@ In the Python API, a bounded list exposes cycle 1 as the plain dictionary
 1 it carries `removed={1}` and `size_modified=None`. At cycle 3 it carries
 `size_modified=3` and empty positional changes.
 
-## LIST-INPUT — TS-14, TS-15, TS-32
+## LIST-INPUT — TS-14, TS-15, TS-17, TS-32
 
 An input bound to the list above at cycle 2, sampled: it reads valid,
 modified, with every element as its delta. Rebound at cycle 5 to an empty
 growing list: it reads valid and modified, with positions 0 and 1 removed.
 Unbound: it reads not valid, and reports every position it was showing as
 removed once (TS-15 for dictionaries and sets is extended here to growing
-lists; the ruling is requested).
+lists; the ruling is requested). Withdrawn by its REF instead, it reads not
+valid and not modified, with no delta, and an active input wakes once (TS-17).
 
 ## LIST-EMPTY-PUBLICATION — TS-9, TS-32
 

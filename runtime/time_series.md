@@ -350,8 +350,8 @@ all valid.
 | Event | What the input reads afterwards | Notification |
 |---|---|---|
 | **bind** | The output's state, as it is, including the output's own last modified time. If the output ticked two cycles ago the input reads valid and not modified | None |
-| **bind, sampled** | A valid target reads modified with its sampled delta; an invalid target reads unmodified, time *never*, and nil delta | A changed binding notifies; an active input schedules its node |
-| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). A scalar follower losing a valid value through its REF wakes its node (TS-17). Other unbinds are silent |
+| **bind, sampled** | A valid target reads modified with its sampled delta; an invalid target reads unmodified, time *never*, and nil delta, except that a set or dictionary input moved off a valid target reports its removals (TS-15, TS-17) | A changed binding notifies; an active input schedules its node |
+| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). Every other follower losing a valid value through its REF wakes its node (TS-17). Other unbinds are silent |
 | **rebind** | An unbind and a bind in one step. A TSS or TSD input ticks once with the difference: keys only in the old output removed, keys only in the new one added, and the children of the new one read as modified | As sampled bind |
 
 A sampled valid input reports the sampling time; its producer keeps its own
@@ -359,6 +359,8 @@ time. A sampled scalar's delta is its value; a collection reports its valid
 children's sampled deltas. Sampling descends through valid children. An invalid
 target reads unmodified with time *never* and contributes no sampled delta, recursively.
 It inherits neither the previous binding's time nor the sampling time.
+The one exception is a set or dictionary input moved off a valid target:
+it reports the members it was showing as removed (TS-15, TS-17).
 A passive input has the same observations as an active one.
 
 Fixed collection rebinding compares each child's target. Unchanged bindings
@@ -366,7 +368,9 @@ keep their observation state; changed valid targets are sampled. Parent deltas
 contain those children's deltas. Changing whole A to A.left + B.right samples
 only right, even though the parent's peering changes (TS-25).
 
-A keyed withdrawal is an input-side event: the input is invalid and modified,
+A keyed withdrawal occurs when a set or dictionary input that was showing
+a valid target is unbound, or is moved to a target that is invalid or has
+never published. It is an input-side event: the input is invalid and modified,
 has no current members, and reports the former members as removed for this
 cycle. Its last modified time is `never`; the withdrawal event, not an owned
 output timestamp, makes it modified. The removal delta is readable while
@@ -492,8 +496,9 @@ Rules
   equals the evaluation time, and valid exactly when that time is not
   *never*. A plain peered input reflects the output. A non-peered input
   maintains child-change observations while valid (TS-7, TS-27); sampling
-  adds the input-side observation in TS-14. An unbound input is not valid;
-  keyed withdrawal retains the removal observation in TS-15 (see Points to settle).
+  adds the input-side observation in TS-14. An unbound input is not valid, and
+  neither is one bound to an invalid target; keyed withdrawal from either
+  retains the removal observation in TS-15 (see Points to settle).
 - **TS-2** The value of a time-series that is not valid is nil. The delta of
   one that is not modified is nil.
 - **TS-3** An owned output's last modified time never decreases, except
@@ -583,7 +588,9 @@ Rules
 - **TS-14** A plain bind causes no notification. A sampled valid target reads
   modified in its cycle: a scalar's delta is its value; a collection reports
   valid children's sampled deltas. An invalid target and its invalid
-  descendants read unmodified, time *never*, and no delta.
+  descendants read unmodified, time *never*, and no delta. A set or
+  dictionary input moved off a valid target still reports the members it
+  was showing as removed (TS-15, TS-17).
   Sampling changes input observations, never producer timestamps.
 - **TS-15** Explicitly unbinding a scalar or fixed-shape input is silent. A set or
   dictionary input reports what it was showing as removed. TS-17 governs
@@ -601,13 +608,22 @@ Rules
   A new dictionary target is sampled even if it has the same keys as the
   previous target. Consumers bound to its current children see the samples
   in the selection cycle. See the [dictionary retarget trace](cases_references.md#ref-dictionary-retarget--ts-14-and-ts-17).
-  An empty or invalidated REF unbinds it. When a scalar follower loses
-  a valid value, an active follower schedules its node once. This also applies when the new
-  designation is a live output that has never published. The follower reads
-  invalid and unmodified, with no delta and last modified time *never*.
-  Losing the binding detaches the old target. No further withdrawal is
+  An empty or invalidated REF unbinds it. A designation of a live output
+  that is invalid or has never published binds it to that output. In both
+  cases a follower that was showing a valid value loses it. Every non-keyed
+  follower, whether a scalar, a window, a fixed or growing list or a bundle,
+  then reads invalid and unmodified, with no delta and last modified time
+  *never*, and an active follower schedules its node once.
+  A set or dictionary follower reports its removals instead (TS-15). So
+  does a set or dictionary child of a fixed list or bundle: its ancestors
+  read modified in that cycle with those removals as their only delta
+  (TS-4), and the other children contribute none.
+  Losing the valid value detaches the old target. No further withdrawal is
   reported while the follower is already invalid. See the
   [reference withdrawal trace](cases_references.md#ref-withdrawal--ts-8-ts-16-and-ts-17).
+  An input bound to an output that forwards what another input follows
+  observes what it would observe following that input's REF directly. See the
+  [chained follower trace](cases_references.md#ref-chained--ts-15-ts-16-and-ts-17).
 - **TS-18** A SIGNAL input is modified exactly when the output it is bound to
   is. Offered a REF output, it is bound to the designated output, never to
   the reference: it follows re-pointing like any ordinary input (TS-17) and
