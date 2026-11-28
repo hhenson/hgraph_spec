@@ -175,14 +175,15 @@ relay stays idle after cycle 0 and its scalar reader observes 1, 2, 3.
 
 ## REF-CHAINED — TS-15, TS-16 and TS-17
 
-A selector designates a dictionary. An inner input follows the selector. An
-outer input is bound to the inner input, as when a nested graph's output
-forwards what its input follows; it has no binding of its own to a producer.
+A selector designates a dictionary. An inner input follows the selector. A
+forwarding output shows what the inner input follows, as a nested graph's
+output does for one of the graph's inputs. An outer input is bound to that
+forwarding output; it has no binding of its own to a producer.
 A holds `{9:90}`. B holds `{1:10}` and adds `2:20` at cycle 1. C holds
 `{1:11, 3:30}`. D first publishes at cycle 7. A second selector designates B
-throughout and a second inner input follows it. At cycle 10 the outer input
-is rebound from the first inner input to the second. The table gives the
-outer input. R denotes a removal in the delta.
+throughout. A second inner input follows it and has its own forwarding
+output. At cycle 10 the outer input is rebound from the first forwarding
+output to the second. The table gives the outer input. R denotes a removal in the delta.
 
 | Cycle | Select | Producer change | Delta | Added | Removed | Valid / modified |
 |---|---|---|---|---|---|---|
@@ -198,15 +199,23 @@ outer input. R denotes a removal in the delta.
 | 9 | C | — | 1:12, 2:R, 3:30 | 3 | 2 | true / true |
 | 10 | A; outer input rebound | — | 1:10, 2:20, 3:R | 2 | 3 | true / true |
 
-Through cycle 9 the first inner input reads the same rows. So does a follower any number of
-bindings further from the selector. Removals are the keys shown before the cycle and absent after
-it; in this trace every key's child has published, so removed keys, values and items agree with the delta. At cycle 1 key 9
+At each of cycles 0 to 9 the first inner input reads the same row as the
+outer input. So does a follower any number of forwarding outputs further
+from the first selector. At cycle 10 the first inner input stays with the
+first selector and moves from C to A: its delta is `9:90, 1:R, 3:R`.
+Removals are the keys a follower showed before the cycle and does not show
+after it. Additions are the keys it did not show before the cycle and shows
+after it (TS-15). In this trace every key's child has published, so removed
+keys, values and items agree with the delta. At cycle 1 key 9
 comes from A, not from B's own delta. At cycle 2 the follower compares B
 with the final designation (TS-16): key 9 is neither added nor removed, and
 overlapping key 1 is sampled. At cycle 6 the input is bound to D, not
 unbound, so D's first publication at cycle 7 reaches it as an ordinary tick.
-At cycle 9 one designation moves to an
-overlapping key set: key 1 is sampled and is neither added nor removed. At
+At cycle 9 one designation moves from B to C, whose key sets overlap. The
+follower showed keys 1 and 2 before the cycle and shows 1 and 3 after it,
+so 2 is removed and 3 is added. Key 1 is on both sides: it is neither added
+nor removed, and is sampled at 12, the value C wrote at cycle 4 while the
+follower showed nothing. At
 cycle 10 the selector and the outer input both move. The outer input compares
 C, which it showed before the cycle, with B, which it shows after it. A was
 never shown to it and contributes nothing. A set input following the key set reports the

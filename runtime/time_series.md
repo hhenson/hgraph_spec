@@ -351,8 +351,8 @@ all valid.
 |---|---|---|
 | **bind** | The output's state, as it is, including the output's own last modified time. If the output ticked two cycles ago the input reads valid and not modified | None |
 | **bind, sampled** | A valid target reads modified with its sampled delta; an invalid target reads unmodified, time *never*, and nil delta, except that a set or dictionary input moved off a valid target reports its removals (TS-15, TS-17) | A changed binding notifies; an active input schedules its node |
-| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). Every other follower losing a valid value through its REF wakes its node (TS-17). Other unbinds are silent |
-| **rebind** | An unbind and a bind in one step. A TSS or TSD input ticks once with the difference: keys only in the old output removed, keys only in the new one added, and the children of the new one read as modified | As sampled bind |
+| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). Every other follower, whether a scalar, a window, a fixed or growing list or a bundle, that loses a valid value through its REF wakes its node (TS-17). Other unbinds are silent |
+| **rebind** | An unbind and a bind in one step. A TSS or TSD input ticks once with the difference between what it showed before the cycle and what it shows after it: keys shown before and not after removed, keys shown after and not before added, and the children of the output it shows after read as modified. An output it did not show before the cycle contributes no removals, however many moves the cycle holds (TS-15) | As sampled bind |
 
 A sampled valid input reports the sampling time; its producer keeps its own
 time. A sampled scalar's delta is its value; a collection reports its valid
@@ -376,6 +376,23 @@ cycle. Its last modified time is `never`; the withdrawal event, not an owned
 output timestamp, makes it modified. The removal delta is readable while
 invalid. Physical teardown detaches silently and does not synthesize this
 running-graph withdrawal. See [reference cases](cases_references.md).
+
+An input is bound to an output, never to another input. The output may be a
+**forwarding endpoint**: an output that shows the output a REF designates,
+or the output another forwarding endpoint shows, at any depth. A nested
+graph's output that forwards what one of the graph's inputs follows is one.
+An input bound to a forwarding endpoint follows the REF at the head of that
+chain as if it were bound to it directly (TS-17).
+
+A follower's delta is taken across the whole cycle, not per move. However
+many designation changes, withdrawals and rebinds a cycle holds, and at
+whatever depth of a forwarding chain they happen, a set or dictionary
+follower reports once: *removed* is the keys it showed before the cycle and
+does not show after it, and *added* is the keys it did not show before the
+cycle and shows after it. An output it showed only within the cycle, or
+never showed, contributes nothing. A follower that showed nothing before the
+cycle reports no removals, even when its new target removes a key in that
+cycle (TS-15).
 
 Sampling is how an input brought into a running graph — a new branch of a
 switch, a new key of a map — sees values that were set before it existed.
@@ -595,6 +612,14 @@ Rules
 - **TS-15** Explicitly unbinding a scalar or fixed-shape input is silent. A set or
   dictionary input reports what it was showing as removed. TS-17 governs
   withdrawal by a REF producer.
+  What a set or dictionary input was showing is what it showed before the
+  cycle. Its removals are the keys it showed before the cycle and does not
+  show after it. Its additions are the keys it did not show before the cycle
+  and shows after it. An output it showed only within the cycle, or never
+  showed, contributes neither. An input that showed nothing before the cycle
+  reports no removals. This holds for an explicit unbind or rebind, for a
+  change of its REF (TS-17), for a change anywhere along a chain of
+  forwarding endpoints, and for any combination of them in one cycle.
 - **TS-16** A REF ticks on its first publication and on a changed designation.
   A target tick alone leaves the REF idle. Equality compares endpoint
   identities and, for child references, their designation tree. Repeating a
@@ -614,15 +639,22 @@ Rules
   follower, whether a scalar, a window, a fixed or growing list or a bundle,
   then reads invalid and unmodified, with no delta and last modified time
   *never*, and an active follower schedules its node once.
-  A set or dictionary follower reports its removals instead (TS-15). So
-  does a set or dictionary child of a fixed list or bundle: its ancestors
-  read modified in that cycle with those removals as their only delta
-  (TS-4), and the other children contribute none.
+  A set or dictionary follower reports its removals instead (TS-15). A set
+  or dictionary child of a fixed list or bundle follower reports its
+  removals in the same way: the child's ancestors read modified in that
+  cycle with those removals as their only delta (TS-4), and the other
+  children contribute none.
   Losing the valid value detaches the old target. No further withdrawal is
   reported while the follower is already invalid. See the
   [reference withdrawal trace](cases_references.md#ref-withdrawal--ts-8-ts-16-and-ts-17).
-  An input bound to an output that forwards what another input follows
-  observes what it would observe following that input's REF directly. See the
+  An input may be bound to a forwarding endpoint: an output that shows the
+  output a REF designates, or the output another forwarding endpoint shows,
+  at any depth. The input observes what it would observe bound to that REF
+  directly, and every statement of this rule holds for it. When one cycle
+  holds several changes, whether of a designation, of a forwarding endpoint
+  along the chain or of the input's own binding, the follower reports once,
+  comparing what it showed before the cycle with what it shows after it
+  (TS-15). See the
   [chained follower trace](cases_references.md#ref-chained--ts-15-ts-16-and-ts-17).
 - **TS-18** A SIGNAL input is modified exactly when the output it is bound to
   is. Offered a REF output, it is bound to the designated output, never to
