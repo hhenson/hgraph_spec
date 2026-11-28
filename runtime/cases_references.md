@@ -145,6 +145,11 @@ the same scalar-reader trace.
 | 4 | A | — | 8 |
 
 A passive reader sees the same state if another input wakes its node.
+A window reader or a list reader in place of the scalar reader has the same
+trace. At cycle 1 it wakes once and reads invalid and unmodified with no
+delta. The window publishes no replacement and no removed samples, and the
+list reports no removed positions. A set or dictionary reader instead reports
+its removals (REF-DICTIONARY).
 The three selector actions remain distinguishable on the REF itself. An empty
 reference and a reference to B are valid designations. Invalidating the REF
 clears its validity.
@@ -164,6 +169,39 @@ A relay copies a selector's current REF value once. At cycle 0 the selector
 holds A, whose value is 1. At cycle 1 the selector selects B, whose value is
 10, while A publishes 2. At cycle 2 A publishes 3 and B publishes 11. The
 relay stays idle after cycle 0 and its scalar reader observes 1, 2, 3.
+
+## REF-CHAIN — TS-15 and TS-17
+
+A, B and C are dictionary outputs. A publishes `{9:90}` at 0, B publishes
+`{1:10}` at 0 and adds `2:20` at 1, and C publishes `{2:5, 3:30}` at 0.
+Selector S designates A, B, C or empty. Selector S2 designates C throughout.
+An outer endpoint T follows S, and from cycle 6 follows S2. The reader is
+bound to T, never to S or to a dictionary. R denotes a removal in the delta.
+
+| t | S selects | T follows | Reader's value | Added | Removed | Delta | Valid / modified |
+|---|---|---|---|---|---|---|---|
+| 0 | A | S | 9:90 | 9 | — | 9:90 | true / true |
+| 1 | B | S | 1:10, 2:20 | 1, 2 | 9 | 9:R, 1:10, 2:20 | true / true |
+| 2 | — | S | 1:10, 2:20 | — | — | nil | true / false |
+| 3 | C | S | 2:5, 3:30 | 3 | 1 | 1:R, 2:5, 3:30 | true / true |
+| 4 | empty | S | nil | — | 2, 3 | 2:R, 3:R | false / true |
+| 5 | A | S | 9:90 | 9 | — | 9:90 | true / true |
+| 6 | B | S2 | 2:5, 3:30 | 2, 3 | 9 | 9:R, 2:5, 3:30 | true / true |
+| 7 | — | S2 | 2:5, 3:30 | — | — | nil | true / false |
+
+Every row equals what a reader bound directly to S, and at 6 and 7 to S2,
+observes. At 1 the reader reports key 9 as removed although T's own binding
+did not change. At 3 the overlapping key 2 is sampled and is neither added
+nor removed. At 4 the withdrawal reaches the reader in the cycle S empties.
+At 6 S and T both move in one cycle. The removals are against A, which the
+reader showed before the cycle. B was never shown and contributes nothing.
+
+Removed keys, removed values and removed items agree with the delta, and the
+key set reports the same additions and removals. Set outputs in place of
+the dictionaries give the same added and removed members. With scalar,
+window or list outputs, the reader at 4 wakes once and reads invalid and
+unmodified with no delta (REF-WITHDRAWAL). A longer chain of endpoints gives
+the same trace.
 
 ## REF-LIST-POSITION — TS-16, TS-17 and TS-25
 

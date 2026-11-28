@@ -351,7 +351,7 @@ all valid.
 |---|---|---|
 | **bind** | The output's state, as it is, including the output's own last modified time. If the output ticked two cycles ago the input reads valid and not modified | None |
 | **bind, sampled** | A valid target reads modified with its sampled delta; an invalid target reads unmodified, time *never*, and nil delta | A changed binding notifies; an active input schedules its node |
-| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). A scalar follower losing a valid value through its REF wakes its node (TS-17). Other unbinds are silent |
+| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). A scalar, window or list follower losing a valid value through its REF wakes its node (TS-17). Other unbinds are silent |
 | **rebind** | An unbind and a bind in one step. A TSS or TSD input ticks once with the difference: keys only in the old output removed, keys only in the new one added, and the children of the new one read as modified | As sampled bind |
 
 A sampled valid input reports the sampling time; its producer keeps its own
@@ -587,7 +587,10 @@ Rules
   Sampling changes input observations, never producer timestamps.
 - **TS-15** Explicitly unbinding a scalar or fixed-shape input is silent. A set or
   dictionary input reports what it was showing as removed. TS-17 governs
-  withdrawal by a REF producer.
+  withdrawal by a REF producer. A follower of an endpoint that itself
+  follows another reports removals against what it showed before the cycle,
+  however many endpoints lie between it and the producer. See the
+  [chained endpoint trace](cases_references.md#ref-chain--ts-15-and-ts-17).
 - **TS-16** A REF ticks on its first publication and on a changed designation.
   A target tick alone leaves the REF idle. Equality compares endpoint
   identities and, for child references, their designation tree. Repeating a
@@ -601,13 +604,18 @@ Rules
   A new dictionary target is sampled even if it has the same keys as the
   previous target. Consumers bound to its current children see the samples
   in the selection cycle. See the [dictionary retarget trace](cases_references.md#ref-dictionary-retarget--ts-14-and-ts-17).
-  An empty or invalidated REF unbinds it. When a scalar follower loses
-  a valid value, an active follower schedules its node once. This also applies when the new
+  An empty or invalidated REF unbinds it. When a scalar, window or list
+  follower loses a valid value, an active follower schedules its node once.
+  This also applies when the new
   designation is a live output that has never published. The follower reads
   invalid and unmodified, with no delta and last modified time *never*.
+  A window publishes no replacement and a list reports no removed positions.
   Losing the binding detaches the old target. No further withdrawal is
   reported while the follower is already invalid. See the
   [reference withdrawal trace](cases_references.md#ref-withdrawal--ts-8-ts-16-and-ts-17).
+  A follower of an endpoint that itself follows a REF observes the same
+  transition as a direct follower of that REF, in the same cycle. See the
+  [chained endpoint trace](cases_references.md#ref-chain--ts-15-and-ts-17).
 - **TS-18** A SIGNAL input is modified exactly when the output it is bound to
   is. Offered a REF output, it is bound to the designated output, never to
   the reference: it follows re-pointing like any ordinary input (TS-17) and
