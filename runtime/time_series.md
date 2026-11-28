@@ -352,8 +352,8 @@ all valid.
 | Event | What the input reads afterwards | Notification |
 |---|---|---|
 | **bind** | The output's state, as it is, including the output's own last modified time. If the output ticked two cycles ago the input reads valid and not modified | None |
-| **bind, sampled** | A valid target reads modified with its sampled delta, unless the input ends the cycle on the output it showed before it, which is not a move and is not sampled (TS-17). A SIGNAL is not sampled either (TS-18). An invalid target reads unmodified, time *never*, and nil delta, except that a set or dictionary input moved off a valid target reports its removals (TS-15, TS-17) | Notifies when the output shown differs and the input showed a value before the cycle or shows one after it; an active input then schedules its node. Otherwise none. A SIGNAL is never sampled: it is modified, and an active one wakes, only when the dereferenced output ticks (TS-18) |
-| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). Every other follower, whether a scalar, a window, a fixed or growing list or a bundle, that loses a valid value through its REF or through a forwarding endpoint that stops forwarding wakes its node and reads unmodified with no delta, whatever its children are (TS-17). A SIGNAL follower that loses a valid value through its REF or through a forwarding endpoint that stops forwarding goes invalid and unmodified, whatever it followed; whether its node wakes is open (TS-18). Other unbinds are silent |
+| **bind, sampled** | A valid target reads modified with its sampled delta, unless the input ends the cycle on the output it showed before it, which is not a move and is not sampled (TS-17). A SIGNAL is not sampled either: it reads modified only when the output it is bound to is (TS-18). An invalid target reads unmodified, time *never*, and nil delta, except that a set or dictionary input moved off a valid target reports its removals (TS-15, TS-17) | Notifies when the output shown differs and the input showed a value before the cycle or shows one after it; an active input then schedules its node. Otherwise none. A SIGNAL is notified by the same rule; it differs only in what it then reads (TS-18) |
+| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). Every other follower, whether a scalar, a window, a fixed or growing list, a bundle or a SIGNAL, that loses a valid value through its REF or through a forwarding endpoint that stops forwarding wakes its node and reads unmodified with no delta, whatever its children are and, for a SIGNAL, whatever it followed (TS-17, TS-18). Other unbinds are silent |
 | **rebind** | An unbind and a bind in one step. A TSS or TSD input that ends the cycle showing a different output from the one it showed before the cycle ticks once with the difference: keys shown before and not after removed, keys shown after and not before added, and the valid children of the output it shows after read as modified. An output it did not show before the cycle contributes no removals. Ending the cycle on the output it showed before it is not a move, and a cycle from no value to no value reports nothing (TS-15) | As sampled bind |
 
 A sampled valid input reports the sampling time; its producer keeps its own
@@ -433,7 +433,8 @@ chain, does not matter.
   and shows none after it reports nothing, whatever it showed within the
   cycle (TS-14, TS-17).
 - **In every other case** the follower reports once. A SIGNAL follower
-  reports only a tick of the output it ends on (TS-18). For a set or dictionary
+  is never sampled and reports no keyed removals; it reads modified only
+  when the output it ends on is modified (TS-18). For a set or dictionary
   follower, *removed* is the keys it showed before the cycle and does not
   show after it, and *added* is the keys it did not show before the cycle
   and shows after it. The valid children of an output shown after read as
@@ -507,19 +508,21 @@ follows the ordinary rules for the type it resolves to, sampling and keyed
 withdrawal included (TS-14, TS-15, TS-17). Only an input declared REF
 observes designations (TS-16).
 
-A SIGNAL is never sampled. It is modified when the dereferenced output
-ticks, never when only the designation changes, so re-pointing it to a valid
-output that is idle leaves it valid and unmodified. An active SIGNAL wakes
-its node only when the dereferenced output ticks. That includes a tick in
-the same cycle as the re-pointing that brings the SIGNAL to that output. A
-designation change alone does not wake it.
+A SIGNAL bound through a REF or a chain of forwarding endpoints observes
+exactly what a SIGNAL bound directly to the dereferenced output observes.
+That holds on re-pointing, sampling, ticks, producer invalidation (TS-7)
+and withdrawal. So it is never sampled: it is modified exactly when the
+dereferenced output is modified, and never by a designation change alone.
+Re-pointing it to a valid output that is idle leaves it valid and
+unmodified. It is notified as any other follower is (see Binding, TS-17);
+only what it then reads differs.
 
 When what it follows is withdrawn, by an empty or invalidated REF, a
 forwarding endpoint that stops forwarding, or a move to an output that is
 invalid or has never published, a SIGNAL goes invalid: unmodified, with no
-delta. That holds whatever the kind of the output it followed, a set or
-dictionary included (TS-18). Whether an active SIGNAL wakes on that
-withdrawal is open.
+delta, and an active SIGNAL schedules its node once, as any follower does
+(TS-17). That holds whatever the kind of the output it followed, a set or
+dictionary included: a SIGNAL reports no keyed removals (TS-18).
 
 ### What may bind to what
 
@@ -715,8 +718,8 @@ Rules
   follower schedules its node once. Every non-keyed follower, whether a
   scalar, a window, a fixed or growing list or a bundle, then reads invalid
   and unmodified, with no delta and last modified time *never*, whatever
-  its children are. A SIGNAL follower goes invalid and unmodified under TS-18,
-  whatever kind of output it followed. A set or dictionary held as a child of a fixed list or
+  its children are. So does a SIGNAL follower, whatever kind of output it
+  followed (TS-18). A set or dictionary held as a child of a fixed list or
   bundle follower goes invalid with it and reports no removals.
   A set or dictionary that is itself the follower reports its removals
   instead (TS-15): it reads invalid and modified, with last modified time
@@ -743,7 +746,8 @@ Rules
   different invalid or unpublished output, and a move from no value to no
   value does not notify it. In every
   other case it reports once, however many changes the cycle holds (TS-15).
-  A SIGNAL follower reports only a tick of the output it ends on (TS-18).
+  A SIGNAL follower is never sampled and reports no keyed removals; it
+  reads modified only when the output it ends on is modified (TS-18).
   An earlier move in the cycle, to or from an output with a value, may already have
   scheduled the follower's node. In the first two cases that node may be
   evaluated and reads the input
@@ -752,19 +756,19 @@ Rules
   and the [round trip trace](cases_references.md#ref-round-trip--ts-14-ts-15-ts-16-and-ts-17).
 - **TS-18** A SIGNAL input is modified exactly when the output it is bound to
   is. Offered a REF output or a chain of forwarding endpoints, it is bound to
-  the dereferenced output, never to the reference: it follows re-pointing
-  (TS-17), and a designation change alone never modifies it. It is never
-  sampled. Re-pointed to a
-  valid output that does not tick in that cycle, it reads valid and
-  unmodified. An active SIGNAL wakes its node only when the dereferenced
-  output ticks, including a tick in the same cycle as the re-pointing that
-  brings it to that output. A designation change alone does not wake it.
+  the dereferenced output, never to the reference, and follows re-pointing
+  (TS-17). It then observes exactly what a SIGNAL bound directly to the
+  dereferenced output observes, on re-pointing, sampling, ticks, producer
+  invalidation (TS-7) and withdrawal. It is never sampled, and a
+  designation change alone never modifies it: re-pointed to a
+  valid output that is not modified in that cycle, it reads valid and
+  unmodified. It is notified as any other follower is.
   When what it follows is withdrawn, by an empty or
   invalidated REF, a forwarding endpoint that stops forwarding, or a move to
   an output that is invalid or has never published, it goes invalid:
   unmodified, with no delta, whether the output it followed was a set or
-  dictionary or not. Whether an active SIGNAL wakes on that withdrawal is
-  open.
+  dictionary or not. An active SIGNAL that loses a valid value this way
+  schedules its node once, as any follower does (TS-17).
 - **TS-19** A dictionary key is *added* when it joins the dictionary, whether
   or not its child is valid, and *removed* when it leaves. A child becoming
   valid or invalid neither adds nor removes its key.

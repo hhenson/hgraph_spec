@@ -10,7 +10,7 @@ makes the observer run even when the data input is passive or invalid.
 
 A and B are scalar outputs. A selector publishes a reference to A, B or empty.
 A REF input observes designation; a scalar input follows it, and so does a
-SIGNAL input (TS-18). Both start invalid.
+SIGNAL input (TS-18). All three start invalid.
 
 | t | A publishes | B publishes | Select | Followed value | Data modified | SIGNAL modified | REF modified |
 |---|---|---|---|---|---|---|---|
@@ -23,11 +23,11 @@ SIGNAL input (TS-18). Both start invalid.
 | 6 | 9 | — | A | 9 | true | true | true |
 | 7 | — | — | — | 9 | false | false | false |
 
-The SIGNAL is modified only when the output it dereferences ticks. At 1 it
+The SIGNAL is modified only when the output it dereferences is. At 1 it
 is re-pointed to A, which is idle: it is valid and unmodified, where the
 scalar input samples. At 3 and 6 the selected output ticks in the same
-cycle; an active SIGNAL wakes at 2, 3 and 6, and not at 1. At 5 it goes
-invalid and unmodified.
+cycle. At 5 an active SIGNAL wakes once and reads invalid and unmodified.
+An active SIGNAL is notified at the cycles the scalar input is.
 
 At 1 the scalar input samples A: its delta is 7 and its observed last time is 1;
 A's own last time remains 0. At 5 the scalar input is invalid, unmodified,
@@ -173,9 +173,10 @@ A SIGNAL reader in place of the scalar reader:
 | 3 | — | 8 | false / false |
 | 4 | A | — | true / false |
 
-At cycle 4 only the designation changes, so the SIGNAL is valid and not
-modified, and an active SIGNAL does not wake (TS-18). Whether it wakes at
-cycle 1 is open. The same rows hold when A is a set or dictionary.
+At cycle 1 an active SIGNAL wakes once and reads invalid and unmodified, as
+the scalar reader does. At cycle 4 only the designation changes, so the
+SIGNAL is valid and not modified (TS-18). The same rows hold when A is a set
+or dictionary.
 
 The three selector actions remain distinguishable on the REF itself. An empty
 reference and a reference to B are valid designations. Invalidating the REF
