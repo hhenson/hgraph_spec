@@ -12,16 +12,21 @@ A and B are scalar outputs. A selector publishes a reference to A, B or empty.
 A REF input observes designation; a scalar input follows it, and so does a
 SIGNAL input (TS-18). Both start invalid.
 
-| t | A publishes | B publishes | Select | Followed value | Data modified | REF modified |
-|---|---|---|---|---|---|---|
-| 0 | 7 | 20 | empty | nil | false | true |
-| 1 | — | — | A | 7 | true | true |
-| 2 | 8 | — | — | 8 | true | false |
-| 3 | — | 21 | B | 21 | true | true |
-| 4 | — | — | — | 21 | false | false |
-| 5 | — | — | empty | nil | false | true |
-| 6 | 9 | — | A | 9 | true | true |
-| 7 | — | — | — | 9 | false | false |
+| t | A publishes | B publishes | Select | Followed value | Data modified | SIGNAL modified | REF modified |
+|---|---|---|---|---|---|---|---|
+| 0 | 7 | 20 | empty | nil | false | false | true |
+| 1 | — | — | A | 7 | true | false | true |
+| 2 | 8 | — | — | 8 | true | true | false |
+| 3 | — | 21 | B | 21 | true | true | true |
+| 4 | — | — | — | 21 | false | false | false |
+| 5 | — | — | empty | nil | false | false | true |
+| 6 | 9 | — | A | 9 | true | true | true |
+| 7 | — | — | — | 9 | false | false | false |
+
+The SIGNAL is modified only when the output it dereferences ticks. At 1 it
+is re-pointed to A, which is idle: it is valid and unmodified, where the
+scalar input samples. At 3 and 6 the selected output ticks in the same
+cycle. At 5 it goes invalid and unmodified.
 
 At 1 the input samples A: its delta is 7 and its observed last time is 1;
 A's own last time remains 0. At 5 the scalar input is invalid, unmodified,
@@ -144,10 +149,22 @@ the same scalar-reader trace.
 | 3 | — | 8 | — |
 | 4 | A | — | 8 |
 
+A SIGNAL reader in place of the scalar reader:
+
+| Cycle | Selector | A publishes | Valid / modified |
+|---|---|---|---|
+| 0 | A | 7 | true / true |
+| 1 | Withdraw | — | false / false |
+| 2 | Repeat withdrawal | — | false / false |
+| 3 | — | 8 | false / false |
+| 4 | A | — | true / false |
+
+At cycle 4 only the designation changes, so the SIGNAL is valid and not
+modified (TS-18). The same rows hold when A is a set or dictionary.
+
 A passive reader sees the same state if another input wakes its node.
 Every non-keyed reader gives the same trace: a window, a fixed or growing
-list, or a bundle, whatever its children are. A SIGNAL reader follows TS-18
-and is not traced here. At cycle 1 each wakes
+list, or a bundle, whatever its children are. At cycle 1 each wakes
 once and reads invalid and unmodified, with nil value and no delta: no removed
 samples or positions and no empty replacement. Cycles 2 and 3 are silent.
 At cycle 4 each samples its target (TS-14). A set or dictionary reader
