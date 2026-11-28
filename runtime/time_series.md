@@ -179,9 +179,7 @@ read of the assembled parent retains the parent's change time.
 
 When the whole structure becomes invalid, its time and descendant observation
 state reset to *never*, unmodified. Binding to an invalid target also clears
-old sample state (TS-14). The one exception is a nested keyed withdrawal
-(see Binding, TS-17): for that cycle the structure reads modified and
-reports the removals of its set or dictionary descendants. Implementations may cache these observations from
+old sample state (TS-14). Implementations may cache these observations from
 child events; reads need not scan children (TS-27).
 
 ```mermaid
@@ -199,7 +197,7 @@ stateDiagram-v2
 | Kind | Value | Delta | All valid |
 |---|---|---|---|
 | TS | The scalar | The same scalar | Same as valid |
-| TSB | Every declared field, with nil for an invalid child | The valid modified fields, by name, each with its own delta. In a nested keyed withdrawal, the withdrawing fields instead (TS-17, TS-24) | Every field valid |
+| TSB | Every declared field, with nil for an invalid child | The valid modified fields, by name, each with its own delta | Every field valid |
 | TSL, fixed | The elements, by position | Modified children by index and indices that lost their value (TS-32) | Every element valid |
 | TSL, growing | The elements, by position | As for a fixed list, plus the new length on a size change; removed indices include the dropped tail (TS-32) | Every element valid |
 | TSS | The set | The elements **added** and the elements **removed** | Same as valid |
@@ -352,8 +350,8 @@ all valid.
 | Event | What the input reads afterwards | Notification |
 |---|---|---|
 | **bind** | The output's state, as it is, including the output's own last modified time. If the output ticked two cycles ago the input reads valid and not modified | None |
-| **bind, sampled** | A valid target reads modified with its sampled delta; an invalid target reads unmodified, time *never*, and nil delta, except that a set or dictionary input moved off a valid target reports its removals, as does one beneath a fixed list or bundle input at any depth, whose ancestors then read modified with those removals as their only delta (TS-15, TS-17) | A changed binding notifies; an active input schedules its node |
-| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). Every other follower, whether a scalar, a window, a fixed or growing list or a bundle, that loses a valid value through its REF wakes its node, and reads modified only when a set or dictionary descendant reports removals (TS-17). Other unbinds are silent |
+| **bind, sampled** | A valid target reads modified with its sampled delta; an invalid target reads unmodified, time *never*, and nil delta, except that a set or dictionary input moved off a valid target reports its removals (TS-15, TS-17) | A changed binding notifies; an active input schedules its node |
+| **unbind** | Not valid | A TSS or TSD reports its published removals (TS-15). Every other follower, whether a scalar, a window, a fixed or growing list or a bundle, that loses a valid value through its REF wakes its node and reads unmodified with no delta, whatever its children are (TS-17). Other unbinds are silent |
 | **rebind** | An unbind and a bind in one step. A TSS or TSD input that ends the cycle showing a different output from the one it showed before the cycle ticks once with the difference: keys shown before and not after removed, keys shown after and not before added, and the valid children of the output it shows after read as modified. An output it did not show before the cycle contributes no removals. Ending the cycle on the output it showed before it is not a move, and a cycle from no value to no value reports nothing (TS-15) | As sampled bind, when the output shown differs |
 
 A sampled valid input reports the sampling time; its producer keeps its own
@@ -362,10 +360,9 @@ children's sampled deltas. Sampling descends through valid children. An invalid
 target reads unmodified with time *never* and contributes no sampled delta, recursively.
 It inherits neither the previous binding's time nor the sampling time.
 The one exception is a set or dictionary input moved off a valid target:
-it reports the members it was showing as removed (TS-15, TS-17). It does so
-wherever it sits: as the input itself, or as a descendant of a fixed list or
-bundle input at any depth. In the second case each ancestor reads modified
-for that cycle with those removals as its only delta (TS-4).
+it reports the members it was showing as removed (TS-15, TS-17). When a
+fixed list or bundle input is moved off a valid target, a set or dictionary
+child goes invalid with it and reports nothing.
 A passive input has the same observations as an active one.
 
 Fixed collection rebinding compares each child's target. Unchanged bindings
@@ -385,18 +382,11 @@ modified, with no removed members. Physical teardown detaches silently and
 does not synthesize this
 running-graph withdrawal. See [reference cases](cases_references.md).
 
-A **nested keyed withdrawal** occurs when a fixed list or bundle follower
-loses a valid value through its REF, or is moved off a valid target, while
-it has a set or dictionary descendant that was showing a valid target. The
-descendant may sit at any depth beneath nested fixed lists and bundles. Each
-such descendant makes its own keyed withdrawal. Each of its ancestors, up to
-the follower, then reads invalid and modified for that cycle, with nil value
-and last modified time *never*. An ancestor's delta holds the withdrawing
-descendants' removals and nothing else, by field or by position (TS-4): no
-other child contributes, and a fixed list reports no removed positions. This
-is the only case in which an invalid fixed list or bundle reads modified or
-has a delta. A fixed list or bundle follower with no such descendant reads
-invalid and unmodified, with no delta (TS-17).
+Only a set or dictionary input that is itself the follower makes a keyed
+withdrawal. A fixed list or bundle follower that loses its value reads
+invalid and unmodified with no delta, and so does every child beneath it,
+including a set or dictionary child: no removals pass through a fixed list
+or a bundle (TS-17).
 
 An input is bound to an output, never to another input. The output may be a
 **forwarding endpoint**: an output that holds no value of its own and shows
@@ -659,10 +649,7 @@ Rules
   valid children's sampled deltas. An invalid target and its invalid
   descendants read unmodified, time *never*, and no delta. A set or
   dictionary input moved off a valid target still reports the members it
-  was showing as removed (TS-15, TS-17). So does a set or dictionary
-  descendant of a fixed list or bundle input, at any depth; its ancestors
-  then read modified, time *never*, with those removals as their only delta
-  (TS-17).
+  was showing as removed (TS-15, TS-17).
   Sampling changes input observations, never producer timestamps.
 - **TS-15** Explicitly unbinding a scalar or fixed-shape input is silent. A set or
   dictionary input reports what it was showing as removed. TS-17 governs
@@ -694,20 +681,15 @@ Rules
   An empty or invalidated REF unbinds it. A designation of a live output
   that is invalid or has never published binds it to that output. In both
   cases a follower that was showing a valid value loses it, and an active
-  follower schedules its node once. A scalar, a window, a growing list, and
-  a fixed list or bundle with no set or dictionary descendant showing a
-  valid target then read invalid and unmodified, with no delta and last
-  modified time *never*.
-  A set or dictionary follower reports its removals instead (TS-15): it
-  reads invalid and modified, with last modified time *never*. One that was
-  showing a valid, empty target reads the same, with no removed members.
-  A set or dictionary descendant of a fixed list or bundle follower, at any
-  depth beneath nested fixed lists and bundles, reports its removals in the
-  same way. Each of that descendant's ancestors, up to the follower, then
-  reads invalid and modified in that cycle, with nil value and last modified
-  time *never*. Its delta holds those removals and nothing else (TS-4): the
-  other children contribute none, and a fixed list reports no removed
-  positions.
+  follower schedules its node once. Every non-keyed follower, whether a
+  scalar, a window, a fixed or growing list or a bundle, then reads invalid
+  and unmodified, with no delta and last modified time *never*, whatever
+  its children are. A set or dictionary held as a child of a fixed list or
+  bundle follower goes invalid with it and reports no removals.
+  A set or dictionary that is itself the follower reports its removals
+  instead (TS-15): it reads invalid and modified, with last modified time
+  *never*. One that was showing a valid, empty target reads the same, with
+  no removed members.
   Losing the valid value detaches the old target. No further withdrawal is
   reported while the follower is already invalid. See the
   [reference withdrawal trace](cases_references.md#ref-withdrawal--ts-8-ts-16-and-ts-17).
@@ -761,15 +743,10 @@ Rules
 - **TS-24** A valid TSB value contains every declared field, including nil
   for invalid children. Apply this at each valid nested bundle. Its schema
   does not shrink with validity; its delta contains only changed valid fields.
-  The exception is a nested keyed withdrawal (TS-17): the invalid bundle's
-  delta then holds the fields whose set or dictionary descendants report
-  removals.
 - **TS-25** Fixed child bindings survive changes between peered and assembled
   parents. Rebinding samples only changed valid targets; unchanged targets
   retain their times and delta state. Each parent includes its valid modified
-  children's deltas. Binding an invalid target clears previous sample state.
-  In both, the exception is a set or dictionary descendant moved off a valid
-  target: it reports its removals and each ancestor includes them (TS-17). A fixed
+  children's deltas. Binding an invalid target clears previous sample state. A fixed
   list of reference inputs can bind to a reference to the whole list. A
   reference to a position obtained through this binding continues to follow
   that position when the whole list is repointed. Selecting a position through
@@ -812,9 +789,7 @@ Rules
   Applying a smaller size alone truncates the list. Clearing an in-range
   position invalidates its child and preserves the other positions.
   A list that finishes invalid has no public delta (TS-2, TS-7), even
-  when its extent changed or a position was cleared. The exception is a
-  fixed list in a nested keyed withdrawal (TS-17): its delta holds its set
-  or dictionary descendants' removals, by position.
+  when its extent changed or a position was cleared.
   A truncated child remains readable through the end of the cycle and
   returns with its value and time if restored during that cycle (GRF-25).
   Writing a complete empty growing list or explicitly requesting length zero
