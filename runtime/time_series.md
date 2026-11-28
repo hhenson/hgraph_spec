@@ -463,7 +463,11 @@ or no value, as defined above.
 - When it showed a value before the cycle and shows none after it, it is
   invalidated: it reads invalid and unmodified and notifies once, and that
   is not a tick (TS-7).
-- From no value to no value it does nothing.
+- From no value to no value it reads invalid and unmodified, and the move
+  does not itself notify. In this case and the same-output case, an earlier
+  move in the cycle, to or from an output with a value, may already have
+  scheduled a watcher, which reads the endpoint unmodified unless the output
+  it ended on ticked.
 
 Keyed removals belong to a set or dictionary input (TS-15), not to the
 endpoint: a forwarding endpoint of a set or dictionary that is invalidated
@@ -526,9 +530,11 @@ it is".
 
 A SIGNAL never binds to a reference and never sees one. Offered a REF
 output, a SIGNAL is bound for its lifetime to the alternative output that
-dereferences the reference (see Binding); it never moves. It is modified
-exactly when that output is (TS-18): when the designated output ticks, and
-when a re-point samples a valid target. When the designation is withdrawn
+dereferences the reference (see Binding); it never moves. That output is
+modified when the output it shows is modified, or when it ends a cycle on a
+valid output it did not show before the cycle. A SIGNAL is modified when
+that output is modified, or when a sampled bind samples it (TS-14, TS-18).
+When the designation is withdrawn
 the alternative output is invalidated: the SIGNAL reads invalid and
 unmodified, and an active SIGNAL wakes once (TS-7). A SIGNAL bound to any
 other forwarding endpoint observes that endpoint in the same way. A SIGNAL
