@@ -175,13 +175,15 @@ relay stays idle after cycle 0 and its scalar reader observes 1, 2, 3.
 
 ## REF-CHAINED — TS-15, TS-16 and TS-17
 
-A selector designates a dictionary. An inner input follows the selector. An
-outer input is bound to the inner input, as when a nested graph's output
-forwards what its input follows; it has no binding of its own to a producer.
+A selector designates a dictionary. An inner input follows the selector, and
+a forwarding output forwards what that input follows, as a nested graph's
+output does. The outer input is bound to that forwarding output; it has no
+binding of its own to a producer.
 A holds `{9:90}`. B holds `{1:10}` and adds `2:20` at cycle 1. C holds
 `{1:11, 3:30}`. D first publishes at cycle 7. A second selector designates B
-throughout and a second inner input follows it. At cycle 10 the outer input
-is rebound from the first inner input to the second. The table gives the
+throughout; a second inner input follows it and a second forwarding output
+forwards it. At cycle 10 the outer input
+is rebound from the first forwarding output to the second. The table gives the
 outer input. R denotes a removal in the delta.
 
 | Cycle | Select | Producer change | Delta | Added | Removed | Valid / modified |
@@ -198,8 +200,12 @@ outer input. R denotes a removal in the delta.
 | 9 | C | — | 1:12, 2:R, 3:30 | 3 | 2 | true / true |
 | 10 | A; outer input rebound | — | 1:10, 2:20, 3:R | 2 | 3 | true / true |
 
-Through cycle 9 the first inner input reads the same rows. So does a follower any number of
-bindings further from the selector. Removals are the keys shown before the cycle and absent after
+Through cycle 9 the first inner input reads the same rows. At cycle 10 it
+stays with the first selector and reads `9:90, 1:R, 3:R`. An input bound to
+a forwarding output that forwards what the outer input shows reads every row, 0 to 10,
+and so does one any number of forwarding outputs further on. The rows are
+the same when a forwarding output is re-pointed without a REF, as a switch
+re-points its output. Removals are the keys shown before the cycle and absent after
 it; in this trace every key's child has published, so removed keys, values and items agree with the delta. At cycle 1 key 9
 comes from A, not from B's own delta. At cycle 2 the follower compares B
 with the final designation (TS-16): key 9 is neither added nor removed, and
