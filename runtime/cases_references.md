@@ -6,7 +6,7 @@ Times below are cycles from `MIN_ST`. `—` means no publication, not an empty
 reference. Observe after producers and routing have evaluated. A clock input
 makes the observer run even when the data input is passive or invalid.
 
-## REF-SAMPLE — TS-1, TS-14, TS-16 and TS-17
+## REF-SAMPLE — TS-1, TS-14, TS-16, TS-17 and TS-18
 
 A and B are scalar outputs. A selector publishes a reference to A, B or empty.
 A REF input observes designation; a scalar input follows it, and so does a
@@ -26,9 +26,10 @@ SIGNAL input (TS-18). Both start invalid.
 The SIGNAL is modified only when the output it dereferences ticks. At 1 it
 is re-pointed to A, which is idle: it is valid and unmodified, where the
 scalar input samples. At 3 and 6 the selected output ticks in the same
-cycle. At 5 it goes invalid and unmodified.
+cycle; an active SIGNAL wakes at 2, 3 and 6, and not at 1. At 5 it goes
+invalid and unmodified.
 
-At 1 the input samples A: its delta is 7 and its observed last time is 1;
+At 1 the scalar input samples A: its delta is 7 and its observed last time is 1;
 A's own last time remains 0. At 5 the scalar input is invalid, unmodified,
 with last time `never`. The REF itself is valid: empty is a reference value.
 A target publication does not evaluate the reference selector. Passive data
@@ -134,7 +135,7 @@ unrelated lookups must not increase notification work for a single key change.
 Changing a selection detaches the old membership subscription. Replacing the
 whole dictionary can notify all selected keys; stopping a lookup detaches it.
 
-## REF-WITHDRAWAL — TS-8, TS-16 and TS-17
+## REF-WITHDRAWAL — TS-8, TS-16, TS-17 and TS-18
 
 A scalar reader is active and has no validity guard. At cycle 0 it follows A.
 At cycle 1 the selector either publishes an empty reference, invalidates its
@@ -149,6 +150,19 @@ the same scalar-reader trace.
 | 3 | — | 8 | — |
 | 4 | A | — | 8 |
 
+A passive reader sees the same state if another input wakes its node.
+Every non-keyed reader gives the same trace as the scalar reader: a window, a fixed or growing
+list, or a bundle, whatever its children are. At cycle 1 each wakes
+once and reads invalid and unmodified, with nil value and no delta: no removed
+samples or positions and no empty replacement. Cycles 2 and 3 are silent.
+At cycle 4 each samples its target (TS-14). A set or dictionary reader
+reports its removals at cycle 1 instead (REF-DICTIONARY): it reads invalid
+and modified, with last modified time never. One that was showing a valid,
+empty set or dictionary reads the same, with no removed members. Only a set
+or dictionary that is itself the reader does this. A bundle reader whose
+field `d` followed `{1:10}` and whose field `x` followed a scalar reads
+invalid and unmodified at cycle 1, with no delta: `d` reports no removal.
+
 A SIGNAL reader in place of the scalar reader:
 
 | Cycle | Selector | A publishes | Valid / modified |
@@ -160,20 +174,9 @@ A SIGNAL reader in place of the scalar reader:
 | 4 | A | — | true / false |
 
 At cycle 4 only the designation changes, so the SIGNAL is valid and not
-modified (TS-18). The same rows hold when A is a set or dictionary.
+modified, and an active SIGNAL does not wake (TS-18). Whether it wakes at
+cycle 1 is open. The same rows hold when A is a set or dictionary.
 
-A passive reader sees the same state if another input wakes its node.
-Every non-keyed reader gives the same trace: a window, a fixed or growing
-list, or a bundle, whatever its children are. At cycle 1 each wakes
-once and reads invalid and unmodified, with nil value and no delta: no removed
-samples or positions and no empty replacement. Cycles 2 and 3 are silent.
-At cycle 4 each samples its target (TS-14). A set or dictionary reader
-reports its removals at cycle 1 instead (REF-DICTIONARY): it reads invalid
-and modified, with last modified time never. One that was showing a valid,
-empty set or dictionary reads the same, with no removed members. Only a set
-or dictionary that is itself the reader does this. A bundle reader whose
-field `d` followed `{1:10}` and whose field `x` followed a scalar reads
-invalid and unmodified at cycle 1, with no delta: `d` reports no removal.
 The three selector actions remain distinguishable on the REF itself. An empty
 reference and a reference to B are valid designations. Invalidating the REF
 clears its validity.
