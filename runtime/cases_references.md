@@ -175,8 +175,10 @@ A selector designates a dictionary. An inner input follows the selector. An
 outer input is bound to the inner input, as when a nested graph's output
 forwards what its input follows; it has no binding of its own to a producer.
 A holds `{9:90}`. B holds `{1:10}` and adds `2:20` at cycle 1. C holds
-`{1:11, 3:30}`. D has never published. The table gives the outer input.
-R denotes a removal in the delta.
+`{1:11, 3:30}`. D has never published. A second selector designates B
+throughout and a second inner input follows it. At cycle 9 the outer input
+is rebound from the first inner input to the second. The table gives the
+outer input. R denotes a removal in the delta.
 
 | Cycle | Select | Producer change | Delta | Removed | Valid / modified |
 |---|---|---|---|---|---|
@@ -187,13 +189,20 @@ R denotes a removal in the delta.
 | 4 | — | C writes 1:12 | — | — | false / false |
 | 5 | B | — | 1:10, 2:20 | — | true / true |
 | 6 | D | — | 1:R, 2:R | 1, 2 | false / true |
+| 7 | B | — | 1:10, 2:20 | — | true / true |
+| 8 | C | — | 1:12, 2:R, 3:30 | 2 | true / true |
+| 9 | A; outer input rebound | — | 1:10, 2:20, 3:R | 3 | true / true |
 
-The inner input reads the same rows. So does a follower any number of
+Through cycle 8 the first inner input reads the same rows. So does a follower any number of
 bindings further from the selector. Removals are the keys shown before the cycle and absent after
 it; removed keys, values and items agree with the delta. At cycle 1 key 9
 comes from A, not from B's own delta. At cycle 2 the follower compares B
 with the final designation (TS-16): key 9 is neither added nor removed, and
-overlapping key 1 is sampled. A set input following the key set reports the
+overlapping key 1 is sampled. At cycle 8 one designation moves to an
+overlapping key set: key 1 is sampled and is neither added nor removed. At
+cycle 9 the selector and the outer input both move. The outer input compares
+C, which it showed before the cycle, with B, which it shows after it. A was
+never shown to it and contributes nothing. A set input following the key set reports the
 same added and removed keys.
 
 With scalar, window or list producers in place of the dictionaries, the outer

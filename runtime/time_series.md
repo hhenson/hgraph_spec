@@ -603,6 +603,7 @@ Rules
   in the selection cycle. See the [dictionary retarget trace](cases_references.md#ref-dictionary-retarget--ts-14-and-ts-17).
   An empty or invalidated REF unbinds it. When a scalar, window or list
   follower loses a valid value, an active follower schedules its node once.
+  A list here is a fixed or a growing list.
   This also applies when the new
   designation is a live output that has never published. The follower reads
   invalid and unmodified, with no delta and last modified time *never*.
