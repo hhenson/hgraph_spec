@@ -6,11 +6,11 @@ Times below are cycles from `MIN_ST`. `—` means no publication, not an empty
 reference. Observe after producers and routing have evaluated. A clock input
 makes the observer run even when the data input is passive or invalid.
 
-## REF-SAMPLE — TS-1, TS-14, TS-16 and TS-17
+## REF-SAMPLE — TS-1, TS-14, TS-16, TS-17 and TS-18
 
 A and B are scalar outputs. A selector publishes a reference to A, B or empty.
-A REF input observes designation; a scalar input follows it, and so does a
-SIGNAL input (TS-18). Both start invalid.
+A REF input observes designation; a scalar input follows it, and a SIGNAL
+input observes the selector's alternative output (TS-18). All three start invalid.
 
 | t | A publishes | B publishes | Select | Followed value | Data modified | REF modified |
 |---|---|---|---|---|---|---|
@@ -23,7 +23,13 @@ SIGNAL input (TS-18). Both start invalid.
 | 6 | 9 | — | A | 9 | true | true |
 | 7 | — | — | — | 9 | false | false |
 
-At 1 the input samples A: its delta is 7 and its observed last time is 1;
+The SIGNAL is bound to the selector's alternative output and never moves
+(TS-18). It is modified exactly when that output is, so "Data modified" is
+its column too: at 1 the alternative output samples A and the SIGNAL is
+modified. At 5 the alternative output is invalidated: an active SIGNAL
+wakes once and reads invalid and unmodified (TS-7).
+
+At 1 the scalar input samples A: its delta is 7 and its observed last time is 1;
 A's own last time remains 0. At 5 the scalar input is invalid, unmodified,
 with last time `never`. The REF itself is valid: empty is a reference value.
 A target publication does not evaluate the reference selector. Passive data
@@ -129,7 +135,7 @@ unrelated lookups must not increase notification work for a single key change.
 Changing a selection detaches the old membership subscription. Replacing the
 whole dictionary can notify all selected keys; stopping a lookup detaches it.
 
-## REF-WITHDRAWAL — TS-8, TS-16 and TS-17
+## REF-WITHDRAWAL — TS-8, TS-16, TS-17 and TS-18
 
 A scalar reader is active and has no validity guard. At cycle 0 it follows A.
 At cycle 1 the selector either publishes an empty reference, invalidates its
@@ -145,14 +151,23 @@ the same scalar-reader trace.
 | 4 | A | — | 8 |
 
 A passive reader sees the same state if another input wakes its node.
-Every non-keyed reader gives the same trace: a window, a fixed or growing
-list, or a bundle. At cycle 1 each wakes
+Every non-keyed reader gives the same trace as the scalar reader: a window, a fixed or growing
+list, or a bundle, whatever its children are. At cycle 1 each wakes
 once and reads invalid and unmodified, with nil value and no delta: no removed
 samples or positions and no empty replacement. Cycles 2 and 3 are silent.
 At cycle 4 each samples its target (TS-14). A set or dictionary reader
-reports its removals at cycle 1 instead (REF-DICTIONARY). So does a set or
-dictionary child of a fixed list or bundle reader: that reader is invalid
-and reads modified at cycle 1, with the child's removals as its only delta.
+reports its removals at cycle 1 instead (REF-DICTIONARY): it reads invalid
+and modified, with last modified time never. One that was showing a valid,
+empty set or dictionary reads the same, with no removed members. Only a set
+or dictionary that is itself the reader does this. A bundle reader whose
+field `d` followed `{1:10}` and whose field `x` followed a scalar reads
+invalid and unmodified at cycle 1, with no delta: `d` reports no removal.
+
+A SIGNAL reader is bound to the selector's alternative output (TS-18) and
+gives the scalar reader's trace, whatever the kind of A: modified at cycle
+0, invalid and unmodified at cycle 1 with one wake (TS-7), and modified at
+cycle 4, when the alternative output samples A.
+
 The three selector actions remain distinguishable on the REF itself. An empty
 reference and a reference to B are valid designations. Invalidating the REF
 clears its validity.
@@ -175,14 +190,15 @@ relay stays idle after cycle 0 and its scalar reader observes 1, 2, 3.
 
 ## REF-CHAINED — TS-15, TS-16 and TS-17
 
-A selector designates a dictionary. An inner input follows the selector. An
-outer input is bound to the inner input, as when a nested graph's output
-forwards what its input follows; it has no binding of its own to a producer.
+A selector designates a dictionary. An inner input follows the selector. A
+forwarding output shows what the inner input follows, as a nested graph's
+output does for one of the graph's inputs. An outer input is bound to that
+forwarding output; it has no binding of its own to a producer.
 A holds `{9:90}`. B holds `{1:10}` and adds `2:20` at cycle 1. C holds
 `{1:11, 3:30}`. D first publishes at cycle 7. A second selector designates B
-throughout and a second inner input follows it. At cycle 10 the outer input
-is rebound from the first inner input to the second. The table gives the
-outer input. R denotes a removal in the delta.
+throughout. A second inner input follows it and has its own forwarding
+output. At cycle 10 the outer input is rebound from the first forwarding
+output to the second. The table gives the outer input. R denotes a removal in the delta.
 
 | Cycle | Select | Producer change | Delta | Added | Removed | Valid / modified |
 |---|---|---|---|---|---|---|
@@ -198,24 +214,75 @@ outer input. R denotes a removal in the delta.
 | 9 | C | — | 1:12, 2:R, 3:30 | 3 | 2 | true / true |
 | 10 | A; outer input rebound | — | 1:10, 2:20, 3:R | 2 | 3 | true / true |
 
-Through cycle 9 the first inner input reads the same rows. So does a follower any number of
-bindings further from the selector. Removals are the keys shown before the cycle and absent after
-it; in this trace every key's child has published, so removed keys, values and items agree with the delta. At cycle 1 key 9
+At each of cycles 0 to 9 the first inner input reads the same row as the
+outer input. So does a follower any number of forwarding outputs further
+from the first selector. At cycle 10 the first inner input stays with the
+first selector and moves from C to A: its delta is `9:90, 1:R, 3:R`.
+Removals are the keys a follower showed before the cycle and does not show
+after it. Additions are the keys it did not show before the cycle and shows
+after it (TS-15). In this trace every key's child has published, so removed
+keys, values and items agree with the delta. At cycle 1 key 9
 comes from A, not from B's own delta. At cycle 2 the follower compares B
 with the final designation (TS-16): key 9 is neither added nor removed, and
 overlapping key 1 is sampled. At cycle 6 the input is bound to D, not
 unbound, so D's first publication at cycle 7 reaches it as an ordinary tick.
-At cycle 9 one designation moves to an
-overlapping key set: key 1 is sampled and is neither added nor removed. At
+At cycle 9 one designation moves from B to C, whose key sets overlap. The
+follower showed keys 1 and 2 before the cycle and shows 1 and 3 after it,
+so 2 is removed and 3 is added. Key 1 is on both sides: it is neither added
+nor removed, and is sampled at 12, the value C wrote at cycle 4 while the
+follower showed nothing. At
 cycle 10 the selector and the outer input both move. The outer input compares
-C, which it showed before the cycle, with B, which it shows after it. A was
-never shown to it and contributes nothing. A set input following the key set reports the
+C, which it showed before the cycle, with B, which it shows after it. The
+outer input shows A at neither end of cycle 10, so A contributes nothing. A set input following the key set reports the
 same added and removed keys.
 
 With any non-keyed producers in place of the dictionaries (scalars, windows,
-fixed or growing lists, or bundles), the outer
+fixed or growing lists, or bundles, whatever their children are), the outer
 input follows REF-WITHDRAWAL: at cycles 3 and 6 an active consumer wakes once
 and reads invalid and unmodified, with no delta.
+
+## REF-ROUND-TRIP — TS-14, TS-15, TS-16 and TS-17
+
+The chain holds no REF. A, B, D1 and D2 are dictionary outputs. A holds
+`{1:10}` and B holds `{2:20}`. D1 and D2 have never published. F1 and F2 are
+forwarding outputs. An active dictionary input is bound to F2 throughout, by
+a sampled bind at cycle 0. Each cell under F1 and F2 gives what that output
+forwards at the end of the cycle; `X, then Y` means two moves in one cycle; `—` means unchanged.
+
+| Cycle | F1 forwards | F2 forwards | Producer change | Delta | Added | Removed | Valid / modified |
+|---|---|---|---|---|---|---|---|
+| 0 | A | F1 | — | 1:10 | 1 | — | true / true |
+| 1 | B | A | — | — | — | — | true / false |
+| 2 | — | F1, then A | A adds 3:30 | 3:30 | 3 | — | true / true |
+| 3 | D1 | F1 | — | 1:R, 3:R | — | 1, 3 | false / true |
+| 4 | D2 | — | — | — | — | — | false / false |
+| 5 | A, then D1 | — | — | — | — | — | false / false |
+| 6 | — | — | D1 publishes 4:40 | 4:40 | 4 | — | true / true |
+| 7 | nothing | — | — | 4:R | — | 4 | false / true |
+
+At cycle 1 F1 moves to B and F2 is rebound from F1 to A. The input showed A
+before the cycle and shows A after it, so it has not moved: key 1 is not
+sampled and nothing is added or removed. F1's move may already have
+scheduled the input's node, which then reads the input unmodified. At cycle
+2 the input leaves A for B and returns while A ticks. It reads A's own
+delta, as an input bound to A alone would: key 1 is not sampled. At cycle 3
+it moves from A to D1 and reports a keyed withdrawal. At cycle 4 it moves
+from D1 to D2, from no value to no value: it is not notified and reads
+nothing. At cycle 5 it passes through A and ends on D1. It showed no value
+before the cycle and shows none after it, so it reports nothing; the move to
+A may have scheduled its node, which reads the input unmodified. At cycle 6
+it is bound through F2 and F1 to D1, so D1's first publication reaches it as
+an ordinary tick. At cycle 7 F1 stops forwarding and the input reports its
+removals, as it would for an empty REF.
+
+With a selector REF in place of F1, designating the same outputs and empty
+at cycle 7, every row is the same.
+
+With scalar outputs A = 1 and B = 2 in place of the dictionaries, where A
+publishes 3 at cycle 2 and D1 publishes 4 at cycle 6, a scalar input reads 1
+at cycle 0, unmodified at cycle 1, and 3 at cycle 2. At cycles 3 and 7 it
+wakes once and reads invalid and unmodified (REF-WITHDRAWAL). It is
+unmodified at cycles 4 and 5 and reads 4 at cycle 6.
 
 ## REF-LIST-POSITION — TS-16, TS-17 and TS-25
 
