@@ -145,6 +145,10 @@ the same scalar-reader trace.
 | 4 | A | — | 8 |
 
 A passive reader sees the same state if another input wakes its node.
+A window reader and a list reader give the same trace. At cycle 1 each wakes
+once and reads invalid and unmodified, with nil value and no delta: no removed
+samples or positions and no empty replacement. Cycles 2 and 3 are silent.
+At cycle 4 each samples its target (TS-14).
 The three selector actions remain distinguishable on the REF itself. An empty
 reference and a reference to B are valid designations. Invalidating the REF
 clears its validity.
@@ -164,6 +168,37 @@ A relay copies a selector's current REF value once. At cycle 0 the selector
 holds A, whose value is 1. At cycle 1 the selector selects B, whose value is
 10, while A publishes 2. At cycle 2 A publishes 3 and B publishes 11. The
 relay stays idle after cycle 0 and its scalar reader observes 1, 2, 3.
+
+## REF-CHAINED — TS-15, TS-16 and TS-17
+
+A selector designates a dictionary. An inner input follows the selector. An
+outer input is bound to the inner input, as when a nested graph's output
+forwards what its input follows; it has no binding of its own to a producer.
+A holds `{9:90}`. B holds `{1:10}` and adds `2:20` at cycle 1. C holds
+`{1:11, 3:30}`. D has never published. The table gives the outer input.
+R denotes a removal in the delta.
+
+| Cycle | Select | Producer change | Delta | Removed | Valid / modified |
+|---|---|---|---|---|---|
+| 0 | A | — | 9:90 | — | true / true |
+| 1 | B | B adds 2:20 | 1:10, 2:20, 9:R | 9 | true / true |
+| 2 | A, then C | — | 1:11, 2:R, 3:30 | 2 | true / true |
+| 3 | empty | — | 1:R, 3:R | 1, 3 | false / true |
+| 4 | — | C writes 1:12 | — | — | false / false |
+| 5 | B | — | 1:10, 2:20 | — | true / true |
+| 6 | D | — | 1:R, 2:R | 1, 2 | false / true |
+
+The inner input reads the same rows. So does a follower any number of
+bindings further from the selector. Removals are the keys shown before the cycle and absent after
+it; removed keys, values and items agree with the delta. At cycle 1 key 9
+comes from A, not from B's own delta. At cycle 2 the follower compares B
+with the final designation (TS-16): key 9 is neither added nor removed, and
+overlapping key 1 is sampled. A set input following the key set reports the
+same added and removed keys.
+
+With scalar, window or list producers in place of the dictionaries, the outer
+input follows REF-WITHDRAWAL: at cycles 3 and 6 an active consumer wakes once
+and reads invalid and unmodified, with no delta.
 
 ## REF-LIST-POSITION — TS-16, TS-17 and TS-25
 
