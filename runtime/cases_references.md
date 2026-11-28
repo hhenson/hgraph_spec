@@ -145,10 +145,14 @@ the same scalar-reader trace.
 | 4 | A | — | 8 |
 
 A passive reader sees the same state if another input wakes its node.
-A window reader and a list reader give the same trace. At cycle 1 each wakes
+Every non-keyed reader gives the same trace: a window, a fixed or growing
+list, or a bundle. At cycle 1 each wakes
 once and reads invalid and unmodified, with nil value and no delta: no removed
 samples or positions and no empty replacement. Cycles 2 and 3 are silent.
-At cycle 4 each samples its target (TS-14).
+At cycle 4 each samples its target (TS-14). A set or dictionary reader
+reports its removals at cycle 1 instead (REF-DICTIONARY). So does a set or
+dictionary child of a fixed list or bundle reader: that reader is invalid
+and reads modified at cycle 1, with the child's removals as its only delta.
 The three selector actions remain distinguishable on the REF itself. An empty
 reference and a reference to B are valid designations. Invalidating the REF
 clears its validity.
@@ -175,37 +179,41 @@ A selector designates a dictionary. An inner input follows the selector. An
 outer input is bound to the inner input, as when a nested graph's output
 forwards what its input follows; it has no binding of its own to a producer.
 A holds `{9:90}`. B holds `{1:10}` and adds `2:20` at cycle 1. C holds
-`{1:11, 3:30}`. D has never published. A second selector designates B
-throughout and a second inner input follows it. At cycle 9 the outer input
+`{1:11, 3:30}`. D first publishes at cycle 7. A second selector designates B
+throughout and a second inner input follows it. At cycle 10 the outer input
 is rebound from the first inner input to the second. The table gives the
 outer input. R denotes a removal in the delta.
 
-| Cycle | Select | Producer change | Delta | Removed | Valid / modified |
-|---|---|---|---|---|---|
-| 0 | A | — | 9:90 | — | true / true |
-| 1 | B | B adds 2:20 | 1:10, 2:20, 9:R | 9 | true / true |
-| 2 | A, then C | — | 1:11, 2:R, 3:30 | 2 | true / true |
-| 3 | empty | — | 1:R, 3:R | 1, 3 | false / true |
-| 4 | — | C writes 1:12 | — | — | false / false |
-| 5 | B | — | 1:10, 2:20 | — | true / true |
-| 6 | D | — | 1:R, 2:R | 1, 2 | false / true |
-| 7 | B | — | 1:10, 2:20 | — | true / true |
-| 8 | C | — | 1:12, 2:R, 3:30 | 2 | true / true |
-| 9 | A; outer input rebound | — | 1:10, 2:20, 3:R | 3 | true / true |
+| Cycle | Select | Producer change | Delta | Added | Removed | Valid / modified |
+|---|---|---|---|---|---|---|
+| 0 | A | — | 9:90 | 9 | — | true / true |
+| 1 | B | B adds 2:20 | 1:10, 2:20, 9:R | 1, 2 | 9 | true / true |
+| 2 | A, then C | — | 1:11, 2:R, 3:30 | 3 | 2 | true / true |
+| 3 | empty | — | 1:R, 3:R | — | 1, 3 | false / true |
+| 4 | — | C writes 1:12 | — | — | — | false / false |
+| 5 | B | — | 1:10, 2:20 | 1, 2 | — | true / true |
+| 6 | D | — | 1:R, 2:R | — | 1, 2 | false / true |
+| 7 | — | D publishes 4:40 | 4:40 | 4 | — | true / true |
+| 8 | B | — | 1:10, 2:20, 4:R | 1, 2 | 4 | true / true |
+| 9 | C | — | 1:12, 2:R, 3:30 | 3 | 2 | true / true |
+| 10 | A; outer input rebound | — | 1:10, 2:20, 3:R | 2 | 3 | true / true |
 
-Through cycle 8 the first inner input reads the same rows. So does a follower any number of
+Through cycle 9 the first inner input reads the same rows. So does a follower any number of
 bindings further from the selector. Removals are the keys shown before the cycle and absent after
-it; removed keys, values and items agree with the delta. At cycle 1 key 9
+it; in this trace every key's child has published, so removed keys, values and items agree with the delta. At cycle 1 key 9
 comes from A, not from B's own delta. At cycle 2 the follower compares B
 with the final designation (TS-16): key 9 is neither added nor removed, and
-overlapping key 1 is sampled. At cycle 8 one designation moves to an
+overlapping key 1 is sampled. At cycle 6 the input is bound to D, not
+unbound, so D's first publication at cycle 7 reaches it as an ordinary tick.
+At cycle 9 one designation moves to an
 overlapping key set: key 1 is sampled and is neither added nor removed. At
-cycle 9 the selector and the outer input both move. The outer input compares
+cycle 10 the selector and the outer input both move. The outer input compares
 C, which it showed before the cycle, with B, which it shows after it. A was
 never shown to it and contributes nothing. A set input following the key set reports the
 same added and removed keys.
 
-With scalar, window or list producers in place of the dictionaries, the outer
+With any non-keyed producers in place of the dictionaries (scalars, windows,
+fixed or growing lists, or bundles), the outer
 input follows REF-WITHDRAWAL: at cycles 3 and 6 an active consumer wakes once
 and reads invalid and unmodified, with no delta.
 

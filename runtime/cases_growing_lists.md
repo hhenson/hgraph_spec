@@ -64,7 +64,7 @@ In the Python API, a bounded list exposes cycle 1 as the plain dictionary
 1 it carries `removed={1}` and `size_modified=None`. At cycle 3 it carries
 `size_modified=3` and empty positional changes.
 
-## LIST-INPUT — TS-14, TS-15, TS-32
+## LIST-INPUT — TS-14, TS-15, TS-17, TS-32
 
 An input bound to the list above at cycle 2, sampled: it reads valid,
 modified, with every element as its delta. Rebound at cycle 5 to an empty
